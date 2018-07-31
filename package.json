@@ -1,0 +1,28 @@
+{
+  "name": "@devexperts/swagger-codegen-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@devexperts/utils": "^0.12.6",
+    "@types/prettier": "^1.13.2",
+    "@types/swagger-schema-official": "^2.0.10",
+    "fp-ts": "^1.7.1",
+    "io-ts": "^1.2.1",
+    "io-ts-types": "^0.3.8",
+    "prettier": "^1.13.7",
+    "typescript": "^2.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^10.5.3",
+    "nodemon": "^1.18.3",
+    "ts-node": "^7.0.0"
+  }
+}
