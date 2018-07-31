@@ -11,6 +11,7 @@ import {
 import { tuple } from 'fp-ts/lib/function';
 import { setoidString } from 'fp-ts/lib/Setoid';
 import { Option } from './node_modules/fp-ts/lib/Option';
+import { TQueryParameterObject } from './swagger';
 
 export const getOperationsFromPath = (path: TPathItemObject): TDictionary<TOperationObject> => {
 	const result: TDictionary<TOperationObject> = {};
@@ -48,9 +49,6 @@ export const groupPathsByTag = (paths: TPathsObject): TDictionary<TDictionary<TP
 	return result;
 };
 
-const isPathParameterObject = (parameter: TParameterObject): parameter is TPathParameterObject =>
-	parameter.in === 'path';
-
 const isOperationReferenceParameterObject = (
 	parameter: TParameterObject | TReferenceObject,
 ): parameter is TReferenceObject => typeof (parameter as any)['$ref'] === 'string';
@@ -58,10 +56,20 @@ const isOperationNonReferenceParameterObject = (
 	parameter: TParameterObject | TReferenceObject,
 ): parameter is TParameterObject => !isOperationReferenceParameterObject(parameter);
 
+const isPathParameterObject = (parameter: TParameterObject): parameter is TPathParameterObject =>
+	parameter.in === 'path';
 const isOperationPathParameterObject = (
 	parameter: TParameterObject | TReferenceObject,
 ): parameter is TPathParameterObject =>
 	isOperationNonReferenceParameterObject(parameter) && isPathParameterObject(parameter);
-
 export const getOperationParametersInPath = (operation: TOperationObject): TPathParameterObject[] =>
 	operation.parameters.map(parameters => parameters.filter(isOperationPathParameterObject)).getOrElse([]);
+
+const isQueryParameterObject = (parameter: TParameterObject): parameter is TQueryParameterObject =>
+	parameter.in === 'query';
+const isOperationQueryParameterObject = (
+	parameter: TParameterObject | TReferenceObject,
+): parameter is TQueryParameterObject =>
+	isOperationNonReferenceParameterObject(parameter) && isQueryParameterObject(parameter);
+export const getOperationParametersInQuery = (operation: TOperationObject): TQueryParameterObject[] =>
+	operation.parameters.map(parameters => parameters.filter(isOperationQueryParameterObject)).getOrElse([]);

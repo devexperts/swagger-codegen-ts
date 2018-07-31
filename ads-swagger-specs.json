@@ -1,14 +1,21 @@
 {
   "swagger": "2.0",
-  "info": { "version": "1.0", "title": "Account Data Service API 1.0" },
+  "info": {
+    "version": "1.0",
+    "title": "Account Data Service API 1.0"
+  },
   "paths": {
     "/api/ads/v1/accounts": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get accounts of current user",
         "operationId": "ApiAdsV1AccountsGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "api-version",
@@ -24,7 +31,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Account" }
+              "items": {
+                "$ref": "#/definitions/Account"
+              }
             }
           }
         }
@@ -32,11 +41,15 @@
     },
     "/api/ads/v1/accounts/{accountid}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get account by accountid",
         "operationId": "ApiAdsV1AccountsByAccountidGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -57,12 +70,16 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/Account" }
+            "schema": {
+              "$ref": "#/definitions/Account"
+            }
           }
         }
       },
       "put": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Update client account friendly",
         "operationId": "ApiAdsV1AccountsByAccountidPut",
         "consumes": [
@@ -71,7 +88,9 @@
           "text/json",
           "application/*+json"
         ],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountId",
@@ -85,7 +104,9 @@
             "in": "body",
             "description": "friendlyName",
             "required": false,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "api-version",
@@ -99,19 +120,25 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "format": "int32", "type": "integer" }
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/activity/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get activity of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidActivityByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1AccountsByAccountidActivityByStartdateByEnddateGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -190,18 +217,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/ActivityResponse" }
+            "schema": {
+              "$ref": "#/definitions/ActivityResponse"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/unrealizedgainloss": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get unrealized gainLoss of an account",
         "operationId": "ApiAdsV1AccountsByAccountidUnrealizedgainlossGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -222,19 +255,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/GainLossResponse" }
+            "schema": {
+              "$ref": "#/definitions/GainLossResponse"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/realizedgainloss/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get realized gainLoss of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidRealizedgainlossByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1AccountsByAccountidRealizedgainlossByStartdateByEnddateGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -292,18 +330,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/GainLossResponse" }
+            "schema": {
+              "$ref": "#/definitions/GainLossResponse"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/holdings": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get holdings of an account",
         "operationId": "ApiAdsV1AccountsByAccountidHoldingsGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -356,7 +400,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Holding" }
+              "items": {
+                "$ref": "#/definitions/Holding"
+              }
             }
           }
         }
@@ -364,11 +410,15 @@
     },
     "/api/ads/v1/accounts/{accountids}/performance": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get performance of an account",
         "operationId": "ApiAdsV1AccountsByAccountidsPerformanceGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountids",
@@ -376,7 +426,9 @@
             "description": "accountids",
             "required": true,
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "collectionFormat": "multi"
           },
           {
@@ -393,7 +445,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Performance" }
+              "items": {
+                "$ref": "#/definitions/Performance"
+              }
             }
           }
         }
@@ -401,16 +455,20 @@
     },
     "/api/ads/v1/accounts/{accountid}/performancesummary": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get Household Portfolio Summary",
         "operationId": "ApiAdsV1AccountsByAccountidPerformancesummaryGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "accountId",
+            "name": "accountid",
             "in": "path",
-            "description": "",
+            "description": "Account Identifier",
             "required": true,
             "type": "string"
           },
@@ -433,31 +491,36 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/AccountPerformance" }
+            "schema": {
+              "$ref": "#/definitions/AccountPerformance"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/performancesummary/pointtopoint": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get Household Portfolio Summary",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidPerformancesummaryPointtopointGet",
+        "operationId": "ApiAdsV1AccountsByAccountidPerformancesummaryPointtopointGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "accountId",
+            "name": "accountid",
             "in": "path",
-            "description": "",
+            "description": "Account Identifier",
             "required": true,
             "type": "string"
           },
           {
             "name": "startDate",
             "in": "query",
-            "description": "",
+            "description": "Start Date",
             "required": false,
             "type": "string"
           },
@@ -480,19 +543,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/HistoricalAccountPerformance" }
+            "schema": {
+              "$ref": "#/definitions/HistoricalAccountPerformance"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/marketvaluesummary/{fromdate}/{todate}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get marketvalues of a household",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidMarketvaluesummaryByFromdateByTodateGet",
+        "operationId": "ApiAdsV1AccountsByAccountidMarketvaluesummaryByFromdateByTodateGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -529,7 +597,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/HistoricalMarketValueSummary" }
+              "items": {
+                "$ref": "#/definitions/HistoricalMarketValueSummary"
+              }
             }
           }
         }
@@ -537,12 +607,15 @@
     },
     "/api/ads/v1/accounts/{accountid}/marketvalues/{fromdate}/{todate}/{periodtype}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get marketvalues of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidMarketvaluesByFromdateByTodateByPeriodtypeGet",
+        "operationId": "ApiAdsV1AccountsByAccountidMarketvaluesByFromdateByTodateByPeriodtypeGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -571,7 +644,13 @@
             "description": "periodtype",
             "required": true,
             "type": "string",
-            "enum": ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]
+            "enum": [
+              "Daily",
+              "Weekly",
+              "Monthly",
+              "Quarterly",
+              "Yearly"
+            ]
           },
           {
             "name": "api-version",
@@ -587,7 +666,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/MarketValues" }
+              "items": {
+                "$ref": "#/definitions/MarketValues"
+              }
             }
           }
         }
@@ -595,12 +676,15 @@
     },
     "/api/ads/v1/accounts/{accountid}/cumulativereturnhistory/{startdate}/{enddate}/{periodtype}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get CumulativeReturnHistory of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidCumulativereturnhistoryByStartdateByEnddateByPeriodtypeGet",
+        "operationId": "ApiAdsV1AccountsByAccountidCumulativereturnhistoryByStartdateByEnddateByPeriodtypeGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -629,7 +713,13 @@
             "description": "periodtype",
             "required": true,
             "type": "string",
-            "enum": ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]
+            "enum": [
+              "Daily",
+              "Weekly",
+              "Monthly",
+              "Quarterly",
+              "Yearly"
+            ]
           },
           {
             "name": "api-version",
@@ -643,19 +733,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/CumulativeReturnHistory" }
+            "schema": {
+              "$ref": "#/definitions/CumulativeReturnHistory"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/pointtopointperformance/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get PointToPoint Performance of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidPointtopointperformanceByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1AccountsByAccountidPointtopointperformanceByStartdateByEnddateGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -690,19 +785,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/PointToPointPerformance" }
+            "schema": {
+              "$ref": "#/definitions/PointToPointPerformance"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/marketvalueandnetinvestment/{startdate}/{enddate}/{periodtype}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get MarketValueAndNetInvestment of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidMarketvalueandnetinvestmentByStartdateByEnddateByPeriodtypeGet",
+        "operationId": "ApiAdsV1AccountsByAccountidMarketvalueandnetinvestmentByStartdateByEnddateByPeriodtypeGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -731,7 +831,13 @@
             "description": "periodtype",
             "required": true,
             "type": "string",
-            "enum": ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]
+            "enum": [
+              "Daily",
+              "Weekly",
+              "Monthly",
+              "Quarterly",
+              "Yearly"
+            ]
           },
           {
             "name": "api-version",
@@ -747,7 +853,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/HistoricalMarketValue" }
+              "items": {
+                "$ref": "#/definitions/HistoricalMarketValue"
+              }
             }
           }
         }
@@ -755,10 +863,14 @@
     },
     "/api/ads/v1/accounts/{accountid}/custodialinfo": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "operationId": "ApiAdsV1AccountsByAccountidCustodialinfoGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -778,18 +890,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/CustodialAccountInformation" }
+            "schema": {
+              "$ref": "#/definitions/CustodialAccountInformation"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/holdingbystrategy": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get HoldingByStrategy of an account",
         "operationId": "ApiAdsV1AccountsByAccountidHoldingbystrategyGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -812,7 +930,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Strategist" }
+              "items": {
+                "$ref": "#/definitions/Strategist"
+              }
             }
           }
         }
@@ -820,11 +940,15 @@
     },
     "/api/ads/v1/accounts/{accountid}/holdingsbyassetclass": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get holdings by assetclass of an account",
         "operationId": "ApiAdsV1AccountsByAccountidHoldingsbyassetclassGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -847,7 +971,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/AssetType" }
+              "items": {
+                "$ref": "#/definitions/AssetType"
+              }
             }
           }
         }
@@ -855,11 +981,15 @@
     },
     "/api/ads/v1/accounts/{accountid}/holdingstotal": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get holdings total of an account",
         "operationId": "ApiAdsV1AccountsByAccountidHoldingstotalGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -880,19 +1010,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/HoldingAggregateResponse" }
+            "schema": {
+              "$ref": "#/definitions/HoldingAggregateResponse"
+            }
           }
         }
       }
     },
     "/api/ads/v1/accounts/{accountid}/realizedgainlosstotalvalue/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get realizedGainLoss total value of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidRealizedgainlosstotalvalueByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1AccountsByAccountidRealizedgainlosstotalvalueByStartdateByEnddateGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountid",
@@ -952,11 +1087,15 @@
     },
     "/api/ads/v1/accounts/{accountids}/performancebystrategy": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Get performance by strategy of an account",
         "operationId": "ApiAdsV1AccountsByAccountidsPerformancebystrategyGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "accountids",
@@ -964,7 +1103,9 @@
             "description": "accountids",
             "required": true,
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "collectionFormat": "multi"
           },
           {
@@ -981,7 +1122,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Performance" }
+              "items": {
+                "$ref": "#/definitions/Performance"
+              }
             }
           }
         }
@@ -989,10 +1132,11 @@
     },
     "/api/ads/v1/accounts/{accountid}/realizedgainloss/download/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Download realized gainLoss data of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidRealizedgainlossDownloadByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1AccountsByAccountidRealizedgainlossDownloadByStartdateByEnddateGet",
         "consumes": [],
         "produces": [],
         "parameters": [
@@ -1046,7 +1190,10 @@
             "description": "filetype",
             "required": false,
             "type": "string",
-            "enum": ["CSV", "EXCEL"]
+            "enum": [
+              "CSV",
+              "EXCEL"
+            ]
           },
           {
             "name": "api-version",
@@ -1057,12 +1204,18 @@
             "default": "1.0"
           }
         ],
-        "responses": { "200": { "description": "Success" } }
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/api/ads/v1/accounts/{accountid}/holdings/download": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Download holding data of an account",
         "operationId": "ApiAdsV1AccountsByAccountidHoldingsDownloadGet",
         "consumes": [],
@@ -1111,7 +1264,10 @@
             "description": "filetype",
             "required": false,
             "type": "string",
-            "enum": ["CSV", "EXCEL"]
+            "enum": [
+              "CSV",
+              "EXCEL"
+            ]
           },
           {
             "name": "api-version",
@@ -1122,15 +1278,20 @@
             "default": "1.0"
           }
         ],
-        "responses": { "200": { "description": "Success" } }
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/api/ads/v1/accounts/{accountid}/activity/download/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Download activity data of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidActivityDownloadByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1AccountsByAccountidActivityDownloadByStartdateByEnddateGet",
         "consumes": [],
         "produces": [],
         "parameters": [
@@ -1205,7 +1366,10 @@
             "description": "filetype",
             "required": false,
             "type": "string",
-            "enum": ["CSV", "EXCEL"]
+            "enum": [
+              "CSV",
+              "EXCEL"
+            ]
           },
           {
             "name": "api-version",
@@ -1216,15 +1380,20 @@
             "default": "1.0"
           }
         ],
-        "responses": { "200": { "description": "Success" } }
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/api/ads/v1/accounts/{accountid}/holdingsbyassetclass/download": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Download holding assetclass data of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidHoldingsbyassetclassDownloadGet",
+        "operationId": "ApiAdsV1AccountsByAccountidHoldingsbyassetclassDownloadGet",
         "consumes": [],
         "produces": [],
         "parameters": [
@@ -1241,7 +1410,10 @@
             "description": "filetype",
             "required": false,
             "type": "string",
-            "enum": ["CSV", "EXCEL"]
+            "enum": [
+              "CSV",
+              "EXCEL"
+            ]
           },
           {
             "name": "api-version",
@@ -1252,15 +1424,20 @@
             "default": "1.0"
           }
         ],
-        "responses": { "200": { "description": "Success" } }
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/api/ads/v1/accounts/{accountid}/holdingsbystrategy/download": {
       "get": {
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "summary": "Download holding by strategy data of an account",
-        "operationId":
-          "ApiAdsV1AccountsByAccountidHoldingsbystrategyDownloadGet",
+        "operationId": "ApiAdsV1AccountsByAccountidHoldingsbystrategyDownloadGet",
         "consumes": [],
         "produces": [],
         "parameters": [
@@ -1277,7 +1454,10 @@
             "description": "filetype",
             "required": false,
             "type": "string",
-            "enum": ["CSV", "EXCEL"]
+            "enum": [
+              "CSV",
+              "EXCEL"
+            ]
           },
           {
             "name": "api-version",
@@ -1288,16 +1468,24 @@
             "default": "1.0"
           }
         ],
-        "responses": { "200": { "description": "Success" } }
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/api/ads/v1/advisorcontracts": {
       "get": {
-        "tags": ["AdvisorContract"],
+        "tags": [
+          "AdvisorContract"
+        ],
         "summary": "Get advisor contracts of current user",
         "operationId": "ApiAdsV1AdvisorcontractsGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "api-version",
@@ -1313,7 +1501,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/AdvisorContract" }
+              "items": {
+                "$ref": "#/definitions/AdvisorContract"
+              }
             }
           }
         }
@@ -1321,11 +1511,15 @@
     },
     "/api/ads/v1/advisorcontracts/{contractid}": {
       "get": {
-        "tags": ["AdvisorContract"],
+        "tags": [
+          "AdvisorContract"
+        ],
         "summary": "Get advisor contract by contractid",
         "operationId": "ApiAdsV1AdvisorcontractsByContractidGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "contractid",
@@ -1346,18 +1540,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/AdvisorContract" }
+            "schema": {
+              "$ref": "#/definitions/AdvisorContract"
+            }
           }
         }
       }
     },
     "/api/ads/v1/advisorcontracts/{contractid}/households": {
       "get": {
-        "tags": ["AdvisorContract"],
+        "tags": [
+          "AdvisorContract"
+        ],
         "summary": "Get households by contractid",
         "operationId": "ApiAdsV1AdvisorcontractsByContractidHouseholdsGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "contractid",
@@ -1380,7 +1580,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Household" }
+              "items": {
+                "$ref": "#/definitions/Household"
+              }
             }
           }
         }
@@ -1388,13 +1590,15 @@
     },
     "/api/ads/v1/advisorcontracts/{contractid}/feeshedules/{feemode}": {
       "get": {
-        "tags": ["AdvisorContract"],
-        "summary":
-          "Get feeschedules of a contract by feemode (tier,flat,stepped,fixed)",
-        "operationId":
-          "ApiAdsV1AdvisorcontractsByContractidFeeshedulesByFeemodeGet",
+        "tags": [
+          "AdvisorContract"
+        ],
+        "summary": "Get feeschedules of a contract by feemode (tier,flat,stepped,fixed)",
+        "operationId": "ApiAdsV1AdvisorcontractsByContractidFeeshedulesByFeemodeGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "contractid",
@@ -1424,7 +1628,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/FeeSchedule" }
+              "items": {
+                "$ref": "#/definitions/FeeSchedule"
+              }
             }
           }
         }
@@ -1432,11 +1638,15 @@
     },
     "/api/ads/v1/households": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get households of current user",
         "operationId": "ApiAdsV1HouseholdsGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "api-version",
@@ -1452,7 +1662,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Household" }
+              "items": {
+                "$ref": "#/definitions/Household"
+              }
             }
           }
         }
@@ -1460,11 +1672,15 @@
     },
     "/api/ads/v1/households/{householdid}": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get household by householdid",
         "operationId": "ApiAdsV1HouseholdsByHouseholdidGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -1485,18 +1701,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/Household" }
+            "schema": {
+              "$ref": "#/definitions/Household"
+            }
           }
         }
       }
     },
     "/api/ads/v1/households/{householdid}/accounts": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get accounts by householdid",
         "operationId": "ApiAdsV1HouseholdsByHouseholdidAccountsGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -1534,7 +1756,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Account" }
+              "items": {
+                "$ref": "#/definitions/Account"
+              }
             }
           }
         }
@@ -1542,7 +1766,9 @@
     },
     "/api/ads/v1/households/{householdid}/accounts/download": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "operationId": "ApiAdsV1HouseholdsByHouseholdidAccountsDownloadGet",
         "consumes": [],
         "produces": [],
@@ -1564,7 +1790,10 @@
             "in": "query",
             "required": false,
             "type": "string",
-            "enum": ["CSV", "EXCEL"]
+            "enum": [
+              "CSV",
+              "EXCEL"
+            ]
           },
           {
             "name": "showNetInvestment",
@@ -1582,16 +1811,24 @@
             "default": "1.0"
           }
         ],
-        "responses": { "200": { "description": "Success" } }
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/api/ads/v1/households/{householdid}/unrealizedgainloss": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get unrealized gainloss of a household",
         "operationId": "ApiAdsV1HouseholdsByHouseholdidUnrealizedgainlossGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -1612,19 +1849,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/GainLossResponse" }
+            "schema": {
+              "$ref": "#/definitions/GainLossResponse"
+            }
           }
         }
       }
     },
     "/api/ads/v1/households/{householdid}/realizedgainloss/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get realized gainloss of a household",
-        "operationId":
-          "ApiAdsV1HouseholdsByHouseholdidRealizedgainlossByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1HouseholdsByHouseholdidRealizedgainlossByStartdateByEnddateGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -1682,19 +1924,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/GainLossResponse" }
+            "schema": {
+              "$ref": "#/definitions/GainLossResponse"
+            }
           }
         }
       }
     },
     "/api/ads/v1/households/{householdid}/marketvaluesummary/{fromdate}/{todate}": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get marketvalues of a household",
-        "operationId":
-          "ApiAdsV1HouseholdsByHouseholdidMarketvaluesummaryByFromdateByTodateGet",
+        "operationId": "ApiAdsV1HouseholdsByHouseholdidMarketvaluesummaryByFromdateByTodateGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -1731,7 +1978,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/HistoricalMarketValueSummary" }
+              "items": {
+                "$ref": "#/definitions/HistoricalMarketValueSummary"
+              }
             }
           }
         }
@@ -1739,11 +1988,15 @@
     },
     "/api/ads/v1/households/{householdids}/performance": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get performance of a household",
         "operationId": "ApiAdsV1HouseholdsByHouseholdidsPerformanceGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdids",
@@ -1751,7 +2004,9 @@
             "description": "householdids",
             "required": true,
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "collectionFormat": "multi"
           },
           {
@@ -1768,7 +2023,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Performance" }
+              "items": {
+                "$ref": "#/definitions/Performance"
+              }
             }
           }
         }
@@ -1776,11 +2033,15 @@
     },
     "/api/ads/v1/households/{householdid}/performancesummary": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get Household Portfolio Summary",
         "operationId": "ApiAdsV1HouseholdsByHouseholdidPerformancesummaryGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdId",
@@ -1808,23 +2069,29 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/HouseHoldPerformance" }
+            "schema": {
+              "$ref": "#/definitions/HouseHoldPerformance"
+            }
           }
         }
       }
     },
     "/api/ads/v1/households/{householdid}/performancesummary/pointtopoint": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get Household Point to Point Portfolio Summary",
-        "operationId":
-          "ApiAdsV1HouseholdsByHouseholdidPerformancesummaryPointtopointGet",
+        "operationId": "ApiAdsV1HouseholdsByHouseholdidPerformancesummaryPointtopointGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
             "in": "path",
+            "description": "HouseHold Identifier",
             "required": true,
             "type": "string"
           },
@@ -1854,19 +2121,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/HistoricalHouseholdPerformance" }
+            "schema": {
+              "$ref": "#/definitions/HistoricalHouseholdPerformance"
+            }
           }
         }
       }
     },
     "/api/ads/v1/households/{householdid}/cumulativereturnhistory/{startdate}/{enddate}/{periodtype}": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get CumulativeReturnHistory of an household",
-        "operationId":
-          "ApiAdsV1HouseholdsByHouseholdidCumulativereturnhistoryByStartdateByEnddateByPeriodtypeGet",
+        "operationId": "ApiAdsV1HouseholdsByHouseholdidCumulativereturnhistoryByStartdateByEnddateByPeriodtypeGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -1895,7 +2167,13 @@
             "description": "periodtype",
             "required": true,
             "type": "string",
-            "enum": ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]
+            "enum": [
+              "Daily",
+              "Weekly",
+              "Monthly",
+              "Quarterly",
+              "Yearly"
+            ]
           },
           {
             "name": "api-version",
@@ -1909,19 +2187,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/CumulativeReturnHistory" }
+            "schema": {
+              "$ref": "#/definitions/CumulativeReturnHistory"
+            }
           }
         }
       }
     },
     "/api/ads/v1/households/{householdid}/pointtopointperformance/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get PointToPoint Performance of a household",
-        "operationId":
-          "ApiAdsV1HouseholdsByHouseholdidPointtopointperformanceByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1HouseholdsByHouseholdidPointtopointperformanceByStartdateByEnddateGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -1956,19 +2239,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/PointToPointPerformance" }
+            "schema": {
+              "$ref": "#/definitions/PointToPointPerformance"
+            }
           }
         }
       }
     },
     "/api/ads/v1/households/{householdid}/marketvalueandnetinvestment/{startdate}/{enddate}/{periodtype}": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get MarketValueAndNetInvestment of an household",
-        "operationId":
-          "ApiAdsV1HouseholdsByHouseholdidMarketvalueandnetinvestmentByStartdateByEnddateByPeriodtypeGet",
+        "operationId": "ApiAdsV1HouseholdsByHouseholdidMarketvalueandnetinvestmentByStartdateByEnddateByPeriodtypeGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -1997,7 +2285,13 @@
             "description": "periodtype",
             "required": true,
             "type": "string",
-            "enum": ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]
+            "enum": [
+              "Daily",
+              "Weekly",
+              "Monthly",
+              "Quarterly",
+              "Yearly"
+            ]
           },
           {
             "name": "api-version",
@@ -2013,7 +2307,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/HistoricalMarketValue" }
+              "items": {
+                "$ref": "#/definitions/HistoricalMarketValue"
+              }
             }
           }
         }
@@ -2021,11 +2317,15 @@
     },
     "/api/ads/v1/households/{householdid}/strategistallocation": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get StrategistAllocation of a household",
         "operationId": "ApiAdsV1HouseholdsByHouseholdidStrategistallocationGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -2048,7 +2348,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Strategist" }
+              "items": {
+                "$ref": "#/definitions/Strategist"
+              }
             }
           }
         }
@@ -2056,11 +2358,15 @@
     },
     "/api/ads/v1/households/{householdid}/assetclass": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get Assetclassdetails of an household",
         "operationId": "ApiAdsV1HouseholdsByHouseholdidAssetclassGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -2083,7 +2389,9 @@
             "description": "Success",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/AssetType" }
+              "items": {
+                "$ref": "#/definitions/AssetType"
+              }
             }
           }
         }
@@ -2091,11 +2399,15 @@
     },
     "/api/ads/v1/households/households/bypage": {
       "get": {
-        "tags": ["Household"],
-        "summary": "Get householdresponce by contractid",
+        "tags": [
+          "Household"
+        ],
+        "summary": "Get householdresponse by contractid",
         "operationId": "ApiAdsV1HouseholdsHouseholdsBypageGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "advisorcontractid",
@@ -2160,19 +2472,24 @@
         "responses": {
           "200": {
             "description": "Success",
-            "schema": { "$ref": "#/definitions/HouseholdResponse" }
+            "schema": {
+              "$ref": "#/definitions/HouseholdResponse"
+            }
           }
         }
       }
     },
     "/api/ads/v1/households/{householdid}/realizedgainlosstotalvalue/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Get realizedGainLoss total value of an household",
-        "operationId":
-          "ApiAdsV1HouseholdsByHouseholdidRealizedgainlosstotalvalueByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1HouseholdsByHouseholdidRealizedgainlosstotalvalueByStartdateByEnddateGet",
         "consumes": [],
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "householdid",
@@ -2232,10 +2549,11 @@
     },
     "/api/ads/v1/households/{householdid}/realizedgainloss/download/{startdate}/{enddate}": {
       "get": {
-        "tags": ["Household"],
+        "tags": [
+          "Household"
+        ],
         "summary": "Download realized gainLoss data of household",
-        "operationId":
-          "ApiAdsV1HouseholdsByHouseholdidRealizedgainlossDownloadByStartdateByEnddateGet",
+        "operationId": "ApiAdsV1HouseholdsByHouseholdidRealizedgainlossDownloadByStartdateByEnddateGet",
         "consumes": [],
         "produces": [],
         "parameters": [
@@ -2289,7 +2607,10 @@
             "description": "filetype",
             "required": false,
             "type": "string",
-            "enum": ["CSV", "EXCEL"]
+            "enum": [
+              "CSV",
+              "EXCEL"
+            ]
           },
           {
             "name": "api-version",
@@ -2300,7 +2621,47 @@
             "default": "1.0"
           }
         ],
-        "responses": { "200": { "description": "Success" } }
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/ads/v1/households/testcache": {
+      "get": {
+        "tags": [
+          "Household"
+        ],
+        "operationId": "ApiAdsV1HouseholdsTestcacheGet",
+        "consumes": [],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "value",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "api-version",
+            "in": "path",
+            "description": "The requested API version",
+            "required": true,
+            "type": "string",
+            "default": "1.0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
       }
     }
   },
@@ -2308,48 +2669,144 @@
     "Account": {
       "type": "object",
       "properties": {
-        "accountId": { "type": "string" },
-        "accountNumber": { "type": "string" },
-        "householdId": { "type": "string" },
-        "advisorContractId": { "type": "string" },
-        "owner": { "type": "string" },
-        "registrationType": { "type": "string" },
-        "accountType": { "type": "string" },
-        "registeredName": { "type": "string" },
-        "isFunded": { "type": "boolean" },
-        "isClosed": { "type": "boolean" },
-        "isProposed": { "type": "boolean" },
-        "isPendingFunded": { "type": "boolean" },
-        "modelID": { "type": "string" },
-        "modelName": { "type": "string" },
-        "asOfDate": { "format": "date-time", "type": "string" },
-        "marketValue": { "format": "double", "type": "number" },
-        "proposedValue": { "format": "double", "type": "number" },
-        "netInvestment": { "format": "double", "type": "number" },
-        "friendlyName": { "type": "string" },
-        "inceptionDate": { "format": "date-time", "type": "string" },
-        "custodianName": { "type": "string" },
-        "custodian_ID": { "type": "string" },
-        "accountingMethod": { "type": "string" },
-        "acquisitionName": { "type": "string" },
-        "billTo": { "type": "string" },
-        "faAuthorization": { "type": "string" },
-        "taxId": { "type": "string" },
-        "agentId": { "type": "string" },
-        "agreementVersion": { "format": "double", "type": "number" },
-        "csaType": { "type": "string" },
-        "programID": { "type": "string" },
-        "programName": { "type": "string" },
-        "allocationApproach": { "type": "string" },
-        "fundingAccount": { "type": "string" },
-        "hasHoldingByStrategy": { "format": "int32", "type": "integer" },
-        "linkingAccount": { "type": "string" },
-        "monthlyMax": { "format": "double", "type": "number" },
-        "monthlyMin": { "format": "double", "type": "number" },
-        "sweepDate": { "format": "int32", "type": "integer" },
-        "showPerformancByStrategy": { "type": "boolean" },
-        "terminationDate": { "format": "date-time", "type": "string" },
-        "marketValuePercentage": { "format": "double", "type": "number" }
+        "accountId": {
+          "type": "string"
+        },
+        "accountNumber": {
+          "type": "string"
+        },
+        "householdId": {
+          "type": "string"
+        },
+        "advisorContractId": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "registrationType": {
+          "type": "string"
+        },
+        "accountType": {
+          "type": "string"
+        },
+        "registeredName": {
+          "type": "string"
+        },
+        "isFunded": {
+          "type": "boolean"
+        },
+        "isClosed": {
+          "type": "boolean"
+        },
+        "isProposed": {
+          "type": "boolean"
+        },
+        "isPendingFunded": {
+          "type": "boolean"
+        },
+        "modelID": {
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        },
+        "asOfDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "marketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "proposedValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "netInvestment": {
+          "format": "double",
+          "type": "number"
+        },
+        "friendlyName": {
+          "type": "string"
+        },
+        "inceptionDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "custodianName": {
+          "type": "string"
+        },
+        "custodian_ID": {
+          "type": "string"
+        },
+        "accountingMethod": {
+          "type": "string"
+        },
+        "acquisitionName": {
+          "type": "string"
+        },
+        "billTo": {
+          "type": "string"
+        },
+        "faAuthorization": {
+          "type": "string"
+        },
+        "taxId": {
+          "type": "string"
+        },
+        "agentId": {
+          "type": "string"
+        },
+        "agreementVersion": {
+          "format": "double",
+          "type": "number"
+        },
+        "csaType": {
+          "type": "string"
+        },
+        "programID": {
+          "type": "string"
+        },
+        "programName": {
+          "type": "string"
+        },
+        "allocationApproach": {
+          "type": "string"
+        },
+        "fundingAccount": {
+          "type": "string"
+        },
+        "hasHoldingByStrategy": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "linkingAccount": {
+          "type": "string"
+        },
+        "monthlyMax": {
+          "format": "double",
+          "type": "number"
+        },
+        "monthlyMin": {
+          "format": "double",
+          "type": "number"
+        },
+        "sweepDate": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "showPerformancByStrategy": {
+          "type": "boolean"
+        },
+        "terminationDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "marketValuePercentage": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "ActivityResponse": {
@@ -2357,50 +2814,102 @@
       "properties": {
         "activity": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Activity" }
+          "items": {
+            "$ref": "#/definitions/Activity"
+          }
         },
         "activityTypes": {
           "type": "array",
-          "items": { "$ref": "#/definitions/ActivityType" }
+          "items": {
+            "$ref": "#/definitions/ActivityType"
+          }
         },
         "activityHoldingNames": {
           "type": "array",
-          "items": { "$ref": "#/definitions/ActivityHoldingName" }
+          "items": {
+            "$ref": "#/definitions/ActivityHoldingName"
+          }
         },
-        "totalItems": { "format": "int32", "type": "integer" }
+        "totalItems": {
+          "format": "int32",
+          "type": "integer"
+        }
       }
     },
     "Activity": {
       "type": "object",
       "properties": {
-        "shares": { "format": "double", "type": "number" },
-        "transactionCode": { "type": "string" },
-        "amount": { "format": "double", "type": "number" },
-        "fund": { "type": "string" },
-        "cusipNo": { "type": "string" },
-        "ticker": { "type": "string" },
-        "description": { "type": "string" },
-        "transactionDate": { "format": "int32", "type": "integer" },
-        "advisorContractId": { "type": "string" },
-        "householdId": { "type": "string" },
-        "tType": { "type": "string" },
-        "categoryId": { "format": "int32", "type": "integer" },
-        "groupById": { "format": "int32", "type": "integer" },
-        "isClosed": { "format": "int32", "type": "integer" }
+        "shares": {
+          "format": "double",
+          "type": "number"
+        },
+        "transactionCode": {
+          "type": "string"
+        },
+        "amount": {
+          "format": "double",
+          "type": "number"
+        },
+        "fund": {
+          "type": "string"
+        },
+        "cusipNo": {
+          "type": "string"
+        },
+        "ticker": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "transactionDate": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "advisorContractId": {
+          "type": "string"
+        },
+        "householdId": {
+          "type": "string"
+        },
+        "tType": {
+          "type": "string"
+        },
+        "categoryId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "groupById": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "isClosed": {
+          "format": "int32",
+          "type": "integer"
+        }
       }
     },
     "ActivityType": {
       "type": "object",
       "properties": {
-        "categoryId": { "format": "int32", "type": "integer" },
-        "tType": { "type": "string" }
+        "categoryId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "tType": {
+          "type": "string"
+        }
       }
     },
     "ActivityHoldingName": {
       "type": "object",
       "properties": {
-        "fund": { "type": "string" },
-        "ticker": { "type": "string" }
+        "fund": {
+          "type": "string"
+        },
+        "ticker": {
+          "type": "string"
+        }
       }
     },
     "GainLossResponse": {
@@ -2408,68 +2917,170 @@
       "properties": {
         "shortTerm": {
           "type": "array",
-          "items": { "$ref": "#/definitions/GainLoss" }
+          "items": {
+            "$ref": "#/definitions/GainLoss"
+          }
         },
         "longTerm": {
           "type": "array",
-          "items": { "$ref": "#/definitions/GainLoss" }
+          "items": {
+            "$ref": "#/definitions/GainLoss"
+          }
         },
         "unClassified": {
           "type": "array",
-          "items": { "$ref": "#/definitions/GainLoss" }
+          "items": {
+            "$ref": "#/definitions/GainLoss"
+          }
         },
         "longTermDistribution": {
           "type": "array",
-          "items": { "$ref": "#/definitions/GainLoss" }
+          "items": {
+            "$ref": "#/definitions/GainLoss"
+          }
         },
         "shortTermDistribution": {
           "type": "array",
-          "items": { "$ref": "#/definitions/GainLoss" }
+          "items": {
+            "$ref": "#/definitions/GainLoss"
+          }
         },
         "termDistribution": {
           "type": "array",
-          "items": { "$ref": "#/definitions/GainLoss" }
+          "items": {
+            "$ref": "#/definitions/GainLoss"
+          }
         },
-        "isPRSDataStale": { "format": "int32", "type": "integer" },
-        "totalItems": { "format": "int32", "type": "integer" }
+        "isPRSDataStale": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "totalItems": {
+          "format": "int32",
+          "type": "integer"
+        }
       }
     },
     "GainLoss": {
       "type": "object",
       "properties": {
-        "accountName": { "type": "string" },
-        "accountNumber": { "type": "string" },
-        "description": { "type": "string" },
-        "units": { "format": "double", "type": "number" },
-        "cost": { "format": "double", "type": "number" },
-        "symbol": { "type": "string" },
-        "firstPurchaseDate": { "format": "date-time", "type": "string" },
-        "lastPurchaseDate": { "format": "date-time", "type": "string" },
-        "firstSaleDate": { "format": "date-time", "type": "string" },
-        "lastSaleDate": { "format": "date-time", "type": "string" },
-        "proceeds": { "format": "double", "type": "number" },
-        "holdings": { "format": "double", "type": "number" },
-        "gainLossAmount": { "format": "double", "type": "number" },
-        "maxPurchaseDate": { "format": "date-time", "type": "string" },
-        "transactionDate": { "format": "date-time", "type": "string" },
-        "fundDescription": { "type": "string" },
-        "category": { "type": "string" },
-        "advisorContractId": { "type": "string" },
-        "householdId": { "type": "string" },
-        "saleDate": { "format": "date-time", "type": "string" },
-        "cusipNo": { "type": "string" },
-        "isClosed": { "format": "int32", "type": "integer" },
-        "deferral": { "format": "double", "type": "number" },
-        "custodianId": { "type": "string" },
-        "dataSource": { "type": "string" },
-        "disallowance": { "format": "double", "type": "number" },
-        "missingCostBasis": { "type": "boolean" },
-        "dateOfData": { "format": "int32", "type": "integer" },
-        "symbolRoot": { "type": "string" },
-        "putCall": { "type": "string" },
-        "strikePrice": { "format": "double", "type": "number" },
-        "expirationDate": { "format": "date-time", "type": "string" },
-        "unknownTotal": { "type": "boolean" },
+        "accountName": {
+          "type": "string"
+        },
+        "accountNumber": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "units": {
+          "format": "double",
+          "type": "number"
+        },
+        "cost": {
+          "format": "double",
+          "type": "number"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "firstPurchaseDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "lastPurchaseDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "firstSaleDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "lastSaleDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "proceeds": {
+          "format": "double",
+          "type": "number"
+        },
+        "holdings": {
+          "format": "double",
+          "type": "number"
+        },
+        "gainLossAmount": {
+          "format": "double",
+          "type": "number"
+        },
+        "maxPurchaseDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "transactionDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "fundDescription": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "advisorContractId": {
+          "type": "string"
+        },
+        "householdId": {
+          "type": "string"
+        },
+        "saleDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "cusipNo": {
+          "type": "string"
+        },
+        "isClosed": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "deferral": {
+          "format": "double",
+          "type": "number"
+        },
+        "custodianId": {
+          "type": "string"
+        },
+        "dataSource": {
+          "type": "string"
+        },
+        "disallowance": {
+          "format": "double",
+          "type": "number"
+        },
+        "missingCostBasis": {
+          "type": "boolean"
+        },
+        "dateOfData": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "symbolRoot": {
+          "type": "string"
+        },
+        "putCall": {
+          "type": "string"
+        },
+        "strikePrice": {
+          "format": "double",
+          "type": "number"
+        },
+        "expirationDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "unknownTotal": {
+          "type": "boolean"
+        },
         "issueTypeCode": {
           "enum": [
             "Unknown",
@@ -2551,7 +3162,11 @@
           "type": "string"
         },
         "investmentType": {
-          "enum": ["LongInvestment", "ShortInvestment", "Both"],
+          "enum": [
+            "LongInvestment",
+            "ShortInvestment",
+            "Both"
+          ],
           "type": "string"
         }
       }
@@ -2559,315 +3174,923 @@
     "Holding": {
       "type": "object",
       "properties": {
-        "accountId": { "type": "string" },
-        "holdingId": { "type": "string" },
-        "holdingMarketValue": { "format": "double", "type": "number" },
-        "priceAsofDate": { "format": "date-time", "type": "string" },
-        "securityDescription": { "type": "string" },
-        "assetType": { "type": "string" },
-        "assetClass": { "type": "string" },
-        "subAssetClass": { "type": "string" },
-        "ticker": { "type": "string" },
-        "units": { "format": "double", "type": "number" },
-        "price": { "format": "double", "type": "number" },
-        "priceDate": { "format": "date-time", "type": "string" },
-        "holdings": { "format": "double", "type": "number" },
-        "percentage": { "format": "double", "type": "number" },
-        "gainLossAmount": { "format": "double", "type": "number" },
-        "cost": { "format": "double", "type": "number" },
-        "unitsDontMatch": { "format": "int32", "type": "integer" },
-        "costBasisIncomplete": { "format": "int32", "type": "integer" },
-        "cusipNo": { "type": "string" },
-        "sleeveModelId": { "type": "string" },
-        "suppressHoldings": { "type": "boolean" }
+        "accountId": {
+          "type": "string"
+        },
+        "holdingId": {
+          "type": "string"
+        },
+        "holdingMarketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "priceAsofDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "securityDescription": {
+          "type": "string"
+        },
+        "assetType": {
+          "type": "string"
+        },
+        "assetClass": {
+          "type": "string"
+        },
+        "subAssetClass": {
+          "type": "string"
+        },
+        "ticker": {
+          "type": "string"
+        },
+        "units": {
+          "format": "double",
+          "type": "number"
+        },
+        "price": {
+          "format": "double",
+          "type": "number"
+        },
+        "priceDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "holdings": {
+          "format": "double",
+          "type": "number"
+        },
+        "percentage": {
+          "format": "double",
+          "type": "number"
+        },
+        "gainLossAmount": {
+          "format": "double",
+          "type": "number"
+        },
+        "cost": {
+          "format": "double",
+          "type": "number"
+        },
+        "unitsDontMatch": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "costBasisIncomplete": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "cusipNo": {
+          "type": "string"
+        },
+        "sleeveModelId": {
+          "type": "string"
+        },
+        "suppressHoldings": {
+          "type": "boolean"
+        }
       }
     },
     "Performance": {
       "type": "object",
       "properties": {
-        "accountId": { "type": "string" },
-        "accountName": { "type": "string" },
-        "accountNumber": { "type": "string" },
+        "accountId": {
+          "type": "string"
+        },
+        "accountName": {
+          "type": "string"
+        },
+        "accountNumber": {
+          "type": "string"
+        },
         "benchmarks": {
           "type": "array",
-          "items": { "$ref": "#/definitions/BenchMarkPerformance" }
+          "items": {
+            "$ref": "#/definitions/BenchMarkPerformance"
+          }
         },
         "sleeves": {
           "type": "array",
-          "items": { "$ref": "#/definitions/SleevePerformance" }
+          "items": {
+            "$ref": "#/definitions/SleevePerformance"
+          }
         }
       }
     },
     "BenchMarkPerformance": {
       "type": "object",
       "properties": {
-        "benchmarkCode": { "type": "string" },
-        "benchmarkName": { "type": "string" },
-        "sequence": { "format": "int32", "type": "integer" },
-        "monthEndDate": { "format": "date-time", "type": "string" },
-        "asOfDate": { "format": "date-time", "type": "string" },
-        "mtdPerformance": { "format": "double", "type": "number" },
-        "threeMonthPerformance": { "format": "double", "type": "number" },
-        "sixMonthPerformance": { "format": "double", "type": "number" },
-        "threeMonthSTD": { "format": "double", "type": "number" },
-        "sixMonthSTD": { "format": "double", "type": "number" },
-        "threeMonthBeta": { "format": "double", "type": "number" },
-        "sixMonthBeta": { "format": "double", "type": "number" },
-        "sinceInceptionPerformance": { "format": "double", "type": "number" },
-        "ytdPerformance": { "format": "double", "type": "number" },
-        "oneYrPerformance": { "format": "double", "type": "number" },
-        "twoYrPerformance": { "format": "double", "type": "number" },
-        "threeYrPerformance": { "format": "double", "type": "number" },
-        "fiveYrPerformance": { "format": "double", "type": "number" },
-        "tenYrPerformance": { "format": "double", "type": "number" },
-        "ytdstd": { "format": "double", "type": "number" },
-        "sinceInceptionSTD": { "format": "double", "type": "number" },
-        "oneYrSTD": { "format": "double", "type": "number" },
-        "twoYrSTD": { "format": "double", "type": "number" },
-        "threeYrSTD": { "format": "double", "type": "number" },
-        "fiveYrSTD": { "format": "double", "type": "number" },
-        "tenYrSTD": { "format": "double", "type": "number" },
-        "sinceInceptionBeta": { "format": "double", "type": "number" },
-        "ytdBeta": { "format": "double", "type": "number" },
-        "oneYrBeta": { "format": "double", "type": "number" },
-        "twoYrBeta": { "format": "double", "type": "number" },
-        "threeYrBeta": { "format": "double", "type": "number" },
-        "fiveYrBeta": { "format": "double", "type": "number" },
-        "tenYrBeta": { "format": "double", "type": "number" },
-        "inceptionDate": { "format": "date-time", "type": "string" },
-        "threeMonthStartDate": { "format": "date-time", "type": "string" },
-        "sixMonthStartDate": { "format": "date-time", "type": "string" },
-        "ytdStartDate": { "format": "date-time", "type": "string" },
-        "oneYearStartDate": { "format": "date-time", "type": "string" },
-        "twoYearsStartDate": { "format": "date-time", "type": "string" },
-        "threeYearsStartDate": { "format": "date-time", "type": "string" },
-        "fiveYearsStartDate": { "format": "date-time", "type": "string" },
-        "tenYearsStartDate": { "format": "date-time", "type": "string" },
-        "modelName": { "type": "string" }
+        "benchmarkCode": {
+          "type": "string"
+        },
+        "benchmarkName": {
+          "type": "string"
+        },
+        "sequence": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "monthEndDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "asOfDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "mtdPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdstd": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "inceptionDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "threeMonthStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sixMonthStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "ytdStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "oneYearStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "twoYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "threeYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "fiveYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "tenYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        }
       }
     },
     "SleevePerformance": {
       "type": "object",
       "properties": {
-        "sectorId": { "type": "string" },
-        "sectorName": { "type": "string" },
-        "isTotalAccountSleeve": { "type": "boolean" },
-        "marketValue": { "format": "double", "type": "number" },
-        "monthEndDate": { "format": "date-time", "type": "string" },
-        "asOfDate": { "format": "date-time", "type": "string" },
-        "mtdPerformance": { "format": "double", "type": "number" },
-        "threeMonthPerformance": { "format": "double", "type": "number" },
-        "sixMonthPerformance": { "format": "double", "type": "number" },
-        "threeMonthSTD": { "format": "double", "type": "number" },
-        "sixMonthSTD": { "format": "double", "type": "number" },
-        "threeMonthBeta": { "format": "double", "type": "number" },
-        "sixMonthBeta": { "format": "double", "type": "number" },
-        "sinceInceptionPerformance": { "format": "double", "type": "number" },
-        "ytdPerformance": { "format": "double", "type": "number" },
-        "oneYrPerformance": { "format": "double", "type": "number" },
-        "twoYrPerformance": { "format": "double", "type": "number" },
-        "threeYrPerformance": { "format": "double", "type": "number" },
-        "fiveYrPerformance": { "format": "double", "type": "number" },
-        "tenYrPerformance": { "format": "double", "type": "number" },
-        "ytdstd": { "format": "double", "type": "number" },
-        "sinceInceptionSTD": { "format": "double", "type": "number" },
-        "oneYrSTD": { "format": "double", "type": "number" },
-        "twoYrSTD": { "format": "double", "type": "number" },
-        "threeYrSTD": { "format": "double", "type": "number" },
-        "fiveYrSTD": { "format": "double", "type": "number" },
-        "tenYrSTD": { "format": "double", "type": "number" },
-        "sinceInceptionBeta": { "format": "double", "type": "number" },
-        "ytdBeta": { "format": "double", "type": "number" },
-        "oneYrBeta": { "format": "double", "type": "number" },
-        "twoYrBeta": { "format": "double", "type": "number" },
-        "threeYrBeta": { "format": "double", "type": "number" },
-        "fiveYrBeta": { "format": "double", "type": "number" },
-        "tenYrBeta": { "format": "double", "type": "number" },
-        "inceptionDate": { "format": "date-time", "type": "string" },
-        "threeMonthStartDate": { "format": "date-time", "type": "string" },
-        "sixMonthStartDate": { "format": "date-time", "type": "string" },
-        "ytdStartDate": { "format": "date-time", "type": "string" },
-        "oneYearStartDate": { "format": "date-time", "type": "string" },
-        "twoYearsStartDate": { "format": "date-time", "type": "string" },
-        "threeYearsStartDate": { "format": "date-time", "type": "string" },
-        "fiveYearsStartDate": { "format": "date-time", "type": "string" },
-        "tenYearsStartDate": { "format": "date-time", "type": "string" },
-        "modelName": { "type": "string" }
+        "sectorId": {
+          "type": "string"
+        },
+        "sectorName": {
+          "type": "string"
+        },
+        "isTotalAccountSleeve": {
+          "type": "boolean"
+        },
+        "marketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "monthEndDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "asOfDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "mtdPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdstd": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "inceptionDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "threeMonthStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sixMonthStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "ytdStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "oneYearStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "twoYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "threeYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "fiveYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "tenYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        }
       }
     },
     "AccountPerformance": {
       "type": "object",
       "properties": {
-        "accountId": { "type": "string" },
-        "accountName": { "type": "string" },
-        "accountNumber": { "type": "string" },
+        "accountId": {
+          "type": "string"
+        },
+        "accountName": {
+          "type": "string"
+        },
+        "accountNumber": {
+          "type": "string"
+        },
         "benchmarks": {
           "type": "array",
-          "items": { "$ref": "#/definitions/BenchMarkPerformance" }
+          "items": {
+            "$ref": "#/definitions/BenchMarkPerformance"
+          }
         },
-        "monthEndDate": { "format": "date-time", "type": "string" },
-        "asOfDate": { "format": "date-time", "type": "string" },
-        "mtdPerformance": { "format": "double", "type": "number" },
-        "threeMonthPerformance": { "format": "double", "type": "number" },
-        "sixMonthPerformance": { "format": "double", "type": "number" },
-        "threeMonthSTD": { "format": "double", "type": "number" },
-        "sixMonthSTD": { "format": "double", "type": "number" },
-        "threeMonthBeta": { "format": "double", "type": "number" },
-        "sixMonthBeta": { "format": "double", "type": "number" },
-        "sinceInceptionPerformance": { "format": "double", "type": "number" },
-        "ytdPerformance": { "format": "double", "type": "number" },
-        "oneYrPerformance": { "format": "double", "type": "number" },
-        "twoYrPerformance": { "format": "double", "type": "number" },
-        "threeYrPerformance": { "format": "double", "type": "number" },
-        "fiveYrPerformance": { "format": "double", "type": "number" },
-        "tenYrPerformance": { "format": "double", "type": "number" },
-        "ytdstd": { "format": "double", "type": "number" },
-        "sinceInceptionSTD": { "format": "double", "type": "number" },
-        "oneYrSTD": { "format": "double", "type": "number" },
-        "twoYrSTD": { "format": "double", "type": "number" },
-        "threeYrSTD": { "format": "double", "type": "number" },
-        "fiveYrSTD": { "format": "double", "type": "number" },
-        "tenYrSTD": { "format": "double", "type": "number" },
-        "sinceInceptionBeta": { "format": "double", "type": "number" },
-        "ytdBeta": { "format": "double", "type": "number" },
-        "oneYrBeta": { "format": "double", "type": "number" },
-        "twoYrBeta": { "format": "double", "type": "number" },
-        "threeYrBeta": { "format": "double", "type": "number" },
-        "fiveYrBeta": { "format": "double", "type": "number" },
-        "tenYrBeta": { "format": "double", "type": "number" },
-        "inceptionDate": { "format": "date-time", "type": "string" },
-        "threeMonthStartDate": { "format": "date-time", "type": "string" },
-        "sixMonthStartDate": { "format": "date-time", "type": "string" },
-        "ytdStartDate": { "format": "date-time", "type": "string" },
-        "oneYearStartDate": { "format": "date-time", "type": "string" },
-        "twoYearsStartDate": { "format": "date-time", "type": "string" },
-        "threeYearsStartDate": { "format": "date-time", "type": "string" },
-        "fiveYearsStartDate": { "format": "date-time", "type": "string" },
-        "tenYearsStartDate": { "format": "date-time", "type": "string" },
-        "modelName": { "type": "string" }
+        "monthEndDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "asOfDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "mtdPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdstd": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "inceptionDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "threeMonthStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sixMonthStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "ytdStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "oneYearStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "twoYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "threeYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "fiveYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "tenYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        }
       }
     },
     "HistoricalAccountPerformance": {
       "type": "object",
       "properties": {
-        "accountId": { "type": "string" },
-        "accountNumber": { "type": "string" },
-        "modelName": { "type": "string" },
-        "accountName": { "type": "string" },
+        "accountId": {
+          "type": "string"
+        },
+        "accountNumber": {
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        },
+        "accountName": {
+          "type": "string"
+        },
         "benchmarkPerformanceSummary": {
           "type": "array",
-          "items": { "$ref": "#/definitions/HistoricalBenchMarkPerformance" }
+          "items": {
+            "$ref": "#/definitions/HistoricalBenchMarkPerformance"
+          }
         },
-        "beginDate": { "format": "date-time", "type": "string" },
-        "endDate": { "format": "date-time", "type": "string" },
-        "marketValue": { "format": "double", "type": "number" },
-        "netContribution": { "format": "double", "type": "number" },
-        "grossContribution": { "format": "double", "type": "number" },
-        "netReturn": { "format": "double", "type": "number" },
-        "grossReturn": { "format": "double", "type": "number" },
-        "netSTD": { "format": "double", "type": "number" },
-        "grossSTD": { "format": "double", "type": "number" },
-        "netBeta": { "format": "double", "type": "number" },
-        "grossBeta": { "format": "double", "type": "number" }
+        "beginDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "marketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "netContribution": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossContribution": {
+          "format": "double",
+          "type": "number"
+        },
+        "netReturn": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossReturn": {
+          "format": "double",
+          "type": "number"
+        },
+        "netSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "netBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossBeta": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "HistoricalBenchMarkPerformance": {
       "type": "object",
       "properties": {
-        "benchmarkCode": { "type": "string" },
-        "benchmarkName": { "type": "string" },
-        "sequence": { "format": "int32", "type": "integer" },
-        "beginDate": { "format": "date-time", "type": "string" },
-        "endDate": { "format": "date-time", "type": "string" },
-        "marketValue": { "format": "double", "type": "number" },
-        "netContribution": { "format": "double", "type": "number" },
-        "grossContribution": { "format": "double", "type": "number" },
-        "netReturn": { "format": "double", "type": "number" },
-        "grossReturn": { "format": "double", "type": "number" },
-        "netSTD": { "format": "double", "type": "number" },
-        "grossSTD": { "format": "double", "type": "number" },
-        "netBeta": { "format": "double", "type": "number" },
-        "grossBeta": { "format": "double", "type": "number" }
+        "benchmarkCode": {
+          "type": "string"
+        },
+        "benchmarkName": {
+          "type": "string"
+        },
+        "sequence": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "beginDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "marketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "netContribution": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossContribution": {
+          "format": "double",
+          "type": "number"
+        },
+        "netReturn": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossReturn": {
+          "format": "double",
+          "type": "number"
+        },
+        "netSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "netBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossBeta": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "HistoricalMarketValueSummary": {
       "type": "object",
       "properties": {
-        "beginningValue": { "format": "double", "type": "number" },
-        "endingValue": { "format": "double", "type": "number" },
-        "netContribution": { "format": "double", "type": "number" },
-        "period": { "type": "string" },
-        "periodStartDate": { "format": "date-time", "type": "string" },
-        "portFolioGainLoss": { "format": "double", "type": "number" }
+        "beginningValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "endingValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "netContribution": {
+          "format": "double",
+          "type": "number"
+        },
+        "period": {
+          "type": "string"
+        },
+        "periodStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "portFolioGainLoss": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "MarketValues": {
       "type": "object",
       "properties": {
-        "aplId": { "type": "string" },
-        "asOfDate": { "format": "int32", "type": "integer" },
-        "value": { "format": "double", "type": "number" }
+        "aplId": {
+          "type": "string"
+        },
+        "asOfDate": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "value": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "CumulativeReturnHistory": {
       "type": "object",
       "properties": {
-        "beginDate": { "format": "date-time", "type": "string" },
-        "endDate": { "format": "date-time", "type": "string" },
-        "cumPortfolio": { "$ref": "#/definitions/CumulativePortfolio" },
+        "beginDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "cumPortfolio": {
+          "$ref": "#/definitions/CumulativePortfolio"
+        },
         "benchmarks": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Benchmark" }
+          "items": {
+            "$ref": "#/definitions/Benchmark"
+          }
         }
       }
     },
     "CumulativePortfolio": {
       "type": "object",
       "properties": {
-        "accountId": { "type": "string" },
-        "cumulativeReturnPercentage": { "format": "double", "type": "number" },
-        "householdId": { "type": "string" },
+        "accountId": {
+          "type": "string"
+        },
+        "cumulativeReturnPercentage": {
+          "format": "double",
+          "type": "number"
+        },
+        "householdId": {
+          "type": "string"
+        },
         "dataPoints": {
           "type": "array",
-          "items": { "$ref": "#/definitions/DataPoint" }
+          "items": {
+            "$ref": "#/definitions/DataPoint"
+          }
         }
       }
     },
     "Benchmark": {
       "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "benchmarkReturnPercentage": { "format": "double", "type": "number" },
+        "name": {
+          "type": "string"
+        },
+        "benchmarkReturnPercentage": {
+          "format": "double",
+          "type": "number"
+        },
         "dataPoints": {
           "type": "array",
-          "items": { "$ref": "#/definitions/DataPoint" }
+          "items": {
+            "$ref": "#/definitions/DataPoint"
+          }
         }
       }
     },
     "DataPoint": {
       "type": "object",
       "properties": {
-        "date": { "format": "date-time", "type": "string" },
-        "percentage": { "format": "double", "type": "number" }
+        "date": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "percentage": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "PointToPointPerformance": {
       "type": "object",
       "properties": {
-        "startDate": { "format": "date-time", "type": "string" },
-        "endDate": { "format": "date-time", "type": "string" },
-        "isAnnualized": { "type": "boolean" },
-        "isFault": { "type": "boolean" },
-        "isSameDateRange": { "type": "boolean" },
-        "netReturn": { "format": "double", "type": "number" }
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "isAnnualized": {
+          "type": "boolean"
+        },
+        "isFault": {
+          "type": "boolean"
+        },
+        "isSameDateRange": {
+          "type": "boolean"
+        },
+        "netReturn": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "HistoricalMarketValue": {
       "type": "object",
       "properties": {
-        "date": { "format": "date-time", "type": "string" },
-        "marketValue": { "format": "double", "type": "number" },
-        "netInvestment": { "format": "double", "type": "number" }
+        "date": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "marketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "netInvestment": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "CustodialAccountInformation": {
@@ -2885,38 +4108,76 @@
         "accountFeaturesSection": {
           "$ref": "#/definitions/AccountFeaturesSection"
         },
-        "isGFTC": { "type": "boolean" },
-        "isClosed": { "type": "boolean" },
-        "accountName": { "type": "string" },
-        "accountNumber": { "type": "string" },
-        "isCashAdvantageAccount": { "type": "boolean" },
-        "cashAdvantageUrl": { "type": "string" },
-        "cashAccount": { "type": "string" },
-        "monthlyMax": { "type": "string" },
-        "monthlyMin": { "type": "string" },
-        "sweepDate": { "type": "string" },
-        "billedToAccount": { "type": "string" }
+        "isGFTC": {
+          "type": "boolean"
+        },
+        "isClosed": {
+          "type": "boolean"
+        },
+        "accountName": {
+          "type": "string"
+        },
+        "accountNumber": {
+          "type": "string"
+        },
+        "isCashAdvantageAccount": {
+          "type": "boolean"
+        },
+        "cashAdvantageUrl": {
+          "type": "string"
+        },
+        "cashAccount": {
+          "type": "string"
+        },
+        "monthlyMax": {
+          "type": "string"
+        },
+        "monthlyMin": {
+          "type": "string"
+        },
+        "sweepDate": {
+          "type": "string"
+        },
+        "billedToAccount": {
+          "type": "string"
+        }
       }
     },
     "AccountInfoDataAvailable": {
       "type": "object",
       "properties": {
-        "lastSavedAt": { "type": "string" },
-        "hasBeneficiaryInfo": { "type": "boolean" },
-        "hasAccountFeatureInfo": { "type": "boolean" }
+        "lastSavedAt": {
+          "type": "string"
+        },
+        "hasBeneficiaryInfo": {
+          "type": "boolean"
+        },
+        "hasAccountFeatureInfo": {
+          "type": "boolean"
+        }
       }
     },
     "AccountSummarySection": {
       "type": "object",
       "properties": {
-        "accountDetail": { "$ref": "#/definitions/AccountDetails" },
-        "duplicateStatements": { "$ref": "#/definitions/DuplicateStatements" },
+        "accountDetail": {
+          "$ref": "#/definitions/AccountDetails"
+        },
+        "duplicateStatements": {
+          "$ref": "#/definitions/DuplicateStatements"
+        },
         "requiredMinimumDistribution": {
           "$ref": "#/definitions/RequiredMinimumDistribution"
         },
-        "accountDetailsTitleText": { "type": "string" },
-        "duplicateStatementsTitleText": { "type": "string" },
-        "requiredMinimumDistributionText": { "type": "string" },
+        "accountDetailsTitleText": {
+          "type": "string"
+        },
+        "duplicateStatementsTitleText": {
+          "type": "string"
+        },
+        "requiredMinimumDistributionText": {
+          "type": "string"
+        },
         "custodianCode": {
           "enum": [
             "NA",
@@ -2937,12 +4198,23 @@
           "type": "string"
         },
         "billedAccountType": {
-          "enum": ["ThisAccount", "RelatedAccount", "ACH"],
+          "enum": [
+            "ThisAccount",
+            "RelatedAccount",
+            "ACH"
+          ],
           "type": "string"
         },
-        "billedToAccount": { "type": "string" },
-        "billedAccountHeader": { "type": "string", "readOnly": true },
-        "isClosed": { "type": "boolean" },
+        "billedToAccount": {
+          "type": "string"
+        },
+        "billedAccountHeader": {
+          "type": "string",
+          "readOnly": true
+        },
+        "isClosed": {
+          "type": "boolean"
+        },
         "userRole": {
           "enum": [
             "Admin1",
@@ -2957,12 +4229,29 @@
           ],
           "type": "string"
         },
-        "isGFTC": { "type": "boolean" },
-        "custodianUrl": { "type": "string" },
-        "showCustodianUrl": { "type": "boolean" },
-        "accountWizardurl": { "type": "string" },
-        "agentChannel": { "enum": ["ADG", "IPG", "PCG"], "type": "string" },
-        "displayRmdDetails": { "type": "boolean" }
+        "isGFTC": {
+          "type": "boolean"
+        },
+        "custodianUrl": {
+          "type": "string"
+        },
+        "showCustodianUrl": {
+          "type": "boolean"
+        },
+        "accountWizardurl": {
+          "type": "string"
+        },
+        "agentChannel": {
+          "enum": [
+            "ADG",
+            "IPG",
+            "PCG"
+          ],
+          "type": "string"
+        },
+        "displayRmdDetails": {
+          "type": "boolean"
+        }
       }
     },
     "BeneficiariesSection": {
@@ -2970,14 +4259,22 @@
       "properties": {
         "primaryBeneficiaries": {
           "type": "array",
-          "items": { "$ref": "#/definitions/BeneficiaryDetail" }
+          "items": {
+            "$ref": "#/definitions/BeneficiaryDetail"
+          }
         },
         "contingentBeneficiaries": {
           "type": "array",
-          "items": { "$ref": "#/definitions/BeneficiaryDetail" }
+          "items": {
+            "$ref": "#/definitions/BeneficiaryDetail"
+          }
         },
-        "primaryBeneficiariesHeaderText": { "type": "string" },
-        "contingentBeneficiariesHeaderText": { "type": "string" },
+        "primaryBeneficiariesHeaderText": {
+          "type": "string"
+        },
+        "contingentBeneficiariesHeaderText": {
+          "type": "string"
+        },
         "custodianCode": {
           "enum": [
             "NA",
@@ -2997,9 +4294,15 @@
           ],
           "type": "string"
         },
-        "custodianUrl": { "type": "string" },
-        "showCustodianUrl": { "type": "boolean" },
-        "accountWizardurl": { "type": "string" },
+        "custodianUrl": {
+          "type": "string"
+        },
+        "showCustodianUrl": {
+          "type": "boolean"
+        },
+        "accountWizardurl": {
+          "type": "string"
+        },
         "userRole": {
           "enum": [
             "Admin1",
@@ -3021,105 +4324,251 @@
       "properties": {
         "automaticWithdrawals": {
           "type": "array",
-          "items": { "$ref": "#/definitions/AccountFeatureDetail" }
+          "items": {
+            "$ref": "#/definitions/AccountFeatureDetail"
+          }
         },
-        "nonGFTCWithdrawlLink": { "type": "string" },
+        "nonGFTCWithdrawlLink": {
+          "type": "string"
+        },
         "automaticInvestments": {
           "type": "array",
-          "items": { "$ref": "#/definitions/AccountFeatureDetail" }
+          "items": {
+            "$ref": "#/definitions/AccountFeatureDetail"
+          }
         },
         "standingLetterOfAuthorizations": {
           "type": "array",
-          "items": { "$ref": "#/definitions/AccountFeatureDetail" }
+          "items": {
+            "$ref": "#/definitions/AccountFeatureDetail"
+          }
         },
-        "swP_HeaderText": { "type": "string" },
-        "aiP_HeaderText": { "type": "string" },
-        "standingLetterOfAuthorization_HeaderText": { "type": "string" },
-        "noAccountFeatures_HeaderText": { "type": "string" },
-        "noAccountFeatures": { "type": "boolean" }
+        "swP_HeaderText": {
+          "type": "string"
+        },
+        "aiP_HeaderText": {
+          "type": "string"
+        },
+        "standingLetterOfAuthorization_HeaderText": {
+          "type": "string"
+        },
+        "noAccountFeatures_HeaderText": {
+          "type": "string"
+        },
+        "noAccountFeatures": {
+          "type": "boolean"
+        }
       }
     },
     "AccountDetails": {
       "type": "object",
       "properties": {
-        "registrationName": { "type": "string" },
-        "custodianName": { "type": "string" },
-        "address1": { "type": "string" },
-        "address2": { "type": "string" },
-        "address3": { "type": "string" },
-        "address4": { "type": "string" },
-        "address5": { "type": "string" },
-        "address6": { "type": "string" },
-        "city": { "type": "string" },
-        "state": { "type": "string" },
-        "zip": { "type": "string" },
-        "displayMailingAddress": { "type": "boolean" },
-        "faAuth": { "type": "string" },
-        "isCashAccount": { "type": "boolean" },
-        "accountRegistrationTitleText": { "type": "string" },
-        "ssnInformationText": { "type": "string" },
-        "maskedSsnTaxId": { "type": "string" },
-        "phoneInformationText": { "type": "string" },
-        "phoneNumber": { "type": "string" },
-        "faaInformationText": { "type": "string" },
-        "billingMethodInformationText": { "type": "string" },
-        "billingMethod": { "type": "string" },
-        "mailingAddressTitleText": { "type": "string" },
-        "poADescriptionText": { "type": "string" },
-        "poAs": { "type": "array", "items": { "type": "string" } },
-        "showCashAdvantageText": { "type": "boolean" },
-        "cashAdvantageDescriptionText": { "type": "string" },
-        "maskedCashAdvantageAccount": { "type": "string" },
-        "custodianMessage": { "type": "string" }
+        "registrationName": {
+          "type": "string"
+        },
+        "custodianName": {
+          "type": "string"
+        },
+        "address1": {
+          "type": "string"
+        },
+        "address2": {
+          "type": "string"
+        },
+        "address3": {
+          "type": "string"
+        },
+        "address4": {
+          "type": "string"
+        },
+        "address5": {
+          "type": "string"
+        },
+        "address6": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "displayMailingAddress": {
+          "type": "boolean"
+        },
+        "faAuth": {
+          "type": "string"
+        },
+        "isCashAccount": {
+          "type": "boolean"
+        },
+        "accountRegistrationTitleText": {
+          "type": "string"
+        },
+        "ssnInformationText": {
+          "type": "string"
+        },
+        "maskedSsnTaxId": {
+          "type": "string"
+        },
+        "phoneInformationText": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string"
+        },
+        "faaInformationText": {
+          "type": "string"
+        },
+        "billingMethodInformationText": {
+          "type": "string"
+        },
+        "billingMethod": {
+          "type": "string"
+        },
+        "mailingAddressTitleText": {
+          "type": "string"
+        },
+        "poADescriptionText": {
+          "type": "string"
+        },
+        "poAs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "showCashAdvantageText": {
+          "type": "boolean"
+        },
+        "cashAdvantageDescriptionText": {
+          "type": "string"
+        },
+        "maskedCashAdvantageAccount": {
+          "type": "string"
+        },
+        "custodianMessage": {
+          "type": "string"
+        }
       }
     },
     "DuplicateStatements": {
       "type": "object",
       "properties": {
-        "displayDuplicateStatements": { "type": "boolean" },
-        "nonGFTCDuplicateStatementsLink": { "type": "string" },
-        "duplicateStatementsDownloadUrl": { "type": "string" },
+        "displayDuplicateStatements": {
+          "type": "boolean"
+        },
+        "nonGFTCDuplicateStatementsLink": {
+          "type": "string"
+        },
+        "duplicateStatementsDownloadUrl": {
+          "type": "string"
+        },
         "duplicateStatmentAddresses": {
           "type": "array",
-          "items": { "$ref": "#/definitions/DuplicateStatementAddress" }
+          "items": {
+            "$ref": "#/definitions/DuplicateStatementAddress"
+          }
         }
       }
     },
     "RequiredMinimumDistribution": {
       "type": "object",
       "properties": {
-        "rmdExplanatoryText": { "type": "string" },
-        "displayRmd": { "type": "boolean" },
-        "displayNonGFTCRmd": { "type": "boolean" },
-        "nonGFTCRmdLink": { "type": "string" },
-        "rmdDownloadLink": { "type": "string" },
-        "deliveryMethod": { "type": "string" },
-        "deliveryMethodText": { "type": "string" },
-        "currentYearRMD": { "format": "int32", "type": "integer" },
-        "rmdAmount": { "format": "double", "type": "number" },
-        "rmdTakenYtd": { "format": "double", "type": "number" },
-        "remainingRmd": { "format": "double", "type": "number" },
-        "payeeInformation": { "$ref": "#/definitions/PayeeInformation" },
-        "journalInformation": { "$ref": "#/definitions/JournalInformation" },
-        "bankInformation": { "$ref": "#/definitions/BankInformation" },
-        "rmdDeliveryMethodText": { "type": "string" },
-        "currentYearRmdText": { "type": "string" },
-        "rmdAmountText": { "type": "string" },
-        "rmdTakenYtdText": { "type": "string" },
-        "remainingRmdText": { "type": "string" }
+        "rmdExplanatoryText": {
+          "type": "string"
+        },
+        "displayRmd": {
+          "type": "boolean"
+        },
+        "displayNonGFTCRmd": {
+          "type": "boolean"
+        },
+        "nonGFTCRmdLink": {
+          "type": "string"
+        },
+        "rmdDownloadLink": {
+          "type": "string"
+        },
+        "deliveryMethod": {
+          "type": "string"
+        },
+        "deliveryMethodText": {
+          "type": "string"
+        },
+        "currentYearRMD": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "rmdAmount": {
+          "format": "double",
+          "type": "number"
+        },
+        "rmdTakenYtd": {
+          "format": "double",
+          "type": "number"
+        },
+        "remainingRmd": {
+          "format": "double",
+          "type": "number"
+        },
+        "payeeInformation": {
+          "$ref": "#/definitions/PayeeInformation"
+        },
+        "journalInformation": {
+          "$ref": "#/definitions/JournalInformation"
+        },
+        "bankInformation": {
+          "$ref": "#/definitions/BankInformation"
+        },
+        "rmdDeliveryMethodText": {
+          "type": "string"
+        },
+        "currentYearRmdText": {
+          "type": "string"
+        },
+        "rmdAmountText": {
+          "type": "string"
+        },
+        "rmdTakenYtdText": {
+          "type": "string"
+        },
+        "remainingRmdText": {
+          "type": "string"
+        }
       }
     },
     "BeneficiaryDetail": {
       "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "type": { "type": "string" },
-        "allocation": { "type": "string" },
-        "dateofBirthOrTrust": { "format": "date-time", "type": "string" },
-        "beneficiaryType": { "type": "string" },
-        "imageUrl": { "type": "string" },
-        "dateOfBirthOrTrustText": { "type": "string" },
-        "perStirpes": { "type": "boolean" },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "allocation": {
+          "type": "string"
+        },
+        "dateofBirthOrTrust": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "beneficiaryType": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "dateOfBirthOrTrustText": {
+          "type": "string"
+        },
+        "perStirpes": {
+          "type": "boolean"
+        },
         "custodian": {
           "enum": [
             "NA",
@@ -3144,28 +4593,71 @@
     "AccountFeatureDetail": {
       "type": "object",
       "properties": {
-        "amount": { "format": "double", "type": "number" },
-        "frequency": { "type": "string" },
-        "nextPayDate": { "type": "string" },
-        "federalTaxWithholding": { "format": "double", "type": "number" },
-        "stateTaxWithholding": { "format": "double", "type": "number" },
+        "amount": {
+          "format": "double",
+          "type": "number"
+        },
+        "frequency": {
+          "type": "string"
+        },
+        "nextPayDate": {
+          "type": "string"
+        },
+        "federalTaxWithholding": {
+          "format": "double",
+          "type": "number"
+        },
+        "stateTaxWithholding": {
+          "format": "double",
+          "type": "number"
+        },
         "federalTaxWithholdingPercent": {
           "format": "double",
           "type": "number"
         },
-        "stateTaxWithholdingPercent": { "format": "double", "type": "number" },
-        "displayWithholdings": { "type": "boolean" },
-        "paymentMethod": { "type": "string" },
-        "contributionInformation": { "type": "string" },
-        "bankInformation": { "$ref": "#/definitions/BankInformation" },
-        "payeeInformation": { "$ref": "#/definitions/PayeeInformation" },
-        "journalInformation": { "$ref": "#/definitions/JournalInformation" },
-        "contributionMethod": { "type": "string" },
-        "deliveryMethod": { "type": "string" },
-        "headerTitleText": { "type": "string" },
-        "startDate": { "format": "date-time", "type": "string" },
-        "endDate": { "format": "date-time", "type": "string" },
-        "nextDate": { "format": "date-time", "type": "string" },
+        "stateTaxWithholdingPercent": {
+          "format": "double",
+          "type": "number"
+        },
+        "displayWithholdings": {
+          "type": "boolean"
+        },
+        "paymentMethod": {
+          "type": "string"
+        },
+        "contributionInformation": {
+          "type": "string"
+        },
+        "bankInformation": {
+          "$ref": "#/definitions/BankInformation"
+        },
+        "payeeInformation": {
+          "$ref": "#/definitions/PayeeInformation"
+        },
+        "journalInformation": {
+          "$ref": "#/definitions/JournalInformation"
+        },
+        "contributionMethod": {
+          "type": "string"
+        },
+        "deliveryMethod": {
+          "type": "string"
+        },
+        "headerTitleText": {
+          "type": "string"
+        },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "nextDate": {
+          "format": "date-time",
+          "type": "string"
+        },
         "accountFeatureType": {
           "enum": [
             "Unknown",
@@ -3178,7 +4670,9 @@
           ],
           "type": "string"
         },
-        "periodicTypeText": { "type": "string" },
+        "periodicTypeText": {
+          "type": "string"
+        },
         "custodian": {
           "enum": [
             "NA",
@@ -3198,313 +4692,785 @@
           ],
           "type": "string"
         },
-        "percentAmount": { "format": "double", "type": "number" }
+        "percentAmount": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "DuplicateStatementAddress": {
       "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "address1": { "type": "string" },
-        "address2": { "type": "string" },
-        "city": { "type": "string" },
-        "state": { "type": "string" },
-        "zip": { "type": "string" }
+        "name": {
+          "type": "string"
+        },
+        "address1": {
+          "type": "string"
+        },
+        "address2": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        }
       }
     },
     "PayeeInformation": {
       "type": "object",
       "properties": {
-        "payeeName": { "type": "string" },
-        "address1": { "type": "string" },
-        "address2": { "type": "string" },
-        "address3": { "type": "string" },
-        "address4": { "type": "string" },
-        "address5": { "type": "string" },
-        "address6": { "type": "string" },
-        "city": { "type": "string" },
-        "state": { "type": "string" },
-        "zip": { "type": "string" },
-        "payeeInformationTitle": { "type": "string" },
-        "cityStateZip": { "type": "string" },
-        "isValidPayeeInfo": { "type": "boolean", "readOnly": true }
+        "payeeName": {
+          "type": "string"
+        },
+        "address1": {
+          "type": "string"
+        },
+        "address2": {
+          "type": "string"
+        },
+        "address3": {
+          "type": "string"
+        },
+        "address4": {
+          "type": "string"
+        },
+        "address5": {
+          "type": "string"
+        },
+        "address6": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "payeeInformationTitle": {
+          "type": "string"
+        },
+        "cityStateZip": {
+          "type": "string"
+        },
+        "isValidPayeeInfo": {
+          "type": "boolean",
+          "readOnly": true
+        }
       }
     },
     "JournalInformation": {
       "type": "object",
       "properties": {
-        "accountNumber": { "type": "string" },
-        "journalSectionTitle": { "type": "string" },
-        "accountNumberText": { "type": "string" },
-        "isValidJournalInfo": { "type": "boolean", "readOnly": true }
+        "accountNumber": {
+          "type": "string"
+        },
+        "journalSectionTitle": {
+          "type": "string"
+        },
+        "accountNumberText": {
+          "type": "string"
+        },
+        "isValidJournalInfo": {
+          "type": "boolean",
+          "readOnly": true
+        }
       }
     },
     "BankInformation": {
       "type": "object",
       "properties": {
-        "bankName": { "type": "string" },
-        "routingNumber": { "type": "string" },
-        "accountName": { "type": "string" },
-        "accountNumber": { "type": "string" },
-        "accountType": { "type": "string" },
-        "bankInformationTitle": { "type": "string" },
-        "isValidBankInfo": { "type": "boolean", "readOnly": true }
+        "bankName": {
+          "type": "string"
+        },
+        "routingNumber": {
+          "type": "string"
+        },
+        "accountName": {
+          "type": "string"
+        },
+        "accountNumber": {
+          "type": "string"
+        },
+        "accountType": {
+          "type": "string"
+        },
+        "bankInformationTitle": {
+          "type": "string"
+        },
+        "isValidBankInfo": {
+          "type": "boolean",
+          "readOnly": true
+        }
       }
     },
     "Strategist": {
       "type": "object",
       "properties": {
-        "strategistGroupName": { "type": "string" },
-        "sleeveValue": { "format": "double", "type": "number" },
-        "percentage": { "format": "double", "type": "number" },
+        "strategistGroupName": {
+          "type": "string"
+        },
+        "sleeveValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "percentage": {
+          "format": "double",
+          "type": "number"
+        },
         "sleeveHoldings": {
           "type": "array",
-          "items": { "$ref": "#/definitions/SleeveHolding" }
+          "items": {
+            "$ref": "#/definitions/SleeveHolding"
+          }
         }
       }
     },
     "SleeveHolding": {
       "type": "object",
       "properties": {
-        "custodianId": { "type": "string" },
-        "modelId": { "type": "string" },
-        "modelName": { "type": "string" },
-        "sleeveValue": { "format": "double", "type": "number" },
-        "strategistGroupName": { "type": "string" },
-        "percentage": { "format": "double", "type": "number" },
+        "custodianId": {
+          "type": "string"
+        },
+        "modelId": {
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        },
+        "sleeveValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "strategistGroupName": {
+          "type": "string"
+        },
+        "percentage": {
+          "format": "double",
+          "type": "number"
+        },
         "holdings": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Holding" }
+          "items": {
+            "$ref": "#/definitions/Holding"
+          }
         }
       }
     },
     "AssetType": {
       "type": "object",
       "properties": {
-        "id": { "format": "int32", "type": "integer" },
-        "name": { "type": "string" },
-        "amount": { "format": "double", "type": "number" },
-        "percentage": { "format": "double", "type": "number" },
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "amount": {
+          "format": "double",
+          "type": "number"
+        },
+        "percentage": {
+          "format": "double",
+          "type": "number"
+        },
         "assetClasses": {
           "type": "array",
-          "items": { "$ref": "#/definitions/AssetClass" }
+          "items": {
+            "$ref": "#/definitions/AssetClass"
+          }
         },
-        "hasAssetClasses": { "type": "boolean", "readOnly": true },
-        "className": { "type": "string", "readOnly": true }
+        "hasAssetClasses": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "className": {
+          "type": "string",
+          "readOnly": true
+        }
       }
     },
     "AssetClass": {
       "type": "object",
       "properties": {
-        "id": { "format": "int32", "type": "integer" },
-        "name": { "type": "string" },
-        "amount": { "format": "double", "type": "number" },
-        "percentage": { "format": "double", "type": "number" },
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "amount": {
+          "format": "double",
+          "type": "number"
+        },
+        "percentage": {
+          "format": "double",
+          "type": "number"
+        },
         "assetSubClasses": {
           "type": "array",
-          "items": { "$ref": "#/definitions/AssetSubClass" }
+          "items": {
+            "$ref": "#/definitions/AssetSubClass"
+          }
         },
-        "hasAssetSubClasses": { "type": "boolean", "readOnly": true }
+        "hasAssetSubClasses": {
+          "type": "boolean",
+          "readOnly": true
+        }
       }
     },
     "AssetSubClass": {
       "type": "object",
       "properties": {
-        "id": { "format": "int32", "type": "integer" },
-        "name": { "type": "string" },
-        "amount": { "format": "double", "type": "number" },
-        "percentage": { "format": "double", "type": "number" },
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "amount": {
+          "format": "double",
+          "type": "number"
+        },
+        "percentage": {
+          "format": "double",
+          "type": "number"
+        },
         "holdings": {
           "type": "array",
-          "items": { "$ref": "#/definitions/HoldingSecurity" }
+          "items": {
+            "$ref": "#/definitions/HoldingSecurity"
+          }
         },
-        "hasHoldings": { "type": "boolean", "readOnly": true }
+        "hasHoldings": {
+          "type": "boolean",
+          "readOnly": true
+        }
       }
     },
     "HoldingSecurity": {
       "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "symbol": { "type": "string" },
-        "share": { "format": "double", "type": "number" },
-        "price": { "format": "double", "type": "number" },
-        "asOfDate": { "format": "date-time", "type": "string" },
-        "amount": { "format": "double", "type": "number" },
-        "percentage": { "format": "double", "type": "number" }
+        "name": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "share": {
+          "format": "double",
+          "type": "number"
+        },
+        "price": {
+          "format": "double",
+          "type": "number"
+        },
+        "asOfDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "amount": {
+          "format": "double",
+          "type": "number"
+        },
+        "percentage": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "HoldingAggregateResponse": {
       "type": "object",
       "properties": {
-        "totalCostBasis": { "format": "double", "type": "number" },
-        "totalUnrealizedGainLoss": { "format": "double", "type": "number" },
-        "totalValue": { "format": "double", "type": "number" }
+        "totalCostBasis": {
+          "format": "double",
+          "type": "number"
+        },
+        "totalUnrealizedGainLoss": {
+          "format": "double",
+          "type": "number"
+        },
+        "totalValue": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "RealizedGainLossAggregateResponse": {
       "type": "object",
       "properties": {
-        "totalCost": { "format": "double", "type": "number" },
-        "totalProceeds": { "format": "double", "type": "number" },
-        "totalGainLossAmount": { "format": "double", "type": "number" }
+        "totalCost": {
+          "format": "double",
+          "type": "number"
+        },
+        "totalProceeds": {
+          "format": "double",
+          "type": "number"
+        },
+        "totalGainLossAmount": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "AdvisorContract": {
       "type": "object",
       "properties": {
-        "contractId": { "type": "string" },
-        "firstName": { "type": "string" },
-        "lastName": { "type": "string" },
-        "marketValue": { "format": "double", "type": "number" },
-        "proposedValue": { "format": "double", "type": "number" },
-        "netInvestment": { "format": "double", "type": "number" },
-        "email": { "type": "string" },
-        "address1": { "type": "string" },
-        "address2": { "type": "string" },
-        "city": { "type": "string" },
-        "state": { "type": "string" },
-        "zip": { "type": "string" },
-        "phone": { "type": "string" },
-        "channel": { "type": "string" },
-        "isFunded": { "type": "boolean" },
-        "isClosed": { "type": "boolean" },
-        "isProposed": { "type": "boolean" },
-        "isPendingFunded": { "type": "boolean" },
-        "asOfDate": { "format": "date-time", "type": "string" }
+        "contractId": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "marketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "proposedValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "netInvestment": {
+          "format": "double",
+          "type": "number"
+        },
+        "email": {
+          "type": "string"
+        },
+        "address1": {
+          "type": "string"
+        },
+        "address2": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "channel": {
+          "type": "string"
+        },
+        "isFunded": {
+          "type": "boolean"
+        },
+        "isClosed": {
+          "type": "boolean"
+        },
+        "isProposed": {
+          "type": "boolean"
+        },
+        "isPendingFunded": {
+          "type": "boolean"
+        },
+        "asOfDate": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     },
     "Household": {
       "type": "object",
       "properties": {
-        "householdId": { "type": "string" },
-        "webHouseholdId": { "type": "string" },
-        "advisorContractId": { "type": "string" },
-        "riskProfile": { "format": "int32", "type": "integer" },
-        "firstName": { "type": "string" },
-        "lastName": { "type": "string" },
-        "displayName": { "type": "string" },
-        "sortName": { "type": "string" },
-        "email": { "type": "string" },
-        "address1": { "type": "string" },
-        "address2": { "type": "string" },
-        "city": { "type": "string" },
-        "state": { "type": "string" },
-        "zip": { "type": "string" },
-        "marketValue": { "format": "double", "type": "number" },
-        "proposedValue": { "format": "double", "type": "number" },
-        "netInvestment": { "format": "double", "type": "number" },
-        "isFunded": { "type": "boolean" },
-        "isClosed": { "type": "boolean" },
-        "isProposed": { "type": "boolean" },
-        "isPendingFunded": { "type": "boolean" },
-        "asOfDate": { "format": "date-time", "type": "string" },
-        "inceptionDate": { "format": "int32", "type": "integer" },
-        "terminationDate": { "format": "date-time", "type": "string" }
+        "householdId": {
+          "type": "string"
+        },
+        "webHouseholdId": {
+          "type": "string"
+        },
+        "advisorContractId": {
+          "type": "string"
+        },
+        "riskProfile": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "sortName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "address1": {
+          "type": "string"
+        },
+        "address2": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "marketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "proposedValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "netInvestment": {
+          "format": "double",
+          "type": "number"
+        },
+        "isFunded": {
+          "type": "boolean"
+        },
+        "isClosed": {
+          "type": "boolean"
+        },
+        "isProposed": {
+          "type": "boolean"
+        },
+        "isPendingFunded": {
+          "type": "boolean"
+        },
+        "asOfDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "inceptionDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "terminationDate": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     },
     "FeeSchedule": {
       "type": "object",
       "properties": {
-        "feeID": { "format": "int32", "type": "integer" },
-        "description": { "type": "string" },
-        "include": { "type": "boolean" },
-        "default": { "type": "boolean" },
-        "externallyVisible": { "type": "boolean" },
-        "feeMode": { "type": "string" },
-        "feeType": { "type": "string" },
-        "flatRate": { "format": "double", "type": "number" },
+        "feeID": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "include": {
+          "type": "boolean"
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "externallyVisible": {
+          "type": "boolean"
+        },
+        "feeMode": {
+          "type": "string"
+        },
+        "feeType": {
+          "type": "string"
+        },
+        "flatRate": {
+          "format": "double",
+          "type": "number"
+        },
         "feeScheduleDetails": {
           "type": "array",
-          "items": { "$ref": "#/definitions/FeeScheduleDetail" }
+          "items": {
+            "$ref": "#/definitions/FeeScheduleDetail"
+          }
         }
       }
     },
     "FeeScheduleDetail": {
       "type": "object",
       "properties": {
-        "levelOfAssets": { "type": "string" },
-        "tierMin": { "format": "double", "type": "number" },
-        "tierMax": { "format": "double", "type": "number" },
-        "pctRate": { "format": "double", "type": "number" }
+        "levelOfAssets": {
+          "type": "string"
+        },
+        "tierMin": {
+          "format": "double",
+          "type": "number"
+        },
+        "tierMax": {
+          "format": "double",
+          "type": "number"
+        },
+        "pctRate": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "HouseHoldPerformance": {
       "type": "object",
       "properties": {
-        "houseHoldId": { "type": "string" },
+        "houseHoldId": {
+          "type": "string"
+        },
         "accounts": {
           "type": "array",
-          "items": { "$ref": "#/definitions/AccountPerformance" }
+          "items": {
+            "$ref": "#/definitions/AccountPerformance"
+          }
         },
         "benchmarks": {
           "type": "array",
-          "items": { "$ref": "#/definitions/BenchMarkPerformance" }
+          "items": {
+            "$ref": "#/definitions/BenchMarkPerformance"
+          }
         },
-        "monthEndDate": { "format": "date-time", "type": "string" },
-        "asOfDate": { "format": "date-time", "type": "string" },
-        "mtdPerformance": { "format": "double", "type": "number" },
-        "threeMonthPerformance": { "format": "double", "type": "number" },
-        "sixMonthPerformance": { "format": "double", "type": "number" },
-        "threeMonthSTD": { "format": "double", "type": "number" },
-        "sixMonthSTD": { "format": "double", "type": "number" },
-        "threeMonthBeta": { "format": "double", "type": "number" },
-        "sixMonthBeta": { "format": "double", "type": "number" },
-        "sinceInceptionPerformance": { "format": "double", "type": "number" },
-        "ytdPerformance": { "format": "double", "type": "number" },
-        "oneYrPerformance": { "format": "double", "type": "number" },
-        "twoYrPerformance": { "format": "double", "type": "number" },
-        "threeYrPerformance": { "format": "double", "type": "number" },
-        "fiveYrPerformance": { "format": "double", "type": "number" },
-        "tenYrPerformance": { "format": "double", "type": "number" },
-        "ytdstd": { "format": "double", "type": "number" },
-        "sinceInceptionSTD": { "format": "double", "type": "number" },
-        "oneYrSTD": { "format": "double", "type": "number" },
-        "twoYrSTD": { "format": "double", "type": "number" },
-        "threeYrSTD": { "format": "double", "type": "number" },
-        "fiveYrSTD": { "format": "double", "type": "number" },
-        "tenYrSTD": { "format": "double", "type": "number" },
-        "sinceInceptionBeta": { "format": "double", "type": "number" },
-        "ytdBeta": { "format": "double", "type": "number" },
-        "oneYrBeta": { "format": "double", "type": "number" },
-        "twoYrBeta": { "format": "double", "type": "number" },
-        "threeYrBeta": { "format": "double", "type": "number" },
-        "fiveYrBeta": { "format": "double", "type": "number" },
-        "tenYrBeta": { "format": "double", "type": "number" },
-        "inceptionDate": { "format": "date-time", "type": "string" },
-        "threeMonthStartDate": { "format": "date-time", "type": "string" },
-        "sixMonthStartDate": { "format": "date-time", "type": "string" },
-        "ytdStartDate": { "format": "date-time", "type": "string" },
-        "oneYearStartDate": { "format": "date-time", "type": "string" },
-        "twoYearsStartDate": { "format": "date-time", "type": "string" },
-        "threeYearsStartDate": { "format": "date-time", "type": "string" },
-        "fiveYearsStartDate": { "format": "date-time", "type": "string" },
-        "tenYearsStartDate": { "format": "date-time", "type": "string" },
-        "modelName": { "type": "string" }
+        "monthEndDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "asOfDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "mtdPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeMonthBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "sixMonthBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrPerformance": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdstd": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "sinceInceptionBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "ytdBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "oneYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "twoYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "threeYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "fiveYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "tenYrBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "inceptionDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "threeMonthStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sixMonthStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "ytdStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "oneYearStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "twoYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "threeYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "fiveYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "tenYearsStartDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        }
       }
     },
     "HistoricalHouseholdPerformance": {
       "type": "object",
       "properties": {
-        "householdId": { "type": "string" },
+        "householdId": {
+          "type": "string"
+        },
         "accountPerformanceSummary": {
           "type": "array",
-          "items": { "$ref": "#/definitions/HistoricalAccountPerformance" }
+          "items": {
+            "$ref": "#/definitions/HistoricalAccountPerformance"
+          }
         },
         "benchmarkPerformanceSummary": {
           "type": "array",
-          "items": { "$ref": "#/definitions/HistoricalBenchMarkPerformance" }
+          "items": {
+            "$ref": "#/definitions/HistoricalBenchMarkPerformance"
+          }
         },
-        "beginDate": { "format": "date-time", "type": "string" },
-        "endDate": { "format": "date-time", "type": "string" },
-        "marketValue": { "format": "double", "type": "number" },
-        "netContribution": { "format": "double", "type": "number" },
-        "grossContribution": { "format": "double", "type": "number" },
-        "netReturn": { "format": "double", "type": "number" },
-        "grossReturn": { "format": "double", "type": "number" },
-        "netSTD": { "format": "double", "type": "number" },
-        "grossSTD": { "format": "double", "type": "number" },
-        "netBeta": { "format": "double", "type": "number" },
-        "grossBeta": { "format": "double", "type": "number" }
+        "beginDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "marketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "netContribution": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossContribution": {
+          "format": "double",
+          "type": "number"
+        },
+        "netReturn": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossReturn": {
+          "format": "double",
+          "type": "number"
+        },
+        "netSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossSTD": {
+          "format": "double",
+          "type": "number"
+        },
+        "netBeta": {
+          "format": "double",
+          "type": "number"
+        },
+        "grossBeta": {
+          "format": "double",
+          "type": "number"
+        }
       }
     },
     "HouseholdResponse": {
@@ -3512,25 +5478,50 @@
       "properties": {
         "households": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Household" }
+          "items": {
+            "$ref": "#/definitions/Household"
+          }
         },
-        "aggregationValues": { "$ref": "#/definitions/AggregationValues" }
+        "aggregationValues": {
+          "$ref": "#/definitions/AggregationValues"
+        }
       }
     },
     "AggregationValues": {
       "type": "object",
       "properties": {
-        "totalRecords": { "format": "int32", "type": "integer" },
-        "totalMarketValue": { "format": "double", "type": "number" },
-        "totalNetInvestment": { "format": "double", "type": "number" },
-        "totalProposedValue": { "format": "double", "type": "number" },
-        "totalPendingValue": { "format": "double", "type": "number" },
+        "totalRecords": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "totalMarketValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "totalNetInvestment": {
+          "format": "double",
+          "type": "number"
+        },
+        "totalProposedValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "totalPendingValue": {
+          "format": "double",
+          "type": "number"
+        },
         "displayHistoricalMarketValues": {
           "format": "int32",
           "type": "integer"
         },
-        "minimumInceptionDate": { "format": "int32", "type": "integer" },
-        "maximumAllowFAAuthorization": { "format": "int32", "type": "integer" }
+        "minimumInceptionDate": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "maximumAllowFAAuthorization": {
+          "format": "int32",
+          "type": "integer"
+        }
       }
     }
   },

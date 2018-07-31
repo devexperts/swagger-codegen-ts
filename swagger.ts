@@ -14,6 +14,10 @@ export type TDictionary<A> = {
 	[key: string]: A;
 };
 
+//#region Base
+
+//#endregion
+
 export type TContactObject = {
 	name: Option<string>;
 	url: Option<string>;
@@ -212,22 +216,34 @@ export const BaseItemsObjectProps = {
 };
 ((): t.Type<TBaseItemsObject, mixed> => t.type(BaseItemsObjectProps))(); //integrity check
 
-export type TNonArrayItemsObject = TBaseItemsObject & {
-	type: 'string' | 'number' | 'integer' | 'boolean';
+export type TStringItemsObject = TBaseItemsObject & {
+	type: 'string';
 };
-export const StringItemsObject = t.type({
+export const StringItemsObject: t.Tagged<'type', TStringItemsObject, mixed> = t.type({
 	...BaseItemsObjectProps,
 	type: t.literal('string'),
 });
-export const NumberItemsObject = t.type({
+
+export type TNumberItemsObject = TBaseItemsObject & {
+	type: 'number';
+};
+export const NumberItemsObject: t.Tagged<'type', TNumberItemsObject, mixed> = t.type({
 	...BaseItemsObjectProps,
 	type: t.literal('number'),
 });
-export const IntegerItemsObject = t.type({
+
+export type TIntegerItemsObject = TBaseItemsObject & {
+	type: 'integer';
+};
+export const IntegerItemsObject: t.Tagged<'type', TIntegerItemsObject, mixed> = t.type({
 	...BaseItemsObjectProps,
 	type: t.literal('integer'),
 });
-export const BooleanItemsObject = t.type({
+
+export type TBooleanItemsObject = TBaseItemsObject & {
+	type: 'boolean';
+};
+export const BooleanItemsObject: t.Tagged<'type', TBooleanItemsObject, mixed> = t.type({
 	...BaseItemsObjectProps,
 	type: t.literal('boolean'),
 });
@@ -237,7 +253,12 @@ export type TArrayItemsObject = TBaseItemsObject & {
 	items: Option<TItemsObject[]>;
 };
 
-export type TItemsObject = TArrayItemsObject | TNonArrayItemsObject;
+export type TItemsObject =
+	| TArrayItemsObject
+	| TStringItemsObject
+	| TNumberItemsObject
+	| TIntegerItemsObject
+	| TBooleanItemsObject;
 export const ItemsObject: t.Type<TItemsObject, mixed> = t.recursion<TItemsObject>('ItemsObject', ItemsObject => {
 	const ArrayItemsObject = t.type({
 		...BaseItemsObjectProps,
@@ -252,6 +273,14 @@ export const ItemsObject: t.Type<TItemsObject, mixed> = t.recursion<TItemsObject
 		BooleanItemsObject,
 	]) as any;
 });
+
+export type TNonArrayItemsObject = TStringItemsObject | TNumberItemsObject | TIntegerItemsObject | TBooleanItemsObject;
+export const NonArrayItemsObject: t.Type<TNonArrayItemsObject, mixed> = t.taggedUnion('type', [
+	StringItemsObject,
+	NumberItemsObject,
+	IntegerItemsObject,
+	BooleanItemsObject,
+]);
 
 //#endregion
 
@@ -270,11 +299,13 @@ const BaseParameterObjectProps = {
 export type TBasePathParameterObjectProps = TBaseParameterObjectProps & {
 	in: 'path';
 	required: true;
+	format: Option<string>;
 };
 const BasePathParameterObjectProps = {
 	...BaseParameterObjectProps,
 	in: t.literal('path'),
 	required: t.literal(true),
+	format: stringOption,
 };
 (): t.Type<TBasePathParameterObjectProps, mixed> => t.type(BasePathParameterObjectProps); //integrity
 
@@ -312,12 +343,12 @@ const BooleanPathParameterObject: t.Tagged<'type', TBooleanPathParameterObject, 
 
 export type TArrayPathParameterObject = TBasePathParameterObjectProps & {
 	type: 'array';
-	items: TItemsObject;
+	items: TNonArrayItemsObject;
 };
 const ArrayPathParameterObject: t.Tagged<'type', TArrayPathParameterObject, mixed> = t.type({
 	...BasePathParameterObjectProps,
 	type: t.literal('array'),
-	items: ItemsObject,
+	items: NonArrayItemsObject,
 });
 
 export type TPathParameterObject =
