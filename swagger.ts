@@ -81,16 +81,19 @@ export type TObjectSchemaObject = TBaseSchemaObjectProps & {
 	type: 'object';
 	properties: Option<TDictionary<TSchemaObject>>;
 	required: Option<string[]>;
+	additionalProperties: Option<TSchemaObject>;
 };
 
 export type TStringPropertySchemaObject = TBaseSchemaObjectProps & {
 	type: 'string';
 	format: Option<string>;
+	enum: Option<Array<string | number | boolean>>;
 };
 export const StringPropertySchemaObject: t.Tagged<'type', TStringPropertySchemaObject, mixed> = t.type({
 	...BaseSchemaObjectProps,
 	type: t.literal('string'),
 	format: stringOption,
+	enum: primitiveArrayOption,
 });
 
 export type TNumberPropertySchemaObject = TBaseSchemaObjectProps & {
@@ -159,6 +162,7 @@ export const SchemaObject: t.Type<TSchemaObject, mixed> = t.recursion<TSchemaObj
 			required: stringArrayOption,
 			type: t.literal('object'),
 			properties: createOptionFromNullable(t.dictionary(t.string, SchemaObject)),
+			additionalProperties: createOptionFromNullable(SchemaObject),
 		});
 
 		return t.taggedUnion('type', [

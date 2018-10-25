@@ -52,22 +52,28 @@ const serializeDefinitionsIndex = (definitions: TDefinitionsObject): TFile =>
 // string serializers
 
 const serializeSchemaObjectType = (schema: TSchemaObject): TSerializedSchemObjectWithDependencies => {
+	console.log('serializing', schema);
 	switch (schema.type) {
 		case undefined: {
 			const reference = `${schema.$ref.replace(/^#\/definitions\//g, '')}`;
 			return { content: reference, dependencies: [reference] };
 		}
 		case 'string': {
+			const enumContent = schema.enum.map(serializeEnum);
 			return {
-				content: schema.format.fold(schema.type, format => {
-					// switch (format) {
-					// 	case 'date':
-					// 	case 'date-time': {
-					// 		return 'Date';
-					// 	}
-					// }
-					return schema.type;
-				}),
+				content: enumContent
+					.orElse(() =>
+						schema.format.map(format => {
+							// switch (format) {
+							// 	case 'date':
+							// 	case 'date-time': {
+							// 		return 'Date';
+							// 	}
+							// }
+							return schema.type;
+						}),
+					)
+					.getOrElse(schema.type),
 			};
 		}
 		case 'boolean':
@@ -79,24 +85,27 @@ const serializeSchemaObjectType = (schema: TSchemaObject): TSerializedSchemObjec
 		}
 		case 'array': {
 			const result = serializeSchemaObjectType(schema.items);
-			return { content: `${result.content}[]`, dependencies: result.dependencies };
+			return { content: `Array<${result.content}>`, dependencies: result.dependencies };
 		}
 		case 'object': {
-			const serialized = schema.properties.map(properties => {
-				const fields = serializeDictionary(properties, (name, value) =>
-					serializeField(
-						name,
-						value,
-						schema.required.map(required => required.includes(name)).getOrElse(false),
-					),
-				);
-				const content = fields.map(field => field.content).join('');
-				const dependencies = flatten(fields.map(field => field.dependencies || []));
-				return {
-					content,
-					dependencies,
-				};
-			});
+			const additional = schema.additionalProperties.map(serializeAdditionalProperties);
+			const serialized = additional.orElse(() =>
+				schema.properties.map(properties => {
+					const fields = serializeDictionary(properties, (name, value) =>
+						serializeField(
+							name,
+							value,
+							schema.required.map(required => required.includes(name)).getOrElse(false),
+						),
+					);
+					const content = fields.map(field => field.content).join('');
+					const dependencies = flatten(fields.map(field => field.dependencies || []));
+					return {
+						content,
+						dependencies,
+					};
+				}),
+			);
 			return {
 				content: `{
 					${serialized.map(serialized => serialized.content).toUndefined()}
@@ -116,6 +125,17 @@ const serializeField = (
 	const type = serializeSchemaObjectType(schema).content;
 	return {
 		content: isRequired ? `${name}: ${type};` : `${name}: Option<${type}>;`,
+		dependencies: serialized.dependencies,
+	};
+};
+
+const serializeEnum = (enumValue: Array<string | number | boolean>): string =>
+	enumValue.map(value => `'${value}'`).join(' | ');
+
+const serializeAdditionalProperties = (properties: TSchemaObject): TSerializedSchemObjectWithDependencies => {
+	const serialized = serializeSchemaObjectType(properties);
+	return {
+		content: `[key: string]: ${serialized.content}`,
 		dependencies: serialized.dependencies,
 	};
 };
