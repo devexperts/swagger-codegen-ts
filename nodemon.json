@@ -4,7 +4,8 @@
   ],
   "ignore": [
     "node_modules",
-    "out"
+    "out",
+    "./out"
   ],
   "ext": "ts",
   "exec": "ts-node ./index.ts",
