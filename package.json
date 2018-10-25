@@ -12,9 +12,11 @@
   "license": "ISC",
   "dependencies": {
     "@devexperts/utils": "^0.12.6",
+    "@types/fs-extra": "^5.0.4",
     "@types/prettier": "^1.13.2",
     "@types/swagger-schema-official": "^2.0.10",
     "fp-ts": "^1.7.1",
+    "fs-extra": "^7.0.0",
     "io-ts": "^1.2.1",
     "io-ts-types": "^0.3.8",
     "prettier": "^1.13.7",

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import { Spec, Schema, Path } from 'swagger-schema-official';
 import { tryCatch } from 'fp-ts/lib/Either';
 import { fromEither, fromRefinement, fromNullable, option, Option } from 'fp-ts/lib/Option';
@@ -19,7 +19,6 @@ import {
 	ResponsesDefinitionsObject,
 } from './swagger';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { serializeSwaggerObject } from './serializer';
 import {
 	PathItemObject,
 	OperationObject,
@@ -28,24 +27,28 @@ import {
 	ResponseObject,
 	SchemaObject,
 } from './swagger';
+import { map, write } from './fs';
+import { serializeSwaggerObject } from './serializer2';
 
 const root = process.cwd();
-const out = path.resolve(root, 'out.ts');
+const destination = path.resolve('./out');
+const name = 'spec';
 const json = path.resolve(root, './ads-swagger-specs.json');
 const prettierConfig = path.resolve(root, '.prettierrc');
-const rawSpec = fromEither(tryCatch(() => JSON.parse(fs.readFileSync(json).toString())));
-const decoded = rawSpec.chain(spec => fromEither(SwaggerObject.decode(spec)));
 
-type Dictionary<A> = { [key: string]: A };
+// fs.mkdirSync(path.resolve(destination));
 
 async function run() {
-	const formatted = sequenceT(option)(
-		decoded.map(serializeSwaggerObject),
-		fromNullable(await prettier.resolveConfig(prettierConfig)),
-	).map(([serialized, config]) => prettier.format(serialized, config));
-	if (formatted.isSome()) {
-		// console.log(serialized.value.replace(/\n/g, '\n'));
-		console.log(formatted.value);
+	const raw = await fs.readFile(json);
+	const spec = JSON.parse(raw.toString());
+	const decoded = SwaggerObject.decode(spec);
+	const serialized = decoded.map(spec => serializeSwaggerObject(name, spec));
+	const config = fromNullable(await prettier.resolveConfig(prettierConfig));
+	if (serialized.isRight() && config.isSome()) {
+		const formatted = map(serialized.value, serialized => prettier.format(serialized, config.value));
+		await fs.remove(destination);
+		await fs.mkdirp(destination);
+		await write(destination, formatted);
 	}
 }
 run();
