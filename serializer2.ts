@@ -21,10 +21,7 @@ export const serializeSwaggerObject = (name: string, swaggerObject: TSwaggerObje
 	]);
 
 const serializeDefinitions = (definitions: TDefinitionsObject): TDirectory =>
-	directory('definitions', [
-		serializeDefinitionsIndex(definitions),
-		...serializeDictionary(definitions, serializeDefinition),
-	]);
+	directory('definitions', [...serializeDictionary(definitions, serializeDefinition)]);
 const serializePaths = (definitions: TPathsObject): TDirectory => directory('paths', []);
 
 const serializeDefinition = (name: string, definition: TSchemaObject): TFile => {
@@ -49,14 +46,6 @@ const serializeDefinition = (name: string, definition: TSchemaObject): TFile => 
 	`,
 	);
 };
-
-const serializeDefinitionsIndex = (definitions: TDefinitionsObject): TFile =>
-	file(
-		'definitions.ts',
-		Object.keys(definitions)
-			.map(name => `export * from './${name}';`)
-			.join(''),
-	);
 
 // string serializers
 
