@@ -12,7 +12,7 @@ import { serializeSwaggerObject } from './serializer2';
 const root = process.cwd();
 const destination = path.resolve('./out');
 const name = 'spec';
-const json = path.resolve(root, './specs/ads-swagger-specs.json');
+const json = path.resolve(root, './specs/spec.json');
 
 const prettierConfig = path.resolve(root, '.prettierrc');
 
