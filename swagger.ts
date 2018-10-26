@@ -372,18 +372,83 @@ export const PathParameterObject: t.Tagged<'in', TPathParameterObject, mixed> = 
 
 //#endregion
 
-export type TQueryParameterObject = {
+//#region Query Parameter Object
+
+export type TBaseQueryParameterObjectProps = {
 	name: string;
 	in: 'query';
 	description: Option<string>;
 	required: Option<boolean>;
 };
-export const QueryParameterObject: t.Tagged<'in', TQueryParameterObject, mixed> = t.type({
+
+const BaseQueryParameterObjectProps = {
 	name: t.string,
 	in: t.literal('query'),
 	description: stringOption,
 	required: booleanOption,
+};
+
+(): t.Type<TBaseQueryParameterObjectProps, mixed> => t.type(BaseQueryParameterObjectProps); //integrity
+
+export type TStringQueryParameterObject = TBaseQueryParameterObjectProps & {
+	type: 'string';
+};
+const StringQueryParameterObject: t.Tagged<'type', TStringQueryParameterObject, mixed> = t.type({
+	...BaseQueryParameterObjectProps,
+	type: t.literal('string'),
 });
+
+export type TNumberQueryParameterObject = TBaseQueryParameterObjectProps & {
+	type: 'number';
+};
+const NumberQueryParameterObject: t.Tagged<'type', TNumberQueryParameterObject, mixed> = t.type({
+	...BaseQueryParameterObjectProps,
+	type: t.literal('number'),
+});
+
+export type TIntegerQueryParameterObject = TBaseQueryParameterObjectProps & {
+	type: 'integer';
+};
+const IntegerQueryParameterObject: t.Tagged<'type', TIntegerQueryParameterObject, mixed> = t.type({
+	...BaseQueryParameterObjectProps,
+	type: t.literal('integer'),
+});
+
+export type TBooleanQueryParameterObject = TBaseQueryParameterObjectProps & {
+	type: 'boolean';
+};
+const BooleanQueryParameterObject: t.Tagged<'type', TBooleanQueryParameterObject, mixed> = t.type({
+	...BaseQueryParameterObjectProps,
+	type: t.literal('boolean'),
+});
+
+export type TArrayQueryParameterObject = TBaseQueryParameterObjectProps & {
+	type: 'array';
+	items: TNonArrayItemsObject;
+};
+const ArrayQueryParameterObject: t.Tagged<'type', TArrayQueryParameterObject, mixed> = t.type({
+	...BaseQueryParameterObjectProps,
+	type: t.literal('array'),
+	items: NonArrayItemsObject,
+});
+
+export type TQueryParameterObject =
+	| TStringQueryParameterObject
+	| TNumberQueryParameterObject
+	| TIntegerQueryParameterObject
+	| TBooleanQueryParameterObject
+	| TArrayQueryParameterObject;
+
+export const QueryParameterObject: t.Tagged<'in', TQueryParameterObject, mixed> = t.taggedUnion('type', [
+	StringQueryParameterObject,
+	NumberQueryParameterObject,
+	IntegerQueryParameterObject,
+	BooleanQueryParameterObject,
+	ArrayQueryParameterObject,
+]) as any;
+
+//#endregion
+
 export type THeaderParameterObject = {
 	name: string;
 	in: 'header';
