@@ -6,17 +6,21 @@ import {
 	TPathParameterObject,
 	TPathsObject,
 	TQueryParameterObject,
+	TResponseObject,
+	TResponsesObject,
 	TSchemaObject,
 	TSwaggerObject,
 } from './swagger';
 import { directory, file, TDirectory, TFile } from './fs';
 import { array, catOptions, flatten, uniq } from 'fp-ts/lib/Array';
 import { contramap, Setoid, setoidString } from 'fp-ts/lib/Setoid';
-import { group } from 'fp-ts/lib/NonEmptyArray';
+import { group, groupBy } from 'fp-ts/lib/NonEmptyArray';
 import { getOperationParametersInPath, getOperationParametersInQuery, groupPathsByTag } from './utils';
 import { fromNullable, none, Option, some } from 'fp-ts/lib/Option';
 import { getArrayMonoid, getRecordMonoid, monoidString, fold } from 'fp-ts/lib/Monoid';
 import { camelize } from '@devexperts/utils/dist/string/string';
+import { intercalate } from 'fp-ts/lib/Foldable2v';
+import { collect, lookup } from 'fp-ts/lib/Record';
 
 // TFSEntity serializers
 type TDepdendency = {
@@ -34,6 +38,9 @@ const monoidSerialized = getRecordMonoid<TSerialized>({
 	dependencies: monoidDependencies,
 });
 const foldSerialized = fold(monoidSerialized);
+const foldDependencies = fold(monoidDependencies);
+const intercalateSerialized = intercalate(monoidSerialized, array);
+const uniqString = uniq(setoidString);
 
 export const serializeSwaggerObject = (name: string, swaggerObject: TSwaggerObject): TDirectory =>
 	directory(name, [
@@ -48,16 +55,25 @@ const serializePaths = (paths: TPathsObject): TDirectory =>
 	directory('paths', serializeDictionary(groupPathsByTag(paths), serializePathGroup));
 
 const serializeDefinition = (name: string, definition: TSchemaObject): TFile => {
-	const serialized = serializeSchemaObjectType(definition);
+	const serialized = serializeSchemaObjectType(definition, './');
 	const serializedIO = serializeIOSchemaObjectType(definition);
 
-	const dependencies = serializeDependencies([...serialized.dependencies, ...serializedIO.dependencies]);
+	const dependencies = serializeDependencies([
+		...serialized.dependencies,
+		...serializedIO.dependencies,
+		{
+			name: 'Option',
+			path: 'fp-ts/lib/Option',
+		},
+		{
+			name: 'createOptionFromNullable',
+			path: 'io-ts-types',
+		},
+	]);
 
 	return file(
 		`${name}.ts`,
 		`
-		import { Option } from 'fp-ts/lib/Option';
-		import { createOptionFromNullable } from 'io-ts-types';
 		import * as t from 'io-ts';
 		${dependencies}
 		
@@ -70,13 +86,22 @@ const serializeDefinition = (name: string, definition: TSchemaObject): TFile => 
 const serializePathGroup = (name: string, group: Record<string, TPathItemObject>): TFile => {
 	const serializedType = foldSerialized(serializeDictionary(group, serializePathType));
 	const serializedIO = foldSerialized(serializeDictionary(group, serializePathIO));
-	const dependencies = serializeDependencies([...serializedType.dependencies, ...serializedIO.dependencies]);
+	const dependencies = serializeDependencies([
+		...serializedType.dependencies,
+		...serializedIO.dependencies,
+		{
+			name: 'asks',
+			path: 'fp-ts/lib/Reader',
+		},
+		{
+			name: 'TAPIClient',
+			path: '../client/client',
+		},
+	]);
 	const groupName = name || 'Unknown';
 	return file(
 		`${groupName}.ts`,
 		`
-			import { asks } from 'fp-ts/lib/Reader';
-			import { TAPIClient } from '../client/client';
 			${dependencies}
 		
 			export type ${groupName} = {
@@ -115,13 +140,13 @@ const serializePathIO = (path: string, item: TPathItemObject): TSerialized => {
 
 // string serializers
 
-const serializeSchemaObjectType = (schema: TSchemaObject): TSerialized => {
+const serializeSchemaObjectType = (schema: TSchemaObject, relative: string): TSerialized => {
 	switch (schema.type) {
 		case undefined: {
 			const reference = `${schema.$ref.replace(/^#\/definitions\//g, '')}`;
 			return {
 				content: reference,
-				dependencies: [{ path: `./${reference}`, name: reference }],
+				dependencies: [{ path: `${relative}${reference}`, name: reference }],
 			};
 		}
 		case 'string': {
@@ -144,14 +169,16 @@ const serializeSchemaObjectType = (schema: TSchemaObject): TSerialized => {
 			};
 		}
 		case 'array': {
-			const result = serializeSchemaObjectType(schema.items);
+			const result = serializeSchemaObjectType(schema.items, relative);
 			return {
 				content: `Array<${result.content}>`,
 				dependencies: result.dependencies,
 			};
 		}
 		case 'object': {
-			const additional = schema.additionalProperties.map(serializeAdditionalProperties);
+			const additional = schema.additionalProperties.map(additionalProperties =>
+				serializeAdditionalProperties(additionalProperties, relative),
+			);
 			const serialized = additional.orElse(() =>
 				schema.properties.map(properties => {
 					const fields = serializeDictionary(properties, (name, value) => {
@@ -159,6 +186,7 @@ const serializeSchemaObjectType = (schema: TSchemaObject): TSerialized => {
 							name,
 							value,
 							schema.required.map(required => required.includes(name)).getOrElse(false),
+							relative,
 						);
 						return {
 							content: `${serialized.content};`,
@@ -244,8 +272,8 @@ const serializeIOSchemaObjectType = (schema: TSchemaObject): TSerialized => {
 	}
 };
 
-const serializeField = (name: string, schema: TSchemaObject, isRequired: boolean): TSerialized => {
-	const serialized = serializeSchemaObjectType(schema);
+const serializeField = (name: string, schema: TSchemaObject, isRequired: boolean, relative: string): TSerialized => {
+	const serialized = serializeSchemaObjectType(schema, relative);
 	return {
 		content: isRequired ? `${name}: ${serialized.content}` : `${name}: Option<${serialized.content}>`,
 		dependencies: serialized.dependencies,
@@ -270,8 +298,8 @@ const serializeIOEnum = (enumValue: Array<string | number | boolean>): string =>
 	return `t.union([${serializedValue}])`;
 };
 
-const serializeAdditionalProperties = (properties: TSchemaObject): TSerialized => {
-	const serialized = serializeSchemaObjectType(properties);
+const serializeAdditionalProperties = (properties: TSchemaObject, relative: string): TSerialized => {
+	const serialized = serializeSchemaObjectType(properties, relative);
 	return {
 		content: `{ [key: string]: ${serialized.content} }`,
 		dependencies: serialized.dependencies,
@@ -301,21 +329,43 @@ const serializeOperationObjectType = (
 	const serializedQuery = serializeQueryParameters(parametersInQuery);
 
 	const args = catOptions([serializedParams, serializedQuery]).join(', ');
+	const serializedResponses = serializeOperationResponsesType(operation.responses);
 	return {
 		content: `
 			/**
 			 ${lines.map(line => `* ${line}`).join('\n')}
 			 */
-			readonly ${getOperationName(operation, method)}: (${args}) => LiveData<Error, any>;
+			readonly ${getOperationName(operation, method)}: (${args}) => LiveData<Error, ${serializedResponses.content}>;
 		`,
 		dependencies: [
 			{
 				name: 'LiveData',
 				path: '@devexperts/rx-utils/dist/rd/live-data.utils',
 			},
+			...serializedResponses.dependencies,
 		],
 	};
 };
+
+const serializeOperationResponsesType = (responses: TResponsesObject): TSerialized => {
+	const serialized = catOptions(
+		['200', 'default'].map(code =>
+			lookup(code, responses).map(response => serializeOperationResponseType(code, response)),
+		),
+	);
+	const content = uniq(setoidString)(serialized.map(serialized => serialized.content)).join(' | ') || 'void';
+	const dependencies = foldDependencies(serialized.map(serialized => serialized.dependencies));
+	return {
+		content: content,
+		dependencies,
+	};
+};
+
+const serializeOperationResponseType = (code: string, response: TResponseObject): TSerialized =>
+	response.schema.map(schema => serializeSchemaObjectType(schema, '../definitions/')).getOrElse({
+		content: 'void',
+		dependencies: [],
+	});
 
 const serializeOperationObjectIO = (
 	path: string,
@@ -416,19 +466,11 @@ const getIOName = (name: string): string => `${name}IO`;
 const getOperationName = (operation: TOperationObject, httpMethod: string) =>
 	operation.operationId.getOrElse(httpMethod);
 
-const setoidDependencyPath: Setoid<TDepdendency> = contramap(dependency => dependency.path, setoidString);
-const setoidDependencyName: Setoid<TDepdendency> = contramap(dependency => dependency.name, setoidString);
-const groupDependenciesByPath = group(setoidDependencyPath);
-const uniqueDependencyPathName = uniq(setoidDependencyName);
-const serializeDependencies = (dependencies: TDepdendency[]): string => {
-	const groupped = groupDependenciesByPath(dependencies);
-	return groupped
-		.map(groupped => {
-			const names = uniqueDependencyPathName(groupped.toArray()).map(dependency => dependency.name);
-			return `import { ${names.join(',')} } from '${groupped.head.path}';`;
-		})
-		.join('');
-};
+const serializeDependencies = (dependencies: TDepdendency[]): string =>
+	collect(groupBy(dependencies, dependency => dependency.path), (key, dependencies) => {
+		const names = uniqString(dependencies.toArray().map(dependency => dependency.name));
+		return `import { ${names.join(',')} } from '${dependencies.head.path}';`;
+	}).join('');
 
 const client = `
 	import { LiveData } from '@devexperts/rx-utils/dist/rd/live-data.utils';

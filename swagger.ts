@@ -528,11 +528,8 @@ export const ResponseObject: t.Type<TResponseObject, mixed> = t.type({
 	examples: createOptionFromNullable(ExampleObject),
 });
 
-export type TResponsesObject = TDictionary<TResponseObject | TReferenceObject>;
-export const ResponsesObject: t.Type<TResponsesObject, mixed> = t.dictionary(
-	t.string,
-	t.union([ResponseObject, ReferenceObject]),
-);
+export type TResponsesObject = TDictionary<TResponseObject>;
+export const ResponsesObject: t.Type<TResponsesObject, mixed> = t.dictionary(t.string, ResponseObject);
 
 export type TSecurityRequirementObject = TDictionary<string[]>;
 export const SecurityRequirementObject: t.Type<TSecurityRequirementObject, mixed> = t.dictionary(
