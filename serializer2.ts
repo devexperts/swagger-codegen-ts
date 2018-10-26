@@ -27,7 +27,6 @@ type TSerialized = {
 	content: string;
 	dependencies: TDepdendency[];
 };
-export type TMethod = 'GET' | 'POST';
 
 const monoidDependencies = getArrayMonoid<TDepdendency>();
 const monoidSerialized = getRecordMonoid<TSerialized>({
@@ -296,7 +295,8 @@ const serializeOperationObjectType = (
 	const parametersInQuery = getOperationParametersInQuery(operation);
 	const paramsSummary = parametersInPath.map(serializePathParameterDescription);
 	const querySummary = serializeQueryParametersDescription(parametersInQuery);
-	const lines = array.compact([operation.summary, ...paramsSummary.map(some), querySummary]);
+	const deprecated = operation.deprecated.map(deprecated => `@deprecated`);
+	const lines = array.compact([deprecated, operation.summary, ...paramsSummary.map(some), querySummary]);
 	const serializedParams = serializePathParameters(parametersInPath);
 	const serializedQuery = serializeQueryParameters(parametersInQuery);
 
@@ -343,7 +343,12 @@ const serializeOperationObjectIO = (
 				${query}
 			}),
 		`,
-		dependencies: [],
+		dependencies: [
+			{
+				name: 'map',
+				path: 'rxjs/operators',
+			},
+		],
 	};
 };
 

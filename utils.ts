@@ -43,6 +43,7 @@ export const groupPathsByTag = (paths: TPathsObject): TDictionary<TDictionary<TP
 		const tag = getTagsFromPath(path)
 			.join('')
 			.replace(/\s/g, '');
+
 		result[tag] = {
 			...(result[tag] || {}),
 			[key]: path,
