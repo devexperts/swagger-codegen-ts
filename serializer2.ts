@@ -274,10 +274,11 @@ const serializeOperationObjectType = (
 	operation: TOperationObject,
 ): TSerialized => {
 	const parametersInPath = getOperationParametersInPath(operation);
-	const paramsSummary = parametersInPath.map(serializePathParameterDescription);
-	const serializedParams = serializePathParameters(parametersInPath);
-	const lines = [...array.compact([operation.summary]), ...paramsSummary];
 	const parametersInQuery = getOperationParametersInQuery(operation);
+	const paramsSummary = parametersInPath.map(serializePathParameterDescription);
+	const querySummary = serializeQueryParametersDescription(parametersInQuery);
+	const lines = array.compact([operation.summary, ...paramsSummary.map(some), querySummary]);
+	const serializedParams = serializePathParameters(parametersInPath);
 	const serializedQuery = serializeQueryParameters(parametersInQuery);
 
 	const args = catOptions([serializedParams, serializedQuery]).join(', ');
@@ -306,19 +307,22 @@ const serializePathParameterDescription = (parameter: TPathParameterObject): str
 		.map(d => '- ' + d)
 		.toUndefined()}`;
 
+const serializeQueryParameter = (parameter: TQueryParameterObject): string => {
+	const isRequired = parameter.required.getOrElse(false);
+	return `${parameter.name}${isRequired ? '' : '?'}: ${serializeParameterType(parameter)}`;
+};
 const serializeQueryParameters = (parameters: TQueryParameterObject[]): Option<string> => {
 	if (parameters.length === 0) {
 		return none;
 	}
-	const isRequired = parameters.some(p => p.required.isSome() && p.required.value);
-	const serializedParameters = parameters.map(serializeQueryParameterType);
+	const isRequired = hasRequiredQueryParameters(parameters);
+	const serializedParameters = parameters.map(serializeQueryParameter);
 	return some(`query${isRequired ? '' : '?'}: { ${serializedParameters.join(';')} }`);
 };
-
-const serializeQueryParameterType = (parameter: TQueryParameterObject): string => {
-	const isRequired = parameter.required.getOrElse(false);
-	return `${parameter.name}${isRequired ? '' : '?'}: ${serializeParameterType(parameter)}`;
-};
+const serializeQueryParametersDescription = (parameters: TQueryParameterObject[]): Option<string> =>
+	parameters.length === 0
+		? none
+		: some(hasRequiredQueryParameters(parameters) ? `@param { object } query` : `@param { object } [query]`);
 
 const serializeParameterType = (parameter: TPathParameterObject | TQueryParameterObject): string => {
 	switch (parameter.type) {
@@ -393,3 +397,6 @@ const client = `
 		readonly put: <R>(request: TAPIRequest) => LiveData<E, R>;
 	};
 `;
+
+const hasRequiredQueryParameters = (parameters: TQueryParameterObject[]): boolean =>
+	parameters.some(p => p.required.isSome() && p.required.value);
