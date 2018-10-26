@@ -278,9 +278,9 @@ const serializeOperationObjectType = (
 	const serializedParams = serializePathParameters(parametersInPath);
 	const lines = [...array.compact([operation.summary]), ...paramsSummary];
 	const parametersInQuery = getOperationParametersInQuery(operation);
-	const serializedQuery = serializeQueryParametersType(parametersInQuery);
+	const serializedQuery = serializeQueryParameters(parametersInQuery);
 
-	const args = catOptions([serializedParams, serializedQuery.map(query => query.content)]).join(', ');
+	const args = catOptions([serializedParams, serializedQuery]).join(', ');
 	return {
 		content: `
 			/**
@@ -298,29 +298,29 @@ const serializeOperationObjectType = (
 };
 
 const serializePathParameter = (parameter: TPathParameterObject): string =>
-	`${camelize(parameter.name)}: ${serializePathParameterType(parameter)}`;
+	`${camelize(parameter.name)}: ${serializeParameterType(parameter)}`;
 const serializePathParameters = (parameters: TPathParameterObject[]): Option<string> =>
 	parameters.length === 0 ? none : some(parameters.map(serializePathParameter).join(', '));
-const serializeQueryParametersType = (parameters: TQueryParameterObject[]): Option<TSerialized> => {
+const serializePathParameterDescription = (parameter: TPathParameterObject): string =>
+	`@param {${serializeParameterType(parameter)}} ${camelize(parameter.name)} ${parameter.description
+		.map(d => '- ' + d)
+		.toUndefined()}`;
+
+const serializeQueryParameters = (parameters: TQueryParameterObject[]): Option<string> => {
 	if (parameters.length === 0) {
 		return none;
 	}
 	const isRequired = parameters.some(p => p.required.isSome() && p.required.value);
-	return some(
-		serializeField(
-			'query',
-			{ type: 'object', properties: none, required: none, additionalProperties: none },
-			isRequired,
-		),
-	);
+	const serializedParameters = parameters.map(serializeQueryParameterType);
+	return some(`query${isRequired ? '' : '?'}: { ${serializedParameters.join(';')} }`);
 };
 
-const serializePathParameterDescription = (parameter: TPathParameterObject): string =>
-	`@param {${serializePathParameterType(parameter)}} ${camelize(parameter.name)} ${parameter.description
-		.map(d => '- ' + d)
-		.toUndefined()}`;
+const serializeQueryParameterType = (parameter: TQueryParameterObject): string => {
+	const isRequired = parameter.required.getOrElse(false);
+	return `${parameter.name}${isRequired ? '' : '?'}: ${serializeParameterType(parameter)}`;
+};
 
-const serializePathParameterType = (parameter: TPathParameterObject): string => {
+const serializeParameterType = (parameter: TPathParameterObject | TQueryParameterObject): string => {
 	switch (parameter.type) {
 		case 'string':
 		case 'boolean':
