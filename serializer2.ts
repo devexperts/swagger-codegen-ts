@@ -69,21 +69,28 @@ const serializeDefinition = (name: string, definition: TSchemaObject): TFile => 
 };
 
 const serializePathGroup = (name: string, group: Record<string, TPathItemObject>): TFile => {
-	const serialized = foldSerialized(serializeDictionary(group, serializePath));
-	const dependencies = serializeDependencies(serialized.dependencies);
+	const serializedType = foldSerialized(serializeDictionary(group, serializePathType));
+	const serializedIO = foldSerialized(serializeDictionary(group, serializePathIO));
+	const dependencies = serializeDependencies([...serializedType.dependencies, ...serializedIO.dependencies]);
 	const groupName = name || 'Unknown';
 	return file(
 		`${groupName}.ts`,
 		`
+			import { asks } from 'fp-ts/lib/Reader';
+			import { TAPIClient } from '../client/client';
 			${dependencies}
 		
 			export type ${groupName} = {
-				${serialized.content}
-			}
+				${serializedType.content}
+			};
+			
+			export const ${camelize(groupName, true)} = asks((e: { apiClient: TAPIClient }): ${groupName} => ({
+				${serializedIO.content}
+			}));
 		`,
 	);
 };
-const serializePath = (path: string, item: TPathItemObject): TSerialized => {
+const serializePathType = (path: string, item: TPathItemObject): TSerialized => {
 	const get = item.get.map(operation => serializeOperationObjectType(path, 'GET', operation));
 	const put = item.put.map(operation => serializeOperationObjectType(path, 'PUT', operation));
 	const post = item.post.map(operation => serializeOperationObjectType(path, 'POST', operation));
@@ -91,6 +98,18 @@ const serializePath = (path: string, item: TPathItemObject): TSerialized => {
 	const options = item.options.map(operation => serializeOperationObjectType(path, 'OPTIONS', operation));
 	const head = item.head.map(operation => serializeOperationObjectType(path, 'HEAD', operation));
 	const patch = item.patch.map(operation => serializeOperationObjectType(path, 'PATCH', operation));
+	const operations = catOptions([get, put, post, remove, options, head, patch]);
+	return foldSerialized(operations);
+};
+
+const serializePathIO = (path: string, item: TPathItemObject): TSerialized => {
+	const get = item.get.map(operation => serializeOperationObjectIO(path, 'GET', operation));
+	const put = item.put.map(operation => serializeOperationObjectIO(path, 'PUT', operation));
+	const post = item.post.map(operation => serializeOperationObjectIO(path, 'POST', operation));
+	const remove = item['delete'].map(operation => serializeOperationObjectIO(path, 'DELETE', operation));
+	const options = item.options.map(operation => serializeOperationObjectIO(path, 'OPTIONS', operation));
+	const head = item.head.map(operation => serializeOperationObjectIO(path, 'HEAD', operation));
+	const patch = item.patch.map(operation => serializeOperationObjectIO(path, 'PATCH', operation));
 	const operations = catOptions([get, put, post, remove, options, head, patch]);
 	return foldSerialized(operations);
 };
@@ -298,12 +317,42 @@ const serializeOperationObjectType = (
 	};
 };
 
+const serializeOperationObjectIO = (
+	path: string,
+	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS',
+	operation: TOperationObject,
+): TSerialized => {
+	const parametersInPath = getOperationParametersInPath(operation);
+	const parametersInQuery = getOperationParametersInQuery(operation);
+	const serializedParametersInPath =
+		parametersInPath.length === 0 ? none : some(parametersInPath.map(param => param.name).join(','));
+	const serializedParametersInQuery = parametersInQuery.length === 0 ? none : some('query');
+
+	const args = catOptions([serializedParametersInPath, serializedParametersInQuery]).join(',');
+
+	const url = parametersInPath.reduce(
+		(acc, p) => acc.replace(`{${p.name}}`, `\$\{${camelize(p.name)}\}`),
+		`\`${path}\``,
+	);
+	const query = serializedParametersInQuery.map(query => `query: ${query}`).getOrElse('');
+	return {
+		content: `
+			${getOperationName(operation, method)}: (${args}) => e.apiClient.request({
+				url: ${url},
+				method: '${method}',
+				${query}
+			}),
+		`,
+		dependencies: [],
+	};
+};
+
 const serializePathParameter = (parameter: TPathParameterObject): string =>
-	`${camelize(parameter.name)}: ${serializeParameterType(parameter)}`;
+	`${parameter.name}: ${serializeParameterType(parameter)}`;
 const serializePathParameters = (parameters: TPathParameterObject[]): Option<string> =>
 	parameters.length === 0 ? none : some(parameters.map(serializePathParameter).join(', '));
 const serializePathParameterDescription = (parameter: TPathParameterObject): string =>
-	`@param {${serializeParameterType(parameter)}} ${camelize(parameter.name)} ${parameter.description
+	`@param {${serializeParameterType(parameter)}} ${parameter.name} ${parameter.description
 		.map(d => '- ' + d)
 		.toUndefined()}`;
 
@@ -389,12 +438,8 @@ const client = `
 		method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 	};
 	
-	export type TAPIClient<E> = {
-		readonly request: <R>(request: TFullAPIRequest) => LiveData<E, R>;
-		readonly get: <R>(request: TAPIRequest) => LiveData<E, R>;
-		readonly post: <R>(request: TAPIRequest) => LiveData<E, R>;
-		readonly remove: <R>(request: TAPIRequest) => LiveData<E, R>;
-		readonly put: <R>(request: TAPIRequest) => LiveData<E, R>;
+	export type TAPIClient = {
+		readonly request: (request: TFullAPIRequest) => LiveData<unknown, unknown>;
 	};
 `;
 
