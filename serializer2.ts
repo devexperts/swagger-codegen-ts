@@ -136,13 +136,17 @@ const serializeSchemaObjectType = (schema: TSchemaObject): TSerialized => {
 			const additional = schema.additionalProperties.map(serializeAdditionalProperties);
 			const serialized = additional.orElse(() =>
 				schema.properties.map(properties => {
-					const fields = serializeDictionary(properties, (name, value) =>
-						serializeField(
+					const fields = serializeDictionary(properties, (name, value) => {
+						const serialized = serializeField(
 							name,
 							value,
 							schema.required.map(required => required.includes(name)).getOrElse(false),
-						),
-					);
+						);
+						return {
+							content: `${serialized.content};`,
+							dependencies: serialized.dependencies,
+						};
+					});
 					const content = `{ ${fields.map(field => field.content).join('')} }`;
 					const dependencies = flatten(fields.map(field => field.dependencies || []));
 					return {
@@ -225,7 +229,7 @@ const serializeIOSchemaObjectType = (schema: TSchemaObject): TSerialized => {
 const serializeField = (name: string, schema: TSchemaObject, isRequired: boolean): TSerialized => {
 	const serialized = serializeSchemaObjectType(schema);
 	return {
-		content: isRequired ? `${name}: ${serialized.content};` : `${name}: Option<${serialized.content}>;`,
+		content: isRequired ? `${name}: ${serialized.content}` : `${name}: Option<${serialized.content}>`,
 		dependencies: serialized.dependencies,
 	};
 };
@@ -276,7 +280,7 @@ const serializeOperationObjectType = (
 	const parametersInQuery = getOperationParametersInQuery(operation);
 	const serializedQuery = serializeQueryParametersType(parametersInQuery);
 
-	const args = catOptions([serializedParams, serializedQuery]).join(', ');
+	const args = catOptions([serializedParams, serializedQuery.map(query => query.content)]).join(', ');
 	return {
 		content: `
 			/**
@@ -297,12 +301,18 @@ const serializePathParameter = (parameter: TPathParameterObject): string =>
 	`${camelize(parameter.name)}: ${serializePathParameterType(parameter)}`;
 const serializePathParameters = (parameters: TPathParameterObject[]): Option<string> =>
 	parameters.length === 0 ? none : some(parameters.map(serializePathParameter).join(', '));
-const serializeQueryParametersType = (parameters: TQueryParameterObject[]): Option<string> => {
+const serializeQueryParametersType = (parameters: TQueryParameterObject[]): Option<TSerialized> => {
 	if (parameters.length === 0) {
 		return none;
 	}
 	const isRequired = parameters.some(p => p.required.isSome() && p.required.value);
-	return some(`query${isRequired ? '?' : ''}: {}`);
+	return some(
+		serializeField(
+			'query',
+			{ type: 'object', properties: none, required: none, additionalProperties: none },
+			isRequired,
+		),
+	);
 };
 
 const serializePathParameterDescription = (parameter: TPathParameterObject): string =>
