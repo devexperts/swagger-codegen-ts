@@ -7,6 +7,7 @@ import {
 	TParameterObject,
 	TPathParameterObject,
 	TReferenceObject,
+	TBodyParameterObject,
 } from './swagger';
 import { tuple } from 'fp-ts/lib/function';
 import { setoidString } from 'fp-ts/lib/Setoid';
@@ -76,3 +77,12 @@ const isOperationQueryParameterObject = (
 	isOperationNonReferenceParameterObject(parameter) && isQueryParameterObject(parameter);
 export const getOperationParametersInQuery = (operation: TOperationObject): TQueryParameterObject[] =>
 	operation.parameters.map(parameters => parameters.filter(isOperationQueryParameterObject)).getOrElse([]);
+
+const isBodyParameterObject = (parameter: TParameterObject): parameter is TBodyParameterObject =>
+	parameter.in === 'body';
+const isOperationBodyParameterObject = (
+	parameter: TParameterObject | TReferenceObject,
+): parameter is TBodyParameterObject =>
+	isOperationNonReferenceParameterObject(parameter) && isBodyParameterObject(parameter);
+export const getOperationParametersInBody = (operation: TOperationObject): TBodyParameterObject[] =>
+	operation.parameters.map(parameters => parameters.filter(isOperationBodyParameterObject)).getOrElse([]);

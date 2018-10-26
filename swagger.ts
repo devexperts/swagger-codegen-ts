@@ -288,8 +288,6 @@ export const NonArrayItemsObject: t.Type<TNonArrayItemsObject, mixed> = t.tagged
 
 //#endregion
 
-//#region Path Parameter Object
-
 export type TBaseParameterObjectProps = {
 	name: string;
 	description: Option<string>;
@@ -299,6 +297,8 @@ const BaseParameterObjectProps = {
 	description: stringOption,
 };
 (): t.Type<TBaseParameterObjectProps, mixed> => t.type(BaseParameterObjectProps); //integrity
+
+//#region Path Parameter Object
 
 export type TBasePathParameterObjectProps = TBaseParameterObjectProps & {
 	in: 'path';
@@ -473,18 +473,24 @@ export const FormDataParameterObject: t.Tagged<'in', TFormDataParameterObject, m
 	description: stringOption,
 	required: booleanOption,
 });
-export type TBodyParameterObject = {
-	name: string;
+
+//#region Body Parameter Object
+
+export type TBodyParameterObject = TBaseParameterObjectProps & {
 	in: 'body';
-	description: Option<string>;
 	required: Option<boolean>;
+	schema: TSchemaObject;
 };
+
 export const BodyParameterObject: t.Tagged<'in', TBodyParameterObject, mixed> = t.type({
-	name: t.string,
+	...BaseParameterObjectProps,
 	in: t.literal('body'),
-	description: stringOption,
 	required: booleanOption,
+	schema: SchemaObject,
 });
+
+//#endregion
+
 export type TParameterObject =
 	| TPathParameterObject
 	| TQueryParameterObject
