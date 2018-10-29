@@ -234,7 +234,7 @@ const serializeOperationObject = (
 	const bodyParamsSummary = serializeBodyParametersDescription(bodyParameters);
 
 	const deprecated = operation.deprecated.map(deprecated => `@deprecated`);
-	const lines = array.compact([
+	const lines = catOptions([
 		deprecated,
 		operation.summary,
 		...pathParamsSummary.map(some),
@@ -242,7 +242,10 @@ const serializeOperationObject = (
 		queryParamsSummary,
 	]);
 
-	const serializedPathParams = pathParameters.map(serializePathParameter);
+	const serializedPathParams = pathParameters.map(p => ({
+		...serializePathParameter(p),
+		name: p.name,
+	}));
 	const serializedQueryParams = serializeQueryParameters(queryParameters);
 	const serializedBodyParams = serializeBodyParameters(bodyParameters, relative);
 
@@ -262,10 +265,10 @@ const serializeOperationObject = (
 		',',
 	);
 
-	const serializedResponses = serializeOperationResponses(operation.responses, relative);
-	const url = pathParameters.reduce((acc, p) => acc.replace(`{${p.name}}`, `\$\{${p.name}\}`), `\`${path}\``);
+	const url = serializedPathParams.reduce((acc, p) => acc.replace(`{${p.name}}`, `\$\{${p.io}\}`), `\`${path}\``);
 	const query = serializedQueryParameters.map(query => `query: ${query},`).getOrElse('');
 	const body = serializedBodyParameters.map(body => `body: ${body},`).getOrElse('');
+	const serializedResponses = serializeOperationResponses(operation.responses, relative);
 
 	const type = `
 		/**
@@ -336,7 +339,7 @@ const serializePathParameter = (parameter: TPathParameterObject): TSerialized =>
 	const serializedParameterType = serializeParameterType(parameter);
 	return serialized(
 		`${parameter.name}: ${serializedParameterType.type}`,
-		`${serializedParameterType.io}.decode(${parameter.name})`,
+		`${serializedParameterType.io}.encode(${parameter.name})`,
 	);
 };
 
