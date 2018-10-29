@@ -170,7 +170,7 @@ const serializeSchemaObjectType = (schema: TSchemaObject, relative: string): TSe
 		}
 		case 'array': {
 			const result = serializeSchemaObjectType(schema.items, relative);
-			return serialized(`Array<${result.type}>`, `t.array(${result.io})`);
+			return serialized(`Array<${result.type}>`, `t.array(${result.io})`, result.dependencies);
 		}
 		case 'object': {
 			return schema.additionalProperties
@@ -251,11 +251,13 @@ const serializeOperationObject = (
 	const serializedQueryParameters = queryParameters.length === 0 ? none : some('query');
 	const serializedBodyParameters = bodyParameters.length === 0 ? none : some('body');
 
-	const argsType = catOptions([
-		serializedPathParams.length === 0 ? none : some(serializedPathParams.map(param => param.type).join(',')),
-		serializedBodyParams.map(parameters => parameters.type),
-		serializedQueryParams.type === '' ? none : some(serializedQueryParams.type),
-	]).join(', ');
+	const argsType = [
+		...serializedPathParams.map(param => param.type),
+		catOptions([
+			serializedBodyParams.map(parameters => parameters.type),
+			serializedQueryParams.type === '' ? none : some(serializedQueryParams.type),
+		]),
+	].join(', ');
 	const argsIO = catOptions([serializedPathParameters, serializedBodyParameters, serializedQueryParameters]).join(
 		',',
 	);
