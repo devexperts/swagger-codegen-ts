@@ -172,7 +172,7 @@ const serializeSchemaObjectType = (schema: TSchemaObject, relative: string): TSe
 		case 'number': {
 			return {
 				type: 'number',
-				io: 't.nubmer',
+				io: 't.number',
 				dependencies: emptyArray,
 			};
 		}
@@ -284,7 +284,7 @@ const serializeOperationObject = (
 		pathParameters.length === 0 ? none : some(pathParameters.map(param => param.name).join(','));
 	const serializedQueryParameters = queryParameters.length === 0 ? none : some('query');
 	const serializedBodyParameters = bodyParameters.length === 0 ? none : some('body');
-	
+
 	const args: TSerialized = {
 		type: catOptions([
 			serializedPathParams.length === 0 ? none : some(serializedPathParams.map(param => param.type).join(',')),
