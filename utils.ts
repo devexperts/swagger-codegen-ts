@@ -11,7 +11,6 @@ import {
 } from './swagger';
 import { tuple } from 'fp-ts/lib/function';
 import { setoidString } from 'fp-ts/lib/Setoid';
-import { Option } from './node_modules/fp-ts/lib/Option';
 import { TQueryParameterObject } from './swagger';
 
 export const getOperationsFromPath = (path: TPathItemObject): TDictionary<TOperationObject> => {
