@@ -10,7 +10,7 @@
     "build": "tsc"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MPL-2.0",
   "dependencies": {
     "@devexperts/utils": "^0.12.6",
     "@types/fs-extra": "^5.0.4",
