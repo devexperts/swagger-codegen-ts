@@ -372,7 +372,7 @@ const serializeQueryParameter = (parameter: TQueryParameterObject): TSerializedP
 	return serializedParameter(
 		parameter.name,
 		serializedRequired.type,
-		`${parameter.name}: ${serializedParameterType.io}`,
+		serializedRequired.io,
 		serializedParameterType.isRequired || isRequired,
 		[...serializedParameterType.dependencies, ...serializedRequired.dependencies],
 	);
@@ -459,7 +459,7 @@ const serializeParameters = (
 	return serializedParameter(
 		intercalated.name,
 		`{ ${intercalated.type} }`,
-		't.any',
+		`t.type({ ${intercalated.io} })`,
 		intercalated.isRequired,
 		dependencies,
 	);
@@ -564,8 +564,8 @@ const hasRequiredParameters = (parameters: Array<TQueryParameterObject | TBodyPa
 
 const serializeRequired = (name: string, type: string, io: string, isRequired: boolean): TSerializedType =>
 	isRequired
-		? serializedType(`${name}: ${type}`, `${name}: ${type}`)
-		: serializedType(`${name}?: ${type}`, `${name}?: ${type}`, [
+		? serializedType(`${name}: ${type}`, `${name}: ${io}`)
+		: serializedType(`${name}?: ${type}`, `${name}?: createOptionFromNullable(${io})`, [
 				dependency('createOptionFromNullable', 'io-ts-types'),
 		  ]);
 
@@ -579,13 +579,6 @@ const serializeRequiredParameter = (
 	name,
 	isRequired,
 });
-
-// const serializeRequiredParameter2 = (name: string, parameter: TSerializedParameter): TSerializedParameter => {
-//
-// 	const type = serializeRequiredParameter(parameter.name, parameter.type, parameter.isRequired);
-// 	const io = serializeRequiredParameter(parameter.name, parameter.io, parameter.isRequired);
-// 	return serializedParameter(name, type.type, io.io, type.isRequired || type.)
-// }
 
 const serializeJSDOC = (lines: string[]): string =>
 	lines.length === 0
