@@ -339,7 +339,7 @@ const serializeOperationResponses = (responses: TResponsesObject, relative: stri
 
 	return serializedType(
 		combined.type,
-		serializedType.length > 1 ? `t.union([${combined.io}])` : combined.io,
+		serializedResponses.length > 1 ? `t.union([${combined.io}])` : combined.io,
 		combined.dependencies,
 	);
 };
@@ -526,7 +526,10 @@ const serializeJSDOC = (lines: string[]): string =>
 	 */`;
 
 const serializeURL = (url: string, pathParameters: TSerializedPathParameter[]): string =>
-	pathParameters.reduce((acc, p) => acc.replace(`{${p.name}}`, `\$\{encodeURIComponent(${p.io})\}`), `\`${url}\``);
+	pathParameters.reduce(
+		(acc, p) => acc.replace(`{${p.name}}`, `\$\{encodeURIComponent(${p.io}.toString())\}`),
+		`\`${url}\``,
+	);
 
 const toObjectType = (serialized: TSerializedType): TSerializedType =>
 	serializedType(`{ ${serialized.type} }`, `t.type({ ${serialized.io} })`, serialized.dependencies);
