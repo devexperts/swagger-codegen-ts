@@ -13,7 +13,7 @@ import {
 	TSwaggerObject,
 } from './swagger';
 import { directory, file, TDirectory, TFile } from './fs';
-import { array, catOptions, flatten, uniq } from 'fp-ts/lib/Array';
+import { array, catOptions, uniq } from 'fp-ts/lib/Array';
 import { getRecordSetoid, Setoid, setoidString } from 'fp-ts/lib/Setoid';
 import { groupBy } from 'fp-ts/lib/NonEmptyArray';
 import {
@@ -32,8 +32,8 @@ import { identity } from 'fp-ts/lib/function';
 const EMPTY_DEPENDENCIES: TDepdendency[] = [];
 const SUCCESSFUL_CODES = ['200', 'default'];
 
-const nonEmpty = <A>(as: A[]): Option<A[]> => (as.length === 0 ? none : some(as));
 const concatIfL = <A>(condition: boolean, as: A[], a: (as: A[]) => A): A[] => (condition ? as.concat(a(as)) : as);
+const concatIf = <A>(condition: boolean, as: A[], a: A): A[] => concatIfL(condition, as, as => a);
 
 type TDepdendency = {
 	name: string;
@@ -65,23 +65,6 @@ const serializedParameter = (
 	dependencies: TDepdendency[] = EMPTY_DEPENDENCIES,
 ): TSerializedParameter => ({
 	name,
-	type,
-	io,
-	isRequired,
-	dependencies,
-});
-type TSerializedField = {
-	type: string;
-	io: string;
-	isRequired: boolean;
-	dependencies: TDepdendency[];
-};
-const serializedField = (
-	type: string,
-	io: string,
-	isRequired: boolean,
-	dependencies: TDepdendency[] = EMPTY_DEPENDENCIES,
-): TSerializedField => ({
 	type,
 	io,
 	isRequired,
@@ -130,7 +113,7 @@ const serializePaths = (paths: TPathsObject): TDirectory =>
 	directory('paths', serializeDictionary(groupPathsByTag(paths), serializePathGroup));
 
 const serializeDefinition = (name: string, definition: TSchemaObject): TFile => {
-	const serialized = serializeSchemaObjectType(definition, './');
+	const serialized = serializeSchemaObject(definition, './');
 
 	const dependencies = serializeDependencies([
 		...serialized.dependencies,
@@ -186,7 +169,7 @@ const serializePath = (path: string, item: TPathItemObject): TSerializedType => 
 	return foldSerialized(operations);
 };
 
-const serializeSchemaObjectType = (schema: TSchemaObject, relative: string): TSerializedType => {
+const serializeSchemaObject = (schema: TSchemaObject, relative: string): TSerializedType => {
 	switch (schema.type) {
 		case undefined: {
 			const type = `${schema.$ref.replace(/^#\/definitions\//g, '')}`;
@@ -207,7 +190,7 @@ const serializeSchemaObjectType = (schema: TSchemaObject, relative: string): TSe
 			return serializedType('number', 't.number');
 		}
 		case 'array': {
-			const result = serializeSchemaObjectType(schema.items, relative);
+			const result = serializeSchemaObject(schema.items, relative);
 			return serializedType(`Array<${result.type}>`, `t.array(${result.io})`, result.dependencies);
 		}
 		case 'object': {
@@ -221,7 +204,7 @@ const serializeSchemaObjectType = (schema: TSchemaObject, relative: string): TSe
 									const isRequired = schema.required
 										.map(required => required.includes(name))
 										.getOrElse(false);
-									const field = serializeSchemaObjectType(value, relative);
+									const field = serializeSchemaObject(value, relative);
 									const type = isRequired
 										? `${name}: ${field.type}`
 										: `${name}: Option<${field.type}>`;
@@ -246,7 +229,7 @@ const serializeEnum = (enumValue: Array<string | number | boolean>): TSerialized
 };
 
 const serializeAdditionalProperties = (properties: TSchemaObject, relative: string): TSerializedType => {
-	const additional = serializeSchemaObjectType(properties, relative);
+	const additional = serializeSchemaObject(properties, relative);
 	return serializedType(
 		`{ [key: string]: ${additional.type} }`,
 		`t.dictionary(t.string, ${additional.io})`,
@@ -275,9 +258,9 @@ const serializeOperationObject = (
 
 	const serializedPathParameters = pathParameters.map(serializePathParameter);
 
-	const parameters = [...queryParameters, ...bodyParameters];
-	const hasParameters = parameters.length > 0;
-	const serializedParameters = serializeParameters(queryParameters, bodyParameters, relative);
+	const hasQueryParameters = queryParameters.length > 0;
+	const hasBodyParameters = bodyParameters.length > 0;
+	const hasParameters = hasQueryParameters || hasBodyParameters;
 
 	const serializedResponses = serializeOperationResponses(operation.responses, relative);
 
@@ -285,29 +268,31 @@ const serializeOperationObject = (
 
 	const url = serializeURL(path, serializedPathParameters);
 
-	const args = intercalateSerializedParameter(
-		serializedParameter(',', ',', ',', false),
-		concatIfL(hasParameters, serializedPathParameters, () =>
-			serializeRequiredParameter(
-				'parameters',
-				serializedParameters.type,
-				serializedParameters.io,
-				serializedParameters.isRequired,
-			),
-		),
-	);
+	const serializedQueryParameters = serializeQueryParameters(queryParameters);
+	const serializedBodyParameters = serializeBodyParameters(bodyParameters, relative);
+
+	const argsName = concatIf(hasParameters, serializedPathParameters.map(p => p.name), 'parameters').join(',');
+	const argsType = concatIf(
+		hasParameters,
+		serializedPathParameters.map(p => p.type),
+		`parameters: { query: ${serializedQueryParameters.type}, body: ${serializedBodyParameters.type} }`,
+	).join(',');
 
 	const type = `
 		${jsdoc}
-		readonly ${operationName}: (${args.type}) => LiveData<Error, ${serializedResponses.type}>;
+		readonly ${operationName}: (${argsType}) => LiveData<Error, ${serializedResponses.type}>;
 	`;
 
 	const io = `
-		${operationName}: (${args.name}) => {
-			${hasParameters ? `const encoded = ${serializedParameters.io}.encode(parameters)` : ''}
+		${operationName}: (${argsName}) => {
+			const query = ${hasQueryParameters ? `${serializedQueryParameters.io}.encode(parameters.query)` : 'undefined'};
+			const body = ${hasBodyParameters ? `${serializedBodyParameters.io}.encode(parameters.body)` : 'undefined'};
+		
 			return e.apiClient.request({
 				url: ${url},
 				method: '${method}',
+				body,
+				query
 			}).pipe(map(data => data.chain(value => fromEither(${
 				serializedResponses.io
 			}.decode(value).mapLeft(ResponseValiationError.create)))))
@@ -320,7 +305,8 @@ const serializeOperationObject = (
 		dependency('ResponseValiationError', '../client/client'),
 		dependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
 		...serializedResponses.dependencies,
-		...serializedParameters.dependencies,
+		...serializedQueryParameters.dependencies,
+		...serializedBodyParameters.dependencies,
 	];
 
 	return serializedType(type, io, dependencies);
@@ -350,10 +336,10 @@ const serializeOperationResponse = (
 	code: string,
 	response: TResponseObject,
 	relative: string,
-): Option<TSerializedType> => response.schema.map(schema => serializeSchemaObjectType(schema, relative));
+): Option<TSerializedType> => response.schema.map(schema => serializeSchemaObject(schema, relative));
 
 const serializePathParameter = (parameter: TPathParameterObject): TSerializedParameter => {
-	const serializedParameterType = serializeParameterType(parameter);
+	const serializedParameterType = serializeParameter(parameter);
 
 	return serializedParameter(
 		parameter.name,
@@ -365,13 +351,13 @@ const serializePathParameter = (parameter: TPathParameterObject): TSerializedPar
 };
 
 const serializePathParameterDescription = (parameter: TPathParameterObject): string =>
-	`@param { ${serializeParameterType(parameter).type} } ${parameter.name} ${parameter.description
+	`@param { ${serializeParameter(parameter).type} } ${parameter.name} ${parameter.description
 		.map(d => '- ' + d)
 		.toUndefined()}`;
 
 const serializeQueryParameter = (parameter: TQueryParameterObject): TSerializedParameter => {
 	const isRequired = parameter.required.getOrElse(false);
-	const serializedParameterType = serializeParameterType(parameter);
+	const serializedParameterType = serializeParameter(parameter);
 	const serializedRequired = serializeRequired(
 		parameter.name,
 		serializedParameterType.type,
@@ -400,7 +386,7 @@ const serializeQueryParameters = (parameters: TQueryParameterObject[]): TSeriali
 
 const serializeBodyParameter = (parameter: TBodyParameterObject, relative: string): TSerializedParameter => {
 	const isRequired = parameter.required.getOrElse(false);
-	const serializedParameterType = serializeSchemaObjectType(parameter.schema, relative);
+	const serializedParameterType = serializeSchemaObject(parameter.schema, relative);
 	const serializedRequired = serializeRequired(
 		parameter.name,
 		serializedParameterType.type,
@@ -427,43 +413,6 @@ const serializeBodyParameters = (parameters: TBodyParameterObject[], relative: s
 	);
 };
 
-const serializeParameters = (
-	query: TQueryParameterObject[],
-	body: TBodyParameterObject[],
-	relative: string,
-): TSerializedParameter => {
-	const serializedQuery = nonEmpty(query).map(serializeQueryParameters);
-	const serializedBody = nonEmpty(body).map(body => serializeBodyParameters(body, relative));
-	const intercalated = intercalateSerializedParameter(
-		serializedParameter(',', ',', ',', false),
-		catOptions([
-			serializedQuery.map(serializedQuery =>
-				serializeRequiredParameter(
-					serializedQuery.name,
-					serializedQuery.type,
-					serializedQuery.io,
-					serializedQuery.isRequired,
-				),
-			),
-			serializedBody.map(serializedBody =>
-				serializeRequiredParameter(
-					serializedBody.name,
-					serializedBody.type,
-					serializedBody.io,
-					serializedBody.isRequired,
-				),
-			),
-		]),
-	);
-	const dependencies = flatten(
-		catOptions([
-			serializedQuery.map(serializedQuery => serializedQuery.dependencies),
-			serializedBody.map(serializedBody => serializedBody.dependencies),
-		]),
-	).concat(intercalated.dependencies);
-	const object = toObjectType(intercalated);
-	return serializedParameter(intercalated.name, object.type, object.io, intercalated.isRequired, dependencies);
-};
 const serializeParametersDescription = (
 	query: TQueryParameterObject[],
 	body: TBodyParameterObject[],
@@ -474,12 +423,12 @@ const serializeParametersDescription = (
 		: some(hasRequiredParameters(parameters) ? '@param { object } parameters' : '@param { object } [parameters]');
 };
 
-const serializeParameterType = (parameter: TPathParameterObject | TQueryParameterObject): TSerializedParameter => {
+const serializeParameter = (parameter: TPathParameterObject | TQueryParameterObject): TSerializedParameter => {
 	const isRequired =
 		typeof parameter.required === 'boolean' ? parameter.required : parameter.required.getOrElse(false);
 	switch (parameter.type) {
 		case 'array': {
-			const serializedArrayItems = serializeNonArrayItemsObjectType(parameter.items);
+			const serializedArrayItems = serializeNonArrayItemsObject(parameter.items);
 			return serializedParameter(
 				parameter.name,
 				`Array<${serializedArrayItems.type}>`,
@@ -501,7 +450,7 @@ const serializeParameterType = (parameter: TPathParameterObject | TQueryParamete
 	}
 };
 
-const serializeNonArrayItemsObjectType = (items: TNonArrayItemsObject): TSerializedType => {
+const serializeNonArrayItemsObject = (items: TNonArrayItemsObject): TSerializedType => {
 	switch (items.type) {
 		case 'string': {
 			return serializedType('string', 't.string');
@@ -559,41 +508,15 @@ const client = `
 	}
 `;
 
-const typeToField = (name: string, serialized: TSerializedType, isRequired: boolean): TSerializedField =>
-	isRequired
-		? serializedField(`${name}: ${serialized.type}`, `${name}: ${serialized.io}`, isRequired)
-		: serializedField(
-				`${name}?: ${serialized.type}`,
-				`${name}?: createOptionFromNullable(${serialized.io})`,
-				isRequired,
-				[...serialized.dependencies, dependency('createOptionFromNullable', 'io-ts-types')],
-		  );
-const parameterToField = (parameter: TSerializedParameter): TSerializedField =>
-	typeToField(parameter.name, parameter, parameter.isRequired);
-
-const fieldToParameter = (name: string, field: TSerializedField): TSerializedParameter =>
-	serializedParameter(name, field.type, field.io, field.isRequired, field.dependencies);
-
 const hasRequiredParameters = (parameters: Array<TQueryParameterObject | TBodyParameterObject>): boolean =>
 	parameters.some(p => p.required.exists(identity));
 
 const serializeRequired = (name: string, type: string, io: string, isRequired: boolean): TSerializedType =>
 	isRequired
 		? serializedType(`${name}: ${type}`, `${name}: ${io}`)
-		: serializedType(`${name}?: ${type}`, `${name}?: createOptionFromNullable(${io})`, [
+		: serializedType(`${name}?: ${type}`, `${name}: createOptionFromNullable(${io})`, [
 				dependency('createOptionFromNullable', 'io-ts-types'),
 		  ]);
-
-const serializeRequiredParameter = (
-	name: string,
-	type: string,
-	io: string,
-	isRequired: boolean,
-): TSerializedParameter => ({
-	...serializeRequired(name, type, io, isRequired),
-	name,
-	isRequired,
-});
 
 const serializeJSDOC = (lines: string[]): string =>
 	lines.length === 0
