@@ -272,11 +272,11 @@ const serializeOperationObject = (
 	const serializedBodyParameters = serializeBodyParameters(bodyParameters, relative);
 
 	const argsName = concatIf(hasParameters, serializedPathParameters.map(p => p.name), 'parameters').join(',');
-	const argsType = concatIf(
-		hasParameters,
-		serializedPathParameters.map(p => p.type),
-		`parameters: { query: ${serializedQueryParameters.type}, body: ${serializedBodyParameters.type} }`,
-	).join(',');
+	const argsType = concatIfL(hasParameters, serializedPathParameters.map(p => p.type), () => {
+		const query = hasQueryParameters ? `query: ${serializedQueryParameters.type},` : '';
+		const body = hasBodyParameters ? `body: ${serializedBodyParameters.type},` : '';
+		return `parameters: { ${query} ${body} }`;
+	}).join(',');
 
 	const type = `
 		${jsdoc}
@@ -285,14 +285,14 @@ const serializeOperationObject = (
 
 	const io = `
 		${operationName}: (${argsName}) => {
-			const query = ${hasQueryParameters ? `${serializedQueryParameters.io}.encode(parameters.query)` : 'undefined'};
-			const body = ${hasBodyParameters ? `${serializedBodyParameters.io}.encode(parameters.body)` : 'undefined'};
+			${hasQueryParameters ? `const query = ${serializedQueryParameters.io}.encode(parameters.query);` : ''};
+			${hasBodyParameters ? `const body = ${serializedBodyParameters.io}.encode(parameters.body);` : ''}
 		
 			return e.apiClient.request({
 				url: ${url},
 				method: '${method}',
-				body,
-				query
+				${hasQueryParameters ? 'query' : ''}
+				${hasBodyParameters ? 'body' : ''}
 			}).pipe(map(data => data.chain(value => fromEither(${
 				serializedResponses.io
 			}.decode(value).mapLeft(ResponseValiationError.create)))))
