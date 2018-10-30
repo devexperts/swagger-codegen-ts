@@ -192,7 +192,23 @@ const serializeSchemaObject = (schema: TSchemaObject, relative: string): TSerial
 			]);
 		}
 		case 'string': {
-			return schema.enum.map(serializeEnum).getOrElseL(() => serializedType('string', 't.string'));
+			return schema.enum
+				.map(serializeEnum)
+				.orElse(() =>
+					schema.format.chain(format => {
+						switch (format) {
+							case 'date-time': {
+								return some(
+									serializedType('Date', 'DateFromISOString', [
+										dependency('DateFromISOString', 'io-ts-types'),
+									]),
+								);
+							}
+						}
+						return none;
+					}),
+				)
+				.getOrElseL(() => serializedType('string', 't.string'));
 		}
 		case 'boolean': {
 			return serializedType('boolean', 't.boolean');
