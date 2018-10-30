@@ -23,7 +23,7 @@ import {
 	groupPathsByTag,
 } from './utils';
 import { none, Option, some } from 'fp-ts/lib/Option';
-import { getArrayMonoid, getRecordMonoid, monoidString, fold, monoidAll, monoidAny } from 'fp-ts/lib/Monoid';
+import { getArrayMonoid, getRecordMonoid, monoidString, fold, monoidAny } from 'fp-ts/lib/Monoid';
 import { camelize } from '@devexperts/utils/dist/string/string';
 import { intercalate } from 'fp-ts/lib/Foldable2v';
 import { collect, lookup } from 'fp-ts/lib/Record';
@@ -542,4 +542,4 @@ const serializeJSDOC = (lines: string[]): string =>
 	 */`;
 
 const serializeURL = (url: string, pathParameters: TSerializedParameter[]): string =>
-	pathParameters.reduce((acc, p) => acc.replace(`{${p.name}}`, `\$\{${p.io}\}`), `\`${url}\``);
+	pathParameters.reduce((acc, p) => acc.replace(`{${p.name}}`, `\$\{encodeURIComponent(${p.io})\}`), `\`${url}\``);
