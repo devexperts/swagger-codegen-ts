@@ -393,7 +393,7 @@ const serializeBodyParameter = (parameter: TBodyParameterObject, relative: strin
 		serializedParameterType.io,
 		isRequired,
 	);
-	return serializedParameter(parameter.name, serializedRequired.type, 't.any', isRequired, [
+	return serializedParameter(parameter.name, serializedRequired.type, serializedRequired.io, isRequired, [
 		...serializedParameterType.dependencies,
 		...serializedRequired.dependencies,
 	]);
@@ -404,13 +404,8 @@ const serializeBodyParameters = (parameters: TBodyParameterObject[], relative: s
 		serializedParameter(',', ';', ',', false),
 		serializedParameters,
 	);
-	return serializedParameter(
-		'body',
-		`{ ${intercalated.type} }`,
-		`t.any`,
-		intercalated.isRequired,
-		intercalated.dependencies,
-	);
+	const object = toObjectType(intercalated);
+	return serializedParameter('body', object.type, object.io, intercalated.isRequired, object.dependencies);
 };
 
 const serializeParametersDescription = (
@@ -514,8 +509,9 @@ const hasRequiredParameters = (parameters: Array<TQueryParameterObject | TBodyPa
 const serializeRequired = (name: string, type: string, io: string, isRequired: boolean): TSerializedType =>
 	isRequired
 		? serializedType(`${name}: ${type}`, `${name}: ${io}`)
-		: serializedType(`${name}?: ${type}`, `${name}: createOptionFromNullable(${io})`, [
+		: serializedType(`${name}: Option<${type}>`, `${name}: createOptionFromNullable(${io})`, [
 				dependency('createOptionFromNullable', 'io-ts-types'),
+				dependency('Option', 'fp-ts/lib/Option'),
 		  ]);
 
 const serializeJSDOC = (lines: string[]): string =>
