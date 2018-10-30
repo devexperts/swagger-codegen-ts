@@ -278,7 +278,12 @@ const serializeOperationObject = (
 	const args = intercalateSerializedParameter(
 		serializedParameter(',', ',', ',', false),
 		concatIfL(hasParameters, serializedPathParameters, () =>
-			serializeRequiredParameter('parameters', serializedParameters.type, serializedParameters.isRequired),
+			serializeRequiredParameter(
+				'parameters',
+				serializedParameters.type,
+				serializedParameters.io,
+				serializedParameters.isRequired,
+			),
 		),
 	);
 
@@ -357,7 +362,12 @@ const serializePathParameterDescription = (parameter: TPathParameterObject): str
 const serializeQueryParameter = (parameter: TQueryParameterObject): TSerializedParameter => {
 	const isRequired = parameter.required.getOrElse(false);
 	const serializedParameterType = serializeParameterType(parameter);
-	const serializedRequired = serializeRequired(parameter.name, serializedParameterType.type, isRequired);
+	const serializedRequired = serializeRequired(
+		parameter.name,
+		serializedParameterType.type,
+		serializedParameterType.io,
+		isRequired,
+	);
 
 	return serializedParameter(
 		parameter.name,
@@ -377,7 +387,7 @@ const serializeQueryParameters = (parameters: TQueryParameterObject[]): TSeriali
 	return serializedParameter(
 		'query',
 		`{ ${intercalated.type} }`,
-		`t.any`,
+		`t.type({ ${intercalated.io} })`,
 		intercalated.isRequired,
 		intercalated.dependencies,
 	);
@@ -386,7 +396,12 @@ const serializeQueryParameters = (parameters: TQueryParameterObject[]): TSeriali
 const serializeBodyParameter = (parameter: TBodyParameterObject, relative: string): TSerializedParameter => {
 	const isRequired = parameter.required.getOrElse(false);
 	const serializedParameterType = serializeSchemaObjectType(parameter.schema, relative);
-	const serializedRequired = serializeRequired(parameter.name, serializedParameterType.type, isRequired);
+	const serializedRequired = serializeRequired(
+		parameter.name,
+		serializedParameterType.type,
+		serializedParameterType.io,
+		isRequired,
+	);
 	return serializedParameter(parameter.name, serializedRequired.type, 't.any', isRequired, [
 		...serializedParameterType.dependencies,
 		...serializedRequired.dependencies,
@@ -418,10 +433,20 @@ const serializeParameters = (
 		serializedParameter(',', ',', ',', false),
 		catOptions([
 			serializedQuery.map(serializedQuery =>
-				serializeRequiredParameter(serializedQuery.name, serializedQuery.type, serializedQuery.isRequired),
+				serializeRequiredParameter(
+					serializedQuery.name,
+					serializedQuery.type,
+					serializedQuery.io,
+					serializedQuery.isRequired,
+				),
 			),
 			serializedBody.map(serializedBody =>
-				serializeRequiredParameter(serializedBody.name, serializedBody.type, serializedBody.isRequired),
+				serializeRequiredParameter(
+					serializedBody.name,
+					serializedBody.type,
+					serializedBody.io,
+					serializedBody.isRequired,
+				),
 			),
 		]),
 	);
@@ -537,18 +562,30 @@ const client = `
 const hasRequiredParameters = (parameters: Array<TQueryParameterObject | TBodyParameterObject>): boolean =>
 	parameters.some(p => p.required.exists(identity));
 
-const serializeRequired = (name: string, type: string, isRequired: boolean): TSerializedType =>
+const serializeRequired = (name: string, type: string, io: string, isRequired: boolean): TSerializedType =>
 	isRequired
 		? serializedType(`${name}: ${type}`, `${name}: ${type}`)
 		: serializedType(`${name}?: ${type}`, `${name}?: ${type}`, [
 				dependency('createOptionFromNullable', 'io-ts-types'),
 		  ]);
 
-const serializeRequiredParameter = (name: string, type: string, isRequired: boolean): TSerializedParameter => ({
-	...serializeRequired(name, type, isRequired),
+const serializeRequiredParameter = (
+	name: string,
+	type: string,
+	io: string,
+	isRequired: boolean,
+): TSerializedParameter => ({
+	...serializeRequired(name, type, io, isRequired),
 	name,
 	isRequired,
 });
+
+// const serializeRequiredParameter2 = (name: string, parameter: TSerializedParameter): TSerializedParameter => {
+//
+// 	const type = serializeRequiredParameter(parameter.name, parameter.type, parameter.isRequired);
+// 	const io = serializeRequiredParameter(parameter.name, parameter.io, parameter.isRequired);
+// 	return serializedParameter(name, type.type, io.io, type.isRequired || type.)
+// }
 
 const serializeJSDOC = (lines: string[]): string =>
 	lines.length === 0
