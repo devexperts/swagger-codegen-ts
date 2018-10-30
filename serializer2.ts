@@ -44,10 +44,6 @@ type TSerializedType = {
 	io: string;
 	dependencies: TDepdendency[];
 };
-type TSerializedParameter = TSerializedType & {
-	name: string;
-	isRequired: boolean;
-};
 const serializedType = (
 	type: string,
 	io: string,
@@ -57,6 +53,10 @@ const serializedType = (
 	io,
 	dependencies,
 });
+type TSerializedParameter = TSerializedType & {
+	name: string;
+	isRequired: boolean;
+};
 const serializedParameter = (
 	name: string,
 	type: string,
@@ -65,6 +65,23 @@ const serializedParameter = (
 	dependencies: TDepdendency[] = EMPTY_DEPENDENCIES,
 ): TSerializedParameter => ({
 	name,
+	type,
+	io,
+	isRequired,
+	dependencies,
+});
+type TSerializedField = {
+	type: string;
+	io: string;
+	isRequired: boolean;
+	dependencies: TDepdendency[];
+};
+const serializedField = (
+	type: string,
+	io: string,
+	isRequired: boolean,
+	dependencies: TDepdendency[] = EMPTY_DEPENDENCIES,
+): TSerializedField => ({
 	type,
 	io,
 	isRequired,
@@ -558,6 +575,21 @@ const client = `
 		}
 	}
 `;
+
+const typeToField = (name: string, serialized: TSerializedType, isRequired: boolean): TSerializedField =>
+	isRequired
+		? serializedField(`${name}: ${serialized.type}`, `${name}: ${serialized.io}`, isRequired)
+		: serializedField(
+				`${name}?: ${serialized.type}`,
+				`${name}?: createOptionFromNullable(${serialized.io})`,
+				isRequired,
+				[...serialized.dependencies, dependency('createOptionFromNullable', 'io-ts-types')],
+		  );
+const parameterToField = (parameter: TSerializedParameter): TSerializedField =>
+	typeToField(parameter.name, parameter, parameter.isRequired);
+
+const fieldToParameter = (name: string, field: TSerializedField): TSerializedParameter =>
+	serializedParameter(name, field.type, field.io, field.isRequired, field.dependencies);
 
 const hasRequiredParameters = (parameters: Array<TQueryParameterObject | TBodyParameterObject>): boolean =>
 	parameters.some(p => p.required.exists(identity));
