@@ -54,16 +54,29 @@ const serializedType = (
 	dependencies,
 });
 type TSerializedParameter = TSerializedType & {
-	name: string;
 	isRequired: boolean;
 };
 const serializedParameter = (
-	name: string,
 	type: string,
 	io: string,
 	isRequired: boolean,
 	dependencies: TDepdendency[] = EMPTY_DEPENDENCIES,
 ): TSerializedParameter => ({
+	type,
+	io,
+	isRequired,
+	dependencies,
+});
+type TSerializedPathParameter = TSerializedParameter & {
+	name: string;
+};
+const serializedPathParameter = (
+	name: string,
+	type: string,
+	io: string,
+	isRequired: boolean,
+	dependencies: TDepdendency[] = EMPTY_DEPENDENCIES,
+): TSerializedPathParameter => ({
 	name,
 	type,
 	io,
@@ -85,7 +98,6 @@ const monoidSerializedParameter = getRecordMonoid<TSerializedParameter>({
 	type: monoidString,
 	io: monoidString,
 	dependencies: monoidDependencies,
-	name: monoidString,
 	isRequired: monoidAny,
 });
 const setoidSerializedTypeWithoutDependencies: Setoid<TSerializedType> = getRecordSetoid<
@@ -271,7 +283,7 @@ const serializeOperationObject = (
 	const serializedQueryParameters = serializeQueryParameters(queryParameters);
 	const serializedBodyParameters = serializeBodyParameters(bodyParameters, relative);
 
-	const argsName = concatIf(hasParameters, serializedPathParameters.map(p => p.name), 'parameters').join(',');
+	const argsName = concatIf(hasParameters, pathParameters.map(p => p.name), 'parameters').join(',');
 	const argsType = concatIfL(hasParameters, serializedPathParameters.map(p => p.type), () => {
 		const query = hasQueryParameters ? `query: ${serializedQueryParameters.type},` : '';
 		const body = hasBodyParameters ? `body: ${serializedBodyParameters.type},` : '';
@@ -338,10 +350,10 @@ const serializeOperationResponse = (
 	relative: string,
 ): Option<TSerializedType> => response.schema.map(schema => serializeSchemaObject(schema, relative));
 
-const serializePathParameter = (parameter: TPathParameterObject): TSerializedParameter => {
+const serializePathParameter = (parameter: TPathParameterObject): TSerializedPathParameter => {
 	const serializedParameterType = serializeParameter(parameter);
 
-	return serializedParameter(
+	return serializedPathParameter(
 		parameter.name,
 		`${parameter.name}: ${serializedParameterType.type}`,
 		`${serializedParameterType.io}.encode(${parameter.name})`,
@@ -366,7 +378,6 @@ const serializeQueryParameter = (parameter: TQueryParameterObject): TSerializedP
 	);
 
 	return serializedParameter(
-		parameter.name,
 		serializedRequired.type,
 		serializedRequired.io,
 		serializedParameterType.isRequired || isRequired,
@@ -376,12 +387,9 @@ const serializeQueryParameter = (parameter: TQueryParameterObject): TSerializedP
 
 const serializeQueryParameters = (parameters: TQueryParameterObject[]): TSerializedParameter => {
 	const serializedParameters = parameters.map(serializeQueryParameter);
-	const intercalated = intercalateSerializedParameter(
-		serializedParameter(',', ';', ',', false),
-		serializedParameters,
-	);
+	const intercalated = intercalateSerializedParameter(serializedParameter(';', ',', false), serializedParameters);
 	const object = toObjectType(intercalated);
-	return serializedParameter('query', object.type, object.io, intercalated.isRequired, object.dependencies);
+	return serializedParameter(object.type, object.io, intercalated.isRequired, object.dependencies);
 };
 
 const serializeBodyParameter = (parameter: TBodyParameterObject, relative: string): TSerializedParameter => {
@@ -393,19 +401,16 @@ const serializeBodyParameter = (parameter: TBodyParameterObject, relative: strin
 		serializedParameterType.io,
 		isRequired,
 	);
-	return serializedParameter(parameter.name, serializedRequired.type, serializedRequired.io, isRequired, [
+	return serializedParameter(serializedRequired.type, serializedRequired.io, isRequired, [
 		...serializedParameterType.dependencies,
 		...serializedRequired.dependencies,
 	]);
 };
 const serializeBodyParameters = (parameters: TBodyParameterObject[], relative: string): TSerializedParameter => {
 	const serializedParameters = parameters.map(parameter => serializeBodyParameter(parameter, relative));
-	const intercalated = intercalateSerializedParameter(
-		serializedParameter(',', ';', ',', false),
-		serializedParameters,
-	);
+	const intercalated = intercalateSerializedParameter(serializedParameter(';', ',', false), serializedParameters);
 	const object = toObjectType(intercalated);
-	return serializedParameter('body', object.type, object.io, intercalated.isRequired, object.dependencies);
+	return serializedParameter(object.type, object.io, intercalated.isRequired, object.dependencies);
 };
 
 const serializeParametersDescription = (
@@ -425,7 +430,6 @@ const serializeParameter = (parameter: TPathParameterObject | TQueryParameterObj
 		case 'array': {
 			const serializedArrayItems = serializeNonArrayItemsObject(parameter.items);
 			return serializedParameter(
-				parameter.name,
 				`Array<${serializedArrayItems.type}>`,
 				`t.array(${serializedArrayItems.io})`,
 				isRequired,
@@ -433,14 +437,14 @@ const serializeParameter = (parameter: TPathParameterObject | TQueryParameterObj
 			);
 		}
 		case 'string': {
-			return serializedParameter(parameter.name, 'string', 't.string', isRequired);
+			return serializedParameter('string', 't.string', isRequired);
 		}
 		case 'boolean': {
-			return serializedParameter(parameter.name, 'boolean', 't.boolean', isRequired);
+			return serializedParameter('boolean', 't.boolean', isRequired);
 		}
 		case 'integer':
 		case 'number': {
-			return serializedParameter(parameter.name, 'number', 't.number', isRequired);
+			return serializedParameter('number', 't.number', isRequired);
 		}
 	}
 };
@@ -521,7 +525,7 @@ const serializeJSDOC = (lines: string[]): string =>
 	 ${lines.map(line => `* ${line}`).join('\n')}
 	 */`;
 
-const serializeURL = (url: string, pathParameters: TSerializedParameter[]): string =>
+const serializeURL = (url: string, pathParameters: TSerializedPathParameter[]): string =>
 	pathParameters.reduce((acc, p) => acc.replace(`{${p.name}}`, `\$\{encodeURIComponent(${p.io})\}`), `\`${url}\``);
 
 const toObjectType = (serialized: TSerializedType): TSerializedType =>
