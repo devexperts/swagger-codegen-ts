@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "strict": true,
-    "target": "es2017",
+    "target": "es2016",
     "module": "commonjs",
+    "outDir": "dist",
+    "noUnusedLocals": true
   },
   "exclude": [
     "node_modules"

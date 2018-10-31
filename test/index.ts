@@ -5,11 +5,12 @@ import * as fs from 'fs-extra';
 import { fromNullable } from 'fp-ts/lib/Option';
 import * as prettier from 'prettier';
 
-import { SwaggerObject } from './swagger';
-import { map, write } from './fs';
-import { serializeSwaggerObject } from './serializer2';
+import { SwaggerObject } from '../src/swagger';
+import { map, write } from '../src/fs';
+import { serializeSwaggerObject } from '../src/serializer';
 
-const root = process.cwd();
+const dirname = path.resolve(__dirname);
+const root = path.resolve(dirname, '..');
 const destination = path.resolve('./out');
 const name = 'spec';
 const json = path.resolve(root, './specs/swagger.json');
