@@ -1,0 +1,12 @@
+/src
+/specs
+/node_modules
+/out
+/.vscode
+/test
+/nodemon.json
+/tsconfig.json
+/.gitignore
+/.editorconfig
+/.prettierrc
+/package-lock.json
