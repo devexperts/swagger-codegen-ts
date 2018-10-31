@@ -25,7 +25,7 @@ import {
 } from '../utils';
 import { none, Option, some } from 'fp-ts/lib/Option';
 import { getArrayMonoid, getRecordMonoid, monoidString, fold, monoidAny } from 'fp-ts/lib/Monoid';
-import { camelize } from '@devexperts/utils/dist/string/string';
+import { decapitalize } from '@devexperts/utils/dist/string/string';
 import { intercalate } from 'fp-ts/lib/Foldable2v';
 import { collect, lookup } from 'fp-ts/lib/Record';
 import { identity } from 'fp-ts/lib/function';
@@ -123,7 +123,7 @@ export const serialize: TSerializer = (name: string, swaggerObject: TSwaggerObje
 const serializeDefinitions = (definitions: TDefinitionsObject): TDirectory =>
 	directory('definitions', [...serializeDictionary(definitions, serializeDefinition)]);
 const serializePaths = (paths: TPathsObject): TDirectory =>
-	directory('paths', serializeDictionary(groupPathsByTag(paths), serializePathGroup));
+	directory('controllers', serializeDictionary(groupPathsByTag(paths), serializePathGroup));
 
 const serializeDefinition = (name: string, definition: TSchemaObject): TFile => {
 	const serialized = serializeSchemaObject(definition, './');
@@ -153,7 +153,7 @@ const serializePathGroup = (name: string, group: Record<string, TPathItemObject>
 		dependency('asks', 'fp-ts/lib/Reader'),
 		dependency('TAPIClient', '../client/client'),
 	]);
-	const groupName = name || 'Unknown';
+	const groupName = `${name}Controller`;
 	return file(
 		`${groupName}.ts`,
 		`
@@ -164,7 +164,7 @@ const serializePathGroup = (name: string, group: Record<string, TPathItemObject>
 				${serialized.type}
 			};
 			
-			export const ${camelize(groupName, true)} = asks((e: { apiClient: TAPIClient }): ${groupName} => ({
+			export const ${decapitalize(groupName)} = asks((e: { apiClient: TAPIClient }): ${groupName} => ({
 				${serialized.io}
 			}));
 		`,

@@ -14,6 +14,7 @@ import { tuple } from 'fp-ts/lib/function';
 import { setoidString } from 'fp-ts/lib/Setoid';
 import { TQueryParameterObject } from './swagger';
 import { TFSEntity } from './fs';
+import { camelize } from '@devexperts/utils/dist/string/string';
 
 export type TSerializer = (name: string, schema: TSwaggerObject) => TFSEntity;
 
@@ -21,6 +22,7 @@ export const getOperationsFromPath = (path: TPathItemObject): TDictionary<TOpera
 	const result: TDictionary<TOperationObject> = {};
 	const operations = array.compact([
 		path.get.map(operation => tuple('get', operation)),
+		path.post.map(operation => tuple('post', operation)),
 		path.put.map(operation => tuple('put', operation)),
 		path.delete.map(operation => tuple('delete', operation)),
 		path.head.map(operation => tuple('head', operation)),
@@ -44,9 +46,8 @@ export const groupPathsByTag = (paths: TPathsObject): TDictionary<TDictionary<TP
 	const result: TDictionary<TDictionary<TPathItemObject>> = {};
 	for (const key of keys) {
 		const path = paths[key];
-		const tag = getTagsFromPath(path)
-			.join('')
-			.replace(/\s/g, '');
+		const tags = getTagsFromPath(path);
+		const tag = camelize(tags.join('').replace(/\s/g, ''), false);
 
 		result[tag] = {
 			...(result[tag] || {}),
