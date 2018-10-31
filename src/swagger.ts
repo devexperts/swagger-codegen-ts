@@ -606,29 +606,114 @@ export const ResponsesDefinitionsObject: t.Type<TResponsesDefinitionsObject, mix
 	ResponseObject,
 );
 
-export type TScopeaObject = TDictionary<string>;
-export const ScopesObject: t.Type<TScopeaObject, mixed> = t.dictionary(t.string, t.string);
+export type TScopesObject = TDictionary<string>;
+export const ScopesObject: t.Type<TScopesObject, mixed> = t.dictionary(t.string, t.string);
 
-export type TSecuritySchemeObject = {
-	type: 'basic' | 'apiKey' | 'oauth2';
+//#region SecuritySchemeObject
+
+export type TBaseSecuritySchemeObjectProps = {
 	description: Option<string>;
-	name: string;
-	in: 'query' | 'header';
-	flow: 'implicit' | 'password' | 'application' | 'accessCode';
-	authorizationUrl: string;
-	tokenUrl: string;
-	scopes: TScopeaObject;
 };
-export const SecuritySchemeObject: t.Type<TSecuritySchemeObject, mixed> = t.type({
-	type: t.union([t.literal('basic'), t.literal('apiKey'), t.literal('oauth2')]),
+const BaseSecuritySchemeObjectProps = {
 	description: stringOption,
-	name: t.string,
+};
+(): t.Type<TBaseSecuritySchemeObjectProps, mixed> => t.type(BaseSecuritySchemeObjectProps); //tslint:disable-line no-unused-expression (integrity check)
+
+export type TBasicSecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+	type: 'basic';
+};
+const BasicSecuritySchemeObject: t.Tagged<'type', TBasicSecuritySchemeObject, mixed> = t.type({
+	...BaseSecuritySchemeObjectProps,
+	type: t.literal('basic'),
+});
+
+export type TApiKeySecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+	type: 'apiKey';
+	in: 'query' | 'header';
+	name: string;
+};
+const ApiKeySecuritySchemeObject: t.Tagged<'type', TApiKeySecuritySchemeObject, mixed> = t.type({
+	...BaseSecuritySchemeObjectProps,
+	type: t.literal('apiKey'),
 	in: t.union([t.literal('query'), t.literal('header')]),
-	flow: t.union([t.literal('implicit'), t.literal('password'), t.literal('application'), t.literal('accessCode')]),
+	name: t.string,
+});
+
+export type TImplicitOAuth2SecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+	type: 'oauth2';
+	flow: 'implicit';
+	authorizationUrl: string;
+	scopes: TScopesObject;
+};
+const ImplicitOAuth2SecuritySchemeObject: t.Tagged<'flow', TImplicitOAuth2SecuritySchemeObject, mixed> = t.type({
+	...BaseSecuritySchemeObjectProps,
+	type: t.literal('oauth2'),
+	flow: t.literal('implicit'),
 	authorizationUrl: t.string,
+	scopes: ScopesObject,
+});
+export type TPasswordOAuth2SecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+	type: 'oauth2';
+	flow: 'password';
+	tokenUrl: string;
+	scopes: TScopesObject;
+};
+const PasswordOAuth2SecuritySchemeObject: t.Tagged<'flow', TPasswordOAuth2SecuritySchemeObject, mixed> = t.type({
+	...BaseSecuritySchemeObjectProps,
+	type: t.literal('oauth2'),
+	flow: t.literal('password'),
 	tokenUrl: t.string,
 	scopes: ScopesObject,
 });
+export type TApplicationOAuth2SecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+	type: 'oauth2';
+	flow: 'application';
+	tokenUrl: string;
+	scopes: TScopesObject;
+};
+const ApplicationOAuth2SecuritySchemeObject: t.Tagged<'flow', TApplicationOAuth2SecuritySchemeObject, mixed> = t.type({
+	...BaseSecuritySchemeObjectProps,
+	type: t.literal('oauth2'),
+	flow: t.literal('application'),
+	tokenUrl: t.string,
+	scopes: ScopesObject,
+});
+export type TAccessCodeOAuth2SecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+	type: 'oauth2';
+	flow: 'accessCode';
+	tokenUrl: string;
+	scopes: TScopesObject;
+};
+const AccessCodeOAuth2SecuritySchemeObject: t.Tagged<'flow', TAccessCodeOAuth2SecuritySchemeObject, mixed> = t.type({
+	...BaseSecuritySchemeObjectProps,
+	type: t.literal('oauth2'),
+	flow: t.literal('accessCode'),
+	tokenUrl: t.string,
+	scopes: ScopesObject,
+});
+export type TOAuth2SecuritySchemeObject =
+	| TImplicitOAuth2SecuritySchemeObject
+	| TPasswordOAuth2SecuritySchemeObject
+	| TApplicationOAuth2SecuritySchemeObject
+	| TAccessCodeOAuth2SecuritySchemeObject;
+const OAuth2SecuritySchemeObject: t.Tagged<'type', TOAuth2SecuritySchemeObject, mixed> = t.taggedUnion('flow', [
+	ImplicitOAuth2SecuritySchemeObject,
+	PasswordOAuth2SecuritySchemeObject,
+	ApplicationOAuth2SecuritySchemeObject,
+	AccessCodeOAuth2SecuritySchemeObject,
+]) as any;
+
+export type TSecuritySchemeObject =
+	| TBasicSecuritySchemeObject
+	| TApiKeySecuritySchemeObject
+	| TOAuth2SecuritySchemeObject;
+const SecuritySchemeObject: t.Type<TSecuritySchemeObject, mixed> = t.taggedUnion('type', [
+	BasicSecuritySchemeObject,
+	ApiKeySecuritySchemeObject,
+	OAuth2SecuritySchemeObject,
+]);
+
+//#endregion
 
 export type TSecurityDefinitionsObject = TDictionary<TSecuritySchemeObject>;
 export const SecurityDefinitionsObject: t.Type<TSecurityDefinitionsObject, mixed> = t.dictionary(

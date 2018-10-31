@@ -8,8 +8,9 @@ const self = path.resolve(__dirname);
 
 generate({
 	pathToSpec: path.resolve(self, './swagger.json'),
-	out: path.resolve(self, './out/spec'),
+	out: path.resolve(self, './spec'),
 	serialize,
 }).catch(error => {
+	console.error(error);
 	process.exit(1);
 });

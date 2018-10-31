@@ -13,21 +13,30 @@ const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
 
 export type TGenerateOptions = {
 	/**
-	 * Absolute path to json spec
+	 * Path to json spec
 	 */
 	pathToSpec: string;
 	/**
-	 * Absolute path to output directory (should be empty)
+	 * Path to output directory (should be empty)
 	 */
 	out: string;
 	/**
 	 * Spec serializer
 	 */
 	serialize: TSerializer;
+	/**
+	 * Path to prettier config
+	 */
+	pathToPrettierConfig?: string;
 };
 
+const cwd = process.cwd();
+const resolvePath = (p: string) => (path.isAbsolute(p) ? p : path.resolve(cwd, p));
+
 export async function generate(options: TGenerateOptions): Promise<void> {
-	const { pathToSpec, out, serialize } = options;
+	const { serialize, pathToPrettierConfig } = options;
+	const out = resolvePath(options.out);
+	const pathToSpec = resolvePath(options.pathToSpec);
 	log('Reading spec from', pathToSpec);
 	const buffer = await fs.readFile(pathToSpec);
 	log('Parsing spec');
@@ -42,18 +51,19 @@ export async function generate(options: TGenerateOptions): Promise<void> {
 		return;
 	}
 	log('Serializing spec');
-	const specName = path.dirname(out);
-	const serialized = serialize(specName, decoded.value);
+	const serialized = serialize(path.basename(out), decoded.value);
 	log('Running prettier');
-	const prettierConfig = fromNullable(await prettier.resolveConfig(path.resolve(__dirname, '../.prettierrc')));
+	const prettierConfig = fromNullable(
+		await prettier.resolveConfig(
+			fromNullable(pathToPrettierConfig)
+				.map(resolvePath)
+				.getOrElseL(() => path.resolve(__dirname, '../.prettierrc')),
+		),
+	);
 	const formatted = prettierConfig
 		.map(config => map(serialized, content => prettier.format(content, config)))
 		.getOrElse(serialized);
 	log('Writing to', out);
-	const destination = path.basename(out);
-	if (!fs.pathExists(destination)) {
-		await fs.mkdirp(destination);
-		await write(destination, formatted);
-	}
+	await write(path.dirname(out), formatted);
 	log('Done.');
 }
