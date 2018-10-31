@@ -1,5 +1,15 @@
+<a name="0.2.1"></a>
+## [0.2.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/0.2.0...0.2.1) (2018-10-31)
+
+
+### Bug Fixes
+
+* bubble option dependencies instead of hardcoding ([ef48a40](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/ef48a40))
+
+
+
 <a name="0.2.0"></a>
-# 0.2.0 (2018-10-31)
+# [0.2.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/9d6e079...0.2.0) (2018-10-31)
 
 
 ### Bug Fixes
