@@ -11,8 +11,8 @@ import {
 	TResponsesObject,
 	TSchemaObject,
 	TSwaggerObject,
-} from './swagger';
-import { directory, file, TDirectory, TFile } from './fs';
+} from '../swagger';
+import { directory, file, TDirectory, TFile } from '../fs';
 import { array, catOptions, uniq } from 'fp-ts/lib/Array';
 import { getRecordSetoid, Setoid, setoidString } from 'fp-ts/lib/Setoid';
 import { groupBy } from 'fp-ts/lib/NonEmptyArray';
@@ -21,7 +21,8 @@ import {
 	getOperationParametersInPath,
 	getOperationParametersInQuery,
 	groupPathsByTag,
-} from './utils';
+	TSerializer,
+} from '../utils';
 import { none, Option, some } from 'fp-ts/lib/Option';
 import { getArrayMonoid, getRecordMonoid, monoidString, fold, monoidAny } from 'fp-ts/lib/Monoid';
 import { camelize } from '@devexperts/utils/dist/string/string';
@@ -112,7 +113,7 @@ const intercalateSerializedParameter = intercalate(monoidSerializedParameter, ar
 const uniqString = uniq(setoidString);
 const uniqSerializedWithoutDependencies = uniq(setoidSerializedTypeWithoutDependencies);
 
-export const serializeSwaggerObject = (name: string, swaggerObject: TSwaggerObject): TDirectory =>
+export const serialize: TSerializer = (name: string, swaggerObject: TSwaggerObject): TDirectory =>
 	directory(name, [
 		directory('client', [file('client.ts', client)]),
 		...catOptions([swaggerObject.definitions.map(serializeDefinitions)]),

@@ -2,7 +2,7 @@
   "name": "@devexperts/swagger-codegen-ts",
   "version": "0.1.0",
   "description": "TS generator for swagger spec",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "ts-node": "ts-node",
     "tslint": "tslint -c tslint.json --project tsconfig.json './src/**/*.ts' './test/**/*.ts'",

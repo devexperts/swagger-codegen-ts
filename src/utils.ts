@@ -8,10 +8,14 @@ import {
 	TPathParameterObject,
 	TReferenceObject,
 	TBodyParameterObject,
+	TSwaggerObject,
 } from './swagger';
 import { tuple } from 'fp-ts/lib/function';
 import { setoidString } from 'fp-ts/lib/Setoid';
 import { TQueryParameterObject } from './swagger';
+import { TFSEntity } from './fs';
+
+export type TSerializer = (name: string, schema: TSwaggerObject) => TFSEntity;
 
 export const getOperationsFromPath = (path: TPathItemObject): TDictionary<TOperationObject> => {
 	const result: TDictionary<TOperationObject> = {};
