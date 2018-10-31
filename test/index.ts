@@ -11,4 +11,7 @@ generate({
 	pathToSpec: path.resolve(root, './specs/swagger.json'),
 	out: path.resolve('./out/spec'),
 	serialize,
-}).catch(error => console.error(error));
+}).catch(error => {
+	console.error(error);
+	process.exit(1);
+});
