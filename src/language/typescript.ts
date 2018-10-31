@@ -33,8 +33,8 @@ import { identity } from 'fp-ts/lib/function';
 const EMPTY_DEPENDENCIES: TDepdendency[] = [];
 const SUCCESSFUL_CODES = ['200', 'default'];
 
-const concatIfL = <A>(condition: boolean, as: A[], a: (as: A[]) => A): A[] => (condition ? as.concat(a(as)) : as);
-const concatIf = <A>(condition: boolean, as: A[], a: A): A[] => concatIfL(condition, as, as => a);
+const concatIfL = <A>(condition: boolean, as: A[], a: (as: A[]) => A[]): A[] => (condition ? as.concat(a(as)) : as);
+const concatIf = <A>(condition: boolean, as: A[], a: A[]): A[] => concatIfL(condition, as, as => a);
 
 type TDepdendency = {
 	name: string;
@@ -88,6 +88,10 @@ const dependency = (name: string, path: string): TDepdendency => ({
 	name,
 	path,
 });
+const OPTION_DEPENDENCIES: TDepdendency[] = [
+	dependency('Option', 'fp-ts/lib/Option'),
+	dependency('createOptionFromNullable', 'io-ts-types'),
+];
 
 const monoidDependencies = getArrayMonoid<TDepdendency>();
 const monoidSerializedType = getRecordMonoid<TSerializedType>({
@@ -128,11 +132,7 @@ const serializePaths = (paths: TPathsObject): TDirectory =>
 const serializeDefinition = (name: string, definition: TSchemaObject): TFile => {
 	const serialized = serializeSchemaObject(definition, './');
 
-	const dependencies = serializeDependencies([
-		...serialized.dependencies,
-		dependency('Option', 'fp-ts/lib/Option'),
-		dependency('createOptionFromNullable', 'io-ts-types'),
-	]);
+	const dependencies = serializeDependencies(serialized.dependencies);
 
 	return file(
 		`${name}.ts`,
@@ -240,7 +240,11 @@ const serializeSchemaObject = (schema: TSchemaObject, relative: string): TSerial
 									const io = isRequired
 										? `${name}: ${field.io}`
 										: `${name}: createOptionFromNullable(${field.io})`;
-									return serializedType(`${type};`, `${io},`, field.dependencies);
+									return serializedType(
+										`${type};`,
+										`${io},`,
+										concatIf(!isRequired, field.dependencies, OPTION_DEPENDENCIES),
+									);
 								}),
 							),
 						),
@@ -300,11 +304,11 @@ const serializeOperationObject = (
 	const serializedQueryParameters = serializeQueryParameters(queryParameters);
 	const serializedBodyParameters = serializeBodyParameters(bodyParameters, relative);
 
-	const argsName = concatIf(hasParameters, pathParameters.map(p => p.name), 'parameters').join(',');
+	const argsName = concatIf(hasParameters, pathParameters.map(p => p.name), ['parameters']).join(',');
 	const argsType = concatIfL(hasParameters, serializedPathParameters.map(p => p.type), () => {
 		const query = hasQueryParameters ? `query: ${serializedQueryParameters.type},` : '';
 		const body = hasBodyParameters ? `body: ${serializedBodyParameters.type},` : '';
-		return `parameters: { ${query} ${body} }`;
+		return [`parameters: { ${query} ${body} }`];
 	}).join(',');
 
 	const type = `
@@ -530,10 +534,7 @@ const hasRequiredParameters = (parameters: Array<TQueryParameterObject | TBodyPa
 const serializeRequired = (name: string, type: string, io: string, isRequired: boolean): TSerializedType =>
 	isRequired
 		? serializedType(`${name}: ${type}`, `${name}: ${io}`)
-		: serializedType(`${name}: Option<${type}>`, `${name}: createOptionFromNullable(${io})`, [
-				dependency('createOptionFromNullable', 'io-ts-types'),
-				dependency('Option', 'fp-ts/lib/Option'),
-		  ]);
+		: serializedType(`${name}: Option<${type}>`, `${name}: createOptionFromNullable(${io})`, OPTION_DEPENDENCIES);
 
 const serializeJSDOC = (lines: string[]): string =>
 	lines.length === 0
