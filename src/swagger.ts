@@ -14,10 +14,6 @@ export type TDictionary<A> = {
 	[key: string]: A;
 };
 
-//#region Base
-
-//#endregion
-
 export type TContactObject = {
 	name: Option<string>;
 	url: Option<string>;
@@ -75,7 +71,7 @@ export const ReferenceObject: t.Type<TReferenceObject, mixed> = t.type({
 
 export type TBaseSchemaObjectProps = {};
 const BaseSchemaObjectProps = {};
-(): t.Type<TBaseSchemaObjectProps, mixed> => t.type(BaseSchemaObjectProps); //integrity check
+(): t.Type<TBaseSchemaObjectProps, mixed> => t.type(BaseSchemaObjectProps); //tslint:disable-line no-unused-expression (integrity check)
 
 export type TObjectSchemaObject = TBaseSchemaObjectProps & {
 	type: 'object';
@@ -218,7 +214,7 @@ export const BaseItemsObjectProps = {
 	enum: primitiveArrayOption,
 	multipleOf: numberOption,
 };
-((): t.Type<TBaseItemsObject, mixed> => t.type(BaseItemsObjectProps))(); //integrity check
+((): t.Type<TBaseItemsObject, mixed> => t.type(BaseItemsObjectProps))(); //tslint:disable-line no-unused-expression (integrity check) check
 
 export type TStringItemsObject = TBaseItemsObject & {
 	type: 'string';
@@ -296,7 +292,7 @@ const BaseParameterObjectProps = {
 	name: t.string,
 	description: stringOption,
 };
-(): t.Type<TBaseParameterObjectProps, mixed> => t.type(BaseParameterObjectProps); //integrity
+(): t.Type<TBaseParameterObjectProps, mixed> => t.type(BaseParameterObjectProps); //tslint:disable-line no-unused-expression (integrity check)
 
 //#region Path Parameter Object
 
@@ -311,7 +307,7 @@ const BasePathParameterObjectProps = {
 	required: t.literal(true),
 	format: stringOption,
 };
-(): t.Type<TBasePathParameterObjectProps, mixed> => t.type(BasePathParameterObjectProps); //integrity
+(): t.Type<TBasePathParameterObjectProps, mixed> => t.type(BasePathParameterObjectProps); //tslint:disable-line no-unused-expression (integrity check)
 
 export type TStringPathParameterObject = TBasePathParameterObjectProps & {
 	type: 'string';
@@ -388,7 +384,7 @@ const BaseQueryParameterObjectProps = {
 	required: booleanOption,
 };
 
-(): t.Type<TBaseQueryParameterObjectProps, mixed> => t.type(BaseQueryParameterObjectProps); //integrity
+(): t.Type<TBaseQueryParameterObjectProps, mixed> => t.type(BaseQueryParameterObjectProps); //tslint:disable-line no-unused-expression (integrity check)
 
 export type TStringQueryParameterObject = TBaseQueryParameterObjectProps & {
 	type: 'string';

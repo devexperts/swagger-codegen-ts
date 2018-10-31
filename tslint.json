@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "@devexperts/lint/tslint.json",
+    "tslint-config-prettier"
+  ],
+  "rulesDirectory": [
+    "tslint-plugin-prettier"
+  ],
+  "rules": {
+    "prettier": true
+  }
+}

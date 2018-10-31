@@ -10,3 +10,5 @@
 /.editorconfig
 /.prettierrc
 /package-lock.json
+/.idea
+/tslint.json

@@ -1,21 +1,36 @@
 {
   "name": "@devexperts/swagger-codegen-ts",
   "version": "0.1.0",
-  "description": "",
+  "description": "TS generator for swagger spec",
   "main": "index.js",
   "scripts": {
     "ts-node": "ts-node",
-    "test": "ts-node ./test/index.ts",
+    "tslint": "tslint -c tslint.json --project tsconfig.json './src/**/*.ts' './test/**/*.ts'",
+    "test": "npm run tslint && npm run prettier && ts-node ./test/index.ts",
+    "prettier": "prettier --list-different \"./src/**/*.ts\" \"./test/**/*.ts\"",
+    "prettier:fix": "prettier --write \"./src/**/*.ts\" \"./test/**/*.ts\"",
+    "prepublishOnly": "npm run test && npm run build",
     "start": "nodemon",
-    "build": "tsc -p ./src"
+    "build": "tsc -p ./src",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
-  "author": "",
+  "author": "devexperts",
   "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devex-web-frontend/swagger-codegen-ts.git"
+  },
+  "bugs": {
+    "url": "git+https://github.com/devex-web-frontend/swagger-codegen-ts/issues"
+  },
+  "homepage": "https://github.com/devex-web-frontend/swagger-codegen-ts#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@devexperts/utils": "^0.12.6",
     "@types/fs-extra": "^5.0.4",
     "@types/prettier": "^1.13.2",
-    "@types/swagger-schema-official": "^2.0.10",
     "fp-ts": "^1.10.0",
     "fs-extra": "^7.0.0",
     "io-ts": "^1.2.1",
@@ -24,11 +39,16 @@
     "typescript": "^3.1.3"
   },
   "devDependencies": {
+    "@devexperts/lint": "^0.19.1",
     "@devexperts/remote-data-ts": "^0.3.1",
     "@devexperts/rx-utils": "^0.19.0",
     "@types/node": "^10.5.3",
+    "conventional-changelog-cli": "^2.0.5",
     "nodemon": "^1.18.3",
     "rxjs": "^6.3.3",
-    "ts-node": "^7.0.0"
+    "ts-node": "^7.0.0",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-plugin-prettier": "^2.0.1"
   }
 }
