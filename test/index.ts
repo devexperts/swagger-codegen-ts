@@ -4,14 +4,12 @@ import * as path from 'path';
 import { generate } from '../src';
 import { serialize } from '../src/language/typescript';
 
-const dirname = path.resolve(__dirname);
-const root = path.resolve(dirname, '..');
+const self = path.resolve(__dirname);
 
 generate({
-	pathToSpec: path.resolve(root, './specs/swagger.json'),
-	out: path.resolve('./out/spec'),
+	pathToSpec: path.resolve(self, './swagger.json'),
+	out: path.resolve(self, './out/spec'),
 	serialize,
 }).catch(error => {
-	console.error(error);
 	process.exit(1);
 });
