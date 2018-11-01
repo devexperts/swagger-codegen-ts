@@ -1,3 +1,13 @@
+<a name="0.2.2"></a>
+## [0.2.2](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/0.2.1...v0.2.2) (2018-11-01)
+
+
+### Features
+
+* support recursive types ([1c4c211](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/1c4c211))
+
+
+
 <a name="0.2.1"></a>
 ## [0.2.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/0.2.0...0.2.1) (2018-10-31)
 
