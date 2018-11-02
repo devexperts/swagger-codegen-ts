@@ -579,7 +579,7 @@ const client = `
 			return new ResponseValiationError(errors);
 		} 
 	
-		constructor(errors: Errors) {
+		constructor(readonly errors: Errors) {
 			super('ResponseValiationError');
 			Object.setPrototypeOf(this, ResponseValiationError);
 		}
