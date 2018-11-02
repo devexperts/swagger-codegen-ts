@@ -1,3 +1,13 @@
+<a name="0.2.4"></a>
+## [0.2.4](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.3...v0.2.4) (2018-11-02)
+
+
+### Bug Fixes
+
+* add missing errors field ([ab8109a](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/ab8109a))
+
+
+
 <a name="0.2.3"></a>
 ## [0.2.3](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.2...v0.2.3) (2018-11-02)
 
