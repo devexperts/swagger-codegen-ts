@@ -15,7 +15,7 @@ import {
 import { directory, file, TDirectory, TFile } from '../fs';
 import { array, catOptions, uniq } from 'fp-ts/lib/Array';
 import { getRecordSetoid, Setoid, setoidString } from 'fp-ts/lib/Setoid';
-import { groupBy } from 'fp-ts/lib/NonEmptyArray';
+import { fromArray, groupBy, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import {
 	getOperationParametersInBody,
 	getOperationParametersInPath,
@@ -36,6 +36,8 @@ const SUCCESSFUL_CODES = ['200', 'default'];
 
 const concatIfL = <A>(condition: boolean, as: A[], a: (as: A[]) => A[]): A[] => (condition ? as.concat(a(as)) : as);
 const concatIf = <A>(condition: boolean, as: A[], a: A[]): A[] => concatIfL(condition, as, as => a);
+const unless = (condition: boolean, a: string): string => (condition ? '' : a);
+const when = (condition: boolean, a: string): string => (condition ? a : '');
 
 type TDepdendency = {
 	name: string;
@@ -91,10 +93,9 @@ const dependency = (name: string, path: string): TDepdendency => ({
 	name,
 	path,
 });
-const OPTION_DEPENDENCIES: TDepdendency[] = [
-	dependency('Option', 'fp-ts/lib/Option'),
-	dependency('createOptionFromNullable', 'io-ts-types'),
-];
+const dependencyOption = dependency('Option', 'fp-ts/lib/Option');
+const dependencyCreateOptionFromNullable = dependency('createOptionFromNullable', 'io-ts-types');
+const OPTION_DEPENDENCIES: TDepdendency[] = [dependencyOption, dependencyCreateOptionFromNullable];
 
 const monoidDependencies = getArrayMonoid<TDepdendency>();
 const monoidRefs = getArrayMonoid<string>();
@@ -309,25 +310,32 @@ const serializeOperationObject = (
 
 	const serializedPathParameters = pathParameters.map(serializePathParameter);
 
-	const hasQueryParameters = queryParameters.length > 0;
-	const hasBodyParameters = bodyParameters.length > 0;
-	const hasParameters = hasQueryParameters || hasBodyParameters;
-
 	const serializedResponses = serializeOperationResponses(operation.responses, relative, rootName);
 
 	const operationName = getOperationName(operation, method);
 
 	const serializedUrl = serializeURL(url, serializedPathParameters);
 
-	const serializedQueryParameters = serializeQueryParameters(queryParameters);
-	const serializedBodyParameters = serializeBodyParameters(bodyParameters, relative, rootName);
+	const serializedQueryParameters = fromArray(queryParameters).map(queryParameters =>
+		serializeQueryParameters(queryParameters),
+	);
+	const serializedBodyParameters = fromArray(bodyParameters).map(bodyParameters =>
+		serializeBodyParameters(bodyParameters, relative, rootName),
+	);
+
+	const serializedParameters = intercalateSerializedParameter(
+		serializedParameter(',', ',', false, EMPTY_DEPENDENCIES, EMPTY_REFS),
+		catOptions([serializedQueryParameters, serializedBodyParameters]),
+	);
+
+	const hasQueryParameters = queryParameters.length > 0;
+	const hasBodyParameters = bodyParameters.length > 0;
+	const hasParameters = hasQueryParameters || hasBodyParameters;
 
 	const argsName = concatIf(hasParameters, pathParameters.map(p => p.name), ['parameters']).join(',');
-	const argsType = concatIfL(hasParameters, serializedPathParameters.map(p => p.type), () => {
-		const query = hasQueryParameters ? `query: ${serializedQueryParameters.type},` : '';
-		const body = hasBodyParameters ? `body: ${serializedBodyParameters.type},` : '';
-		return [`parameters: { ${query} ${body} }`];
-	}).join(',');
+	const argsType = concatIfL(hasParameters, serializedPathParameters.map(p => p.type), () => [
+		`parameters: { ${serializedParameters.type} }`,
+	]).join(',');
 
 	const type = `
 		${jsdoc}
@@ -336,14 +344,13 @@ const serializeOperationObject = (
 
 	const io = `
 		${operationName}: (${argsName}) => {
-			${hasQueryParameters ? `const query = ${serializedQueryParameters.io}.encode(parameters.query);` : ''};
-			${hasBodyParameters ? `const body = ${serializedBodyParameters.io}.encode(parameters.body);` : ''}
-		
+			${when(hasParameters, `const encoded = t.partial({ ${serializedParameters.io} }).encode(parameters);`)}
+	
 			return e.apiClient.request({
 				url: ${serializedUrl},
 				method: '${method}',
-				${hasQueryParameters ? 'query' : ''}
-				${hasBodyParameters ? 'body' : ''}
+				${when(hasQueryParameters, 'query: encoded.query,')}
+				${when(hasBodyParameters, 'body: encoded.body,')}
 			}).pipe(map(data => data.chain(value => fromEither(${
 				serializedResponses.io
 			}.decode(value).mapLeft(ResponseValiationError.create)))))
@@ -356,11 +363,10 @@ const serializeOperationObject = (
 		dependency('ResponseValiationError', '../client/client'),
 		dependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
 		...serializedResponses.dependencies,
-		...serializedQueryParameters.dependencies,
-		...serializedBodyParameters.dependencies,
+		...serializedParameters.dependencies,
 	];
 
-	return serializedType(type, io, dependencies, EMPTY_REFS);
+	return serializedType(type, io, dependencies, serializedParameters.refs);
 };
 
 const serializeOperationResponses = (
@@ -437,14 +443,20 @@ const serializeQueryParameter = (parameter: TQueryParameterObject): TSerializedP
 	);
 };
 
-const serializeQueryParameters = (parameters: TQueryParameterObject[]): TSerializedParameter => {
-	const serializedParameters = parameters.map(serializeQueryParameter);
+const serializeQueryParameters = (parameters: NonEmptyArray<TQueryParameterObject>): TSerializedParameter => {
+	const serializedParameters = parameters.toArray().map(serializeQueryParameter);
 	const intercalated = intercalateSerializedParameter(
 		serializedParameter(';', ',', false, EMPTY_DEPENDENCIES, EMPTY_REFS),
 		serializedParameters,
 	);
-	const object = toObjectType(intercalated, none);
-	return serializedParameter(object.type, object.io, intercalated.isRequired, object.dependencies, object.refs);
+	const { isRequired, dependencies, refs, io, type } = intercalated;
+	return serializedParameter(
+		`query${unless(isRequired, '?')}: { ${type} }`,
+		`query: t.type({ ${io} })`,
+		intercalated.isRequired,
+		dependencies,
+		refs,
+	);
 };
 
 const serializeBodyParameter = (
@@ -454,32 +466,29 @@ const serializeBodyParameter = (
 ): TSerializedParameter => {
 	const isRequired = parameter.required.getOrElse(false);
 	const serializedParameterType = serializeSchemaObject(parameter.schema, relative, rootName);
-	const serializedRequired = serializeRequired(
-		parameter.name,
+	return serializedParameter(
 		serializedParameterType.type,
 		serializedParameterType.io,
 		isRequired,
-	);
-	return serializedParameter(
-		serializedRequired.type,
-		serializedRequired.io,
-		isRequired,
-		[...serializedParameterType.dependencies, ...serializedRequired.dependencies],
-		serializedRequired.refs,
+		serializedParameterType.dependencies,
+		serializedParameterType.refs,
 	);
 };
 const serializeBodyParameters = (
-	parameters: TBodyParameterObject[],
+	parameters: NonEmptyArray<TBodyParameterObject>,
 	relative: string,
 	rootName: string,
 ): TSerializedParameter => {
-	const serializedParameters = parameters.map(parameter => serializeBodyParameter(parameter, relative, rootName));
-	const intercalated = intercalateSerializedParameter(
-		serializedParameter(';', ',', false, EMPTY_DEPENDENCIES, EMPTY_REFS),
-		serializedParameters,
+	// according to spec there can be only one body parameter
+	const serializedBodyParameter = serializeBodyParameter(parameters.head, relative, rootName);
+	const { type, isRequired, io, dependencies, refs } = serializedBodyParameter;
+	return serializedParameter(
+		`body${unless(isRequired, '?')}: ${type}`,
+		`body: ${io}`,
+		isRequired,
+		dependencies,
+		refs,
 	);
-	const object = toObjectType(intercalated, none);
-	return serializedParameter(object.type, object.io, intercalated.isRequired, object.dependencies, object.refs);
 };
 
 const serializeParametersDescription = (
@@ -591,11 +600,12 @@ const serializeRequired = (name: string, type: string, io: string, isRequired: b
 		  );
 
 const serializeJSDOC = (lines: string[]): string =>
-	lines.length === 0
-		? ''
-		: `/**
+	unless(
+		lines.length === 0,
+		`/**
 	 ${lines.map(line => `* ${line}`).join('\n')}
-	 */`;
+	 */`,
+	);
 
 const serializeURL = (url: string, pathParameters: TSerializedPathParameter[]): string =>
 	pathParameters.reduce(
