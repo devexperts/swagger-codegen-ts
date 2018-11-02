@@ -1,3 +1,13 @@
+<a name="0.2.3"></a>
+## [0.2.3](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.2...v0.2.3) (2018-11-02)
+
+
+### Bug Fixes
+
+* remove extra body nesting, fix query/body requirements ([1490946](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/1490946))
+
+
+
 <a name="0.2.2"></a>
 ## [0.2.2](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/0.2.1...v0.2.2) (2018-11-01)
 
