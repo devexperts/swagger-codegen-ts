@@ -12,7 +12,8 @@
     "prepublishOnly": "npm run test && npm run build",
     "start": "nodemon",
     "build": "tsc -p ./src",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "version": "npm run changelog && git add CHANGELOG.md"
   },
   "author": "devexperts",
   "license": "MPL-2.0",
