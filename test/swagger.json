@@ -840,6 +840,26 @@
           }
         }
       }
+    },
+    "/test": {
+      "get": {
+        "tags": ["test"],
+        "summary": "Check support of mixed additionalProperties",
+        "operationId": "testCheckSupportOfMixedAdditionalProperties",
+        "responses": {
+          "200": {
+            "description": "test description",
+            "schema": {
+              "type": "object",
+              "description": "test description",
+              "additionalProperties": {
+                "description": "test description",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
