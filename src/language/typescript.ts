@@ -170,7 +170,6 @@ const serializeDefinition = (name: string, definition: TSchemaObject, cwd: strin
 	return file(
 		`${name}.ts`,
 		`
-			import * as t from 'io-ts';
 			${dependencies}
 			
 			export type ${name} = ${serialized.type};
@@ -192,7 +191,6 @@ const serializePathGroup = (name: string, group: Record<string, TPathItemObject>
 	return file(
 		`${groupName}.ts`,
 		`
-			import * as t from 'io-ts';
 			${dependencies}
 		
 			export type ${groupName} = {
@@ -253,18 +251,23 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 						return none;
 					}),
 				)
-				.getOrElseL(() => serializedType('string', 't.string', EMPTY_DEPENDENCIES, EMPTY_REFS));
+				.getOrElseL(() => serializedType('string', 'string', [dependency('string', 'io-ts')], EMPTY_REFS));
 		}
 		case 'boolean': {
-			return serializedType('boolean', 't.boolean', EMPTY_DEPENDENCIES, EMPTY_REFS);
+			return serializedType('boolean', 'boolean', [dependency('boolean', 'io-ts')], EMPTY_REFS);
 		}
 		case 'integer':
 		case 'number': {
-			return serializedType('number', 't.number', EMPTY_DEPENDENCIES, EMPTY_REFS);
+			return serializedType('number', 'number', [dependency('number', 'io-ts')], EMPTY_REFS);
 		}
 		case 'array': {
 			const result = serializeSchemaObject(schema.items, rootName, cwd);
-			return serializedType(`Array<${result.type}>`, `t.array(${result.io})`, result.dependencies, result.refs);
+			return serializedType(
+				`Array<${result.type}>`,
+				`array(${result.io})`,
+				[...result.dependencies, dependency('array', 'io-ts')],
+				result.refs,
+			);
 		}
 		case 'object': {
 			return schema.additionalProperties
@@ -306,16 +309,16 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 
 const serializeEnum = (enumValue: Array<string | number | boolean>): TSerializedType => {
 	const type = enumValue.map(value => `'${value}'`).join(' | ');
-	const io = `t.union([${enumValue.map(value => `t.literal('${value}')`).join(',')}])`;
-	return serializedType(type, io, EMPTY_DEPENDENCIES, EMPTY_REFS);
+	const io = `union([${enumValue.map(value => `literal('${value}')`).join(',')}])`;
+	return serializedType(type, io, [dependency('union', 'io-ts'), dependency('literal', 'io-ts')], EMPTY_REFS);
 };
 
 const serializeAdditionalProperties = (properties: TSchemaObject, rootName: string, cwd: string): TSerializedType => {
 	const additional = serializeSchemaObject(properties, rootName, cwd);
 	return serializedType(
 		`{ [key: string]: ${additional.type} }`,
-		`t.dictionary(t.string, ${additional.io})`,
-		additional.dependencies,
+		`dictionary(string, ${additional.io})`,
+		[...additional.dependencies, dependency('string', 'io-ts'), dependency('dictionary', 'io-ts')],
 		additional.refs,
 	);
 };
@@ -375,7 +378,7 @@ const serializeOperationObject = (
 
 	const io = `
 		${operationName}: (${argsName}) => {
-			${when(hasParameters, `const encoded = t.partial({ ${serializedParameters.io} }).encode(parameters);`)}
+			${when(hasParameters, `const encoded = partial({ ${serializedParameters.io} }).encode(parameters);`)}
 	
 			return e.apiClient.request({
 				url: ${serializedUrl},
@@ -393,6 +396,7 @@ const serializeOperationObject = (
 		dependency('fromEither', '@devexperts/remote-data-ts'),
 		dependency('ResponseValiationError', getRelativeClientPath(cwd)),
 		dependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
+		dependency('partial', 'io-ts'),
 		...serializedResponses.dependencies,
 		...serializedParameters.dependencies,
 	];
@@ -409,17 +413,19 @@ const serializeOperationResponses = (responses: TResponsesObject, rootName: stri
 		),
 	);
 	if (serializedResponses.length === 0) {
-		return serializedType('void', 't.void', EMPTY_DEPENDENCIES, EMPTY_REFS);
+		return serializedType('void', 'tvoid', [dependency('void as tvoid', 'io-ts')], EMPTY_REFS);
 	}
 	const combined = intercalateSerialized(
 		serializedType('|', ',', EMPTY_DEPENDENCIES, EMPTY_REFS),
 		serializedResponses,
 	);
 
+	const isUnion = serializedResponses.length > 1;
+
 	return serializedType(
 		combined.type,
-		serializedResponses.length > 1 ? `t.union([${combined.io}])` : combined.io,
-		combined.dependencies,
+		isUnion ? `union([${combined.io}])` : combined.io,
+		concatIfL(isUnion, combined.dependencies, () => [dependency('union', 'io-ts')]),
 		EMPTY_REFS,
 	);
 };
@@ -477,9 +483,9 @@ const serializeQueryParameters = (parameters: NonEmptyArray<TQueryParameterObjec
 	const { isRequired, dependencies, refs, io, type } = intercalated;
 	return serializedParameter(
 		`query${unless(isRequired, '?')}: { ${type} }`,
-		`query: t.type({ ${io} })`,
+		`query: type({ ${io} })`,
 		intercalated.isRequired,
-		dependencies,
+		[...dependencies, dependency('type', 'io-ts')],
 		refs,
 	);
 };
@@ -534,21 +540,21 @@ const serializeParameter = (parameter: TPathParameterObject | TQueryParameterObj
 			const serializedArrayItems = serializeNonArrayItemsObject(parameter.items);
 			return serializedParameter(
 				`Array<${serializedArrayItems.type}>`,
-				`t.array(${serializedArrayItems.io})`,
+				`array(${serializedArrayItems.io})`,
 				isRequired,
-				serializedArrayItems.dependencies,
+				[...serializedArrayItems.dependencies, dependency('array', 'io-ts')],
 				serializedArrayItems.refs,
 			);
 		}
 		case 'string': {
-			return serializedParameter('string', 't.string', isRequired, EMPTY_DEPENDENCIES, EMPTY_REFS);
+			return serializedParameter('string', 'string', isRequired, [dependency('string', 'io-ts')], EMPTY_REFS);
 		}
 		case 'boolean': {
-			return serializedParameter('boolean', 't.boolean', isRequired, EMPTY_DEPENDENCIES, EMPTY_REFS);
+			return serializedParameter('boolean', 'boolean', isRequired, [dependency('boolean', 'io-ts')], EMPTY_REFS);
 		}
 		case 'integer':
 		case 'number': {
-			return serializedParameter('number', 't.number', isRequired, EMPTY_DEPENDENCIES, EMPTY_REFS);
+			return serializedParameter('number', 'number', isRequired, [dependency('number', 'io-ts')], EMPTY_REFS);
 		}
 	}
 };
@@ -556,14 +562,14 @@ const serializeParameter = (parameter: TPathParameterObject | TQueryParameterObj
 const serializeNonArrayItemsObject = (items: TNonArrayItemsObject): TSerializedType => {
 	switch (items.type) {
 		case 'string': {
-			return serializedType('string', 't.string', EMPTY_DEPENDENCIES, EMPTY_REFS);
+			return serializedType('string', 'string', [dependency('string', 'io-ts')], EMPTY_REFS);
 		}
 		case 'boolean': {
-			return serializedType('boolean', 't.boolean', EMPTY_DEPENDENCIES, EMPTY_REFS);
+			return serializedType('boolean', 'boolean', [dependency('boolean', 'io-ts')], EMPTY_REFS);
 		}
 		case 'integer':
 		case 'number': {
-			return serializedType('number', 't.number', EMPTY_DEPENDENCIES, EMPTY_REFS);
+			return serializedType('number', 'number', [dependency('number', 'io-ts')], EMPTY_REFS);
 		}
 	}
 };
@@ -612,12 +618,12 @@ const client = `
 `;
 
 const utils = `
-	import * as t from 'io-ts';
-	export const unknownType = new class UnknownType extends t.Type<unknown> {
+	import { Type, success, identity } from 'io-ts';
+	export const unknownType = new class UnknownType extends Type<unknown> {
 		readonly _tag: 'UnknownType' = 'UnknownType';
 	
 		constructor() {
-			super('unknownType', (_: unknown): _ is unknown => true, t.success, t.identity);
+			super('unknownType', (_: unknown): _ is unknown => true, success, identity);
 		}
 	}();
 `;
@@ -650,16 +656,18 @@ const serializeURL = (url: string, pathParameters: TSerializedPathParameter[]): 
 	);
 
 const toObjectType = (serialized: TSerializedType, recursion: Option<string>): TSerializedType => {
-	const io = `t.type({ ${serialized.io} })`;
+	const io = `type({ ${serialized.io} })`;
 	return serializedType(
 		`{ ${serialized.type} }`,
 		recursion
 			.map(recursion => {
 				const recursionIO = getIOName(recursion);
-				return `t.recursion<${recursion}>('${recursionIO}', ${recursionIO} => ${io})`;
+				return `recursion<${recursion}>('${recursionIO}', ${recursionIO} => ${io})`;
 			})
 			.getOrElse(io),
-		serialized.dependencies,
+		concatIfL(recursion.isSome(), [...serialized.dependencies, dependency('type', 'io-ts')], () => [
+			dependency('recursion', 'io-ts'),
+		]),
 		EMPTY_REFS,
 	);
 };

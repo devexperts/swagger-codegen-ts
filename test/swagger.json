@@ -1076,6 +1076,9 @@
       "xml": {
         "name": "Pet"
       }
+    },
+    "EmptyObject" : {
+      "type" : "object"
     }
   },
   "externalDocs": {
