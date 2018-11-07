@@ -1,3 +1,18 @@
+<a name="0.3.0"></a>
+# [0.3.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.4...v0.3.0) (2018-11-07)
+
+
+### Bug Fixes
+
+* treat empty object as unknown type ([#5](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/5)) ([3db0d90](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/3db0d90))
+
+
+### BREAKING CHANGES
+
+* empty objects like '{}' are now serialized as unknown instead of object
+
+
+
 <a name="0.2.4"></a>
 ## [0.2.4](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.3...v0.2.4) (2018-11-02)
 
