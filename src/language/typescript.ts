@@ -391,16 +391,19 @@ const serializeOperationObject = (
 		},
 	`;
 
-	const dependencies = [
-		dependency('map', 'rxjs/operators'),
-		dependency('fromEither', '@devexperts/remote-data-ts'),
-		dependency('ResponseValiationError', getRelativeClientPath(cwd)),
-		dependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
-		dependency('partial', 'io-ts'),
-		...flatten(serializedPathParameters.map(parameter => parameter.dependencies)),
-		...serializedResponses.dependencies,
-		...serializedParameters.dependencies,
-	];
+	const dependencies = concatIfL(
+		hasParameters,
+		[
+			dependency('map', 'rxjs/operators'),
+			dependency('fromEither', '@devexperts/remote-data-ts'),
+			dependency('ResponseValiationError', getRelativeClientPath(cwd)),
+			dependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
+			...flatten(serializedPathParameters.map(parameter => parameter.dependencies)),
+			...serializedResponses.dependencies,
+			...serializedParameters.dependencies,
+		],
+		() => [dependency('partial', 'io-ts')],
+	);
 
 	return serializedType(type, io, dependencies, serializedParameters.refs);
 };
