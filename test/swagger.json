@@ -843,9 +843,11 @@
     },
     "/test": {
       "get": {
-        "tags": ["test"],
-        "summary": "Check support of mixed additionalProperties",
-        "operationId": "testCheckSupportOfMixedAdditionalProperties",
+        "tags": [
+          "test"
+        ],
+        "summary": "Check support of unknown additionalProperties",
+        "operationId": "checkSupportOfUnknownAdditionalProperties",
         "responses": {
           "200": {
             "description": "test description",
@@ -856,6 +858,33 @@
                 "description": "test description",
                 "type": "object"
               }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "test"
+        ],
+        "summary": "Check support of unknown body",
+        "description": "",
+        "operationId": "checkSupportOfUnknownBody",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "test description",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "schema": {
+              "type": "string"
             }
           }
         }

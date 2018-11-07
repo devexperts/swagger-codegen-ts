@@ -57,6 +57,13 @@ const serializedType = (type: string, io: string, dependencies: TDepdendency[], 
 	refs,
 });
 
+const SERIALIZED_MIXED_DICTIONARY_TYPE = serializedType(
+	'Record<string, t.mixed>',
+	't.Dictionary',
+	EMPTY_DEPENDENCIES,
+	EMPTY_REFS,
+);
+
 type TSerializedParameter = TSerializedType & {
 	isRequired: boolean;
 };
@@ -131,19 +138,15 @@ const CONTROLLERS_DIRECTORY = 'controllers';
 const DEFINITIONS_DIRECTORY = 'definitions';
 const CLIENT_DIRECTORY = 'client';
 const CLIENT_FILENAME = 'client';
-const UTILS_DIRECTORY = 'utils';
-const UTILS_FILENAME = 'utils';
 
 const getRelativeRoot = (cwd: string) => path.relative(cwd, ROOT_DIRECTORY);
 const getRelativeDefinitionPath = (cwd: string, definitionFileName: string): string =>
 	`${getRelativeRoot(cwd)}/${DEFINITIONS_DIRECTORY}/${definitionFileName}`;
 const getRelativeClientPath = (cwd: string): string => `${getRelativeRoot(cwd)}/${CLIENT_DIRECTORY}/${CLIENT_FILENAME}`;
-const getRelativeUtilsPath = (cwd: string): string => `${getRelativeRoot(cwd)}/${UTILS_DIRECTORY}/${UTILS_FILENAME}`;
 
 export const serialize: TSerializer = (name: string, swaggerObject: TSwaggerObject): TDirectory =>
 	directory(name, [
 		directory(CLIENT_DIRECTORY, [file(`${CLIENT_FILENAME}.ts`, client)]),
-		directory(UTILS_DIRECTORY, [file(`${UTILS_FILENAME}.ts`, utils)]),
 		...catOptions([swaggerObject.definitions.map(serializeDefinitions)]),
 		serializePaths(swaggerObject.paths),
 	]);
@@ -292,14 +295,7 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 						return toObjectType(serialized, serialized.refs.includes(rootName) ? some(rootName) : none);
 					}),
 				)
-				.getOrElseL(() =>
-					serializedType(
-						'unknown',
-						'unknownType',
-						[dependency('unknownType', getRelativeUtilsPath(cwd))],
-						EMPTY_REFS,
-					),
-				);
+				.getOrElse(SERIALIZED_MIXED_DICTIONARY_TYPE);
 		}
 	}
 };
@@ -609,18 +605,6 @@ const client = `
 			Object.setPrototypeOf(this, ResponseValiationError);
 		}
 	}
-`;
-
-const utils = `
-	import * as t from 'io-ts';
-	
-	export const unknownType = new class UnknownType extends t.Type<unknown> {
-		readonly _tag: 'UnknownType' = 'UnknownType';
-	
-		constructor() {
-			super('unknownType', (_: unknown): _ is unknown => true, t.success, t.identity);
-		}
-	}();
 `;
 
 const hasRequiredParameters = (parameters: Array<TQueryParameterObject | TBodyParameterObject>): boolean =>
