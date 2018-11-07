@@ -1,3 +1,13 @@
+<a name="0.3.3"></a>
+## [0.3.3](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.2...v0.3.3) (2018-11-07)
+
+
+### Bug Fixes
+
+* fix unused imports ([df13a12](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/df13a12))
+
+
+
 <a name="0.3.2"></a>
 ## [0.3.2](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.1...v0.3.2) (2018-11-07)
 
