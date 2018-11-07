@@ -1,3 +1,13 @@
+<a name="0.3.4"></a>
+## [0.3.4](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.3...v0.3.4) (2018-11-07)
+
+
+### Bug Fixes
+
+* fix missing path parameter dependencies ([3a5604f](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/3a5604f))
+
+
+
 <a name="0.3.3"></a>
 ## [0.3.3](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.2...v0.3.3) (2018-11-07)
 
