@@ -1,3 +1,13 @@
+<a name="0.3.7"></a>
+## [0.3.7](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.6...v0.3.7) (2018-11-21)
+
+
+### Bug Fixes
+
+* fix recursion by adding explicit output type argument ([8f41fa9](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/8f41fa9))
+
+
+
 <a name="0.3.6"></a>
 ## [0.3.6](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.5...v0.3.6) (2018-11-21)
 
