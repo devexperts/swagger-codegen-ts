@@ -666,7 +666,7 @@ const toObjectType = (serialized: TSerializedType, recursion: Option<string>): T
 		recursion
 			.map(recursion => {
 				const recursionIO = getIOName(recursion);
-				return `recursion<${recursion}>('${recursionIO}', ${recursionIO} => ${io})`;
+				return `recursion<${recursion}, unknown>('${recursionIO}', ${recursionIO} => ${io})`;
 			})
 			.getOrElse(io),
 		concatIfL(recursion.isSome(), [...serialized.dependencies, dependency('type', 'io-ts')], () => [
