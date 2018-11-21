@@ -1,3 +1,8 @@
+<a name="0.3.6"></a>
+## [0.3.6](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.5...v0.3.6) (2018-11-21)
+
+
+
 <a name="0.3.5"></a>
 ## [0.3.5](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.4...v0.3.5) (2018-11-07)
 
