@@ -6,7 +6,7 @@
   "scripts": {
     "ts-node": "ts-node",
     "tslint": "tslint -c tslint.json --project tsconfig.json './src/**/*.ts' './test/**/*.ts'",
-    "test": "npm run tslint && npm run prettier && ts-node ./test/index.ts",
+    "test": "rm -rf ./test/out && npm run tslint && npm run prettier && ts-node ./test/index.ts",
     "prettier": "prettier --list-different \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prettier:fix": "prettier --write \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prepublishOnly": "npm run test && npm run build",

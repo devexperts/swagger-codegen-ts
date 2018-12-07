@@ -733,36 +733,36 @@ export const TagObject: t.Type<TTagObject, mixed> = t.type({
 });
 
 export type TSwaggerObject = {
-	swagger: string;
-	info: TInfoObject;
-	host: Option<string>;
 	basePath: Option<string>;
-	schemes: Option<string[]>;
 	consumes: Option<string[]>;
-	produces: Option<string[]>;
-	paths: TPathsObject;
 	definitions: Option<TDefinitionsObject>;
-	parameters: Option<TParametersDefinitionsObject>;
-	responses: Option<TResponsesDefinitionsObject>;
-	securityDefinitions: Option<TSecurityDefinitionsObject>;
-	security: Option<TSecurityRequirementObject[]>;
-	tags: Option<TTagObject[]>;
 	externalDocs: Option<TExternalDocumentationObject>;
+	host: Option<string>;
+	info: TInfoObject;
+	parameters: Option<TParametersDefinitionsObject>;
+	paths: TPathsObject;
+	produces: Option<string[]>;
+	responses: Option<TResponsesDefinitionsObject>;
+	schemes: Option<string[]>;
+	security: Option<TSecurityRequirementObject[]>;
+	securityDefinitions: Option<TSecurityDefinitionsObject>;
+	swagger: string;
+	tags: Option<TTagObject[]>;
 };
 export const SwaggerObject: t.Type<TSwaggerObject, mixed> = t.type({
-	swagger: t.string,
-	info: InfoObject,
-	host: stringOption,
 	basePath: stringOption,
-	schemes: stringArrayOption,
 	consumes: stringArrayOption,
-	produces: stringArrayOption,
-	paths: PathsObject,
 	definitions: createOptionFromNullable(DefinitionsObject),
-	parameters: createOptionFromNullable(ParametersDefinitionsObject),
-	responses: createOptionFromNullable(ResponsesDefinitionsObject),
-	securityDefinitions: createOptionFromNullable(SecurityDefinitionsObject),
-	security: createOptionFromNullable(t.array(SecurityRequirementObject)),
-	tags: createOptionFromNullable(t.array(TagObject)),
 	externalDocs: createOptionFromNullable(ExternalDocumentationObject),
+	host: stringOption,
+	info: InfoObject,
+	parameters: createOptionFromNullable(ParametersDefinitionsObject),
+	paths: PathsObject,
+	produces: stringArrayOption,
+	responses: createOptionFromNullable(ResponsesDefinitionsObject),
+	schemes: stringArrayOption,
+	security: createOptionFromNullable(t.array(SecurityRequirementObject)),
+	securityDefinitions: createOptionFromNullable(SecurityDefinitionsObject),
+	swagger: t.string,
+	tags: createOptionFromNullable(t.array(TagObject)),
 });

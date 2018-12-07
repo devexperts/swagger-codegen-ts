@@ -14,7 +14,7 @@ import {
 } from '../swagger';
 import { directory, file, TDirectory, TFile } from '../fs';
 import * as path from 'path';
-import { array, catOptions, flatten, uniq } from 'fp-ts/lib/Array';
+import { array, catOptions, flatten, head, uniq } from 'fp-ts/lib/Array';
 import { getRecordSetoid, Setoid, setoidString } from 'fp-ts/lib/Setoid';
 import { fromArray, groupBy, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import {
@@ -24,7 +24,7 @@ import {
 	groupPathsByTag,
 	TSerializer,
 } from '../utils';
-import { none, Option, some } from 'fp-ts/lib/Option';
+import { fromNullable, none, Option, some } from 'fp-ts/lib/Option';
 import { getArrayMonoid, getRecordMonoid, monoidString, fold, monoidAny } from 'fp-ts/lib/Monoid';
 import { decapitalize } from '@devexperts/utils/dist/string/string';
 import { intercalate } from 'fp-ts/lib/Foldable2v';
@@ -135,8 +135,10 @@ const UTILS_DIRECTORY = 'utils';
 const UTILS_FILENAME = 'utils';
 
 const getRelativeRoot = (cwd: string) => path.relative(cwd, ROOT_DIRECTORY);
-const getRelativeDefinitionPath = (cwd: string, definitionFileName: string): string =>
-	`${getRelativeRoot(cwd)}/${DEFINITIONS_DIRECTORY}/${definitionFileName}`;
+const getRelativeRefPath = (cwd: string, refBlockName: string, refFileName: string): string =>
+	`${getRelativeRoot(cwd)}/${refBlockName}/${refFileName}`;
+const getRelativeOutRefPath = (cwd: string, blockName: string, outFileName: string, refFileName: string): string =>
+	`${getRelativeRoot(cwd)}/../${outFileName}/${blockName}/${refFileName}`;
 const getRelativeClientPath = (cwd: string): string => `${getRelativeRoot(cwd)}/${CLIENT_DIRECTORY}/${CLIENT_FILENAME}`;
 const getRelativeUtilsPath = (cwd: string): string => `${getRelativeRoot(cwd)}/${UTILS_DIRECTORY}/${UTILS_FILENAME}`;
 
@@ -218,10 +220,29 @@ const serializePath = (url: string, item: TPathItemObject, rootName: string, cwd
 const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: string): TSerializedType => {
 	switch (schema.type) {
 		case undefined: {
-			const type = `${schema.$ref.replace(/^#\/definitions\//g, '')}`;
+			const $ref = schema.$ref;
+			const defBlock = fromNullable($ref.match(/#\/[^\/]+\//))
+				.chain(head)
+				.map(def => def.replace(/[#, \/]/g, ''));
+			const refFileName = fromNullable($ref.match(/^\.\/[^\/]+\.[^\/]+#/))
+				.chain(head)
+				.map(ref => ref.replace(/(\.\/|\.[^/]+#)/g, ''));
+			const safeType = fromNullable($ref.match(/\/[^\/]+$/))
+				.chain(head)
+				.map(type => type.replace(/^\//, ''));
+
+			if (safeType.isNone() || defBlock.isNone()) {
+				throw new Error(`Invalid $ref: ${$ref}`);
+			}
+
+			const type = safeType.value;
+
 			const io = getIOName(type);
 			const isRecursive = rootName === type || rootName === io;
-			const definitionFilePath = getRelativeDefinitionPath(cwd, type);
+			const definitionFilePath = refFileName.isSome()
+				? getRelativeOutRefPath(cwd, defBlock.value, refFileName.value, type)
+				: getRelativeRefPath(cwd, defBlock.value, type);
+
 			return serializedType(
 				type,
 				io,
