@@ -108,6 +108,7 @@ export const generate = async (options: TGenerateOptions): Promise<void> => {
 			const report = PathReporter.report(decoded);
 			const lastReport = last(report);
 			log(lastReport.getOrElse('Invalid spec'));
+			fs.writeFileSync(`${options.out}/qwe.txt`, decoded.toString());
 			ThrowReporter.report(decoded);
 			return;
 		}

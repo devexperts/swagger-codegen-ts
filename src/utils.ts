@@ -1,4 +1,4 @@
-import { array, uniq, flatten } from 'fp-ts/lib/Array';
+import { array, uniq, flatten, last } from 'fp-ts/lib/Array';
 import {
 	TPathItemObject,
 	TOperationObject,
@@ -9,12 +9,14 @@ import {
 	TReferenceObject,
 	TBodyParameterObject,
 	TSwaggerObject,
+	TParametersDefinitionsObject,
 } from './swagger';
-import { tuple } from 'fp-ts/lib/function';
-import { setoidString } from 'fp-ts/lib/Setoid';
+import { identity, tuple } from 'fp-ts/lib/function';
+import { getRecordSetoid, setoidString } from 'fp-ts/lib/Setoid';
 import { TQueryParameterObject } from './swagger';
 import { TFSEntity } from './fs';
 import { camelize } from '@devexperts/utils/dist/string/string';
+import { Option, some } from 'fp-ts/lib/Option';
 
 export type TSerializer = (name: string, schema: TSwaggerObject) => TFSEntity;
 
@@ -41,17 +43,58 @@ export const getTagsFromPath = (path: TPathItemObject): string[] => {
 	return uniq(setoidString)(tags);
 };
 
-export const groupPathsByTag = (paths: TPathsObject): TDictionary<TDictionary<TPathItemObject>> => {
+const paramSetoid = getRecordSetoid<TParameterObject | TReferenceObject>({
+	name: setoidString,
+	$ref: setoidString,
+});
+
+export const resolveParam = (parameters: Option<TParametersDefinitionsObject>) => (
+	param: TParameterObject | TReferenceObject,
+): Option<TParameterObject | TReferenceObject> => {
+	if (!isOperationReferenceParameterObject(param)) {
+		return some(param);
+	}
+	return last(param.$ref.split('/')).chain(ref => parameters.mapNullable(parameters => parameters[ref]));
+};
+
+export const addParamsToTag = (
+	params: Array<TParameterObject | TReferenceObject>,
+	parameters: Option<TParametersDefinitionsObject>,
+) => (tag: TOperationObject): TOperationObject => ({
+	...tag,
+	parameters: tag.parameters
+		.alt(some([]))
+		.map(tagParameters =>
+			[...tagParameters, ...params].map(params => resolveParam(parameters)(params).getOrElse(params)),
+		)
+		.map(uniq(paramSetoid)),
+});
+
+export const groupPathsByTag = (
+	paths: TPathsObject,
+	parameters: Option<TParametersDefinitionsObject>,
+): TDictionary<TDictionary<TPathItemObject>> => {
 	const keys = Object.keys(paths);
 	const result: TDictionary<TDictionary<TPathItemObject>> = {};
 	for (const key of keys) {
 		const path = paths[key];
-		const tags = getTagsFromPath(path);
+		const pathParams = path.parameters;
+		const addParams = pathParams.map(pathParams => addParamsToTag(pathParams, parameters)).getOrElse(identity);
+		const pathWithParams: TPathItemObject = pathParams
+			.map(() => ({
+				...path,
+				get: path.get.map(addParams),
+				post: path.post.map(addParams),
+				put: path.put.map(addParams),
+				delete: path.delete.map(addParams),
+			}))
+			.getOrElse(path);
+		const tags = getTagsFromPath(pathWithParams);
 		const tag = camelize(tags.join('').replace(/\s/g, ''), false);
 
 		result[tag] = {
 			...(result[tag] || {}),
-			[key]: path,
+			[key]: pathWithParams,
 		};
 	}
 	return result;

@@ -3,6 +3,7 @@ import {
 	TDefinitionsObject,
 	TNonArrayItemsObject,
 	TOperationObject,
+	TParametersDefinitionsObject,
 	TPathItemObject,
 	TPathParameterObject,
 	TPathsObject,
@@ -147,7 +148,7 @@ export const serialize: TSerializer = (name: string, swaggerObject: TSwaggerObje
 		directory(CLIENT_DIRECTORY, [file(`${CLIENT_FILENAME}.ts`, client)]),
 		directory(UTILS_DIRECTORY, [file(`${UTILS_FILENAME}.ts`, utils)]),
 		...catOptions([swaggerObject.definitions.map(serializeDefinitions)]),
-		serializePaths(swaggerObject.paths),
+		serializePaths(swaggerObject.paths, swaggerObject.parameters),
 	]);
 
 const serializeDefinitions = (definitions: TDefinitionsObject): TDirectory =>
@@ -156,10 +157,10 @@ const serializeDefinitions = (definitions: TDefinitionsObject): TDirectory =>
 			serializeDefinition(name, definition, `${ROOT_DIRECTORY}/${DEFINITIONS_DIRECTORY}`),
 		),
 	]);
-const serializePaths = (paths: TPathsObject): TDirectory =>
+const serializePaths = (paths: TPathsObject, parameters: Option<TParametersDefinitionsObject>): TDirectory =>
 	directory(
 		CONTROLLERS_DIRECTORY,
-		serializeDictionary(groupPathsByTag(paths), (name, group) =>
+		serializeDictionary(groupPathsByTag(paths, parameters), (name, group) =>
 			serializePathGroup(name, group, `${ROOT_DIRECTORY}/${CONTROLLERS_DIRECTORY}`),
 		),
 	);
