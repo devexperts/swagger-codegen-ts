@@ -57,7 +57,7 @@ paths:
               description: Pet object that needs to be added to the store
               required: true
               schema:
-                  "$ref": "./common.json#/definitions/Pet"
+                  "$ref": "./common.yml#/definitions/Pet"
             responses:
                 '405':
                     description: Invalid input
@@ -83,7 +83,7 @@ paths:
               description: Pet object that needs to be added to the store
               required: true
               schema:
-                  "$ref": "./common.json#/definitions/Pet"
+                  "$ref": "./common.yml#/definitions/Pet"
             responses:
                 '400':
                     description: Invalid ID supplied
@@ -125,7 +125,7 @@ paths:
                     schema:
                         type: array
                         items:
-                            "$ref": "./common.json#/definitions/Pet"
+                            "$ref": "./common.yml#/definitions/Pet"
                 '400':
                     description: Invalid status value
             security:
@@ -158,7 +158,7 @@ paths:
                     schema:
                         type: array
                         items:
-                            "$ref": "./common.json#/definitions/Pet"
+                            "$ref": "./common.yml#/definitions/Pet"
                 '400':
                     description: Invalid tag value
             security:
@@ -182,7 +182,7 @@ paths:
                 '200':
                     description: successful operation
                     schema:
-                        "$ref": "./common.json#/definitions/Pet"
+                        "$ref": "./common.yml#/definitions/Pet"
                 '400':
                     description: Invalid ID supplied
                 '404':
@@ -269,7 +269,7 @@ paths:
                 '200':
                     description: successful operation
                     schema:
-                        "$ref": "./common.json#/definitions/ApiResponse"
+                        "$ref": "./common.yml#/definitions/ApiResponse"
             security:
             - petstore_auth:
               - write:pets
@@ -310,12 +310,12 @@ paths:
               description: order placed for purchasing the pet
               required: true
               schema:
-                  "$ref": "./common.json#/definitions/Order"
+                  "$ref": "./common.yml#/definitions/Order"
             responses:
                 '200':
                     description: successful operation
                     schema:
-                        "$ref": "./common.json#/definitions/Order"
+                        "$ref": "./common.yml#/definitions/Order"
                 '400':
                     description: Invalid Order
     "/store/order/{orderId}":
@@ -342,7 +342,7 @@ paths:
                 '200':
                     description: successful operation
                     schema:
-                        "$ref": "./common.json#/definitions/Order"
+                        "$ref": "./common.yml#/definitions/Order"
                 '400':
                     description: Invalid ID supplied
                 '404':
@@ -386,7 +386,7 @@ paths:
               description: Created user object
               required: true
               schema:
-                  "$ref": "./common.json#/definitions/User"
+                  "$ref": "./common.yml#/definitions/User"
             responses:
                 default:
                     description: successful operation
@@ -408,7 +408,7 @@ paths:
               schema:
                   type: array
                   items:
-                      "$ref": "./common.json#/definitions/User"
+                      "$ref": "./common.yml#/definitions/User"
             responses:
                 default:
                     description: successful operation
@@ -430,7 +430,7 @@ paths:
               schema:
                   type: array
                   items:
-                      "$ref": "./common.json#/definitions/User"
+                      "$ref": "./common.yml#/definitions/User"
             responses:
                 default:
                     description: successful operation
@@ -505,7 +505,7 @@ paths:
                 '200':
                     description: successful operation
                     schema:
-                        "$ref": "./common.json#/definitions/User"
+                        "$ref": "./common.yml#/definitions/User"
                 '400':
                     description: Invalid username supplied
                 '404':
@@ -530,7 +530,7 @@ paths:
               description: Updated user object
               required: true
               schema:
-                  "$ref": "./common.json#/definitions/User"
+                  "$ref": "./common.yml#/definitions/User"
             responses:
                 '400':
                     description: Invalid user supplied

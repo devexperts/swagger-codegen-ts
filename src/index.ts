@@ -1,6 +1,6 @@
 import { SwaggerObject, TSwaggerObject } from './swagger';
 import * as prettier from 'prettier';
-import { map, TFSEntity, write } from './fs';
+import { map, read, TFSEntity, write } from './fs';
 import { TSerializer } from './utils';
 import * as fs from 'fs-extra';
 import { fromNullable, Option } from 'fp-ts/lib/Option';
@@ -47,19 +47,6 @@ export type TGenerateOptions = {
 const cwd = process.cwd();
 const resolvePath = (p: string) => (path.isAbsolute(p) ? p : path.resolve(cwd, p));
 
-type TBuffer = {
-	buffer: Buffer;
-	fileName: string;
-};
-
-const read = async (_pathToFile: string): Promise<TBuffer> => {
-	const pathToFile = resolvePath(_pathToFile);
-	return {
-		buffer: await fs.readFile(pathToFile),
-		fileName: path.basename(pathToFile),
-	};
-};
-
 const decode = (json: TJSON): Either<ValidationError[], TSwaggerObject> => {
 	return SwaggerObject.decode(json);
 };
@@ -98,7 +85,7 @@ export const generate = async (options: TGenerateOptions): Promise<void> => {
 
 	for (const pathToFile of options.pathsToSpec) {
 		const pathToSpec = resolvePath(pathToFile);
-		const buffer = await read(pathToSpec);
+		const buffer = await read(pathToSpec, cwd);
 		const dirName = head(buffer.fileName.split('.')).getOrElse(buffer.fileName);
 		const apiOut = path.resolve(out, `./${dirName}`);
 		await fs.mkdir(apiOut);
@@ -108,7 +95,6 @@ export const generate = async (options: TGenerateOptions): Promise<void> => {
 			const report = PathReporter.report(decoded);
 			const lastReport = last(report);
 			log(lastReport.getOrElse('Invalid spec'));
-			fs.writeFileSync(`${options.out}/qwe.txt`, decoded.toString());
 			ThrowReporter.report(decoded);
 			return;
 		}

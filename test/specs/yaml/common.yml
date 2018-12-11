@@ -3,6 +3,14 @@ info:
     version: 1.0.0
     title: Common
 paths: []
+parameters:
+    petIdPathParam:
+        name: petId
+        in: path
+        description: ID of pet to return
+        required: true
+        type: integer
+        format: int64
 definitions:
     Order:
         type: object

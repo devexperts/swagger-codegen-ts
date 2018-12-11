@@ -16,7 +16,8 @@ import { getRecordSetoid, setoidString } from 'fp-ts/lib/Setoid';
 import { TQueryParameterObject } from './swagger';
 import { TFSEntity } from './fs';
 import { camelize } from '@devexperts/utils/dist/string/string';
-import { Option, some } from 'fp-ts/lib/Option';
+import { option, Option, some } from 'fp-ts/lib/Option';
+import { sequence } from 'fp-ts/lib/Traversable';
 
 export type TSerializer = (name: string, schema: TSwaggerObject) => TFSEntity;
 
@@ -48,26 +49,30 @@ const paramSetoid = getRecordSetoid<TParameterObject | TReferenceObject>({
 	$ref: setoidString,
 });
 
-export const resolveParam = (parameters: Option<TParametersDefinitionsObject>) => (
-	param: TParameterObject | TReferenceObject,
-): Option<TParameterObject | TReferenceObject> => {
-	if (!isOperationReferenceParameterObject(param)) {
-		return some(param);
+const addPathParametersToTag = (pathParams: Array<TParameterObject | TReferenceObject>) => (
+	tagParams: Array<TParameterObject | TReferenceObject>,
+): Array<TParameterObject | TReferenceObject> => uniq(paramSetoid)([...pathParams, ...tagParams]);
+
+const resolveTagParameter = (fileParameters: TParametersDefinitionsObject) => (
+	parameter: TParameterObject | TReferenceObject,
+): Option<TParameterObject> => {
+	if (!isOperationReferenceParameterObject(parameter)) {
+		return some(parameter);
 	}
-	return last(param.$ref.split('/')).chain(ref => parameters.mapNullable(parameters => parameters[ref]));
+	return last(parameter.$ref.split('/')).mapNullable(ref => fileParameters[ref]);
 };
 
-export const addParamsToTag = (
-	params: Array<TParameterObject | TReferenceObject>,
-	parameters: Option<TParametersDefinitionsObject>,
+const getTagWithResolvedParameters = (
+	addPathParametersToTag: (
+		tagParams: Array<TParameterObject | TReferenceObject>,
+	) => Array<TParameterObject | TReferenceObject>,
+	resolveTagParameter: (parameter: TParameterObject | TReferenceObject) => Option<TParameterObject>,
 ) => (tag: TOperationObject): TOperationObject => ({
 	...tag,
 	parameters: tag.parameters
-		.alt(some([]))
-		.map(tagParameters =>
-			[...tagParameters, ...params].map(params => resolveParam(parameters)(params).getOrElse(params)),
-		)
-		.map(uniq(paramSetoid)),
+		.map(addPathParametersToTag)
+		.map(parameters => parameters.map(resolveTagParameter))
+		.chain(sequence(option, array)),
 });
 
 export const groupPathsByTag = (
@@ -76,17 +81,25 @@ export const groupPathsByTag = (
 ): TDictionary<TDictionary<TPathItemObject>> => {
 	const keys = Object.keys(paths);
 	const result: TDictionary<TDictionary<TPathItemObject>> = {};
+	const resolveTagParam = parameters.map(resolveTagParameter);
 	for (const key of keys) {
 		const path = paths[key];
 		const pathParams = path.parameters;
-		const addParams = pathParams.map(pathParams => addParamsToTag(pathParams, parameters)).getOrElse(identity);
+		const addPathParamsToTag = pathParams.map(addPathParametersToTag);
+		const processTag = addPathParamsToTag
+			.chain(addPathParamsToTag =>
+				resolveTagParam.map(resolveTagParam =>
+					getTagWithResolvedParameters(addPathParamsToTag, resolveTagParam),
+				),
+			)
+			.getOrElse(identity);
 		const pathWithParams: TPathItemObject = pathParams
 			.map(() => ({
 				...path,
-				get: path.get.map(addParams),
-				post: path.post.map(addParams),
-				put: path.put.map(addParams),
-				delete: path.delete.map(addParams),
+				get: path.get.map(processTag),
+				post: path.post.map(processTag),
+				put: path.put.map(processTag),
+				delete: path.delete.map(processTag),
 			}))
 			.getOrElse(path);
 		const tags = getTagsFromPath(pathWithParams);
