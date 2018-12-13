@@ -7,18 +7,9 @@ import { fromNullable, Option } from 'fp-ts/lib/Option';
 import * as path from 'path';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { head, last } from 'fp-ts/lib/Array';
-import { Either, Right } from 'fp-ts/lib/Either';
-import { ValidationError } from 'io-ts';
-import { serialize } from './language/typescript';
+import { last } from 'fp-ts/lib/Array';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
-
-type TJSON = {
-	[key: string]: unknown;
-};
-
-export type TFileReader = (buffer: Buffer) => TJSON;
 
 export type TGenerateOptions = {
 	/**
@@ -47,10 +38,6 @@ export type TGenerateOptions = {
 const cwd = process.cwd();
 const resolvePath = (p: string) => (path.isAbsolute(p) ? p : path.resolve(cwd, p));
 
-const decode = (json: TJSON): Either<ValidationError[], TSwaggerObject> => {
-	return SwaggerObject.decode(json);
-};
-
 const serializeDecode = (serializer: TSerializer) => async (
 	decoded: Right<ValidationError[], TSwaggerObject>,
 	out: string,
@@ -72,14 +59,12 @@ const writeFormatted = (out: string, formatted: TFSEntity) => write(path.dirname
 
 export const generate = async (options: TGenerateOptions): Promise<void> => {
 	const out = resolvePath(options.out);
+	const isPathExist = await fs.pathExists(out);
 
-	if (!(await fs.pathExists(out))) {
-		await fs.mkdirp(out);
+	if (isPathExist) {
+		await del(out);
 	}
-	const outStats = await fs.stat(out);
-	if (!outStats.isDirectory()) {
-		throw new Error('OUT is not directory');
-	}
+	await fs.mkdirp(out);
 	const prettierConfig = await getPrettierConfig(options.pathToPrettierConfig);
 	const serializer = serializeDecode(serialize);
 
@@ -90,7 +75,7 @@ export const generate = async (options: TGenerateOptions): Promise<void> => {
 		const apiOut = path.resolve(out, `./${dirName}`);
 		await fs.mkdir(apiOut);
 		const json = options.fileReader(buffer.buffer);
-		const decoded = decode(json);
+		const decoded = SwaggerObject.decode(json);
 		if (decoded.isLeft()) {
 			const report = PathReporter.report(decoded);
 			const lastReport = last(report);

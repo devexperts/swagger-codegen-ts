@@ -228,15 +228,11 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 		case undefined: {
 			if (is$ref(schema)) {
 				const $ref = schema.$ref;
-				const defBlock = fromNullable($ref.match(/#\/[^\/]+\//))
-					.chain(head)
-					.map(def => def.replace(/[#, \/]/g, ''));
-				const refFileName = fromNullable($ref.match(/^\.\/[^\/]+\.[^\/]+#/))
-					.chain(head)
-					.map(ref => ref.replace(/(\.\/|\.[^/]+#)/g, ''));
-				const safeType = fromNullable($ref.match(/\/[^\/]+$/))
-					.chain(head)
-					.map(type => type.replace(/^\//, ''));
+				const parts = fromNullable($ref.match(/^((.+)\/(.+)\.(.+))?#\/(.+)\/(.+)$/));
+
+				const defBlock = parts.mapNullable(parts => parts[5]);
+				const refFileName = parts.mapNullable(parts => parts[3]);
+				const safeType = parts.mapNullable(parts => parts[6]);
 
 				if (safeType.isNone() || defBlock.isNone()) {
 					throw new Error(`Invalid $ref: ${$ref}`);
