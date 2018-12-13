@@ -12,14 +12,9 @@ import { Right } from 'fp-ts/lib/Either';
 import { ValidationError } from 'io-ts';
 import { serialize } from './language/typescript';
 import * as del from 'del';
+import { TFileReader } from './fileReader';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
-
-type TJSON = {
-	[key: string]: unknown;
-};
-
-export type TFileReader = (buffer: Buffer) => TJSON;
 
 export type TGenerateOptions = {
 	/**
