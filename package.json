@@ -30,8 +30,10 @@
   },
   "dependencies": {
     "@devexperts/utils": "^0.12.6",
+    "@types/del": "^3.0.1",
     "@types/fs-extra": "^5.0.4",
     "@types/prettier": "^1.13.2",
+    "del": "^3.0.0",
     "fp-ts": "^1.10.0",
     "fs-extra": "^7.0.0",
     "io-ts": "^1.2.1",
