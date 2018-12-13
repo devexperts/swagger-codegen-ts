@@ -27,6 +27,11 @@ export const directory = (name: string, content: TFSEntity[]): TDirectory => ({
 
 export type TFSEntity = TFile | TDirectory;
 
+export type TBuffer = {
+	buffer: Buffer;
+	fileName: string;
+};
+
 export const write = async (destination: string, entity: TFSEntity): Promise<void> => {
 	switch (entity.type) {
 		case 'FILE': {
@@ -54,4 +59,12 @@ export const map = (entity: TFSEntity, f: (content: string) => string): TFSEntit
 			return directory(entity.name, entity.content.map(entity => map(entity, f)));
 		}
 	}
+};
+
+export const read = async (_pathToFile: string, cwd: string): Promise<TBuffer> => {
+	const pathToFile = path.isAbsolute(_pathToFile) ? _pathToFile : path.resolve(cwd, _pathToFile);
+	return {
+		buffer: await fs.readFile(pathToFile),
+		fileName: path.basename(pathToFile),
+	};
 };

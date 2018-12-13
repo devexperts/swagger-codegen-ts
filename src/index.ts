@@ -1,6 +1,6 @@
 import { SwaggerObject, TSwaggerObject } from './swagger';
 import * as prettier from 'prettier';
-import { map, TFSEntity, write } from './fs';
+import { map, read, TFSEntity, write } from './fs';
 import { TSerializer } from './utils';
 import * as fs from 'fs-extra';
 import { fromNullable, Option } from 'fp-ts/lib/Option';
@@ -8,11 +8,11 @@ import * as path from 'path';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { head, last } from 'fp-ts/lib/Array';
+import { TFileReader } from './fileReader';
 import { Right } from 'fp-ts/lib/Either';
 import { ValidationError } from 'io-ts';
 import { serialize } from './language/typescript';
 import * as del from 'del';
-import { TFileReader } from './fileReader';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
 
@@ -42,19 +42,6 @@ export type TGenerateOptions = {
 
 const cwd = process.cwd();
 const resolvePath = (p: string) => (path.isAbsolute(p) ? p : path.resolve(cwd, p));
-
-type TBuffer = {
-	buffer: Buffer;
-	fileName: string;
-};
-
-const read = async (pathToFile: string): Promise<TBuffer> => {
-	const filePath = resolvePath(pathToFile);
-	return {
-		buffer: await fs.readFile(filePath),
-		fileName: path.basename(filePath),
-	};
-};
 
 const serializeDecode = (serializer: TSerializer) => async (
 	decoded: Right<ValidationError[], TSwaggerObject>,
@@ -88,7 +75,7 @@ export const generate = async (options: TGenerateOptions): Promise<void> => {
 
 	for (const pathToFile of options.pathsToSpec) {
 		const pathToSpec = resolvePath(pathToFile);
-		const buffer = await read(pathToSpec);
+		const buffer = await read(pathToSpec, cwd);
 		const dirName = head(buffer.fileName.split('.')).getOrElse(buffer.fileName);
 		const apiOut = path.resolve(out, `./${dirName}`);
 		await fs.mkdir(apiOut);
