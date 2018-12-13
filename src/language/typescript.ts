@@ -15,7 +15,7 @@ import {
 } from '../swagger';
 import { directory, file, TDirectory, TFile } from '../fs';
 import * as path from 'path';
-import { array, catOptions, flatten, head, uniq } from 'fp-ts/lib/Array';
+import { array, catOptions, flatten, uniq } from 'fp-ts/lib/Array';
 import { getRecordSetoid, Setoid, setoidString } from 'fp-ts/lib/Setoid';
 import { fromArray, groupBy, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import {
