@@ -14,7 +14,7 @@ import {
 } from '../swagger';
 import { directory, file, TDirectory, TFile } from '../fs';
 import * as path from 'path';
-import { array, catOptions, flatten, head, uniq } from 'fp-ts/lib/Array';
+import { array, catOptions, flatten, uniq } from 'fp-ts/lib/Array';
 import { getRecordSetoid, Setoid, setoidString } from 'fp-ts/lib/Setoid';
 import { fromArray, groupBy, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import {
@@ -221,15 +221,11 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 	switch (schema.type) {
 		case undefined: {
 			const $ref = schema.$ref;
-			const defBlock = fromNullable($ref.match(/#\/[^\/]+\//))
-				.chain(head)
-				.map(def => def.replace(/[#, \/]/g, ''));
-			const refFileName = fromNullable($ref.match(/^\.\/[^\/]+\.[^\/]+#/))
-				.chain(head)
-				.map(ref => ref.replace(/(\.\/|\.[^/]+#)/g, ''));
-			const safeType = fromNullable($ref.match(/\/[^\/]+$/))
-				.chain(head)
-				.map(type => type.replace(/^\//, ''));
+			const parts = fromNullable($ref.match(/^((.+)\/(.+)\.(.+))?#\/(.+)\/(.+)$/));
+
+			const defBlock = parts.mapNullable(parts => parts[5]);
+			const refFileName = parts.mapNullable(parts => parts[3]);
+			const safeType = parts.mapNullable(parts => parts[6]);
 
 			if (safeType.isNone() || defBlock.isNone()) {
 				throw new Error(`Invalid $ref: ${$ref}`);

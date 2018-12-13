@@ -8,9 +8,10 @@ import * as path from 'path';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { head, last } from 'fp-ts/lib/Array';
-import { Either, Right } from 'fp-ts/lib/Either';
+import { Right } from 'fp-ts/lib/Either';
 import { ValidationError } from 'io-ts';
 import { serialize } from './language/typescript';
+import * as del from 'del';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
 
@@ -52,16 +53,12 @@ type TBuffer = {
 	fileName: string;
 };
 
-const read = async (_pathToFile: string): Promise<TBuffer> => {
-	const pathToFile = resolvePath(_pathToFile);
+const read = async (pathToFile: string): Promise<TBuffer> => {
+	const filePath = resolvePath(pathToFile);
 	return {
-		buffer: await fs.readFile(pathToFile),
-		fileName: path.basename(pathToFile),
+		buffer: await fs.readFile(filePath),
+		fileName: path.basename(filePath),
 	};
-};
-
-const decode = (json: TJSON): Either<ValidationError[], TSwaggerObject> => {
-	return SwaggerObject.decode(json);
 };
 
 const serializeDecode = (serializer: TSerializer) => async (
@@ -85,14 +82,12 @@ const writeFormatted = (out: string, formatted: TFSEntity) => write(path.dirname
 
 export const generate = async (options: TGenerateOptions): Promise<void> => {
 	const out = resolvePath(options.out);
+	const isPathExist = await fs.pathExists(out);
 
-	if (!(await fs.pathExists(out))) {
-		await fs.mkdirp(out);
+	if (isPathExist) {
+		await del(out);
 	}
-	const outStats = await fs.stat(out);
-	if (!outStats.isDirectory()) {
-		throw new Error('OUT is not directory');
-	}
+	await fs.mkdirp(out);
 	const prettierConfig = await getPrettierConfig(options.pathToPrettierConfig);
 	const serializer = serializeDecode(serialize);
 
@@ -103,7 +98,7 @@ export const generate = async (options: TGenerateOptions): Promise<void> => {
 		const apiOut = path.resolve(out, `./${dirName}`);
 		await fs.mkdir(apiOut);
 		const json = options.fileReader(buffer.buffer);
-		const decoded = decode(json);
+		const decoded = SwaggerObject.decode(json);
 		if (decoded.isLeft()) {
 			const report = PathReporter.report(decoded);
 			const lastReport = last(report);
