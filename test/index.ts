@@ -18,7 +18,7 @@ generate({
 });
 
 generate({
-	pathsToSpec: [path.resolve(self, './specs/yaml/common.yml'), path.resolve(self, './specs/yaml/swagger.yml')],
+	pathsToSpec: [path.resolve(self, './specs/yaml/swagger.yml'), path.resolve(self, './specs/yaml/common.yml')],
 	out: path.resolve(self, './out/yaml'),
 	serialize,
 	fileReader: fromYaml,
