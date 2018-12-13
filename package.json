@@ -6,7 +6,7 @@
   "scripts": {
     "ts-node": "ts-node",
     "tslint": "tslint -c tslint.json --project tsconfig.json './src/**/*.ts' './test/**/*.ts'",
-    "test": "rm -rf ./test/out && npm run tslint && npm run prettier && ts-node ./test/index.ts",
+    "test": "npm run tslint && npm run prettier && ts-node ./test/index.ts",
     "prettier": "prettier --list-different \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prettier:fix": "prettier --write \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prepublishOnly": "npm run test && npm run build",
@@ -30,8 +30,10 @@
   },
   "dependencies": {
     "@devexperts/utils": "^0.12.6",
+    "@types/del": "^3.0.1",
     "@types/fs-extra": "^5.0.4",
     "@types/prettier": "^1.13.2",
+    "del": "^3.0.0",
     "fp-ts": "^1.10.0",
     "fs-extra": "^7.0.0",
     "io-ts": "^1.2.1",
