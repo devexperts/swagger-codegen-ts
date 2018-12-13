@@ -7,7 +7,12 @@ import { fromNullable, Option } from 'fp-ts/lib/Option';
 import * as path from 'path';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { last } from 'fp-ts/lib/Array';
+import { head, last } from 'fp-ts/lib/Array';
+import { TFileReader } from './fileReader';
+import { Right } from 'fp-ts/lib/Either';
+import { ValidationError } from 'io-ts';
+import * as del from 'del';
+import { serialize } from './language/typescript';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
 
