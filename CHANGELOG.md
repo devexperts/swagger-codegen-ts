@@ -1,3 +1,20 @@
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.7...v0.4.0) (2018-12-14)
+
+
+### Features
+
+* add alOff support ([6f1989b](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/6f1989b)), closes [#11](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/11)
+* add multiple file support ([ca7c164](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/ca7c164)), closes [#2](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/2)
+* add parameters in path support ([89e79dd](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/89e79dd)), closes [#9](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/9)
+
+
+### BREAKING CHANGES
+
+* `pathToSpec` renamed to `pathsToSpec` and it is `string[]` now instead of `string`
+
+
+
 <a name="0.3.7"></a>
 ## [0.3.7](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.6...v0.3.7) (2018-11-21)
 
@@ -54,21 +71,12 @@
 
 
 <a name="0.3.1"></a>
-## [0.3.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.0...v0.3.1) (2018-11-07)
+## [0.3.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.4...v0.3.1) (2018-11-07)
 
 
 ### Bug Fixes
 
 * fix broken body parameters encoding ([c8a4214](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/c8a4214))
-
-
-
-<a name="0.3.0"></a>
-# [0.3.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.4...v0.3.0) (2018-11-07)
-
-
-### Bug Fixes
-
 * treat empty object as unknown type ([#5](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/5)) ([3db0d90](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/3db0d90))
 
 

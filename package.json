@@ -1,6 +1,6 @@
 {
   "name": "@devexperts/swagger-codegen-ts",
-  "version": "0.3.7",
+  "version": "0.4.0",
   "description": "TS generator for swagger spec",
   "main": "dist/index.js",
   "scripts": {
