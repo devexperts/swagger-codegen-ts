@@ -33,6 +33,7 @@ import { decapitalize } from '@devexperts/utils/dist/string/string';
 import { intercalate } from 'fp-ts/lib/Foldable2v';
 import { collect, lookup } from 'fp-ts/lib/Record';
 import { identity } from 'fp-ts/lib/function';
+import { camelize } from 'tslint/lib/utils';
 
 const EMPTY_DEPENDENCIES: TDependency[] = [];
 const EMPTY_REFS: string[] = [];
@@ -222,12 +223,13 @@ const serializePath = (url: string, item: TPathItemObject, rootName: string, cwd
 
 const is$ref = (a: TReferenceSchemaObject | TAllOfSchemaObject): a is TReferenceSchemaObject =>
 	Object.prototype.hasOwnProperty.bind(a)('$ref');
-const getDefName = (name: string): string => `Def${name}`;
-const getImportAsDef = (name: string): string => `${name} as ${getDefName(name)}`;
+const getDefName = (name: string, prefix: string): string => `${camelize(prefix)}${name}`;
+const getImportAsDef = (name: string, prefix: string): string => `${name} as ${getDefName(name, prefix)}`;
 const isSameOutName = (isSameName: boolean, isOut: boolean): boolean => isOut && isSameName;
-const getDefIFSameName = (isSameOutName: boolean) => (name: string): string =>
-	!isSameOutName ? name : getDefName(name);
-const importAsFile = (isSameOutName: boolean) => (name: string) => (!isSameOutName ? name : getImportAsDef(name));
+const getDefIFSameName = (isSameOutName: boolean, prefix: string) => (name: string): string =>
+	!isSameOutName ? name : getDefName(name, prefix);
+const importAsFile = (isSameOutName: boolean, prefix: string) => (name: string) =>
+	!isSameOutName ? name : getImportAsDef(name, prefix);
 
 const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: string): TSerializedType => {
 	switch (schema.type) {
@@ -253,8 +255,8 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 					: getRelativeRefPath(cwd, defBlock.value, type);
 
 				const isSameOuterName = isSameOutName(rootName === type, refFileName.isSome());
-				const defName = getDefIFSameName(isSameOuterName);
-				const asDefName = importAsFile(isSameOuterName);
+				const defName = getDefIFSameName(isSameOuterName, refFileName.getOrElse(''));
+				const asDefName = importAsFile(isSameOuterName, refFileName.getOrElse(''));
 
 				return serializedType(
 					defName(type),
