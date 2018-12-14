@@ -120,17 +120,16 @@ export const BooleanPropertySchemaObject: t.Tagged<'type', TBooleanPropertySchem
 	type: t.literal('boolean'),
 });
 
+export type TAllOfSchemaObject = TBaseSchemaObjectProps & {
+	allOf: TSchemaObject[];
+	description: Option<string>;
+	type: undefined;
+};
 export type TReferenceSchemaObject = TReferenceObject &
 	TBaseSchemaObjectProps & {
 		type: undefined;
 	};
-export const ReferenceSchemaObject = t.intersection([
-	ReferenceObject,
-	t.type({
-		...BaseSchemaObjectProps,
-		type: t.literal(undefined as any),
-	}),
-]);
+export type TReferenceOrAllOfSchemeObject = TReferenceSchemaObject | TAllOfSchemaObject;
 
 export type TArraySchemaObject = TBaseSchemaObjectProps & {
 	type: 'array';
@@ -138,7 +137,7 @@ export type TArraySchemaObject = TBaseSchemaObjectProps & {
 };
 
 export type TSchemaObject =
-	| TReferenceSchemaObject
+	| TReferenceOrAllOfSchemeObject
 	| TObjectSchemaObject
 	| TStringPropertySchemaObject
 	| TNumberPropertySchemaObject
@@ -160,9 +159,24 @@ export const SchemaObject: t.Type<TSchemaObject, mixed> = t.recursion<TSchemaObj
 			properties: createOptionFromNullable(t.dictionary(t.string, SchemaObject)),
 			additionalProperties: createOptionFromNullable(SchemaObject),
 		});
+		const ReferenceOrAllOfSchemaObject: t.Tagged<'type', TReferenceOrAllOfSchemeObject, mixed> = t.union([
+			t.intersection([
+				ReferenceObject,
+				t.type({
+					...BaseSchemaObjectProps,
+					type: t.literal(undefined as any),
+				}),
+			]),
+			t.type({
+				...BaseSchemaObjectProps,
+				description: stringOption,
+				type: t.literal(undefined as any),
+				allOf: t.array(SchemaObject),
+			}),
+		]);
 
 		return t.taggedUnion('type', [
-			ReferenceSchemaObject,
+			ReferenceOrAllOfSchemaObject,
 			ArraySchemaObject,
 			ObjectSchemaObject,
 			StringPropertySchemaObject,

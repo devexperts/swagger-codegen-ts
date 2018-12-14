@@ -1,4 +1,5 @@
 import {
+	TAllOfSchemaObject,
 	TBodyParameterObject,
 	TDefinitionsObject,
 	TNonArrayItemsObject,
@@ -8,6 +9,7 @@ import {
 	TPathParameterObject,
 	TPathsObject,
 	TQueryParameterObject,
+	TReferenceSchemaObject,
 	TResponseObject,
 	TResponsesObject,
 	TSchemaObject,
@@ -32,7 +34,7 @@ import { intercalate } from 'fp-ts/lib/Foldable2v';
 import { collect, lookup } from 'fp-ts/lib/Record';
 import { identity } from 'fp-ts/lib/function';
 
-const EMPTY_DEPENDENCIES: TDepdendency[] = [];
+const EMPTY_DEPENDENCIES: TDependency[] = [];
 const EMPTY_REFS: string[] = [];
 const SUCCESSFUL_CODES = ['200', 'default'];
 
@@ -41,17 +43,17 @@ const concatIf = <A>(condition: boolean, as: A[], a: A[]): A[] => concatIfL(cond
 const unless = (condition: boolean, a: string): string => (condition ? '' : a);
 const when = (condition: boolean, a: string): string => (condition ? a : '');
 
-type TDepdendency = {
+type TDependency = {
 	name: string;
 	path: string;
 };
 type TSerializedType = {
 	type: string;
 	io: string;
-	dependencies: TDepdendency[];
+	dependencies: TDependency[];
 	refs: string[];
 };
-const serializedType = (type: string, io: string, dependencies: TDepdendency[], refs: string[]): TSerializedType => ({
+const serializedType = (type: string, io: string, dependencies: TDependency[], refs: string[]): TSerializedType => ({
 	type,
 	io,
 	dependencies,
@@ -65,7 +67,7 @@ const serializedParameter = (
 	type: string,
 	io: string,
 	isRequired: boolean,
-	dependencies: TDepdendency[],
+	dependencies: TDependency[],
 	refs: string[],
 ): TSerializedParameter => ({
 	type,
@@ -82,7 +84,7 @@ const serializedPathParameter = (
 	type: string,
 	io: string,
 	isRequired: boolean,
-	dependencies: TDepdendency[],
+	dependencies: TDependency[],
 	refs: string[],
 ): TSerializedPathParameter => ({
 	name,
@@ -92,15 +94,15 @@ const serializedPathParameter = (
 	dependencies,
 	refs,
 });
-const dependency = (name: string, path: string): TDepdendency => ({
+const dependency = (name: string, path: string): TDependency => ({
 	name,
 	path,
 });
 const dependencyOption = dependency('Option', 'fp-ts/lib/Option');
 const dependencyCreateOptionFromNullable = dependency('createOptionFromNullable', 'io-ts-types');
-const OPTION_DEPENDENCIES: TDepdendency[] = [dependencyOption, dependencyCreateOptionFromNullable];
+const OPTION_DEPENDENCIES: TDependency[] = [dependencyOption, dependencyCreateOptionFromNullable];
 
-const monoidDependencies = getArrayMonoid<TDepdendency>();
+const monoidDependencies = getArrayMonoid<TDependency>();
 const monoidRefs = getArrayMonoid<string>();
 const monoidSerializedType = getRecordMonoid<TSerializedType>({
 	type: monoidString,
@@ -210,7 +212,7 @@ const serializePath = (url: string, item: TPathItemObject, rootName: string, cwd
 	const get = item.get.map(operation => serializeOperationObject(url, 'GET', operation, rootName, cwd));
 	const put = item.put.map(operation => serializeOperationObject(url, 'PUT', operation, rootName, cwd));
 	const post = item.post.map(operation => serializeOperationObject(url, 'POST', operation, rootName, cwd));
-	const remove = item['delete'].map(operation => serializeOperationObject(url, 'DELETE', operation, rootName, cwd));
+	const remove = item.delete.map(operation => serializeOperationObject(url, 'DELETE', operation, rootName, cwd));
 	const options = item.options.map(operation => serializeOperationObject(url, 'OPTIONS', operation, rootName, cwd));
 	const head = item.head.map(operation => serializeOperationObject(url, 'HEAD', operation, rootName, cwd));
 	const patch = item.patch.map(operation => serializeOperationObject(url, 'PATCH', operation, rootName, cwd));
@@ -218,35 +220,53 @@ const serializePath = (url: string, item: TPathItemObject, rootName: string, cwd
 	return foldSerialized(operations);
 };
 
+const is$ref = (a: TReferenceSchemaObject | TAllOfSchemaObject): a is TReferenceSchemaObject =>
+	Object.prototype.hasOwnProperty.bind(a)('$ref');
+
 const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: string): TSerializedType => {
 	switch (schema.type) {
 		case undefined: {
-			const $ref = schema.$ref;
-			const parts = fromNullable($ref.match(/^((.+)\/(.+)\.(.+))?#\/(.+)\/(.+)$/));
+			if (is$ref(schema)) {
+				const $ref = schema.$ref;
+				const parts = fromNullable($ref.match(/^((.+)\/(.+)\.(.+))?#\/(.+)\/(.+)$/));
 
-			const defBlock = parts.mapNullable(parts => parts[5]);
-			const refFileName = parts.mapNullable(parts => parts[3]);
-			const safeType = parts.mapNullable(parts => parts[6]);
+				const defBlock = parts.mapNullable(parts => parts[5]);
+				const refFileName = parts.mapNullable(parts => parts[3]);
+				const safeType = parts.mapNullable(parts => parts[6]);
 
-			if (safeType.isNone() || defBlock.isNone()) {
-				throw new Error(`Invalid $ref: ${$ref}`);
+				if (safeType.isNone() || defBlock.isNone()) {
+					throw new Error(`Invalid $ref: ${$ref}`);
+				}
+
+				const type = safeType.value;
+
+				const io = getIOName(type);
+				const isRecursive = rootName === type || rootName === io;
+				const definitionFilePath = refFileName.isSome()
+					? getRelativeOutRefPath(cwd, defBlock.value, refFileName.value, type)
+					: getRelativeRefPath(cwd, defBlock.value, type);
+
+				return serializedType(
+					type,
+					io,
+					isRecursive
+						? EMPTY_DEPENDENCIES
+						: [dependency(type, definitionFilePath), dependency(io, definitionFilePath)],
+					[type],
+				);
 			}
 
-			const type = safeType.value;
-
-			const io = getIOName(type);
-			const isRecursive = rootName === type || rootName === io;
-			const definitionFilePath = refFileName.isSome()
-				? getRelativeOutRefPath(cwd, defBlock.value, refFileName.value, type)
-				: getRelativeRefPath(cwd, defBlock.value, type);
+			const results = schema.allOf.map(item => serializeSchemaObject(item, rootName, cwd));
+			const types = results.map(item => item.type);
+			const ios = results.map(item => item.io);
+			const dependencies = fold(monoidDependencies)(results.map(item => item.dependencies));
+			const refs = fold(monoidRefs)(results.map(item => item.refs));
 
 			return serializedType(
-				type,
-				io,
-				isRecursive
-					? EMPTY_DEPENDENCIES
-					: [dependency(type, definitionFilePath), dependency(io, definitionFilePath)],
-				[type],
+				intercalate(monoidString, array)(' & ', types),
+				`intersection([${intercalate(monoidString, array)(', ', ios)}])`,
+				[dependency('intersection', 'io-ts'), ...dependencies],
+				refs,
 			);
 		}
 		case 'string': {
@@ -603,7 +623,7 @@ const getIOName = (name: string): string => `${name}IO`;
 const getOperationName = (operation: TOperationObject, httpMethod: string) =>
 	operation.operationId.getOrElse(httpMethod);
 
-const serializeDependencies = (dependencies: TDepdendency[]): string =>
+const serializeDependencies = (dependencies: TDependency[]): string =>
 	collect(groupBy(dependencies, dependency => dependency.path), (key, dependencies) => {
 		const names = uniqString(dependencies.toArray().map(dependency => dependency.name));
 		return `import { ${names.join(',')} } from '${dependencies.head.path}';`;

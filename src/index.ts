@@ -11,8 +11,8 @@ import { head, last } from 'fp-ts/lib/Array';
 import { TFileReader } from './fileReader';
 import { Right } from 'fp-ts/lib/Either';
 import { ValidationError } from 'io-ts';
-import { serialize } from './language/typescript';
 import * as del from 'del';
+import { serialize } from './language/typescript';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
 
