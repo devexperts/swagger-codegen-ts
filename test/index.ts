@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-import * as path from 'path';
 import { generate } from '../src';
 import { serialize } from '../src/language/typescript';
 import { fromJSON, fromYaml } from '../src/fileReader';
+import { resolve } from 'path';
 
-const self = path.resolve(__dirname);
+const self = resolve(__dirname);
 
 generate({
-	pathsToSpec: [path.resolve(self, './specs/json/swagger.json'), path.resolve(self, './specs/json/common.json')],
-	out: path.resolve(self, './out/json'),
+	pathsToSpec: [resolve(self, './specs/json/swagger.json'), resolve(self, './specs/json/common.json')],
+	out: resolve(self, './out/json'),
 	serialize,
 	fileReader: fromJSON,
 }).catch(error => {
@@ -18,8 +18,8 @@ generate({
 });
 
 generate({
-	pathsToSpec: [path.resolve(self, './specs/yaml/common.yml'), path.resolve(self, './specs/yaml/swagger.yml')],
-	out: path.resolve(self, './out/yaml'),
+	pathsToSpec: [resolve(self, './specs/yaml/swagger.yml'), resolve(self, './specs/yaml/common.yml')],
+	out: resolve(self, './out/yaml'),
 	serialize,
 	fileReader: fromYaml,
 }).catch(error => {

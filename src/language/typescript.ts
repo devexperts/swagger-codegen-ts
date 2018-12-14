@@ -222,6 +222,12 @@ const serializePath = (url: string, item: TPathItemObject, rootName: string, cwd
 
 const is$ref = (a: TReferenceSchemaObject | TAllOfSchemaObject): a is TReferenceSchemaObject =>
 	Object.prototype.hasOwnProperty.bind(a)('$ref');
+const getDefName = (name: string): string => `Def${name}`;
+const getImportAsDef = (name: string): string => `${name} as ${getDefName(name)}`;
+const isSameOutName = (isSameName: boolean, isOut: boolean): boolean => isOut && isSameName;
+const getDefIFSameName = (isSameOutName: boolean) => (name: string): string =>
+	!isSameOutName ? name : getDefName(name);
+const importAsFile = (isSameOutName: boolean) => (name: string) => (!isSameOutName ? name : getImportAsDef(name));
 
 const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: string): TSerializedType => {
 	switch (schema.type) {
@@ -230,8 +236,8 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 				const $ref = schema.$ref;
 				const parts = fromNullable($ref.match(/^((.+)\/(.+)\.(.+))?#\/(.+)\/(.+)$/));
 
-				const defBlock = parts.mapNullable(parts => parts[5]);
 				const refFileName = parts.mapNullable(parts => parts[3]);
+				const defBlock = parts.mapNullable(parts => parts[5]);
 				const safeType = parts.mapNullable(parts => parts[6]);
 
 				if (safeType.isNone() || defBlock.isNone()) {
@@ -241,17 +247,24 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 				const type = safeType.value;
 
 				const io = getIOName(type);
-				const isRecursive = rootName === type || rootName === io;
+				const isRecursive = refFileName.isNone() && (rootName === type || rootName === io);
 				const definitionFilePath = refFileName.isSome()
 					? getRelativeOutRefPath(cwd, defBlock.value, refFileName.value, type)
 					: getRelativeRefPath(cwd, defBlock.value, type);
 
+				const isSameOuterName = isSameOutName(rootName === type, refFileName.isSome());
+				const defName = getDefIFSameName(isSameOuterName);
+				const asDefName = importAsFile(isSameOuterName);
+
 				return serializedType(
-					type,
-					io,
+					defName(type),
+					defName(io),
 					isRecursive
 						? EMPTY_DEPENDENCIES
-						: [dependency(type, definitionFilePath), dependency(io, definitionFilePath)],
+						: [
+								dependency(asDefName(type), definitionFilePath),
+								dependency(asDefName(io), definitionFilePath),
+						  ],
 					[type],
 				);
 			}
