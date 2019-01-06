@@ -143,13 +143,14 @@ const getRelativeRefPath = (cwd: string, refBlockName: string, refFileName: stri
 	`${getRelativeRoot(cwd)}/${refBlockName}/${refFileName}`;
 const getRelativeOutRefPath = (cwd: string, blockName: string, outFileName: string, refFileName: string): string =>
 	`${getRelativeRoot(cwd)}/../${outFileName}/${blockName}/${refFileName}`;
-const getRelativeClientPath = (cwd: string): string => `${getRelativeRoot(cwd)}/${CLIENT_DIRECTORY}/${CLIENT_FILENAME}`;
-const getRelativeUtilsPath = (cwd: string): string => `${getRelativeRoot(cwd)}/${UTILS_DIRECTORY}/${UTILS_FILENAME}`;
+const getRelativeClientPath = (cwd: string): string =>
+	`../${getRelativeRoot(cwd)}/${CLIENT_DIRECTORY}/${CLIENT_FILENAME}`;
+const getRelativeUtilsPath = (cwd: string): string => `../${getRelativeRoot(cwd)}/${UTILS_DIRECTORY}/${UTILS_FILENAME}`;
 
 export const serialize: TSerializer = (name: string, swaggerObject: TSwaggerObject): TDirectory =>
 	directory(name, [
-		directory(CLIENT_DIRECTORY, [file(`${CLIENT_FILENAME}.ts`, client)]),
-		directory(UTILS_DIRECTORY, [file(`${UTILS_FILENAME}.ts`, utils)]),
+		directory(`../${CLIENT_DIRECTORY}`, [file(`${CLIENT_FILENAME}.ts`, client)]),
+		directory(`../${UTILS_DIRECTORY}`, [file(`${UTILS_FILENAME}.ts`, utils)]),
 		...catOptions([swaggerObject.definitions.map(serializeDefinitions)]),
 		serializePaths(swaggerObject.paths, swaggerObject.parameters),
 	]);
