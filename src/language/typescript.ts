@@ -139,38 +139,44 @@ const UTILS_DIRECTORY = 'utils';
 const UTILS_FILENAME = 'utils';
 
 const getRelativeRoot = (cwd: string) => path.relative(cwd, ROOT_DIRECTORY);
+const getRelativeOut = (out: string, cwd: string) => path.relative(cwd, out);
 const getRelativeRefPath = (cwd: string, refBlockName: string, refFileName: string): string =>
 	`${getRelativeRoot(cwd)}/${refBlockName}/${refFileName}`;
 const getRelativeOutRefPath = (cwd: string, blockName: string, outFileName: string, refFileName: string): string =>
 	`${getRelativeRoot(cwd)}/../${outFileName}/${blockName}/${refFileName}`;
 const getRelativeClientPath = (cwd: string): string =>
 	`../${getRelativeRoot(cwd)}/${CLIENT_DIRECTORY}/${CLIENT_FILENAME}`;
-const getRelativeUtilsPath = (cwd: string): string => `../${getRelativeRoot(cwd)}/${UTILS_DIRECTORY}/${UTILS_FILENAME}`;
+const getRelativeUtilsPath = (cwd: string, out: string): string =>
+	`${getRelativeOut(out, cwd)}/${UTILS_DIRECTORY}/${UTILS_FILENAME}`;
 
 export const serialize: TSerializer = (name: string, swaggerObject: TSwaggerObject, out: string): TDirectory =>
 	directory(name, [
 		directory(out, [file(`${CLIENT_FILENAME}.ts`, client)]),
 		directory(out, [file(`${UTILS_FILENAME}.ts`, utils)]),
-		...catOptions([swaggerObject.definitions.map(serializeDefinitions)]),
-		serializePaths(swaggerObject.paths, swaggerObject.parameters),
+		...catOptions([swaggerObject.definitions.map(serializeDefinitions(out))]),
+		serializePaths(swaggerObject.paths, swaggerObject.parameters, out),
 	]);
 
-const serializeDefinitions = (definitions: TDefinitionsObject): TDirectory =>
+const serializeDefinitions = (out: string) => (definitions: TDefinitionsObject): TDirectory =>
 	directory(DEFINITIONS_DIRECTORY, [
 		...serializeDictionary(definitions, (name, definition) =>
-			serializeDefinition(name, definition, `${ROOT_DIRECTORY}/${DEFINITIONS_DIRECTORY}`),
+			serializeDefinition(name, definition, `${ROOT_DIRECTORY}/${DEFINITIONS_DIRECTORY}`, out),
 		),
 	]);
-const serializePaths = (paths: TPathsObject, parameters: Option<TParametersDefinitionsObject>): TDirectory =>
+const serializePaths = (
+	paths: TPathsObject,
+	parameters: Option<TParametersDefinitionsObject>,
+	out: string,
+): TDirectory =>
 	directory(
 		CONTROLLERS_DIRECTORY,
 		serializeDictionary(groupPathsByTag(paths, parameters), (name, group) =>
-			serializePathGroup(name, group, `${ROOT_DIRECTORY}/${CONTROLLERS_DIRECTORY}`),
+			serializePathGroup(name, group, `${ROOT_DIRECTORY}/${CONTROLLERS_DIRECTORY}`, out),
 		),
 	);
 
-const serializeDefinition = (name: string, definition: TSchemaObject, cwd: string): TFile => {
-	const serialized = serializeSchemaObject(definition, name, cwd);
+const serializeDefinition = (name: string, definition: TSchemaObject, cwd: string, out: string): TFile => {
+	const serialized = serializeSchemaObject(definition, name, cwd, out);
 
 	const dependencies = serializeDependencies(serialized.dependencies);
 
@@ -185,10 +191,10 @@ const serializeDefinition = (name: string, definition: TSchemaObject, cwd: strin
 	);
 };
 
-const serializePathGroup = (name: string, group: Record<string, TPathItemObject>, cwd: string): TFile => {
+const serializePathGroup = (name: string, group: Record<string, TPathItemObject>, cwd: string, out: string): TFile => {
 	const groupName = `${name}Controller`;
 	const serialized = foldSerialized(
-		serializeDictionary(group, (url, item) => serializePath(url, item, groupName, cwd)),
+		serializeDictionary(group, (url, item) => serializePath(url, item, groupName, cwd, out)),
 	);
 	const dependencies = serializeDependencies([
 		...serialized.dependencies,
@@ -210,14 +216,22 @@ const serializePathGroup = (name: string, group: Record<string, TPathItemObject>
 		`,
 	);
 };
-const serializePath = (url: string, item: TPathItemObject, rootName: string, cwd: string): TSerializedType => {
-	const get = item.get.map(operation => serializeOperationObject(url, 'GET', operation, rootName, cwd));
-	const put = item.put.map(operation => serializeOperationObject(url, 'PUT', operation, rootName, cwd));
-	const post = item.post.map(operation => serializeOperationObject(url, 'POST', operation, rootName, cwd));
-	const remove = item.delete.map(operation => serializeOperationObject(url, 'DELETE', operation, rootName, cwd));
-	const options = item.options.map(operation => serializeOperationObject(url, 'OPTIONS', operation, rootName, cwd));
-	const head = item.head.map(operation => serializeOperationObject(url, 'HEAD', operation, rootName, cwd));
-	const patch = item.patch.map(operation => serializeOperationObject(url, 'PATCH', operation, rootName, cwd));
+const serializePath = (
+	url: string,
+	item: TPathItemObject,
+	rootName: string,
+	cwd: string,
+	out: string,
+): TSerializedType => {
+	const get = item.get.map(operation => serializeOperationObject(url, 'GET', operation, rootName, cwd, out));
+	const put = item.put.map(operation => serializeOperationObject(url, 'PUT', operation, rootName, cwd, out));
+	const post = item.post.map(operation => serializeOperationObject(url, 'POST', operation, rootName, cwd, out));
+	const remove = item.delete.map(operation => serializeOperationObject(url, 'DELETE', operation, rootName, cwd, out));
+	const options = item.options.map(operation =>
+		serializeOperationObject(url, 'OPTIONS', operation, rootName, cwd, out),
+	);
+	const head = item.head.map(operation => serializeOperationObject(url, 'HEAD', operation, rootName, cwd, out));
+	const patch = item.patch.map(operation => serializeOperationObject(url, 'PATCH', operation, rootName, cwd, out));
 	const operations = catOptions([get, put, post, remove, options, head, patch]);
 	return foldSerialized(operations);
 };
@@ -232,7 +246,7 @@ const getDefIFSameName = (isSameOutName: boolean, prefix: string) => (name: stri
 const importAsFile = (isSameOutName: boolean, prefix: string) => (name: string) =>
 	!isSameOutName ? name : getImportAsDef(name, prefix);
 
-const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: string): TSerializedType => {
+const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: string, out: string): TSerializedType => {
 	switch (schema.type) {
 		case undefined: {
 			if (is$ref(schema)) {
@@ -272,7 +286,7 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 				);
 			}
 
-			const results = schema.allOf.map(item => serializeSchemaObject(item, rootName, cwd));
+			const results = schema.allOf.map(item => serializeSchemaObject(item, rootName, cwd, out));
 			const types = results.map(item => item.type);
 			const ios = results.map(item => item.io);
 			const dependencies = fold(monoidDependencies)(results.map(item => item.dependencies));
@@ -315,7 +329,7 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 			return serializedType('number', 'number', [dependency('number', 'io-ts')], EMPTY_REFS);
 		}
 		case 'array': {
-			const result = serializeSchemaObject(schema.items, rootName, cwd);
+			const result = serializeSchemaObject(schema.items, rootName, cwd, out);
 			return serializedType(
 				`Array<${result.type}>`,
 				`array(${result.io})`,
@@ -325,7 +339,7 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 		}
 		case 'object': {
 			return schema.additionalProperties
-				.map(additionalProperties => serializeAdditionalProperties(additionalProperties, rootName, cwd))
+				.map(additionalProperties => serializeAdditionalProperties(additionalProperties, rootName, cwd, out))
 				.orElse(() =>
 					schema.properties.map(properties => {
 						const serialized = foldSerialized(
@@ -333,7 +347,7 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 								const isRequired = schema.required
 									.map(required => required.includes(name))
 									.getOrElse(false);
-								const field = serializeSchemaObject(value, rootName, cwd);
+								const field = serializeSchemaObject(value, rootName, cwd, out);
 								const type = isRequired ? `${name}: ${field.type}` : `${name}: Option<${field.type}>`;
 								const io = isRequired
 									? `${name}: ${field.io}`
@@ -353,7 +367,7 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 					serializedType(
 						'unknown',
 						'unknownType',
-						[dependency('unknownType', getRelativeUtilsPath(cwd))],
+						[dependency('unknownType', getRelativeUtilsPath(cwd, out))],
 						EMPTY_REFS,
 					),
 				);
@@ -367,8 +381,13 @@ const serializeEnum = (enumValue: Array<string | number | boolean>): TSerialized
 	return serializedType(type, io, [dependency('union', 'io-ts'), dependency('literal', 'io-ts')], EMPTY_REFS);
 };
 
-const serializeAdditionalProperties = (properties: TSchemaObject, rootName: string, cwd: string): TSerializedType => {
-	const additional = serializeSchemaObject(properties, rootName, cwd);
+const serializeAdditionalProperties = (
+	properties: TSchemaObject,
+	rootName: string,
+	cwd: string,
+	out: string,
+): TSerializedType => {
+	const additional = serializeSchemaObject(properties, rootName, cwd, out);
 	return serializedType(
 		`{ [key: string]: ${additional.type} }`,
 		`dictionary(string, ${additional.io})`,
@@ -383,6 +402,7 @@ const serializeOperationObject = (
 	operation: TOperationObject,
 	rootName: string,
 	cwd: string,
+	out: string,
 ): TSerializedType => {
 	const pathParameters = getOperationParametersInPath(operation);
 	const queryParameters = getOperationParametersInQuery(operation);
@@ -398,7 +418,7 @@ const serializeOperationObject = (
 
 	const serializedPathParameters = pathParameters.map(serializePathParameter);
 
-	const serializedResponses = serializeOperationResponses(operation.responses, rootName, cwd);
+	const serializedResponses = serializeOperationResponses(operation.responses, rootName, cwd, out);
 
 	const operationName = getOperationName(operation, method);
 
@@ -408,7 +428,7 @@ const serializeOperationObject = (
 		serializeQueryParameters(queryParameters),
 	);
 	const serializedBodyParameters = fromArray(bodyParameters).map(bodyParameters =>
-		serializeBodyParameters(bodyParameters, rootName, cwd),
+		serializeBodyParameters(bodyParameters, rootName, cwd, out),
 	);
 
 	const serializedParameters = intercalateSerializedParameter(
@@ -462,11 +482,18 @@ const serializeOperationObject = (
 	return serializedType(type, io, dependencies, serializedParameters.refs);
 };
 
-const serializeOperationResponses = (responses: TResponsesObject, rootName: string, cwd: string): TSerializedType => {
+const serializeOperationResponses = (
+	responses: TResponsesObject,
+	rootName: string,
+	cwd: string,
+	out: string,
+): TSerializedType => {
 	const serializedResponses = uniqSerializedWithoutDependencies(
 		catOptions(
 			SUCCESSFUL_CODES.map(code =>
-				lookup(code, responses).chain(response => serializeOperationResponse(code, response, rootName, cwd)),
+				lookup(code, responses).chain(response =>
+					serializeOperationResponse(code, response, rootName, cwd, out),
+				),
 			),
 		),
 	);
@@ -493,7 +520,8 @@ const serializeOperationResponse = (
 	response: TResponseObject,
 	rootName: string,
 	cwd: string,
-): Option<TSerializedType> => response.schema.map(schema => serializeSchemaObject(schema, rootName, cwd));
+	out: string,
+): Option<TSerializedType> => response.schema.map(schema => serializeSchemaObject(schema, rootName, cwd, out));
 
 const serializePathParameter = (parameter: TPathParameterObject): TSerializedPathParameter => {
 	const serializedParameterType = serializeParameter(parameter);
@@ -552,9 +580,10 @@ const serializeBodyParameter = (
 	parameter: TBodyParameterObject,
 	rootName: string,
 	cwd: string,
+	out: string,
 ): TSerializedParameter => {
 	const isRequired = parameter.required.getOrElse(false);
-	const serializedParameterType = serializeSchemaObject(parameter.schema, rootName, cwd);
+	const serializedParameterType = serializeSchemaObject(parameter.schema, rootName, cwd, out);
 	return serializedParameter(
 		serializedParameterType.type,
 		serializedParameterType.io,
@@ -567,9 +596,10 @@ const serializeBodyParameters = (
 	parameters: NonEmptyArray<TBodyParameterObject>,
 	rootName: string,
 	cwd: string,
+	out: string,
 ): TSerializedParameter => {
 	// according to spec there can be only one body parameter
-	const serializedBodyParameter = serializeBodyParameter(parameters.head, rootName, cwd);
+	const serializedBodyParameter = serializeBodyParameter(parameters.head, rootName, cwd, out);
 	const { type, isRequired, io, dependencies, refs } = serializedBodyParameter;
 	return serializedParameter(
 		`body${unless(isRequired, '?')}: ${type}`,
