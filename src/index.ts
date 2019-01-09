@@ -46,7 +46,7 @@ const resolvePath = (p: string) => (path.isAbsolute(p) ? p : path.resolve(cwd, p
 const serializeDecode = (serializer: TSerializer) => async (
 	decoded: Right<ValidationError[], TSwaggerObject>,
 	out: string,
-): Promise<TFSEntity> => serializer(path.basename(out), decoded.value);
+): Promise<TFSEntity> => serializer(path.basename(out), decoded.value, out);
 
 const getPrettierConfig = async (pathToPrettierConfig?: string): Promise<Option<prettier.Options>> =>
 	fromNullable(
