@@ -133,24 +133,23 @@ const uniqSerializedWithoutDependencies = uniq(setoidSerializedTypeWithoutDepend
 const ROOT_DIRECTORY = '.';
 const CONTROLLERS_DIRECTORY = 'controllers';
 const DEFINITIONS_DIRECTORY = 'definitions';
-const CLIENT_DIRECTORY = 'client';
 const CLIENT_FILENAME = 'client';
-const UTILS_DIRECTORY = 'utils';
 const UTILS_FILENAME = 'utils';
+const RELATIVE_OUT = '../..';
+const RELATIVE_CLIENT_PATH = `${RELATIVE_OUT}/${CLIENT_FILENAME}`;
+const RELATIVE_UTILS_PATH = `${RELATIVE_OUT}/${UTILS_FILENAME}`;
 
 const getRelativeRoot = (cwd: string) => path.relative(cwd, ROOT_DIRECTORY);
 const getRelativeRefPath = (cwd: string, refBlockName: string, refFileName: string): string =>
 	`${getRelativeRoot(cwd)}/${refBlockName}/${refFileName}`;
 const getRelativeOutRefPath = (cwd: string, blockName: string, outFileName: string, refFileName: string): string =>
 	`${getRelativeRoot(cwd)}/../${outFileName}/${blockName}/${refFileName}`;
-const getRelativeClientPath = (cwd: string): string => `${getRelativeRoot(cwd)}/${CLIENT_DIRECTORY}/${CLIENT_FILENAME}`;
-const getRelativeUtilsPath = (cwd: string): string => `${getRelativeRoot(cwd)}/${UTILS_DIRECTORY}/${UTILS_FILENAME}`;
 
-export const serialize: TSerializer = (name: string, swaggerObject: TSwaggerObject): TDirectory =>
+export const serialize: TSerializer = (name: string, swaggerObject: TSwaggerObject, out: string): TDirectory =>
 	directory(name, [
-		directory(CLIENT_DIRECTORY, [file(`${CLIENT_FILENAME}.ts`, client)]),
-		directory(UTILS_DIRECTORY, [file(`${UTILS_FILENAME}.ts`, utils)]),
-		...catOptions([swaggerObject.definitions.map(serializeDefinitions)]),
+		directory(out, [file(`${CLIENT_FILENAME}.ts`, client)]),
+		directory(out, [file(`${UTILS_FILENAME}.ts`, utils)]),
+		...catOptions([swaggerObject.definitions.map(defs => serializeDefinitions(defs))]),
 		serializePaths(swaggerObject.paths, swaggerObject.parameters),
 	]);
 
@@ -192,7 +191,7 @@ const serializePathGroup = (name: string, group: Record<string, TPathItemObject>
 	const dependencies = serializeDependencies([
 		...serialized.dependencies,
 		dependency('asks', 'fp-ts/lib/Reader'),
-		dependency('TAPIClient', getRelativeClientPath(cwd)),
+		dependency('TAPIClient', RELATIVE_CLIENT_PATH),
 	]);
 	return file(
 		`${groupName}.ts`,
@@ -352,7 +351,7 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 					serializedType(
 						'unknown',
 						'unknownType',
-						[dependency('unknownType', getRelativeUtilsPath(cwd))],
+						[dependency('unknownType', RELATIVE_UTILS_PATH)],
 						EMPTY_REFS,
 					),
 				);
@@ -449,7 +448,7 @@ const serializeOperationObject = (
 		[
 			dependency('map', 'rxjs/operators'),
 			dependency('fromEither', '@devexperts/remote-data-ts'),
-			dependency('ResponseValiationError', getRelativeClientPath(cwd)),
+			dependency('ResponseValiationError', RELATIVE_CLIENT_PATH),
 			dependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
 			...flatten(serializedPathParameters.map(parameter => parameter.dependencies)),
 			...serializedResponses.dependencies,

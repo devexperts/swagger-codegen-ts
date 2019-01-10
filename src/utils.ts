@@ -19,7 +19,7 @@ import { camelize } from '@devexperts/utils/dist/string/string';
 import { option, Option, some } from 'fp-ts/lib/Option';
 import { sequence } from 'fp-ts/lib/Traversable';
 
-export type TSerializer = (name: string, schema: TSwaggerObject) => TFSEntity;
+export type TSerializer = (name: string, schema: TSwaggerObject, out: string) => TFSEntity;
 
 export const getOperationsFromPath = (path: TPathItemObject): TDictionary<TOperationObject> => {
 	const result: TDictionary<TOperationObject> = {};

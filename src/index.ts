@@ -45,8 +45,9 @@ const resolvePath = (p: string) => (path.isAbsolute(p) ? p : path.resolve(cwd, p
 
 const serializeDecode = (serializer: TSerializer) => async (
 	decoded: Right<ValidationError[], TSwaggerObject>,
+	apiOut: string,
 	out: string,
-): Promise<TFSEntity> => serializer(path.basename(out), decoded.value);
+): Promise<TFSEntity> => serializer(path.basename(apiOut), decoded.value, out);
 
 const getPrettierConfig = async (pathToPrettierConfig?: string): Promise<Option<prettier.Options>> =>
 	fromNullable(
@@ -88,7 +89,7 @@ export const generate = async (options: TGenerateOptions): Promise<void> => {
 			ThrowReporter.report(decoded);
 			return;
 		}
-		const seralized = await serializer(decoded, apiOut);
+		const seralized = await serializer(decoded, apiOut, out);
 		const formatted = formatSerialized(seralized, prettierConfig);
 		writeFormatted(apiOut, formatted);
 	}
