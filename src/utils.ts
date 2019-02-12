@@ -70,6 +70,7 @@ const getTagWithResolvedParameters = (
 ) => (tag: TOperationObject): TOperationObject => ({
 	...tag,
 	parameters: tag.parameters
+		.alt(some([]))
 		.map(addPathParametersToTag)
 		.map(parameters => parameters.map(resolveTagParameter))
 		.chain(sequence(option, array)),

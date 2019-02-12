@@ -159,6 +159,13 @@ paths:
         - read:pets
       deprecated: true
   "/pet/{petId}":
+    parameters:
+    - name: petId
+      in: path
+      description: ID of pet to return
+      required: true
+      type: integer
+      format: int64
     get:
       tags:
       - pet
@@ -168,13 +175,6 @@ paths:
       produces:
       - application/xml
       - application/json
-      parameters:
-      - name: petId
-        in: path
-        description: ID of pet to return
-        required: true
-        type: integer
-        format: int64
       responses:
         '200':
           description: successful operation
@@ -198,12 +198,6 @@ paths:
       - application/xml
       - application/json
       parameters:
-      - name: petId
-        in: path
-        description: ID of pet that needs to be updated
-        required: true
-        type: integer
-        format: int64
       - name: name
         in: formData
         description: Updated name of the pet
@@ -235,12 +229,6 @@ paths:
         in: header
         required: false
         type: string
-      - name: petId
-        in: path
-        description: Pet id to delete
-        required: true
-        type: integer
-        format: int64
       responses:
         '400':
           description: Invalid ID supplied
@@ -251,6 +239,13 @@ paths:
         - write:pets
         - read:pets
   "/pet/{petId}/uploadImage":
+    parameters:
+    - name: petId
+      in: path
+      description: ID of pet to update
+      required: true
+      type: integer
+      format: int64
     post:
       tags:
       - pet
@@ -262,12 +257,6 @@ paths:
       produces:
       - application/json
       parameters:
-      - name: petId
-        in: path
-        description: ID of pet to update
-        required: true
-        type: integer
-        format: int64
       - name: additionalMetadata
         in: formData
         description: Additional data to pass to server
@@ -602,6 +591,45 @@ paths:
           description: success
           schema:
             type: string
+  /test/{Param1}/{Param2}:
+    parameters:
+    - $ref: '#/parameters/Param1pathParam'
+    - $ref: '#/parameters/Param2pathParam'
+    get:
+      tags:
+      - test
+      summary: Some summary
+      description: ''
+      operationId: checkSeveralParameterInPath
+      produces:
+      - application/xml
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            "$ref": "./common.yml#/definitions/User"
+        400:
+          description: Invalid username supplied
+        404:
+          description: User not found
+parameters:
+  Param1pathParam:
+    name: Param1
+    in: path
+    description: Param1
+    required: true
+    type: string
+    minLength: 1
+    maxLength: 64
+  Param2pathParam:
+    name: Param2
+    in: path
+    description: Param2
+    required: true
+    type: string
+    minLength: 1
+    maxLength: 64
 securityDefinitions:
   petstore_auth:
     type: oauth2
