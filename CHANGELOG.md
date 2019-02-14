@@ -1,3 +1,14 @@
+<a name="0.4.2"></a>
+## [0.4.2](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.1...v0.4.2) (2019-02-14)
+
+
+### Bug Fixes
+
+* lock fp-ts and io-ts minor versions ([#25](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/25)) ([438067a](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/438067a))
+* tag parameters fix ([#23](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/23)) ([348058e](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/348058e)), closes [#17](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/17)
+
+
+
 <a name="0.4.1"></a>
 ## [0.4.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.0...v0.4.1) (2018-12-14)
 
@@ -82,21 +93,12 @@
 
 
 <a name="0.3.1"></a>
-## [0.3.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.0...v0.3.1) (2018-11-07)
+## [0.3.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.4...v0.3.1) (2018-11-07)
 
 
 ### Bug Fixes
 
 * fix broken body parameters encoding ([c8a4214](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/c8a4214))
-
-
-
-<a name="0.3.0"></a>
-# [0.3.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.4...v0.3.0) (2018-11-07)
-
-
-### Bug Fixes
-
 * treat empty object as unknown type ([#5](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/5)) ([3db0d90](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/3db0d90))
 
 
