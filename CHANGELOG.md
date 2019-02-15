@@ -1,3 +1,14 @@
+<a name="0.4.3"></a>
+## [0.4.3](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.2...v0.4.3) (2019-02-15)
+
+
+### Bug Fixes
+
+* Ability to use cusom serializer. Solves [#26](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/26) ([#27](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/27)) ([a76be11](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/a76be11))
+* Consider HTTP201 to be successful code ([#28](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/28)) ([b19b33d](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/b19b33d))
+
+
+
 <a name="0.4.2"></a>
 ## [0.4.2](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.1...v0.4.2) (2019-02-14)
 
