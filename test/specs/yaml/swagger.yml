@@ -51,6 +51,10 @@ paths:
         schema:
           "$ref": "./common.yml#/definitions/Pet"
       responses:
+        '201':
+          description: Pet successfuly created
+          schema:
+            $ref: "./common.yml#/definitions/Pet"
         '405':
           description: Invalid input
       security:

@@ -37,7 +37,7 @@ import { camelize } from 'tslint/lib/utils';
 
 const EMPTY_DEPENDENCIES: TDependency[] = [];
 const EMPTY_REFS: string[] = [];
-const SUCCESSFUL_CODES = ['200', 'default'];
+const SUCCESSFUL_CODES = ['200', '201', 'default'];
 
 const concatIfL = <A>(condition: boolean, as: A[], a: (as: A[]) => A[]): A[] => (condition ? as.concat(a(as)) : as);
 const concatIf = <A>(condition: boolean, as: A[], a: A[]): A[] => concatIfL(condition, as, as => a);
