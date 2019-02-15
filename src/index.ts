@@ -12,7 +12,6 @@ import { TFileReader } from './fileReader';
 import { Right } from 'fp-ts/lib/Either';
 import { ValidationError } from 'io-ts';
 import * as del from 'del';
-import { serialize } from './language/typescript';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
 
@@ -71,7 +70,7 @@ export const generate = async (options: TGenerateOptions): Promise<void> => {
 	}
 	await fs.mkdirp(out);
 	const prettierConfig = await getPrettierConfig(options.pathToPrettierConfig);
-	const serializer = serializeDecode(serialize);
+	const serializer = serializeDecode(options.serialize);
 
 	for (const pathToFile of options.pathsToSpec) {
 		const pathToSpec = resolvePath(pathToFile);
