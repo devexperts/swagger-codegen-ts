@@ -1,3 +1,18 @@
+<a name="0.5.0"></a>
+# [0.5.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.3...v0.5.0) (2019-02-19)
+
+
+### Bug Fixes
+
+* make fp-ts, io-ts and remote-data to be peer dependencies ([#29](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/29)) ([988212b](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/988212b))
+
+
+### BREAKING CHANGES
+
+* listed dependencies were moved to peerDependencies
+
+
+
 <a name="0.4.3"></a>
 ## [0.4.3](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.2...v0.4.3) (2019-02-15)
 
