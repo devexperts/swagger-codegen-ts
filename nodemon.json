@@ -1,6 +1,6 @@
 {
   "watch": [
-    "./test",
+    "./test2",
     "./src"
   ],
   "ignore": [
@@ -9,6 +9,6 @@
     "./test/out"
   ],
   "ext": "ts",
-  "exec": "ts-node ./test/index.ts",
+  "exec": "ts-node ./test2/index.ts",
   "optOut": true
 }

@@ -5,13 +5,13 @@
   "main": "dist/index.js",
   "scripts": {
     "ts-node": "ts-node",
-    "tslint": "tslint -c tslint.json --project tsconfig.json './src/**/*.ts' './test/**/*.ts'",
-    "test": "npm run tslint && npm run prettier && ts-node ./test/index.ts",
-    "prettier": "prettier --list-different \"./src/**/*.ts\" \"./test/**/*.ts\"",
-    "prettier:fix": "prettier --write \"./src/**/*.ts\" \"./test/**/*.ts\"",
+    "tslint": "tslint -c tslint.json --project tsconfig.json './src2/**/*.ts' './test2/**/*.ts'",
+    "test": "npm run tslint && npm run prettier && ts-node ./test2/index.ts",
+    "prettier": "prettier --list-different \"./src2/**/*.ts\" \"./test2/**/*.ts\"",
+    "prettier:fix": "prettier --write \"./src2/**/*.ts\" \"./test2/**/*.ts\"",
     "prepublishOnly": "npm run test && npm run build",
     "start": "nodemon",
-    "build": "tsc -p ./src",
+    "build": "tsc -p ./src2",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "version": "npm run changelog && git add CHANGELOG.md"
   },
