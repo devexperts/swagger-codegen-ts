@@ -6,9 +6,13 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{js,ts,jsx,tsx,html,css,scss,sass}]
+[*.{js,ts}]
 indent_style = tab
 indent_size = 4
+
+[*.{json,yaml}]
+indent_style = space
+indent_size = 2
 
 [*.md]
 max_line_length = off
