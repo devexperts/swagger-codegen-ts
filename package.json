@@ -37,29 +37,30 @@
     "del": "^4.1.0",
     "fs-extra": "^7.0.1",
     "js-yaml": "^3.13.1",
-    "prettier": "^1.17.0"
+    "prettier": "^1.17.0",
+    "typelevel-ts": "^0.3.5"
   },
   "devDependencies": {
-    "fp-ts": "^1.17.1",
-    "io-ts": "^1.8.5",
-    "io-ts-types": "^0.4.7",
-    "typescript": "^3.4.5",
     "@devexperts/lint": "^0.28.3",
     "@devexperts/remote-data-ts": "^0.5.0",
     "@devexperts/rx-utils": "^0.28.3",
     "@types/node": "^11.13.7",
     "conventional-changelog-cli": "^2.0.17",
+    "fp-ts": "^1.17.1",
+    "io-ts": "^1.8.5",
+    "io-ts-types": "^0.4.7",
     "nodemon": "^1.18.11",
     "rxjs": "^6.5.1",
     "ts-node": "^8.1.0",
     "tslint": "^5.16.0",
     "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.1"
+    "tslint-plugin-prettier": "^2.0.1",
+    "typescript": "^3.4.5"
   },
   "peerDependencies": {
+    "@devexperts/remote-data-ts": "^0.5.0",
     "fp-ts": "^1.17.1",
     "io-ts": "^1.8.5",
-    "io-ts-types": "^0.4.7",
-    "@devexperts/remote-data-ts": "^0.5.0"
+    "io-ts-types": "^0.4.7"
   }
 }

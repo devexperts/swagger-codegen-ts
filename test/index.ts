@@ -7,7 +7,7 @@ import { parseJSON } from '../src/parse';
 const self = resolve(__dirname);
 
 run({
-	specs: [resolve(self, './specs/json/components.json'), resolve(self, './specs/json/swagger.json')],
+	specs: [resolve(self, './specs/json/components.json'), resolve(self, './specs/json/scheme.json')],
 	parser: parseJSON,
 	out: resolve(self, './out/json'),
 });
