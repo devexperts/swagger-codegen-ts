@@ -7,7 +7,10 @@ export type ExternalDocumentationObject = {
 	description: Option<string>;
 	url: string;
 };
-export const externalDocumentationObjectIO = type({
-	description: createOptionFromNullable(string),
-	url: string,
-});
+export const externalDocumentationObjectIO = type(
+	{
+		description: createOptionFromNullable(string),
+		url: string,
+	},
+	'ExternalDocumentationObject',
+);

@@ -1,30 +1,35 @@
 import { Option } from 'fp-ts/lib/Option';
-import { array, string, type, unknown } from 'io-ts';
+import { Any, array, recursion, RecursiveType, string, type } from 'io-ts';
 import { createOptionFromNullable } from 'io-ts-types';
 import { ComponentsObject, componentsObjectIO } from './components-object';
+import { InfoObject, infoObjectIO } from './info-object';
+import { ServerObject, serverObjectIO } from './server-object';
+import { pathsObjectIO, PathsObject } from './paths-object';
+import { TagObject, tagObjectIO } from './tag-object';
+import { ExternalDocumentationObject, externalDocumentationObjectIO } from './external-documentation-object';
+import { SecurityRequirementObject, securityRequirementObjectIO } from './security-requirement-object';
 
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#oasObject
 export type OpenAPI = {
 	components: Option<ComponentsObject>;
-	externalDocs: Option<object>; // TODO
-	info: unknown; // TODO
+	externalDocs: Option<ExternalDocumentationObject>;
+	info: InfoObject;
 	openapi: string;
-	paths: unknown; // TODO
-	security: Option<unknown[]>; // TODO
-	servers: Option<unknown[]>; // TODO
-	tags: Option<unknown>; // TODO
+	paths: PathsObject;
+	security: Option<SecurityRequirementObject[]>;
+	servers: Option<ServerObject[]>;
+	tags: Option<TagObject[]>;
 };
 
-export const openAPIIO = type(
-	{
+export const openAPIIO: RecursiveType<Any, OpenAPI, unknown> = recursion('OpenAPI', () =>
+	type({
 		components: createOptionFromNullable(componentsObjectIO),
-		externalDocs: createOptionFromNullable(unknown), // TODO
-		info: unknown, // TODO
+		externalDocs: createOptionFromNullable(externalDocumentationObjectIO),
+		info: infoObjectIO,
 		openapi: string,
-		paths: unknown, // TODO
-		security: createOptionFromNullable(array(unknown)), // TODO
-		servers: createOptionFromNullable(array(unknown)), // TODO
-		tags: createOptionFromNullable(unknown), // TODO
-	},
-	'OpenAPI',
+		paths: pathsObjectIO,
+		security: createOptionFromNullable(array(securityRequirementObjectIO)),
+		servers: createOptionFromNullable(array(serverObjectIO)),
+		tags: createOptionFromNullable(array(tagObjectIO)),
+	}),
 );

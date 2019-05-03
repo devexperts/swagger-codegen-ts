@@ -10,10 +10,13 @@ export type XMLObject = {
 	attribute: Option<boolean>;
 	wrapper: Option<boolean>;
 };
-export const xmlObjectIO = type({
-	name: createOptionFromNullable(string),
-	namespace: createOptionFromNullable(string),
-	prefix: createOptionFromNullable(string),
-	attribute: createOptionFromNullable(boolean),
-	wrapper: createOptionFromNullable(boolean),
-});
+export const xmlObjectIO = type(
+	{
+		name: createOptionFromNullable(string),
+		namespace: createOptionFromNullable(string),
+		prefix: createOptionFromNullable(string),
+		attribute: createOptionFromNullable(boolean),
+		wrapper: createOptionFromNullable(boolean),
+	},
+	'XMLObject',
+);

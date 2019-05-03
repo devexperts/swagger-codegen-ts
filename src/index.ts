@@ -6,6 +6,7 @@ import { writeDirectory } from './write/directory';
 import { record, string } from 'io-ts';
 import { openAPIIO } from './validate/open-api-3';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { resolve } from 'path';
 
 export interface GenerateProps {
 	/**
@@ -32,14 +33,22 @@ export const run = ({ out, specs, parser }: GenerateProps) => {
 	const validated = record(string, openAPIIO).decode(content);
 	if (validated.isRight()) {
 		writeDirectory({ path: out });
-		writeFile({
-			content: JSON.stringify(validated.value, undefined, '\t'),
-			path: out,
-			name: 'specs',
-			extension: 'ts',
+		Object.keys(validated.value).forEach(spec => {
+			writeFile({
+				content: `const ${spec} = ` + JSON.stringify(validated.value[spec], undefined, '\t'),
+				path: out,
+				name: spec,
+				extension: 'ts',
+			});
 		});
 	}
 	if (validated.isLeft()) {
 		console.log(PathReporter.report(validated));
+		writeFile({
+			content: 'const errors = ' + JSON.stringify(PathReporter.report(validated), undefined, '\t'),
+			path: resolve(__dirname, '../'),
+			name: 'errors',
+			extension: 'ts',
+		});
 	}
 };

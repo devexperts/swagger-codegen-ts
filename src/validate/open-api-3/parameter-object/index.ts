@@ -21,39 +21,39 @@ export const parameterObjectSpecificIO = type(
 );
 
 export type ParameterObjectCommon = {
-	description: Option<string>;
-	deprecated: Option<boolean>;
-	required: Option<boolean>;
 	allowEmptyValue: Option<boolean>;
+	deprecated: Option<boolean>;
+	description: Option<string>;
+	required: Option<boolean>;
 
 	// schema: ref
-	style: Option<string>;
-	explode: Option<boolean>;
 	allowReserved: Option<boolean>;
-	schema: Option<SchemaObject | ReferenceObject>;
 	example: Option<unknown>;
 	examples: Option<Record<string, ExampleObject | ReferenceObject>>;
+	explode: Option<boolean>;
+	schema: Option<SchemaObject | ReferenceObject>;
+	style: Option<string>;
 
 	//schema: content
-	content: Record<string, MediaTypeObject>;
+	content: Option<Record<string, MediaTypeObject>>;
 };
 export const parameterObjectCommonIO = type(
 	{
-		description: createOptionFromNullable(string),
-		deprecated: createOptionFromNullable(boolean),
-		required: createOptionFromNullable(boolean),
 		allowEmptyValue: createOptionFromNullable(boolean),
+		deprecated: createOptionFromNullable(boolean),
+		description: createOptionFromNullable(string),
+		required: createOptionFromNullable(boolean),
 
 		// schema: ref
-		style: createOptionFromNullable(string),
-		explode: createOptionFromNullable(boolean),
 		allowReserved: createOptionFromNullable(boolean),
-		schema: createOptionFromNullable(union([schemaObjectIO, referenceObjectIO])),
 		example: createOptionFromNullable(unknown),
 		examples: createOptionFromNullable(record(string, union([exampleObjectIO, referenceObjectIO]))),
+		explode: createOptionFromNullable(boolean),
+		schema: createOptionFromNullable(union([schemaObjectIO, referenceObjectIO])),
+		style: createOptionFromNullable(string),
 
 		//schema: content
-		content: record(string, mediaTypeObjectIO),
+		content: createOptionFromNullable(record(string, mediaTypeObjectIO)),
 	},
 	'ParameterObjectCommon',
 );
