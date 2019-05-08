@@ -440,7 +440,7 @@ const serializeOperationObject = (
 				${when(hasBodyParameters, 'body: encoded.body,')}
 			}).pipe(map(data => data.chain(value => fromEither(${
 				serializedResponses.io
-			}.decode(value).mapLeft(ResponseValiationError.create)))))
+			}.decode(value).mapLeft(ResponseValidationError.create)))))
 		},
 	`;
 
@@ -449,7 +449,7 @@ const serializeOperationObject = (
 		[
 			dependency('map', 'rxjs/operators'),
 			dependency('fromEither', '@devexperts/remote-data-ts'),
-			dependency('ResponseValiationError', getRelativeClientPath(cwd)),
+			dependency('ResponseValidationError', getRelativeClientPath(cwd)),
 			dependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
 			...flatten(serializedPathParameters.map(parameter => parameter.dependencies)),
 			...serializedResponses.dependencies,
@@ -662,14 +662,14 @@ const client = `
 		readonly request: (request: TFullAPIRequest) => LiveData<Error, mixed>;
 	};
 	
-	export class ResponseValiationError extends Error {
-		static create(errors: Errors): ResponseValiationError {
-			return new ResponseValiationError(errors);
+	export class ResponseValidationError extends Error {
+		static create(errors: Errors): ResponseValidationError {
+			return new ResponseValidationError(errors);
 		} 
 	
 		constructor(readonly errors: Errors) {
-			super('ResponseValiationError');
-			Object.setPrototypeOf(this, ResponseValiationError);
+			super('ResponseValidationError');
+			Object.setPrototypeOf(this, ResponseValidationError);
 		}
 	}
 `;
