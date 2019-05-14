@@ -1,4 +1,17 @@
-<a name="0.5.0"></a>
+# [0.6.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.5.0...v0.6.0) (2019-05-14)
+
+
+### Bug Fixes
+
+* misspelled for class name ResponseValidationError ([9f5e99e](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/9f5e99e))
+
+
+### BREAKING CHANGES
+
+* generated class name changed to ResponseValidationError
+
+
+
 # [0.5.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.3...v0.5.0) (2019-02-19)
 
 
@@ -13,7 +26,6 @@
 
 
 
-<a name="0.4.3"></a>
 ## [0.4.3](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.2...v0.4.3) (2019-02-15)
 
 
@@ -24,7 +36,6 @@
 
 
 
-<a name="0.4.2"></a>
 ## [0.4.2](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.1...v0.4.2) (2019-02-14)
 
 
@@ -35,7 +46,6 @@
 
 
 
-<a name="0.4.1"></a>
 ## [0.4.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.4.0...v0.4.1) (2018-12-14)
 
 
@@ -45,7 +55,6 @@
 
 
 
-<a name="0.4.0"></a>
 # [0.4.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.7...v0.4.0) (2018-12-14)
 
 
@@ -63,7 +72,6 @@
 
 
 
-<a name="0.3.7"></a>
 ## [0.3.7](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.6...v0.3.7) (2018-11-21)
 
 
@@ -73,12 +81,10 @@
 
 
 
-<a name="0.3.6"></a>
 ## [0.3.6](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.5...v0.3.6) (2018-11-21)
 
 
 
-<a name="0.3.5"></a>
 ## [0.3.5](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.4...v0.3.5) (2018-11-07)
 
 
@@ -88,7 +94,6 @@
 
 
 
-<a name="0.3.4"></a>
 ## [0.3.4](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.3...v0.3.4) (2018-11-07)
 
 
@@ -98,7 +103,6 @@
 
 
 
-<a name="0.3.3"></a>
 ## [0.3.3](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.2...v0.3.3) (2018-11-07)
 
 
@@ -108,7 +112,6 @@
 
 
 
-<a name="0.3.2"></a>
 ## [0.3.2](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.1...v0.3.2) (2018-11-07)
 
 
@@ -118,13 +121,20 @@
 
 
 
-<a name="0.3.1"></a>
-## [0.3.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.4...v0.3.1) (2018-11-07)
+## [0.3.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.0...v0.3.1) (2018-11-07)
 
 
 ### Bug Fixes
 
 * fix broken body parameters encoding ([c8a4214](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/c8a4214))
+
+
+
+# [0.3.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.4...v0.3.0) (2018-11-07)
+
+
+### Bug Fixes
+
 * treat empty object as unknown type ([#5](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/5)) ([3db0d90](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/3db0d90))
 
 
@@ -134,7 +144,6 @@
 
 
 
-<a name="0.2.4"></a>
 ## [0.2.4](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.3...v0.2.4) (2018-11-02)
 
 
@@ -144,7 +153,6 @@
 
 
 
-<a name="0.2.3"></a>
 ## [0.2.3](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.2...v0.2.3) (2018-11-02)
 
 
@@ -154,7 +162,6 @@
 
 
 
-<a name="0.2.2"></a>
 ## [0.2.2](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/0.2.1...v0.2.2) (2018-11-01)
 
 
@@ -164,7 +171,6 @@
 
 
 
-<a name="0.2.1"></a>
 ## [0.2.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/0.2.0...0.2.1) (2018-10-31)
 
 
@@ -174,7 +180,6 @@
 
 
 
-<a name="0.2.0"></a>
 # [0.2.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/9d6e079...0.2.0) (2018-10-31)
 
 
