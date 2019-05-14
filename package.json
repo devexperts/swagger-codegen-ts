@@ -36,7 +36,7 @@
     "@types/prettier": "^1.13.2",
     "del": "^3.0.0",
     "fs-extra": "^7.0.0",
-    "js-yaml": "^3.12.0",
+    "js-yaml": "^3.13.1",
     "prettier": "^1.15.3"
   },
   "devDependencies": {
