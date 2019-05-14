@@ -40,21 +40,21 @@
     "prettier": "^1.15.3"
   },
   "devDependencies": {
-    "fp-ts": "^1.13.0",
-    "io-ts": "~1.2.1",
-    "io-ts-types": "^0.4.0",
-    "typescript": "^3.3.3",
     "@devexperts/lint": "^0.19.1",
     "@devexperts/remote-data-ts": "^0.3.1",
     "@devexperts/rx-utils": "^0.19.0",
     "@types/node": "^10.5.3",
-    "conventional-changelog-cli": "^2.0.5",
+    "conventional-changelog-cli": "^2.0.21",
+    "fp-ts": "^1.13.0",
+    "io-ts": "~1.2.1",
+    "io-ts-types": "^0.4.0",
     "nodemon": "^1.18.3",
     "rxjs": "^6.3.3",
     "ts-node": "^7.0.0",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
-    "tslint-plugin-prettier": "^2.0.1"
+    "tslint-plugin-prettier": "^2.0.1",
+    "typescript": "^3.3.3"
   },
   "peerDependencies": {
     "fp-ts": "^1.0.0",
