@@ -34,6 +34,11 @@
             "delivered"
           ]
         },
+        "state" : {
+          "type" : "string",
+          "description" : "order state",
+          "enum" : [ "ACTIVE" ]
+        },
         "complete": {
           "type": "boolean",
           "default": false

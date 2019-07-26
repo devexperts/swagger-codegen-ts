@@ -362,7 +362,10 @@ const serializeSchemaObject = (schema: TSchemaObject, rootName: string, cwd: str
 
 const serializeEnum = (enumValue: Array<string | number | boolean>): TSerializedType => {
 	const type = enumValue.map(value => `'${value}'`).join(' | ');
-	const io = `union([${enumValue.map(value => `literal('${value}')`).join(',')}])`;
+	const io =
+		enumValue.length === 1
+			? `literal(${type})`
+			: `union([${enumValue.map(value => `literal('${value}')`).join(',')}])`;
 	return serializedType(type, io, [dependency('union', 'io-ts'), dependency('literal', 'io-ts')], EMPTY_REFS);
 };
 
