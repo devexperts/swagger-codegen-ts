@@ -1,3 +1,12 @@
+## [0.6.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.6.0...v0.6.1) (2019-07-27)
+
+
+### Bug Fixes
+
+* support enums with single value ([#33](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/33)) ([#34](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/34)) ([98000b4](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/98000b4))
+
+
+
 # [0.6.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.5.0...v0.6.0) (2019-05-14)
 
 
@@ -121,20 +130,12 @@
 
 
 
-## [0.3.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.3.0...v0.3.1) (2018-11-07)
+## [0.3.1](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.4...v0.3.1) (2018-11-07)
 
 
 ### Bug Fixes
 
 * fix broken body parameters encoding ([c8a4214](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/c8a4214))
-
-
-
-# [0.3.0](https://github.com/devex-web-frontend/swagger-codegen-ts/compare/v0.2.4...v0.3.0) (2018-11-07)
-
-
-### Bug Fixes
-
 * treat empty object as unknown type ([#5](https://github.com/devex-web-frontend/swagger-codegen-ts/issues/5)) ([3db0d90](https://github.com/devex-web-frontend/swagger-codegen-ts/commit/3db0d90))
 
 
