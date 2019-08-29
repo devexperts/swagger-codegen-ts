@@ -19,12 +19,12 @@
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/devex-web-frontend/swagger-codegen-ts.git"
+    "url": "git+https://github.com/devexperts/swagger-codegen-ts.git"
   },
   "bugs": {
-    "url": "git+https://github.com/devex-web-frontend/swagger-codegen-ts/issues"
+    "url": "git+https://github.com/devexperts/swagger-codegen-ts/issues"
   },
-  "homepage": "https://github.com/devex-web-frontend/swagger-codegen-ts#readme",
+  "homepage": "https://github.com/devexperts/swagger-codegen-ts#readme",
   "publishConfig": {
     "access": "public"
   },
