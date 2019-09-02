@@ -728,7 +728,7 @@ const utils = `
 		return ['No errors!'];
 	}
 
-	export const report = function(validation: Validation<any>) {
+	export const report = function(validation: Validation<unknown>) {
 		return validation.fold(fail, ok);
 	};
 
