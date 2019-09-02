@@ -650,6 +650,8 @@ const serializeDependencies = (dependencies: TDependency[]): string =>
 const client = `
 	import { LiveData } from '@devexperts/rx-utils/dist/rd/live-data.utils';
 	import { Errors, mixed } from 'io-ts';
+	import { report } from '../utils/utils';
+	import { left } from 'fp-ts/lib/Either';
 
 	export type TAPIRequest = {
 		url: string;
@@ -671,21 +673,65 @@ const client = `
 		} 
 	
 		constructor(readonly errors: Errors) {
-			super('ResponseValidationError');
+			super(report(left(errors)).toString());
+			this.name = 'ResponseValidationError';
 			Object.setPrototypeOf(this, ResponseValidationError);
 		}
 	}
 `;
 
 const utils = `
-	import { Type, success, identity } from 'io-ts';
+	import { Type, success, identity, Errors, Validation, Context, ValidationError } from 'io-ts';
+
 	export const unknownType = new class UnknownType extends Type<unknown> {
 		readonly _tag: 'UnknownType' = 'UnknownType';
-	
+
 		constructor() {
 			super('unknownType', (_: unknown): _ is unknown => true, success, identity);
 		}
 	}();
+
+	function getMessage(e: ValidationError) {
+		return e.message !== undefined ? e.message : 
+			createMessage(e.context)
+			+ '\\n in context: \\n' 
+			+ getContextPath(e.context);
+	}
+
+	function createMessage(context: Context) {
+		return (
+			'\\n Received: \\n  ' +
+			JSON.stringify(context[context.length - 1].actual) +
+			'\\n expected: \\n  ' +
+			context[context.length - 1].type.name +
+			'\\n in field \\n  ' +
+			context[context.length - 1].key
+		);
+	}
+
+	function getContextPath(context: Context) {
+		return context
+			.map(function(cEntry, index) {
+				const padding = new Array(index * 2 + 2).fill(' ').join('');
+				return (
+					padding + cEntry.key + (index > 0 ? ': ' : '') + cEntry.type.name.replace(/([,{])/g, '$1 \\n' + padding)
+				);
+			})
+			.join(' -> \\n');
+	}
+
+	function fail(es: Errors) {
+		return es.map(getMessage);
+	}
+
+	function ok() {
+		return ['No errors!'];
+	}
+
+	export const report = function(validation: Validation<unknown>) {
+		return validation.fold(fail, ok);
+	};
+
 `;
 
 const hasRequiredParameters = (parameters: Array<TQueryParameterObject | TBodyParameterObject>): boolean =>
