@@ -6,14 +6,14 @@
   "scripts": {
     "ts-node": "ts-node",
     "tslint": "tslint -c tslint.json --project tsconfig.json './src/**/*.ts' './test/**/*.ts'",
-    "test": "npm run tslint && npm run prettier && ts-node ./test/index.ts",
+    "test": "yarn tslint && yarn prettier && ts-node ./test/index.ts",
     "prettier": "prettier --list-different \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prettier:fix": "prettier --write \"./src/**/*.ts\" \"./test/**/*.ts\"",
-    "prepublishOnly": "npm run test && npm run build",
+    "prepublishOnly": "yarn test && yarn build",
     "start": "nodemon",
     "build": "tsc -p ./src",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "version": "npm run changelog && git add CHANGELOG.md"
+    "version": "yarn changelog && git add CHANGELOG.md"
   },
   "author": "devexperts",
   "license": "MPL-2.0",
