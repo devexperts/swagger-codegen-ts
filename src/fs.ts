@@ -2,9 +2,9 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 
 export interface File {
-	type: 'FILE';
-	name: string;
-	content: string;
+	readonly type: 'FILE';
+	readonly name: string;
+	readonly content: string;
 }
 
 export const file = (name: string, content: string): File => ({
@@ -14,9 +14,9 @@ export const file = (name: string, content: string): File => ({
 });
 
 export interface Directory {
-	type: 'DIRECTORY';
-	name: string;
-	content: FSEntity[];
+	readonly type: 'DIRECTORY';
+	readonly name: string;
+	readonly content: FSEntity[];
 }
 
 export const directory = (name: string, content: FSEntity[]): Directory => ({
@@ -28,8 +28,8 @@ export const directory = (name: string, content: FSEntity[]): Directory => ({
 export type FSEntity = File | Directory;
 
 export interface BufferWithName {
-	buffer: Buffer;
-	fileName: string;
+	readonly buffer: Buffer;
+	readonly fileName: string;
 }
 
 export const write = async (destination: string, entity: FSEntity): Promise<void> => {

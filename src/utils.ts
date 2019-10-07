@@ -24,7 +24,7 @@ export interface Serializer {
 }
 
 export const getOperationsFromPath = (path: PathItemObject): Dictionary<OperationObject> => {
-	const result: Dictionary<OperationObject> = {};
+	const result: Record<string, OperationObject> = {};
 	const operations = array.compact([
 		pipe(
 			path.get,
@@ -107,7 +107,7 @@ export const groupPathsByTag = (
 	parameters: Option<ParametersDefinitionsObject>,
 ): Dictionary<Dictionary<PathItemObject>> => {
 	const keys = Object.keys(paths);
-	const result: Dictionary<Dictionary<PathItemObject>> = {};
+	const result: Record<string, Dictionary<PathItemObject>> = {};
 	const resolveTagParam = pipe(
 		parameters,
 		map(resolveTagParameter),
