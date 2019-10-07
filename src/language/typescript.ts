@@ -2,6 +2,7 @@ import {
 	AllOfSchemaObject,
 	BodyParameterObject,
 	DefinitionsObject,
+	Dictionary,
 	NonArrayItemsObject,
 	OperationObject,
 	ParametersDefinitionsObject,
@@ -59,15 +60,15 @@ const unless = (condition: boolean, a: string): string => (condition ? '' : a);
 const when = (condition: boolean, a: string): string => (condition ? a : '');
 
 interface Dependency {
-	name: string;
-	path: string;
+	readonly name: string;
+	readonly path: string;
 }
 
 interface SerializedType {
-	type: string;
-	io: string;
-	dependencies: Dependency[];
-	refs: string[];
+	readonly type: string;
+	readonly io: string;
+	readonly dependencies: Dependency[];
+	readonly refs: string[];
 }
 
 const serializedType = (type: string, io: string, dependencies: Dependency[], refs: string[]): SerializedType => ({
@@ -78,7 +79,7 @@ const serializedType = (type: string, io: string, dependencies: Dependency[], re
 });
 
 interface SerializedParameter extends SerializedType {
-	isRequired: boolean;
+	readonly isRequired: boolean;
 }
 const serializedParameter = (
 	type: string,
@@ -94,7 +95,7 @@ const serializedParameter = (
 	refs,
 });
 interface SerializedPathParameter extends SerializedParameter {
-	name: string;
+	readonly name: string;
 }
 const serializedPathParameter = (
 	name: string,
@@ -204,7 +205,7 @@ const serializeDefinition = (name: string, definition: SchemaObject, cwd: string
 	);
 };
 
-const serializePathGroup = (name: string, group: Record<string, PathItemObject>, cwd: string): File => {
+const serializePathGroup = (name: string, group: Dictionary<PathItemObject>, cwd: string): File => {
 	const groupName = `${name}Controller`;
 	const serialized = foldSerialized(
 		serializeDictionary(group, (url, item) => serializePath(url, item, groupName, cwd)),
@@ -745,7 +746,7 @@ const serializeNonArrayItemsObject = (items: NonArrayItemsObject): SerializedTyp
 	}
 };
 
-const serializeDictionary = <A, B>(dictionary: Record<string, A>, serializeValue: (name: string, value: A) => B): B[] =>
+const serializeDictionary = <A, B>(dictionary: Dictionary<A>, serializeValue: (name: string, value: A) => B): B[] =>
 	Object.keys(dictionary).map(name => serializeValue(name, dictionary[name]));
 
 const getIOName = (name: string): string => `${name}IO`;
@@ -774,13 +775,13 @@ const client = `
 	import { left } from 'fp-ts/lib/Either';
 
 	export interface APIRequest {
-		url: string;
-		query?: object;
-		body?: unknown;
+		readonly url: string;
+		readonly query?: object;
+		readonly body?: unknown;
 	};
 
 	export interface FullAPIRequest extends APIRequest {
-		method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+		readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 	};
 	
 	export interface APIClient {

@@ -19,24 +19,24 @@ export interface GenerateOptions {
 	/**
 	 * Paths to spec files
 	 */
-	pathsToSpec: string[];
+	readonly pathsToSpec: string[];
 	/**
 	 * Path to output directory (should be empty)
 	 */
-	out: string;
+	readonly out: string;
 	/**
 	 * Spec serializer
 	 */
-	serialize: Serializer;
+	readonly serialize: Serializer;
 	/**
 	 * Path to prettier config
 	 */
-	pathToPrettierConfig?: string;
+	readonly pathToPrettierConfig?: string;
 	/**
 	 * Buffer to JSON converter
 	 * @param buffer - File Buffer
 	 */
-	fileReader: FileReader;
+	readonly fileReader: FileReader;
 }
 
 const cwd = process.cwd();
