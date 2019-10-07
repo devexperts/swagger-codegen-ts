@@ -9,7 +9,7 @@ import { SwaggerObject } from './schema/2.0/swagger-object';
 import { Dictionary } from './utils/types';
 import { Reference, ReferenceObject } from './schema/2.0/reference-object';
 import { QueryParameterObject } from './schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
-import { PathParameterObject } from './schema/2.0/parameter-object/path-parameter-object';
+import { PathParameterObject } from './schema/2.0/parameter-object/path-parameter-object/path-parameter-object';
 import { BodyParameterObject } from './schema/2.0/parameter-object/body-parameter-object';
 import { ParameterObject } from './schema/2.0/parameter-object/parameter-object';
 import { OperationObject } from './schema/2.0/operation-object';

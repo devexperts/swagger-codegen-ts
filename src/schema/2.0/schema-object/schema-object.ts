@@ -21,7 +21,7 @@ export type SchemaObject =
 	| BooleanPropertySchemaObject
 	| ArraySchemaObject;
 
-export const SchemaObject = t.recursion<SchemaObject, unknown>('SchemaObject', SchemaObject => {
+export const SchemaObject: t.Type<SchemaObject, unknown> = t.recursion('SchemaObject', SchemaObject => {
 	const ArraySchemaObject = t.type({
 		type: t.literal('array'),
 		items: SchemaObject,
