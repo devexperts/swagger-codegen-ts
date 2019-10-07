@@ -6,7 +6,8 @@
   "scripts": {
     "ts-node": "ts-node",
     "test:lint": "eslint ./src/**/*.ts ./test/**/*.ts --fix",
-    "test": "yarn test:lint && yarn prettier && ts-node ./test/index.ts",
+    "test:build": "ts-node ./test/index.ts && tsc -p tsconfig.test.json",
+    "test": "yarn test:lint && yarn prettier && yarn test:build",
     "prettier": "prettier --list-different \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prettier:fix": "prettier --write \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prepublishOnly": "yarn test && yarn build",
@@ -31,11 +32,11 @@
   "dependencies": {
     "@devexperts/utils": "^0.12.6",
     "@types/del": "^3.0.1",
-    "@types/fs-extra": "^5.0.4",
+    "@types/fs-extra": "^8.0.0",
     "@types/js-yaml": "^3.11.2",
     "@types/prettier": "^1.13.2",
     "del": "^3.0.0",
-    "fs-extra": "^7.0.0",
+    "fs-extra": "^8.1.0",
     "js-yaml": "^3.13.1",
     "prettier": "^1.15.3"
   },
@@ -43,7 +44,6 @@
     "@devexperts/lint": "^1.0.0-alpha.2",
     "@devexperts/remote-data-ts": "^2.0.0",
     "@devexperts/rx-utils": "^1.0.0-alpha.2",
-    "@types/node": "^10.5.3",
     "conventional-changelog-cli": "^2.0.21",
     "eslint": "^6.5.1",
     "fp-ts": "^2.1.0",
@@ -51,7 +51,7 @@
     "io-ts-types": "^0.5.1",
     "nodemon": "^1.18.3",
     "rxjs": "^6.3.3",
-    "ts-node": "^7.0.0",
+    "ts-node": "^8.4.1",
     "typescript": "^3.6.3"
   },
   "peerDependencies": {
