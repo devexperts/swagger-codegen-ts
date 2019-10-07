@@ -1,4 +1,3 @@
-import { SwaggerObject } from './schema/2.0/swagger';
 import * as prettier from 'prettier';
 import { map, read, FSEntity, write } from './fs';
 import { Serializer } from './utils';
@@ -12,6 +11,7 @@ import * as del from 'del';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { SwaggerObject } from './schema/2.0/swagger-object';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
 

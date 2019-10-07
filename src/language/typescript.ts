@@ -1,21 +1,3 @@
-import {
-	AllOfSchemaObject,
-	BodyParameterObject,
-	DefinitionsObject,
-	Dictionary,
-	NonArrayItemsObject,
-	OperationObject,
-	ParametersDefinitionsObject,
-	PathItemObject,
-	PathParameterObject,
-	PathsObject,
-	QueryParameterObject,
-	ReferenceSchemaObject,
-	ResponseObject,
-	ResponsesObject,
-	SchemaObject,
-	SwaggerObject,
-} from '../schema/2.0/swagger';
 import { directory, file, Directory, File } from '../fs';
 import * as path from 'path';
 import { array, flatten, getMonoid as getArrayMonoid, uniq } from 'fp-ts/lib/Array';
@@ -49,6 +31,22 @@ import { constFalse, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
 import { intercalate } from 'fp-ts/lib/Foldable';
+import { SwaggerObject } from '../schema/2.0/swagger-object';
+import { Dictionary } from '../utils/types';
+import { ResponseObject } from '../schema/2.0/response-object';
+import { NonArrayItemsObject } from '../schema/2.0/items-object';
+import { QueryParameterObject } from '../schema/2.0/parameter-object/query-parameter-object';
+import { PathParameterObject } from '../schema/2.0/parameter-object/path-parameter-object';
+import { ResponsesObject } from '../schema/2.0/responses-object';
+import { ReferenceSchemaObject } from '../schema/2.0/schema-object/reference-schema-object';
+import { AllOfSchemaObject } from '../schema/2.0/schema-object/all-of-schema-object';
+import { SchemaObject } from '../schema/2.0/schema-object/schema-object';
+import { DefinitionsObject } from '../schema/2.0/definitions-object';
+import { BodyParameterObject } from '../schema/2.0/parameter-object/body-parameter-object';
+import { OperationObject } from '../schema/2.0/operation-object';
+import { PathItemObject } from '../schema/2.0/path-item-object';
+import { PathsObject } from '../schema/2.0/paths-object';
+import { ParametersDefinitionsObject } from '../schema/2.0/parameters-definitions-object';
 
 const EMPTY_DEPENDENCIES: Dependency[] = [];
 const EMPTY_REFS: string[] = [];
