@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import { generate } from '../src';
-import { serialize } from '../src/language/typescript';
 import { fromJSON, fromYaml } from '../src/fileReader';
 import { resolve } from 'path';
+import { serialize } from '../src/language/typescript/2.0-rx';
 
 const self = resolve(__dirname);
 
