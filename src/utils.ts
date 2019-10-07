@@ -10,10 +10,10 @@ import {
 	TBodyParameterObject,
 	TSwaggerObject,
 	TParametersDefinitionsObject,
-} from './swagger';
+	TQueryParameterObject,
+} from './schema/2.0/swagger';
 import { constant, Endomorphism, identity, tuple } from 'fp-ts/lib/function';
 import { getStructEq, eqString } from 'fp-ts/lib/Eq';
-import { TQueryParameterObject } from './swagger';
 import { TFSEntity } from './fs';
 import { camelize } from '@devexperts/utils/dist/string/string';
 import { alt, map, mapNullable, option, Option, some, chain, getOrElse } from 'fp-ts/lib/Option';

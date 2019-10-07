@@ -14,7 +14,7 @@ import {
 	TResponsesObject,
 	TSchemaObject,
 	TSwaggerObject,
-} from '../swagger';
+} from '../schema/2.0/swagger';
 import { directory, file, TDirectory, TFile } from '../fs';
 import * as path from 'path';
 import { array, flatten, getMonoid as getArrayMonoid, uniq } from 'fp-ts/lib/Array';

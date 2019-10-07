@@ -1,4 +1,4 @@
-import { SwaggerObject, TSwaggerObject } from './swagger';
+import { SwaggerObject, TSwaggerObject } from './schema/2.0/swagger';
 import * as prettier from 'prettier';
 import { map, read, TFSEntity, write } from './fs';
 import { TSerializer } from './utils';
