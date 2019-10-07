@@ -19,7 +19,9 @@ import { camelize } from '@devexperts/utils/dist/string/string';
 import { alt, map, mapNullable, option, Option, some, chain, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-export type Serializer = (name: string, schema: SwaggerObject) => FSEntity;
+export interface Serializer {
+	(name: string, schema: SwaggerObject): FSEntity;
+}
 
 export const getOperationsFromPath = (path: PathItemObject): Dictionary<OperationObject> => {
 	const result: Dictionary<OperationObject> = {};

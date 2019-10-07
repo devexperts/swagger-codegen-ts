@@ -15,7 +15,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
 
-export type GenerateOptions = {
+export interface GenerateOptions {
 	/**
 	 * Paths to spec files
 	 */
@@ -37,7 +37,7 @@ export type GenerateOptions = {
 	 * @param buffer - File Buffer
 	 */
 	fileReader: FileReader;
-};
+}
 
 const cwd = process.cwd();
 const resolvePath = (p: string) => (path.isAbsolute(p) ? p : path.resolve(cwd, p));

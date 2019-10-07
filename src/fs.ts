@@ -1,11 +1,11 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-export type File = {
+export interface File {
 	type: 'FILE';
 	name: string;
 	content: string;
-};
+}
 
 export const file = (name: string, content: string): File => ({
 	type: 'FILE',
@@ -13,11 +13,11 @@ export const file = (name: string, content: string): File => ({
 	content,
 });
 
-export type Directory = {
+export interface Directory {
 	type: 'DIRECTORY';
 	name: string;
 	content: FSEntity[];
-};
+}
 
 export const directory = (name: string, content: FSEntity[]): Directory => ({
 	type: 'DIRECTORY',
@@ -27,10 +27,10 @@ export const directory = (name: string, content: FSEntity[]): Directory => ({
 
 export type FSEntity = File | Directory;
 
-export type BufferWithName = {
+export interface BufferWithName {
 	buffer: Buffer;
 	fileName: string;
-};
+}
 
 export const write = async (destination: string, entity: FSEntity): Promise<void> => {
 	switch (entity.type) {
