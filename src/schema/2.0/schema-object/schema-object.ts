@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import { stringArrayOption, stringOption } from '../../../utils/io-ts';
+import { dictionary, stringArrayOption, stringOption } from '../../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { ReferenceObject } from '../reference-object';
 import { StringPropertySchemaObject } from './string-property-schema-object';
@@ -29,7 +29,7 @@ export const SchemaObject = t.recursion<SchemaObject, unknown>('SchemaObject', S
 	const ObjectSchemaObject = t.type({
 		required: stringArrayOption,
 		type: t.literal('object'),
-		properties: optionFromNullable(t.record(t.string, SchemaObject, 'Dictionary<SchemaObject>')),
+		properties: optionFromNullable(dictionary(SchemaObject, 'Dictionary<SchemaObject>')),
 		additionalProperties: optionFromNullable(SchemaObject),
 	});
 	const ReferenceOrAllOfSchemaObject = t.union([

@@ -1,5 +1,5 @@
 import { PathParameterObject } from './path-parameter-object';
-import { QueryParameterObject } from './query-parameter-object';
+import { QueryParameterObject } from './query-parameter-object/query-parameter-object';
 import { HeaderParameterObject } from './header-parameter-object';
 import { FormDataParameterObject } from './form-data-parameter-object';
 import { BodyParameterObject } from './body-parameter-object';

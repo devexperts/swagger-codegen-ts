@@ -1,7 +1,7 @@
 import { Dictionary } from '../../utils/types';
 import { HeaderObject } from './header-object';
-import * as t from 'io-ts';
+import { dictionary } from '../../utils/io-ts';
 
 export interface HeadersObject extends Dictionary<HeaderObject> {}
 
-export const HeadersObject = t.record(t.string, HeaderObject, 'HeadersObject');
+export const HeadersObject = dictionary(HeaderObject, 'HeadersObject');

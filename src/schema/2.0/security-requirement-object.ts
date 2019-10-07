@@ -1,6 +1,7 @@
 import { Dictionary } from '../../utils/types';
-import * as t from 'io-ts';
+import { dictionary } from '../../utils/io-ts';
+import { array, string } from 'io-ts';
 
 export interface SecurityRequirementObject extends Dictionary<string[]> {}
 
-export const SecurityRequirementObject = t.record(t.string, t.array(t.string), 'SecurityRequirementObject');
+export const SecurityRequirementObject = dictionary(array(string), 'SecurityRequirementObject');

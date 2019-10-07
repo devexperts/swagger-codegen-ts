@@ -1,7 +1,7 @@
 import { Dictionary } from '../../utils/types';
 import { PathItemObject } from './path-item-object';
-import * as t from 'io-ts';
+import { dictionary } from '../../utils/io-ts';
 
 export interface PathsObject extends Dictionary<PathItemObject> {}
 
-export const PathsObject = t.record(t.string, PathItemObject, 'PathsObject');
+export const PathsObject = dictionary(PathItemObject, 'PathsObject');

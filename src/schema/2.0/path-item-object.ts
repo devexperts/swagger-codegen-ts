@@ -3,7 +3,7 @@ import { stringOption } from '../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { OperationObject } from './operation-object';
 import { ParameterObject } from './parameter-object/parameter-object';
-import { ReferenceObject } from './reference-object';
+import { Reference, ReferenceObject } from './reference-object';
 import { Option } from 'fp-ts/lib/Option';
 
 export interface PathItemObject {
@@ -15,7 +15,7 @@ export interface PathItemObject {
 	readonly options: Option<OperationObject>;
 	readonly head: Option<OperationObject>;
 	readonly patch: Option<OperationObject>;
-	readonly parameters: Option<Array<ParameterObject | ReferenceObject>>;
+	readonly parameters: Option<Reference<ParameterObject>[]>;
 }
 
 export const PathItemObject = t.type(
