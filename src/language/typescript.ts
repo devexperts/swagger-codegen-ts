@@ -35,7 +35,7 @@ import { SwaggerObject } from '../schema/2.0/swagger-object';
 import { Dictionary } from '../utils/types';
 import { ResponseObject } from '../schema/2.0/response-object';
 import { NonArrayItemsObject } from '../schema/2.0/items-object';
-import { QueryParameterObject } from '../schema/2.0/parameter-object/query-parameter-object';
+import { QueryParameterObject } from '../schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
 import { PathParameterObject } from '../schema/2.0/parameter-object/path-parameter-object';
 import { ResponsesObject } from '../schema/2.0/responses-object';
 import { ReferenceSchemaObject } from '../schema/2.0/schema-object/reference-schema-object';

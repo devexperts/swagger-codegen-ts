@@ -1,7 +1,7 @@
 import { Dictionary } from '../../utils/types';
 import { ParameterObject } from './parameter-object/parameter-object';
-import * as t from 'io-ts';
+import { dictionary } from '../../utils/io-ts';
 
 export interface ParametersDefinitionsObject extends Dictionary<ParameterObject> {}
 
-export const ParametersDefinitionsObject = t.record(t.string, ParameterObject, 'ParametersDefinitionsObject');
+export const ParametersDefinitionsObject = dictionary(ParameterObject, 'ParametersDefinitionsObject');

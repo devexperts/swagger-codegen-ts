@@ -7,8 +7,8 @@ import { alt, map, mapNullable, option, Option, some, chain, getOrElse } from 'f
 import { pipe } from 'fp-ts/lib/pipeable';
 import { SwaggerObject } from './schema/2.0/swagger-object';
 import { Dictionary } from './utils/types';
-import { ReferenceObject } from './schema/2.0/reference-object';
-import { QueryParameterObject } from './schema/2.0/parameter-object/query-parameter-object';
+import { Reference, ReferenceObject } from './schema/2.0/reference-object';
+import { QueryParameterObject } from './schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
 import { PathParameterObject } from './schema/2.0/parameter-object/path-parameter-object';
 import { BodyParameterObject } from './schema/2.0/parameter-object/body-parameter-object';
 import { ParameterObject } from './schema/2.0/parameter-object/parameter-object';
@@ -65,19 +65,19 @@ export const getTagsFromPath = (path: PathItemObject): string[] => {
 	return uniq(eqString)(tags);
 };
 
-type Param = ParameterObject | ReferenceObject;
-const paramSetoid = getStructEq<Param>({
+type Parameter = Reference<ParameterObject>;
+const paramSetoid = getStructEq<Parameter>({
 	name: eqString,
 	$ref: eqString,
 });
 
-const addPathParametersToTag = (pathParams: Param[]): Endomorphism<Param[]> => tagParams =>
+const addPathParametersToTag = (pathParams: Parameter[]): Endomorphism<Parameter[]> => tagParams =>
 	uniq(paramSetoid)([...pathParams, ...tagParams]);
 
 const resolveTagParameter = (fileParameters: ParametersDefinitionsObject) => (
-	parameter: Param,
+	parameter: Parameter,
 ): Option<ParameterObject> => {
-	if (!isOperationReferenceParameterObject(parameter)) {
+	if (!isReferenceObject(parameter)) {
 		return some(parameter);
 	}
 	return pipe(
@@ -87,13 +87,13 @@ const resolveTagParameter = (fileParameters: ParametersDefinitionsObject) => (
 };
 
 const getTagWithResolvedParameters = (
-	addPathParametersToTag: Endomorphism<Param[]>,
-	resolveTagParameter: (parameter: Param) => Option<ParameterObject>,
+	addPathParametersToTag: Endomorphism<Parameter[]>,
+	resolveTagParameter: (parameter: Parameter) => Option<ParameterObject>,
 ) => (tag: OperationObject): OperationObject => ({
 	...tag,
 	parameters: pipe(
 		tag.parameters,
-		alt<Param[]>(constant(some([]))),
+		alt<Parameter[]>(constant(some([]))),
 		map(addPathParametersToTag),
 		map(parameters => parameters.map(resolveTagParameter)),
 		chain(array.sequence(option)),
@@ -161,13 +161,13 @@ export const groupPathsByTag = (
 	return result;
 };
 
-const isOperationReferenceParameterObject = (parameter: Param): parameter is ReferenceObject =>
+const isReferenceObject = (parameter: unknown): parameter is ReferenceObject =>
 	typeof (parameter as any)['$ref'] === 'string';
-const isOperationNonReferenceParameterObject = (parameter: Param): parameter is ParameterObject =>
-	!isOperationReferenceParameterObject(parameter);
+const isOperationNonReferenceParameterObject = (parameter: Parameter): parameter is ParameterObject =>
+	!isReferenceObject(parameter);
 
 const isPathParameterObject = (parameter: ParameterObject): parameter is PathParameterObject => parameter.in === 'path';
-const isOperationPathParameterObject = (parameter: Param): parameter is PathParameterObject =>
+const isOperationPathParameterObject = (parameter: Parameter): parameter is PathParameterObject =>
 	isOperationNonReferenceParameterObject(parameter) && isPathParameterObject(parameter);
 export const getOperationParametersInPath = (operation: OperationObject): PathParameterObject[] =>
 	pipe(
@@ -178,7 +178,7 @@ export const getOperationParametersInPath = (operation: OperationObject): PathPa
 
 const isQueryParameterObject = (parameter: ParameterObject): parameter is QueryParameterObject =>
 	parameter.in === 'query';
-const isOperationQueryParameterObject = (parameter: Param): parameter is QueryParameterObject =>
+const isOperationQueryParameterObject = (parameter: Parameter): parameter is QueryParameterObject =>
 	isOperationNonReferenceParameterObject(parameter) && isQueryParameterObject(parameter);
 export const getOperationParametersInQuery = (operation: OperationObject): QueryParameterObject[] =>
 	pipe(
@@ -188,7 +188,7 @@ export const getOperationParametersInQuery = (operation: OperationObject): Query
 	);
 
 const isBodyParameterObject = (parameter: ParameterObject): parameter is BodyParameterObject => parameter.in === 'body';
-const isOperationBodyParameterObject = (parameter: Param): parameter is BodyParameterObject =>
+const isOperationBodyParameterObject = (parameter: Parameter): parameter is BodyParameterObject =>
 	isOperationNonReferenceParameterObject(parameter) && isBodyParameterObject(parameter);
 export const getOperationParametersInBody = (operation: OperationObject): BodyParameterObject[] =>
 	pipe(

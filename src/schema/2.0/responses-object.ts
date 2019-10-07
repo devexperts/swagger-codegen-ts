@@ -1,7 +1,7 @@
 import { Dictionary } from '../../utils/types';
 import { ResponseObject } from './response-object';
-import * as t from 'io-ts';
+import { dictionary } from '../../utils/io-ts';
 
 export interface ResponsesObject extends Dictionary<ResponseObject> {}
 
-export const ResponsesObject = t.record(t.string, ResponseObject, 'ResponsesObject');
+export const ResponsesObject = dictionary(ResponseObject, 'ResponsesObject');

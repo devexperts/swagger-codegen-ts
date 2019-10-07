@@ -1,6 +1,7 @@
 import { Dictionary } from '../../utils/types';
-import * as t from 'io-ts';
+import { dictionary } from '../../utils/io-ts';
+import { string } from 'io-ts';
 
 export interface ExampleObject extends Dictionary<string> {}
 
-export const ExampleObject = t.record(t.string, t.string, 'ExampleObject');
+export const ExampleObject = dictionary(string, 'ExampleObject');
