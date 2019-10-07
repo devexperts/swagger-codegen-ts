@@ -8,25 +8,23 @@ export const numberOption = optionFromNullable(t.number);
 export const stringArrayOption = optionFromNullable(t.array(t.string));
 export const primitiveArrayOption = optionFromNullable(t.array(t.union([t.string, t.boolean, t.number])));
 
-export type TDictionary<A> = {
-	[key: string]: A;
-};
+export interface Dictionary<A> extends Record<string, A> {}
 
-export type TContactObject = {
+export interface ContactObject {
 	name: Option<string>;
 	url: Option<string>;
 	email: Option<string>;
-};
+}
 export const ContactObject = t.type(
 	{
 		name: stringOption,
 		url: stringOption,
 		email: stringOption,
 	},
-	'TContactObject',
+	'ContactObject',
 );
 
-export type TLicenseObject = {
+export type LicenseObject = {
 	name: string;
 	url: Option<string>;
 };
@@ -35,15 +33,15 @@ export const LicenseObject = t.type(
 		name: t.string,
 		url: stringOption,
 	},
-	'TLicenseObject',
+	'LicenseObject',
 );
 
-export type TInfoObject = {
+export type InfoObject = {
 	title: string;
 	description: Option<string>;
 	termsOfService: Option<string>;
-	contact: Option<TContactObject>;
-	license: Option<TLicenseObject>;
+	contact: Option<ContactObject>;
+	license: Option<LicenseObject>;
 	version: string;
 };
 export const InfoObject = t.type(
@@ -55,10 +53,10 @@ export const InfoObject = t.type(
 		license: optionFromNullable(LicenseObject),
 		version: t.string,
 	},
-	'TInfoObject',
+	'InfoObject',
 );
 
-export type TExternalDocumentationObject = {
+export type ExternalDocumentationObject = {
 	description: Option<string>;
 	url: string;
 };
@@ -67,29 +65,29 @@ export const ExternalDocumentationObject = t.type(
 		description: stringOption,
 		url: t.string,
 	},
-	'TExternalDocumentationObject',
+	'ExternalDocumentationObject',
 );
 
-export type TReferenceObject = {
+export type ReferenceObject = {
 	$ref: string;
 };
 export const ReferenceObject = t.type(
 	{
 		$ref: t.string,
 	},
-	'TReferenceObject',
+	'ReferenceObject',
 );
 
 //#region Schema Object
 
-export type TObjectSchemaObject = {
+export type ObjectSchemaObject = {
 	type: 'object';
-	properties: Option<TDictionary<TSchemaObject>>;
+	properties: Option<Dictionary<SchemaObject>>;
 	required: Option<string[]>;
-	additionalProperties: Option<TSchemaObject>;
+	additionalProperties: Option<SchemaObject>;
 };
 
-export type TStringPropertySchemaObject = {
+export type StringPropertySchemaObject = {
 	type: 'string';
 	format: Option<string>;
 	enum: Option<Array<string | number | boolean>>;
@@ -100,10 +98,10 @@ export const StringPropertySchemaObject = t.type(
 		format: stringOption,
 		enum: primitiveArrayOption,
 	},
-	'TStringPropertySchemaObject',
+	'StringPropertySchemaObject',
 );
 
-export type TNumberPropertySchemaObject = {
+export type NumberPropertySchemaObject = {
 	type: 'number';
 	format: Option<string>;
 };
@@ -112,10 +110,10 @@ export const NumberPropertySchemaObject = t.type(
 		type: t.literal('number'),
 		format: stringOption,
 	},
-	'TNumberPropertySchemaObject',
+	'NumberPropertySchemaObject',
 );
 
-export type TIntegerPropertySchemaObject = {
+export type IntegerPropertySchemaObject = {
 	type: 'integer';
 	format: Option<string>;
 };
@@ -124,43 +122,43 @@ export const IntegerPropertySchemaObject = t.type(
 		type: t.literal('integer'),
 		format: stringOption,
 	},
-	'TIntegerPropertySchemaObject',
+	'IntegerPropertySchemaObject',
 );
 
-export type TBooleanPropertySchemaObject = {
+export type BooleanPropertySchemaObject = {
 	type: 'boolean';
 };
 export const BooleanPropertySchemaObject = t.type(
 	{
 		type: t.literal('boolean'),
 	},
-	'TBooleanPropertySchemaObject',
+	'BooleanPropertySchemaObject',
 );
 
-export type TAllOfSchemaObject = {
-	allOf: TSchemaObject[];
+export type AllOfSchemaObject = {
+	allOf: SchemaObject[];
 	description: Option<string>;
 	type: undefined;
 };
-export type TReferenceSchemaObject = TReferenceObject & {
+export type ReferenceSchemaObject = ReferenceObject & {
 	type: undefined;
 };
-export type TReferenceOrAllOfSchemeObject = TReferenceSchemaObject | TAllOfSchemaObject;
+export type ReferenceOrAllOfSchemeObject = ReferenceSchemaObject | AllOfSchemaObject;
 
-export type TArraySchemaObject = {
+export type ArraySchemaObject = {
 	type: 'array';
-	items: TSchemaObject;
+	items: SchemaObject;
 };
 
-export type TSchemaObject =
-	| TReferenceOrAllOfSchemeObject
-	| TObjectSchemaObject
-	| TStringPropertySchemaObject
-	| TNumberPropertySchemaObject
-	| TIntegerPropertySchemaObject
-	| TBooleanPropertySchemaObject
-	| TArraySchemaObject;
-export const SchemaObject = t.recursion<TSchemaObject, unknown>('SchemaObject', SchemaObject => {
+export type SchemaObject =
+	| ReferenceOrAllOfSchemeObject
+	| ObjectSchemaObject
+	| StringPropertySchemaObject
+	| NumberPropertySchemaObject
+	| IntegerPropertySchemaObject
+	| BooleanPropertySchemaObject
+	| ArraySchemaObject;
+export const SchemaObject = t.recursion<SchemaObject, unknown>('SchemaObject', SchemaObject => {
 	const ArraySchemaObject = t.type({
 		type: t.literal('array'),
 		items: SchemaObject,
@@ -168,7 +166,7 @@ export const SchemaObject = t.recursion<TSchemaObject, unknown>('SchemaObject', 
 	const ObjectSchemaObject = t.type({
 		required: stringArrayOption,
 		type: t.literal('object'),
-		properties: optionFromNullable(t.record(t.string, SchemaObject, 'TDictionary<TSchemaObject>')),
+		properties: optionFromNullable(t.record(t.string, SchemaObject, 'Dictionary<SchemaObject>')),
 		additionalProperties: optionFromNullable(SchemaObject),
 	});
 	const ReferenceOrAllOfSchemaObject = t.union([
@@ -198,12 +196,12 @@ export const SchemaObject = t.recursion<TSchemaObject, unknown>('SchemaObject', 
 
 //#endregion
 
-export type TDefinitionsObject = TDictionary<TSchemaObject>;
-export const DefinitionsObject = t.record(t.string, SchemaObject, 'TDefinitionsObject');
+export type DefinitionsObject = Dictionary<SchemaObject>;
+export const DefinitionsObject = t.record(t.string, SchemaObject, 'DefinitionsObject');
 
 //#region Items Object
 
-export type TBaseItemsObject = {
+export type BaseItemsObject = {
 	format: Option<string>;
 	collectionFormat: Option<'csv' | 'ssv' | 'tsv' | 'pipes'>;
 	maximum: Option<number>;
@@ -238,7 +236,7 @@ export const BaseItemsObjectProps = {
 	multipleOf: numberOption,
 };
 
-export type TStringItemsObject = TBaseItemsObject & {
+export type StringItemsObject = BaseItemsObject & {
 	type: 'string';
 };
 export const StringItemsObject = t.type(
@@ -246,10 +244,10 @@ export const StringItemsObject = t.type(
 		...BaseItemsObjectProps,
 		type: t.literal('string'),
 	},
-	'TStringItemsObject',
+	'StringItemsObject',
 );
 
-export type TNumberItemsObject = TBaseItemsObject & {
+export type NumberItemsObject = BaseItemsObject & {
 	type: 'number';
 };
 export const NumberItemsObject = t.type(
@@ -257,10 +255,10 @@ export const NumberItemsObject = t.type(
 		...BaseItemsObjectProps,
 		type: t.literal('number'),
 	},
-	'TNumberItemsObject',
+	'NumberItemsObject',
 );
 
-export type TIntegerItemsObject = TBaseItemsObject & {
+export type IntegerItemsObject = BaseItemsObject & {
 	type: 'integer';
 };
 export const IntegerItemsObject = t.type(
@@ -268,10 +266,10 @@ export const IntegerItemsObject = t.type(
 		...BaseItemsObjectProps,
 		type: t.literal('integer'),
 	},
-	'TIntegerItemsObject',
+	'IntegerItemsObject',
 );
 
-export type TBooleanItemsObject = TBaseItemsObject & {
+export type BooleanItemsObject = BaseItemsObject & {
 	type: 'boolean';
 };
 export const BooleanItemsObject = t.type(
@@ -279,21 +277,21 @@ export const BooleanItemsObject = t.type(
 		...BaseItemsObjectProps,
 		type: t.literal('boolean'),
 	},
-	'TBooleanItemsObject',
+	'BooleanItemsObject',
 );
 
-export type TArrayItemsObject = TBaseItemsObject & {
+export type ArrayItemsObject = BaseItemsObject & {
 	type: 'array';
-	items: Option<TItemsObject[]>;
+	items: Option<ItemsObject[]>;
 };
 
-export type TItemsObject =
-	| TArrayItemsObject
-	| TStringItemsObject
-	| TNumberItemsObject
-	| TIntegerItemsObject
-	| TBooleanItemsObject;
-export const ItemsObject = t.recursion<TItemsObject>('ItemsObject', ItemsObject => {
+export type ItemsObject =
+	| ArrayItemsObject
+	| StringItemsObject
+	| NumberItemsObject
+	| IntegerItemsObject
+	| BooleanItemsObject;
+export const ItemsObject = t.recursion<ItemsObject>('ItemsObject', ItemsObject => {
 	const ArrayItemsObject = t.type({
 		...BaseItemsObjectProps,
 		type: t.literal('array'),
@@ -308,15 +306,15 @@ export const ItemsObject = t.recursion<TItemsObject>('ItemsObject', ItemsObject 
 	]) as any;
 });
 
-export type TNonArrayItemsObject = TStringItemsObject | TNumberItemsObject | TIntegerItemsObject | TBooleanItemsObject;
+export type NonArrayItemsObject = StringItemsObject | NumberItemsObject | IntegerItemsObject | BooleanItemsObject;
 export const NonArrayItemsObject = t.union(
 	[StringItemsObject, NumberItemsObject, IntegerItemsObject, BooleanItemsObject],
-	'TNonArrayItemsObject',
+	'NonArrayItemsObject',
 );
 
 //#endregion
 
-export type TBaseParameterObjectProps = {
+export type BaseParameterObjectProps = {
 	name: string;
 	description: Option<string>;
 };
@@ -327,7 +325,7 @@ const BaseParameterObjectProps = {
 
 //#region Path Parameter Object
 
-export type TBasePathParameterObjectProps = TBaseParameterObjectProps & {
+export type BasePathParameterObjectProps = BaseParameterObjectProps & {
 	in: 'path';
 	required: true;
 	format: Option<string>;
@@ -339,7 +337,7 @@ const BasePathParameterObjectProps = {
 	format: stringOption,
 };
 
-export type TStringPathParameterObject = TBasePathParameterObjectProps & {
+export type StringPathParameterObject = BasePathParameterObjectProps & {
 	type: 'string';
 };
 const StringPathParameterObject = t.type(
@@ -347,10 +345,10 @@ const StringPathParameterObject = t.type(
 		...BasePathParameterObjectProps,
 		type: t.literal('string'),
 	},
-	'TStringPathParameterObject',
+	'StringPathParameterObject',
 );
 
-export type TNumberPathParameterObject = TBasePathParameterObjectProps & {
+export type NumberPathParameterObject = BasePathParameterObjectProps & {
 	type: 'number';
 };
 const NumberPathParameterObject = t.type(
@@ -358,10 +356,10 @@ const NumberPathParameterObject = t.type(
 		...BasePathParameterObjectProps,
 		type: t.literal('number'),
 	},
-	'TNumberPathParameterObject',
+	'NumberPathParameterObject',
 );
 
-export type TIntegerPathParameterObject = TBasePathParameterObjectProps & {
+export type IntegerPathParameterObject = BasePathParameterObjectProps & {
 	type: 'integer';
 };
 const IntegerPathParameterObject = t.type(
@@ -369,10 +367,10 @@ const IntegerPathParameterObject = t.type(
 		...BasePathParameterObjectProps,
 		type: t.literal('integer'),
 	},
-	'TIntegerPathParameterObject',
+	'IntegerPathParameterObject',
 );
 
-export type TBooleanPathParameterObject = TBasePathParameterObjectProps & {
+export type BooleanPathParameterObject = BasePathParameterObjectProps & {
 	type: 'boolean';
 };
 const BooleanPathParameterObject = t.type(
@@ -380,12 +378,12 @@ const BooleanPathParameterObject = t.type(
 		...BasePathParameterObjectProps,
 		type: t.literal('boolean'),
 	},
-	'TBooleanPathParameterObject',
+	'BooleanPathParameterObject',
 );
 
-export type TArrayPathParameterObject = TBasePathParameterObjectProps & {
+export type ArrayPathParameterObject = BasePathParameterObjectProps & {
 	type: 'array';
-	items: TNonArrayItemsObject;
+	items: NonArrayItemsObject;
 };
 const ArrayPathParameterObject = t.type(
 	{
@@ -393,15 +391,15 @@ const ArrayPathParameterObject = t.type(
 		type: t.literal('array'),
 		items: NonArrayItemsObject,
 	},
-	'TArrayPathParameterObject',
+	'ArrayPathParameterObject',
 );
 
-export type TPathParameterObject =
-	| TStringPathParameterObject
-	| TNumberPathParameterObject
-	| TIntegerPathParameterObject
-	| TBooleanPathParameterObject
-	| TArrayPathParameterObject;
+export type PathParameterObject =
+	| StringPathParameterObject
+	| NumberPathParameterObject
+	| IntegerPathParameterObject
+	| BooleanPathParameterObject
+	| ArrayPathParameterObject;
 
 export const PathParameterObject = t.union(
 	[
@@ -411,14 +409,14 @@ export const PathParameterObject = t.union(
 		BooleanPathParameterObject,
 		ArrayPathParameterObject,
 	],
-	'TPathParameterObject',
+	'PathParameterObject',
 );
 
 //#endregion
 
 //#region Query Parameter Object
 
-export type TBaseQueryParameterObjectProps = {
+export type BaseQueryParameterObjectProps = {
 	name: string;
 	in: 'query';
 	description: Option<string>;
@@ -432,7 +430,7 @@ const BaseQueryParameterObjectProps = {
 	required: booleanOption,
 };
 
-export type TStringQueryParameterObject = TBaseQueryParameterObjectProps & {
+export type StringQueryParameterObject = BaseQueryParameterObjectProps & {
 	type: 'string';
 };
 const StringQueryParameterObject = t.type(
@@ -440,10 +438,10 @@ const StringQueryParameterObject = t.type(
 		...BaseQueryParameterObjectProps,
 		type: t.literal('string'),
 	},
-	'TStringQueryParameterObject',
+	'StringQueryParameterObject',
 );
 
-export type TNumberQueryParameterObject = TBaseQueryParameterObjectProps & {
+export type NumberQueryParameterObject = BaseQueryParameterObjectProps & {
 	type: 'number';
 };
 const NumberQueryParameterObject = t.type(
@@ -451,10 +449,10 @@ const NumberQueryParameterObject = t.type(
 		...BaseQueryParameterObjectProps,
 		type: t.literal('number'),
 	},
-	'TNumberQueryParameterObject',
+	'NumberQueryParameterObject',
 );
 
-export type TIntegerQueryParameterObject = TBaseQueryParameterObjectProps & {
+export type IntegerQueryParameterObject = BaseQueryParameterObjectProps & {
 	type: 'integer';
 };
 const IntegerQueryParameterObject = t.type(
@@ -462,10 +460,10 @@ const IntegerQueryParameterObject = t.type(
 		...BaseQueryParameterObjectProps,
 		type: t.literal('integer'),
 	},
-	'TIntegerQueryParameterObject',
+	'IntegerQueryParameterObject',
 );
 
-export type TBooleanQueryParameterObject = TBaseQueryParameterObjectProps & {
+export type BooleanQueryParameterObject = BaseQueryParameterObjectProps & {
 	type: 'boolean';
 };
 const BooleanQueryParameterObject = t.type(
@@ -473,12 +471,12 @@ const BooleanQueryParameterObject = t.type(
 		...BaseQueryParameterObjectProps,
 		type: t.literal('boolean'),
 	},
-	'TBooleanQueryParameterObject',
+	'BooleanQueryParameterObject',
 );
 
-export type TArrayQueryParameterObject = TBaseQueryParameterObjectProps & {
+export type ArrayQueryParameterObject = BaseQueryParameterObjectProps & {
 	type: 'array';
-	items: TNonArrayItemsObject;
+	items: NonArrayItemsObject;
 };
 const ArrayQueryParameterObject = t.type(
 	{
@@ -486,15 +484,15 @@ const ArrayQueryParameterObject = t.type(
 		type: t.literal('array'),
 		items: NonArrayItemsObject,
 	},
-	'TArrayQueryParameterObject',
+	'ArrayQueryParameterObject',
 );
 
-export type TQueryParameterObject =
-	| TStringQueryParameterObject
-	| TNumberQueryParameterObject
-	| TIntegerQueryParameterObject
-	| TBooleanQueryParameterObject
-	| TArrayQueryParameterObject;
+export type QueryParameterObject =
+	| StringQueryParameterObject
+	| NumberQueryParameterObject
+	| IntegerQueryParameterObject
+	| BooleanQueryParameterObject
+	| ArrayQueryParameterObject;
 
 export const QueryParameterObject = t.union(
 	[
@@ -504,12 +502,12 @@ export const QueryParameterObject = t.union(
 		BooleanQueryParameterObject,
 		ArrayQueryParameterObject,
 	],
-	'TQueryParameterObject',
+	'QueryParameterObject',
 );
 
 //#endregion
 
-export type THeaderParameterObject = {
+export type HeaderParameterObject = {
 	name: string;
 	in: 'header';
 	description: Option<string>;
@@ -522,9 +520,9 @@ export const HeaderParameterObject = t.type(
 		description: stringOption,
 		required: booleanOption,
 	},
-	'THeaderParameterObject',
+	'HeaderParameterObject',
 );
-export type TFormDataParameterObject = {
+export type FormDataParameterObject = {
 	name: string;
 	in: 'formData';
 	description: Option<string>;
@@ -537,15 +535,15 @@ export const FormDataParameterObject = t.type(
 		description: stringOption,
 		required: booleanOption,
 	},
-	'TFormDataParameterObject',
+	'FormDataParameterObject',
 );
 
 //#region Body Parameter Object
 
-export type TBodyParameterObject = TBaseParameterObjectProps & {
+export type BodyParameterObject = BaseParameterObjectProps & {
 	in: 'body';
 	required: Option<boolean>;
-	schema: TSchemaObject;
+	schema: SchemaObject;
 };
 
 export const BodyParameterObject = t.type(
@@ -555,26 +553,26 @@ export const BodyParameterObject = t.type(
 		required: booleanOption,
 		schema: SchemaObject,
 	},
-	'TBodyParameterObject',
+	'BodyParameterObject',
 );
 
 //#endregion
 
-export type TParameterObject =
-	| TPathParameterObject
-	| TQueryParameterObject
-	| THeaderParameterObject
-	| TFormDataParameterObject
-	| TBodyParameterObject;
+export type ParameterObject =
+	| PathParameterObject
+	| QueryParameterObject
+	| HeaderParameterObject
+	| FormDataParameterObject
+	| BodyParameterObject;
 export const ParameterObject = t.union(
 	[PathParameterObject, QueryParameterObject, HeaderParameterObject, FormDataParameterObject, BodyParameterObject],
-	'TParameterObject',
+	'ParameterObject',
 );
 
-export type TExampleObject = TDictionary<string>;
-export const ExampleObject = t.record(t.string, t.string, 'TExampleObject');
+export type ExampleObject = Dictionary<string>;
+export const ExampleObject = t.record(t.string, t.string, 'ExampleObject');
 
-export type THeaderObject = TItemsObject & {
+export type HeaderObject = ItemsObject & {
 	description: Option<string>;
 };
 export const HeaderObject = t.intersection(
@@ -584,17 +582,17 @@ export const HeaderObject = t.intersection(
 			description: stringOption,
 		}),
 	],
-	'THeaderObject',
+	'HeaderObject',
 );
 
-export type THeadersObject = TDictionary<THeaderObject>;
-export const HeadersObject = t.record(t.string, HeaderObject, 'THeadersObject');
+export type HeadersObject = Dictionary<HeaderObject>;
+export const HeadersObject = t.record(t.string, HeaderObject, 'HeadersObject');
 
-export type TResponseObject = {
+export type ResponseObject = {
 	description: string;
-	schema: Option<TSchemaObject>;
-	headers: Option<THeadersObject>;
-	examples: Option<TExampleObject>;
+	schema: Option<SchemaObject>;
+	headers: Option<HeadersObject>;
+	examples: Option<ExampleObject>;
 };
 export const ResponseObject = t.type(
 	{
@@ -603,28 +601,28 @@ export const ResponseObject = t.type(
 		headers: optionFromNullable(HeadersObject),
 		examples: optionFromNullable(ExampleObject),
 	},
-	'TResponseObject',
+	'ResponseObject',
 );
 
-export type TResponsesObject = TDictionary<TResponseObject>;
-export const ResponsesObject = t.record(t.string, ResponseObject, 'TResponsesObject');
+export type ResponsesObject = Dictionary<ResponseObject>;
+export const ResponsesObject = t.record(t.string, ResponseObject, 'ResponsesObject');
 
-export type TSecurityRequirementObject = TDictionary<string[]>;
-export const SecurityRequirementObject = t.record(t.string, t.array(t.string), 'TSecurityRequirementObject');
+export type SecurityRequirementObject = Dictionary<string[]>;
+export const SecurityRequirementObject = t.record(t.string, t.array(t.string), 'SecurityRequirementObject');
 
-export type TOperationObject = {
+export type OperationObject = {
 	tags: Option<string[]>;
 	summary: Option<string>;
 	description: Option<string>;
-	externalDocs: Option<TExternalDocumentationObject>;
+	externalDocs: Option<ExternalDocumentationObject>;
 	operationId: Option<string>;
 	consumes: Option<string[]>;
 	produces: Option<string[]>;
-	parameters: Option<Array<TParameterObject | TReferenceObject>>;
-	responses: TResponsesObject;
+	parameters: Option<Array<ParameterObject | ReferenceObject>>;
+	responses: ResponsesObject;
 	schemes: Option<string[]>;
 	deprecated: Option<boolean>;
-	security: Option<TSecurityRequirementObject[]>;
+	security: Option<SecurityRequirementObject[]>;
 };
 export const OperationObject = t.type(
 	{
@@ -641,19 +639,19 @@ export const OperationObject = t.type(
 		deprecated: booleanOption,
 		security: optionFromNullable(t.array(SecurityRequirementObject)),
 	},
-	'TOperationObject',
+	'OperationObject',
 );
 
-export type TPathItemObject = {
+export type PathItemObject = {
 	$ref: Option<string>;
-	get: Option<TOperationObject>;
-	put: Option<TOperationObject>;
-	post: Option<TOperationObject>;
-	delete: Option<TOperationObject>;
-	options: Option<TOperationObject>;
-	head: Option<TOperationObject>;
-	patch: Option<TOperationObject>;
-	parameters: Option<Array<TParameterObject | TReferenceObject>>;
+	get: Option<OperationObject>;
+	put: Option<OperationObject>;
+	post: Option<OperationObject>;
+	delete: Option<OperationObject>;
+	options: Option<OperationObject>;
+	head: Option<OperationObject>;
+	patch: Option<OperationObject>;
+	parameters: Option<Array<ParameterObject | ReferenceObject>>;
 };
 export const PathItemObject = t.type(
 	{
@@ -667,31 +665,31 @@ export const PathItemObject = t.type(
 		patch: optionFromNullable(OperationObject),
 		parameters: optionFromNullable(t.array(t.union([ParameterObject, ReferenceObject]))),
 	},
-	'TPathItemObject',
+	'PathItemObject',
 );
 
-export type TPathsObject = TDictionary<TPathItemObject>;
-export const PathsObject = t.record(t.string, PathItemObject, 'TPathsObject');
+export type PathsObject = Dictionary<PathItemObject>;
+export const PathsObject = t.record(t.string, PathItemObject, 'PathsObject');
 
-export type TParametersDefinitionsObject = TDictionary<TParameterObject>;
-export const ParametersDefinitionsObject = t.record(t.string, ParameterObject, 'TParametersDefinitionsObject');
+export type ParametersDefinitionsObject = Dictionary<ParameterObject>;
+export const ParametersDefinitionsObject = t.record(t.string, ParameterObject, 'ParametersDefinitionsObject');
 
-export type TResponsesDefinitionsObject = TDictionary<TResponseObject>;
-export const ResponsesDefinitionsObject = t.record(t.string, ResponseObject, 'TResponsesDefinitionsObject');
+export type ResponsesDefinitionsObject = Dictionary<ResponseObject>;
+export const ResponsesDefinitionsObject = t.record(t.string, ResponseObject, 'ResponsesDefinitionsObject');
 
-export type TScopesObject = TDictionary<string>;
-export const ScopesObject = t.record(t.string, t.string, 'TScopesObject');
+export type ScopesObject = Dictionary<string>;
+export const ScopesObject = t.record(t.string, t.string, 'ScopesObject');
 
 //#region SecuritySchemeObject
 
-export type TBaseSecuritySchemeObjectProps = {
+export type BaseSecuritySchemeObjectProps = {
 	description: Option<string>;
 };
 const BaseSecuritySchemeObjectProps = {
 	description: stringOption,
 };
 
-export type TBasicSecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+export type BasicSecuritySchemeObject = BaseSecuritySchemeObjectProps & {
 	type: 'basic';
 };
 const BasicSecuritySchemeObject = t.type(
@@ -699,10 +697,10 @@ const BasicSecuritySchemeObject = t.type(
 		...BaseSecuritySchemeObjectProps,
 		type: t.literal('basic'),
 	},
-	'TBasicSecuritySchemeObject',
+	'BasicSecuritySchemeObject',
 );
 
-export type TApiKeySecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+export type ApiKeySecuritySchemeObject = BaseSecuritySchemeObjectProps & {
 	type: 'apiKey';
 	in: 'query' | 'header';
 	name: string;
@@ -714,14 +712,14 @@ const ApiKeySecuritySchemeObject = t.type(
 		in: t.union([t.literal('query'), t.literal('header')]),
 		name: t.string,
 	},
-	'TApiKeySecuritySchemeObject',
+	'ApiKeySecuritySchemeObject',
 );
 
-export type TImplicitOAuth2SecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+export type ImplicitOAuth2SecuritySchemeObject = BaseSecuritySchemeObjectProps & {
 	type: 'oauth2';
 	flow: 'implicit';
 	authorizationUrl: string;
-	scopes: TScopesObject;
+	scopes: ScopesObject;
 };
 const ImplicitOAuth2SecuritySchemeObject = t.type(
 	{
@@ -731,13 +729,13 @@ const ImplicitOAuth2SecuritySchemeObject = t.type(
 		authorizationUrl: t.string,
 		scopes: ScopesObject,
 	},
-	'TImplicitOAuth2SecuritySchemeObject',
+	'ImplicitOAuth2SecuritySchemeObject',
 );
-export type TPasswordOAuth2SecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+export type PasswordOAuth2SecuritySchemeObject = BaseSecuritySchemeObjectProps & {
 	type: 'oauth2';
 	flow: 'password';
 	tokenUrl: string;
-	scopes: TScopesObject;
+	scopes: ScopesObject;
 };
 const PasswordOAuth2SecuritySchemeObject = t.type(
 	{
@@ -747,13 +745,13 @@ const PasswordOAuth2SecuritySchemeObject = t.type(
 		tokenUrl: t.string,
 		scopes: ScopesObject,
 	},
-	'TPasswordOAuth2SecuritySchemeObject',
+	'PasswordOAuth2SecuritySchemeObject',
 );
-export type TApplicationOAuth2SecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+export type ApplicationOAuth2SecuritySchemeObject = BaseSecuritySchemeObjectProps & {
 	type: 'oauth2';
 	flow: 'application';
 	tokenUrl: string;
-	scopes: TScopesObject;
+	scopes: ScopesObject;
 };
 const ApplicationOAuth2SecuritySchemeObject = t.type(
 	{
@@ -763,13 +761,13 @@ const ApplicationOAuth2SecuritySchemeObject = t.type(
 		tokenUrl: t.string,
 		scopes: ScopesObject,
 	},
-	'TApplicationOAuth2SecuritySchemeObject',
+	'ApplicationOAuth2SecuritySchemeObject',
 );
-export type TAccessCodeOAuth2SecuritySchemeObject = TBaseSecuritySchemeObjectProps & {
+export type AccessCodeOAuth2SecuritySchemeObject = BaseSecuritySchemeObjectProps & {
 	type: 'oauth2';
 	flow: 'accessCode';
 	tokenUrl: string;
-	scopes: TScopesObject;
+	scopes: ScopesObject;
 };
 const AccessCodeOAuth2SecuritySchemeObject = t.type(
 	{
@@ -779,13 +777,13 @@ const AccessCodeOAuth2SecuritySchemeObject = t.type(
 		tokenUrl: t.string,
 		scopes: ScopesObject,
 	},
-	'TAccessCodeOAuth2SecuritySchemeObject',
+	'AccessCodeOAuth2SecuritySchemeObject',
 );
-export type TOAuth2SecuritySchemeObject =
-	| TImplicitOAuth2SecuritySchemeObject
-	| TPasswordOAuth2SecuritySchemeObject
-	| TApplicationOAuth2SecuritySchemeObject
-	| TAccessCodeOAuth2SecuritySchemeObject;
+export type OAuth2SecuritySchemeObject =
+	| ImplicitOAuth2SecuritySchemeObject
+	| PasswordOAuth2SecuritySchemeObject
+	| ApplicationOAuth2SecuritySchemeObject
+	| AccessCodeOAuth2SecuritySchemeObject;
 const OAuth2SecuritySchemeObject = t.union(
 	[
 		ImplicitOAuth2SecuritySchemeObject,
@@ -793,27 +791,24 @@ const OAuth2SecuritySchemeObject = t.union(
 		ApplicationOAuth2SecuritySchemeObject,
 		AccessCodeOAuth2SecuritySchemeObject,
 	],
-	'TOAuth2SecuritySchemeObject',
+	'OAuth2SecuritySchemeObject',
 );
 
-export type TSecuritySchemeObject =
-	| TBasicSecuritySchemeObject
-	| TApiKeySecuritySchemeObject
-	| TOAuth2SecuritySchemeObject;
+export type SecuritySchemeObject = BasicSecuritySchemeObject | ApiKeySecuritySchemeObject | OAuth2SecuritySchemeObject;
 const SecuritySchemeObject = t.union(
 	[BasicSecuritySchemeObject, ApiKeySecuritySchemeObject, OAuth2SecuritySchemeObject],
-	'TSecuritySchemeObject',
+	'SecuritySchemeObject',
 );
 
 //#endregion
 
-export type TSecurityDefinitionsObject = TDictionary<TSecuritySchemeObject>;
-export const SecurityDefinitionsObject = t.record(t.string, SecuritySchemeObject, 'TSecurityDefinitionsObject');
+export type SecurityDefinitionsObject = Dictionary<SecuritySchemeObject>;
+export const SecurityDefinitionsObject = t.record(t.string, SecuritySchemeObject, 'SecurityDefinitionsObject');
 
-export type TTagObject = {
+export type TagObject = {
 	name: string;
 	description: Option<string>;
-	externalDocs: Option<TExternalDocumentationObject>;
+	externalDocs: Option<ExternalDocumentationObject>;
 };
 export const TagObject = t.type(
 	{
@@ -821,25 +816,25 @@ export const TagObject = t.type(
 		description: stringOption,
 		externalDocs: optionFromNullable(ExternalDocumentationObject),
 	},
-	'TTagObject',
+	'TagObject',
 );
 
-export type TSwaggerObject = {
+export type SwaggerObject = {
 	basePath: Option<string>;
 	consumes: Option<string[]>;
-	definitions: Option<TDefinitionsObject>;
-	externalDocs: Option<TExternalDocumentationObject>;
+	definitions: Option<DefinitionsObject>;
+	externalDocs: Option<ExternalDocumentationObject>;
 	host: Option<string>;
-	info: TInfoObject;
-	parameters: Option<TParametersDefinitionsObject>;
-	paths: TPathsObject;
+	info: InfoObject;
+	parameters: Option<ParametersDefinitionsObject>;
+	paths: PathsObject;
 	produces: Option<string[]>;
-	responses: Option<TResponsesDefinitionsObject>;
+	responses: Option<ResponsesDefinitionsObject>;
 	schemes: Option<string[]>;
-	security: Option<TSecurityRequirementObject[]>;
-	securityDefinitions: Option<TSecurityDefinitionsObject>;
+	security: Option<SecurityRequirementObject[]>;
+	securityDefinitions: Option<SecurityDefinitionsObject>;
 	swagger: string;
-	tags: Option<TTagObject[]>;
+	tags: Option<TagObject[]>;
 };
 export const SwaggerObject = t.type(
 	{
@@ -859,5 +854,5 @@ export const SwaggerObject = t.type(
 		swagger: t.string,
 		tags: optionFromNullable(t.array(TagObject)),
 	},
-	'TSwaggerObject',
+	'SwaggerObject',
 );
