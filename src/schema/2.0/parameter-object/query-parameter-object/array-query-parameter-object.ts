@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
 import { BaseQueryParameterObjectProps } from './base-query-parameter-object';
-import { NonArrayItemsObject } from '../../items-object';
+import { NonArrayItemsObject } from '../../items-object/non-array-items-object';
 
 export interface ArrayQueryParameterObject extends BaseQueryParameterObjectProps {
 	readonly type: 'array';

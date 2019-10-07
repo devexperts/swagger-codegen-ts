@@ -34,9 +34,8 @@ import { intercalate } from 'fp-ts/lib/Foldable';
 import { SwaggerObject } from '../schema/2.0/swagger-object';
 import { Dictionary } from '../utils/types';
 import { ResponseObject } from '../schema/2.0/response-object';
-import { NonArrayItemsObject } from '../schema/2.0/items-object';
 import { QueryParameterObject } from '../schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
-import { PathParameterObject } from '../schema/2.0/parameter-object/path-parameter-object';
+import { PathParameterObject } from '../schema/2.0/parameter-object/path-parameter-object/path-parameter-object';
 import { ResponsesObject } from '../schema/2.0/responses-object';
 import { ReferenceSchemaObject } from '../schema/2.0/schema-object/reference-schema-object';
 import { AllOfSchemaObject } from '../schema/2.0/schema-object/all-of-schema-object';
@@ -47,6 +46,7 @@ import { OperationObject } from '../schema/2.0/operation-object';
 import { PathItemObject } from '../schema/2.0/path-item-object';
 import { PathsObject } from '../schema/2.0/paths-object';
 import { ParametersDefinitionsObject } from '../schema/2.0/parameters-definitions-object';
+import { NonArrayItemsObject } from '../schema/2.0/items-object/non-array-items-object';
 
 const EMPTY_DEPENDENCIES: Dependency[] = [];
 const EMPTY_REFS: string[] = [];

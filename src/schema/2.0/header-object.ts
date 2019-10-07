@@ -1,4 +1,4 @@
-import { ItemsObject } from './items-object';
+import { ItemsObject } from './items-object/items-object';
 import { Option } from 'fp-ts/lib/Option';
 import * as t from 'io-ts';
 import { stringOption } from '../../utils/io-ts';
