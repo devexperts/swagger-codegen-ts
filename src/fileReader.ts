@@ -1,8 +1,6 @@
 import * as yaml from 'js-yaml';
 
-export type JSON = {
-	[key: string]: unknown;
-};
+export interface JSON extends Record<string, unknown> {}
 export type FileReader = (buffer: Buffer) => JSON;
 
 export const fromJSON: FileReader = buffer => JSON.parse(buffer.toString());

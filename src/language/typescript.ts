@@ -58,16 +58,18 @@ const concatIf = <A>(condition: boolean, as: A[], a: A[]): A[] => concatIfL(cond
 const unless = (condition: boolean, a: string): string => (condition ? '' : a);
 const when = (condition: boolean, a: string): string => (condition ? a : '');
 
-type Dependency = {
+interface Dependency {
 	name: string;
 	path: string;
-};
-type SerializedType = {
+}
+
+interface SerializedType {
 	type: string;
 	io: string;
 	dependencies: Dependency[];
 	refs: string[];
-};
+}
+
 const serializedType = (type: string, io: string, dependencies: Dependency[], refs: string[]): SerializedType => ({
 	type,
 	io,
@@ -75,9 +77,9 @@ const serializedType = (type: string, io: string, dependencies: Dependency[], re
 	refs,
 });
 
-type SerializedParameter = SerializedType & {
+interface SerializedParameter extends SerializedType {
 	isRequired: boolean;
-};
+}
 const serializedParameter = (
 	type: string,
 	io: string,
@@ -91,9 +93,9 @@ const serializedParameter = (
 	dependencies,
 	refs,
 });
-type SerializedPathParameter = SerializedParameter & {
+interface SerializedPathParameter extends SerializedParameter {
 	name: string;
-};
+}
 const serializedPathParameter = (
 	name: string,
 	type: string,
@@ -217,9 +219,9 @@ const serializePathGroup = (name: string, group: Record<string, PathItemObject>,
 		`
 			${dependencies}
 		
-			export type ${groupName} = {
+			export interface ${groupName} {
 				${serialized.type}
-			};
+			}
 			
 			export const ${decapitalize(groupName)} = asks((e: { apiClient: APIClient }): ${groupName} => ({
 				${serialized.io}
@@ -771,17 +773,17 @@ const client = `
 	import { report } from '../utils/utils';
 	import { left } from 'fp-ts/lib/Either';
 
-	export type APIRequest = {
+	export interface APIRequest {
 		url: string;
 		query?: object;
 		body?: unknown;
 	};
 
-	export type FullAPIRequest = APIRequest & {
+	export interface FullAPIRequest extends APIRequest {
 		method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 	};
 	
-	export type APIClient = {
+	export interface APIClient {
 		readonly request: (request: FullAPIRequest) => LiveData<Error, mixed>;
 	};
 	

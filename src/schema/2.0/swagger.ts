@@ -24,10 +24,11 @@ export const ContactObject = t.type(
 	'ContactObject',
 );
 
-export type LicenseObject = {
+export interface LicenseObject {
 	name: string;
 	url: Option<string>;
-};
+}
+
 export const LicenseObject = t.type(
 	{
 		name: t.string,
@@ -36,14 +37,15 @@ export const LicenseObject = t.type(
 	'LicenseObject',
 );
 
-export type InfoObject = {
+export interface InfoObject {
 	title: string;
 	description: Option<string>;
 	termsOfService: Option<string>;
 	contact: Option<ContactObject>;
 	license: Option<LicenseObject>;
 	version: string;
-};
+}
+
 export const InfoObject = t.type(
 	{
 		title: t.string,
@@ -56,10 +58,11 @@ export const InfoObject = t.type(
 	'InfoObject',
 );
 
-export type ExternalDocumentationObject = {
+export interface ExternalDocumentationObject {
 	description: Option<string>;
 	url: string;
-};
+}
+
 export const ExternalDocumentationObject = t.type(
 	{
 		description: stringOption,
@@ -68,9 +71,10 @@ export const ExternalDocumentationObject = t.type(
 	'ExternalDocumentationObject',
 );
 
-export type ReferenceObject = {
+export interface ReferenceObject {
 	$ref: string;
-};
+}
+
 export const ReferenceObject = t.type(
 	{
 		$ref: t.string,
@@ -80,18 +84,19 @@ export const ReferenceObject = t.type(
 
 //#region Schema Object
 
-export type ObjectSchemaObject = {
+export interface ObjectSchemaObject {
 	type: 'object';
 	properties: Option<Dictionary<SchemaObject>>;
 	required: Option<string[]>;
 	additionalProperties: Option<SchemaObject>;
-};
+}
 
-export type StringPropertySchemaObject = {
+export interface StringPropertySchemaObject {
 	type: 'string';
 	format: Option<string>;
 	enum: Option<Array<string | number | boolean>>;
-};
+}
+
 export const StringPropertySchemaObject = t.type(
 	{
 		type: t.literal('string'),
@@ -101,10 +106,11 @@ export const StringPropertySchemaObject = t.type(
 	'StringPropertySchemaObject',
 );
 
-export type NumberPropertySchemaObject = {
+export interface NumberPropertySchemaObject {
 	type: 'number';
 	format: Option<string>;
-};
+}
+
 export const NumberPropertySchemaObject = t.type(
 	{
 		type: t.literal('number'),
@@ -113,10 +119,11 @@ export const NumberPropertySchemaObject = t.type(
 	'NumberPropertySchemaObject',
 );
 
-export type IntegerPropertySchemaObject = {
+export interface IntegerPropertySchemaObject {
 	type: 'integer';
 	format: Option<string>;
-};
+}
+
 export const IntegerPropertySchemaObject = t.type(
 	{
 		type: t.literal('integer'),
@@ -125,9 +132,10 @@ export const IntegerPropertySchemaObject = t.type(
 	'IntegerPropertySchemaObject',
 );
 
-export type BooleanPropertySchemaObject = {
+export interface BooleanPropertySchemaObject {
 	type: 'boolean';
-};
+}
+
 export const BooleanPropertySchemaObject = t.type(
 	{
 		type: t.literal('boolean'),
@@ -135,20 +143,22 @@ export const BooleanPropertySchemaObject = t.type(
 	'BooleanPropertySchemaObject',
 );
 
-export type AllOfSchemaObject = {
+export interface AllOfSchemaObject {
 	allOf: SchemaObject[];
 	description: Option<string>;
 	type: undefined;
-};
-export type ReferenceSchemaObject = ReferenceObject & {
+}
+
+export interface ReferenceSchemaObject extends ReferenceObject {
 	type: undefined;
-};
+}
+
 export type ReferenceOrAllOfSchemeObject = ReferenceSchemaObject | AllOfSchemaObject;
 
-export type ArraySchemaObject = {
+export interface ArraySchemaObject {
 	type: 'array';
 	items: SchemaObject;
-};
+}
 
 export type SchemaObject =
 	| ReferenceOrAllOfSchemeObject
@@ -196,12 +206,12 @@ export const SchemaObject = t.recursion<SchemaObject, unknown>('SchemaObject', S
 
 //#endregion
 
-export type DefinitionsObject = Dictionary<SchemaObject>;
+export interface DefinitionsObject extends Dictionary<SchemaObject> {}
 export const DefinitionsObject = t.record(t.string, SchemaObject, 'DefinitionsObject');
 
 //#region Items Object
 
-export type BaseItemsObject = {
+export interface BaseItemsObject {
 	format: Option<string>;
 	collectionFormat: Option<'csv' | 'ssv' | 'tsv' | 'pipes'>;
 	maximum: Option<number>;
@@ -216,7 +226,8 @@ export type BaseItemsObject = {
 	uniqueItems: Option<boolean>;
 	enum: Option<Array<string | number | boolean>>;
 	multipleOf: Option<number>;
-};
+}
+
 export const BaseItemsObjectProps = {
 	format: stringOption,
 	collectionFormat: optionFromNullable(
@@ -236,9 +247,9 @@ export const BaseItemsObjectProps = {
 	multipleOf: numberOption,
 };
 
-export type StringItemsObject = BaseItemsObject & {
+export interface StringItemsObject extends BaseItemsObject {
 	type: 'string';
-};
+}
 export const StringItemsObject = t.type(
 	{
 		...BaseItemsObjectProps,
@@ -247,9 +258,9 @@ export const StringItemsObject = t.type(
 	'StringItemsObject',
 );
 
-export type NumberItemsObject = BaseItemsObject & {
+export interface NumberItemsObject extends BaseItemsObject {
 	type: 'number';
-};
+}
 export const NumberItemsObject = t.type(
 	{
 		...BaseItemsObjectProps,
@@ -258,9 +269,9 @@ export const NumberItemsObject = t.type(
 	'NumberItemsObject',
 );
 
-export type IntegerItemsObject = BaseItemsObject & {
+export interface IntegerItemsObject extends BaseItemsObject {
 	type: 'integer';
-};
+}
 export const IntegerItemsObject = t.type(
 	{
 		...BaseItemsObjectProps,
@@ -269,9 +280,9 @@ export const IntegerItemsObject = t.type(
 	'IntegerItemsObject',
 );
 
-export type BooleanItemsObject = BaseItemsObject & {
+export interface BooleanItemsObject extends BaseItemsObject {
 	type: 'boolean';
-};
+}
 export const BooleanItemsObject = t.type(
 	{
 		...BaseItemsObjectProps,
@@ -280,10 +291,10 @@ export const BooleanItemsObject = t.type(
 	'BooleanItemsObject',
 );
 
-export type ArrayItemsObject = BaseItemsObject & {
+export interface ArrayItemsObject extends BaseItemsObject {
 	type: 'array';
 	items: Option<ItemsObject[]>;
-};
+}
 
 export type ItemsObject =
 	| ArrayItemsObject
@@ -314,10 +325,10 @@ export const NonArrayItemsObject = t.union(
 
 //#endregion
 
-export type BaseParameterObjectProps = {
+export interface BaseParameterObjectProps {
 	name: string;
 	description: Option<string>;
-};
+}
 const BaseParameterObjectProps = {
 	name: t.string,
 	description: stringOption,
@@ -325,11 +336,11 @@ const BaseParameterObjectProps = {
 
 //#region Path Parameter Object
 
-export type BasePathParameterObjectProps = BaseParameterObjectProps & {
+export interface BasePathParameterObjectProps extends BaseParameterObjectProps {
 	in: 'path';
 	required: true;
 	format: Option<string>;
-};
+}
 const BasePathParameterObjectProps = {
 	...BaseParameterObjectProps,
 	in: t.literal('path'),
@@ -337,9 +348,9 @@ const BasePathParameterObjectProps = {
 	format: stringOption,
 };
 
-export type StringPathParameterObject = BasePathParameterObjectProps & {
+export interface StringPathParameterObject extends BasePathParameterObjectProps {
 	type: 'string';
-};
+}
 const StringPathParameterObject = t.type(
 	{
 		...BasePathParameterObjectProps,
@@ -348,9 +359,9 @@ const StringPathParameterObject = t.type(
 	'StringPathParameterObject',
 );
 
-export type NumberPathParameterObject = BasePathParameterObjectProps & {
+export interface NumberPathParameterObject extends BasePathParameterObjectProps {
 	type: 'number';
-};
+}
 const NumberPathParameterObject = t.type(
 	{
 		...BasePathParameterObjectProps,
@@ -359,9 +370,9 @@ const NumberPathParameterObject = t.type(
 	'NumberPathParameterObject',
 );
 
-export type IntegerPathParameterObject = BasePathParameterObjectProps & {
+export interface IntegerPathParameterObject extends BasePathParameterObjectProps {
 	type: 'integer';
-};
+}
 const IntegerPathParameterObject = t.type(
 	{
 		...BasePathParameterObjectProps,
@@ -370,9 +381,9 @@ const IntegerPathParameterObject = t.type(
 	'IntegerPathParameterObject',
 );
 
-export type BooleanPathParameterObject = BasePathParameterObjectProps & {
+export interface BooleanPathParameterObject extends BasePathParameterObjectProps {
 	type: 'boolean';
-};
+}
 const BooleanPathParameterObject = t.type(
 	{
 		...BasePathParameterObjectProps,
@@ -381,10 +392,10 @@ const BooleanPathParameterObject = t.type(
 	'BooleanPathParameterObject',
 );
 
-export type ArrayPathParameterObject = BasePathParameterObjectProps & {
+export interface ArrayPathParameterObject extends BasePathParameterObjectProps {
 	type: 'array';
 	items: NonArrayItemsObject;
-};
+}
 const ArrayPathParameterObject = t.type(
 	{
 		...BasePathParameterObjectProps,
@@ -416,12 +427,12 @@ export const PathParameterObject = t.union(
 
 //#region Query Parameter Object
 
-export type BaseQueryParameterObjectProps = {
+export interface BaseQueryParameterObjectProps {
 	name: string;
 	in: 'query';
 	description: Option<string>;
 	required: Option<boolean>;
-};
+}
 
 const BaseQueryParameterObjectProps = {
 	name: t.string,
@@ -441,9 +452,9 @@ const StringQueryParameterObject = t.type(
 	'StringQueryParameterObject',
 );
 
-export type NumberQueryParameterObject = BaseQueryParameterObjectProps & {
+export interface NumberQueryParameterObject extends BaseQueryParameterObjectProps {
 	type: 'number';
-};
+}
 const NumberQueryParameterObject = t.type(
 	{
 		...BaseQueryParameterObjectProps,
@@ -452,9 +463,9 @@ const NumberQueryParameterObject = t.type(
 	'NumberQueryParameterObject',
 );
 
-export type IntegerQueryParameterObject = BaseQueryParameterObjectProps & {
+export interface IntegerQueryParameterObject extends BaseQueryParameterObjectProps {
 	type: 'integer';
-};
+}
 const IntegerQueryParameterObject = t.type(
 	{
 		...BaseQueryParameterObjectProps,
@@ -463,9 +474,9 @@ const IntegerQueryParameterObject = t.type(
 	'IntegerQueryParameterObject',
 );
 
-export type BooleanQueryParameterObject = BaseQueryParameterObjectProps & {
+export interface BooleanQueryParameterObject extends BaseQueryParameterObjectProps {
 	type: 'boolean';
-};
+}
 const BooleanQueryParameterObject = t.type(
 	{
 		...BaseQueryParameterObjectProps,
@@ -474,10 +485,10 @@ const BooleanQueryParameterObject = t.type(
 	'BooleanQueryParameterObject',
 );
 
-export type ArrayQueryParameterObject = BaseQueryParameterObjectProps & {
+export interface ArrayQueryParameterObject extends BaseQueryParameterObjectProps {
 	type: 'array';
 	items: NonArrayItemsObject;
-};
+}
 const ArrayQueryParameterObject = t.type(
 	{
 		...BaseQueryParameterObjectProps,
@@ -507,12 +518,13 @@ export const QueryParameterObject = t.union(
 
 //#endregion
 
-export type HeaderParameterObject = {
+export interface HeaderParameterObject {
 	name: string;
 	in: 'header';
 	description: Option<string>;
 	required: Option<boolean>;
-};
+}
+
 export const HeaderParameterObject = t.type(
 	{
 		name: t.string,
@@ -522,12 +534,12 @@ export const HeaderParameterObject = t.type(
 	},
 	'HeaderParameterObject',
 );
-export type FormDataParameterObject = {
+export interface FormDataParameterObject {
 	name: string;
 	in: 'formData';
 	description: Option<string>;
 	required: Option<boolean>;
-};
+}
 export const FormDataParameterObject = t.type(
 	{
 		name: t.string,
@@ -540,11 +552,11 @@ export const FormDataParameterObject = t.type(
 
 //#region Body Parameter Object
 
-export type BodyParameterObject = BaseParameterObjectProps & {
+export interface BodyParameterObject extends BaseParameterObjectProps {
 	in: 'body';
 	required: Option<boolean>;
 	schema: SchemaObject;
-};
+}
 
 export const BodyParameterObject = t.type(
 	{
@@ -569,7 +581,7 @@ export const ParameterObject = t.union(
 	'ParameterObject',
 );
 
-export type ExampleObject = Dictionary<string>;
+export interface ExampleObject extends Dictionary<string> {}
 export const ExampleObject = t.record(t.string, t.string, 'ExampleObject');
 
 export type HeaderObject = ItemsObject & {
@@ -585,15 +597,15 @@ export const HeaderObject = t.intersection(
 	'HeaderObject',
 );
 
-export type HeadersObject = Dictionary<HeaderObject>;
+export interface HeadersObject extends Dictionary<HeaderObject> {}
 export const HeadersObject = t.record(t.string, HeaderObject, 'HeadersObject');
 
-export type ResponseObject = {
+export interface ResponseObject {
 	description: string;
 	schema: Option<SchemaObject>;
 	headers: Option<HeadersObject>;
 	examples: Option<ExampleObject>;
-};
+}
 export const ResponseObject = t.type(
 	{
 		description: t.string,
@@ -604,13 +616,13 @@ export const ResponseObject = t.type(
 	'ResponseObject',
 );
 
-export type ResponsesObject = Dictionary<ResponseObject>;
+export interface ResponsesObject extends Dictionary<ResponseObject> {}
 export const ResponsesObject = t.record(t.string, ResponseObject, 'ResponsesObject');
 
-export type SecurityRequirementObject = Dictionary<string[]>;
+export interface SecurityRequirementObject extends Dictionary<string[]> {}
 export const SecurityRequirementObject = t.record(t.string, t.array(t.string), 'SecurityRequirementObject');
 
-export type OperationObject = {
+export interface OperationObject {
 	tags: Option<string[]>;
 	summary: Option<string>;
 	description: Option<string>;
@@ -623,7 +635,8 @@ export type OperationObject = {
 	schemes: Option<string[]>;
 	deprecated: Option<boolean>;
 	security: Option<SecurityRequirementObject[]>;
-};
+}
+
 export const OperationObject = t.type(
 	{
 		tags: stringArrayOption,
@@ -642,7 +655,7 @@ export const OperationObject = t.type(
 	'OperationObject',
 );
 
-export type PathItemObject = {
+export interface PathItemObject {
 	$ref: Option<string>;
 	get: Option<OperationObject>;
 	put: Option<OperationObject>;
@@ -652,7 +665,7 @@ export type PathItemObject = {
 	head: Option<OperationObject>;
 	patch: Option<OperationObject>;
 	parameters: Option<Array<ParameterObject | ReferenceObject>>;
-};
+}
 export const PathItemObject = t.type(
 	{
 		$ref: stringOption,
@@ -668,30 +681,31 @@ export const PathItemObject = t.type(
 	'PathItemObject',
 );
 
-export type PathsObject = Dictionary<PathItemObject>;
+export interface PathsObject extends Dictionary<PathItemObject> {}
 export const PathsObject = t.record(t.string, PathItemObject, 'PathsObject');
 
-export type ParametersDefinitionsObject = Dictionary<ParameterObject>;
+export interface ParametersDefinitionsObject extends Dictionary<ParameterObject> {}
 export const ParametersDefinitionsObject = t.record(t.string, ParameterObject, 'ParametersDefinitionsObject');
 
-export type ResponsesDefinitionsObject = Dictionary<ResponseObject>;
+export interface ResponsesDefinitionsObject extends Dictionary<ResponseObject> {}
 export const ResponsesDefinitionsObject = t.record(t.string, ResponseObject, 'ResponsesDefinitionsObject');
 
-export type ScopesObject = Dictionary<string>;
+export interface ScopesObject extends Dictionary<string> {}
 export const ScopesObject = t.record(t.string, t.string, 'ScopesObject');
 
 //#region SecuritySchemeObject
 
-export type BaseSecuritySchemeObjectProps = {
+export interface BaseSecuritySchemeObjectProps {
 	description: Option<string>;
-};
+}
+
 const BaseSecuritySchemeObjectProps = {
 	description: stringOption,
 };
 
-export type BasicSecuritySchemeObject = BaseSecuritySchemeObjectProps & {
+export interface BasicSecuritySchemeObject extends BaseSecuritySchemeObjectProps {
 	type: 'basic';
-};
+}
 const BasicSecuritySchemeObject = t.type(
 	{
 		...BaseSecuritySchemeObjectProps,
@@ -700,11 +714,11 @@ const BasicSecuritySchemeObject = t.type(
 	'BasicSecuritySchemeObject',
 );
 
-export type ApiKeySecuritySchemeObject = BaseSecuritySchemeObjectProps & {
+export interface ApiKeySecuritySchemeObject extends BaseSecuritySchemeObjectProps {
 	type: 'apiKey';
 	in: 'query' | 'header';
 	name: string;
-};
+}
 const ApiKeySecuritySchemeObject = t.type(
 	{
 		...BaseSecuritySchemeObjectProps,
@@ -715,12 +729,12 @@ const ApiKeySecuritySchemeObject = t.type(
 	'ApiKeySecuritySchemeObject',
 );
 
-export type ImplicitOAuth2SecuritySchemeObject = BaseSecuritySchemeObjectProps & {
+export interface ImplicitOAuth2SecuritySchemeObject extends BaseSecuritySchemeObjectProps {
 	type: 'oauth2';
 	flow: 'implicit';
 	authorizationUrl: string;
 	scopes: ScopesObject;
-};
+}
 const ImplicitOAuth2SecuritySchemeObject = t.type(
 	{
 		...BaseSecuritySchemeObjectProps,
@@ -731,12 +745,12 @@ const ImplicitOAuth2SecuritySchemeObject = t.type(
 	},
 	'ImplicitOAuth2SecuritySchemeObject',
 );
-export type PasswordOAuth2SecuritySchemeObject = BaseSecuritySchemeObjectProps & {
+export interface PasswordOAuth2SecuritySchemeObject extends BaseSecuritySchemeObjectProps {
 	type: 'oauth2';
 	flow: 'password';
 	tokenUrl: string;
 	scopes: ScopesObject;
-};
+}
 const PasswordOAuth2SecuritySchemeObject = t.type(
 	{
 		...BaseSecuritySchemeObjectProps,
@@ -747,12 +761,12 @@ const PasswordOAuth2SecuritySchemeObject = t.type(
 	},
 	'PasswordOAuth2SecuritySchemeObject',
 );
-export type ApplicationOAuth2SecuritySchemeObject = BaseSecuritySchemeObjectProps & {
+export interface ApplicationOAuth2SecuritySchemeObject extends BaseSecuritySchemeObjectProps {
 	type: 'oauth2';
 	flow: 'application';
 	tokenUrl: string;
 	scopes: ScopesObject;
-};
+}
 const ApplicationOAuth2SecuritySchemeObject = t.type(
 	{
 		...BaseSecuritySchemeObjectProps,
@@ -763,12 +777,12 @@ const ApplicationOAuth2SecuritySchemeObject = t.type(
 	},
 	'ApplicationOAuth2SecuritySchemeObject',
 );
-export type AccessCodeOAuth2SecuritySchemeObject = BaseSecuritySchemeObjectProps & {
+export interface AccessCodeOAuth2SecuritySchemeObject extends BaseSecuritySchemeObjectProps {
 	type: 'oauth2';
 	flow: 'accessCode';
 	tokenUrl: string;
 	scopes: ScopesObject;
-};
+}
 const AccessCodeOAuth2SecuritySchemeObject = t.type(
 	{
 		...BaseSecuritySchemeObjectProps,
@@ -802,14 +816,15 @@ const SecuritySchemeObject = t.union(
 
 //#endregion
 
-export type SecurityDefinitionsObject = Dictionary<SecuritySchemeObject>;
+export interface SecurityDefinitionsObject extends Dictionary<SecuritySchemeObject> {}
 export const SecurityDefinitionsObject = t.record(t.string, SecuritySchemeObject, 'SecurityDefinitionsObject');
 
-export type TagObject = {
+export interface TagObject {
 	name: string;
 	description: Option<string>;
 	externalDocs: Option<ExternalDocumentationObject>;
-};
+}
+
 export const TagObject = t.type(
 	{
 		name: t.string,
@@ -819,7 +834,7 @@ export const TagObject = t.type(
 	'TagObject',
 );
 
-export type SwaggerObject = {
+export interface SwaggerObject {
 	basePath: Option<string>;
 	consumes: Option<string[]>;
 	definitions: Option<DefinitionsObject>;
@@ -835,7 +850,8 @@ export type SwaggerObject = {
 	securityDefinitions: Option<SecurityDefinitionsObject>;
 	swagger: string;
 	tags: Option<TagObject[]>;
-};
+}
+
 export const SwaggerObject = t.type(
 	{
 		basePath: stringOption,
