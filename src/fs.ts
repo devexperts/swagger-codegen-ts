@@ -1,38 +1,38 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-export type TFile = {
+export type File = {
 	type: 'FILE';
 	name: string;
 	content: string;
 };
 
-export const file = (name: string, content: string): TFile => ({
+export const file = (name: string, content: string): File => ({
 	type: 'FILE',
 	name,
 	content,
 });
 
-export type TDirectory = {
+export type Directory = {
 	type: 'DIRECTORY';
 	name: string;
-	content: TFSEntity[];
+	content: FSEntity[];
 };
 
-export const directory = (name: string, content: TFSEntity[]): TDirectory => ({
+export const directory = (name: string, content: FSEntity[]): Directory => ({
 	type: 'DIRECTORY',
 	name,
 	content,
 });
 
-export type TFSEntity = TFile | TDirectory;
+export type FSEntity = File | Directory;
 
-export type TBuffer = {
+export type BufferWithName = {
 	buffer: Buffer;
 	fileName: string;
 };
 
-export const write = async (destination: string, entity: TFSEntity): Promise<void> => {
+export const write = async (destination: string, entity: FSEntity): Promise<void> => {
 	switch (entity.type) {
 		case 'FILE': {
 			const filePath = path.resolve(destination, entity.name);
@@ -50,7 +50,7 @@ export const write = async (destination: string, entity: TFSEntity): Promise<voi
 	}
 };
 
-export const map = (entity: TFSEntity, f: (content: string) => string): TFSEntity => {
+export const map = (entity: FSEntity, f: (content: string) => string): FSEntity => {
 	switch (entity.type) {
 		case 'FILE': {
 			return file(entity.name, f(entity.content));
@@ -61,7 +61,7 @@ export const map = (entity: TFSEntity, f: (content: string) => string): TFSEntit
 	}
 };
 
-export const read = async (_pathToFile: string, cwd: string): Promise<TBuffer> => {
+export const read = async (_pathToFile: string, cwd: string): Promise<BufferWithName> => {
 	const pathToFile = path.isAbsolute(_pathToFile) ? _pathToFile : path.resolve(cwd, _pathToFile);
 	return {
 		buffer: await fs.readFile(pathToFile),

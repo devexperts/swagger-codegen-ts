@@ -1,28 +1,28 @@
 import { array, uniq, flatten, last } from 'fp-ts/lib/Array';
 import {
-	TPathItemObject,
-	TOperationObject,
-	TPathsObject,
-	TDictionary,
-	TParameterObject,
-	TPathParameterObject,
-	TReferenceObject,
-	TBodyParameterObject,
-	TSwaggerObject,
-	TParametersDefinitionsObject,
-	TQueryParameterObject,
+	PathItemObject,
+	OperationObject,
+	PathsObject,
+	Dictionary,
+	ParameterObject,
+	PathParameterObject,
+	ReferenceObject,
+	BodyParameterObject,
+	SwaggerObject,
+	ParametersDefinitionsObject,
+	QueryParameterObject,
 } from './schema/2.0/swagger';
 import { constant, Endomorphism, identity, tuple } from 'fp-ts/lib/function';
 import { getStructEq, eqString } from 'fp-ts/lib/Eq';
-import { TFSEntity } from './fs';
+import { FSEntity } from './fs';
 import { camelize } from '@devexperts/utils/dist/string/string';
 import { alt, map, mapNullable, option, Option, some, chain, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-export type TSerializer = (name: string, schema: TSwaggerObject) => TFSEntity;
+export type Serializer = (name: string, schema: SwaggerObject) => FSEntity;
 
-export const getOperationsFromPath = (path: TPathItemObject): TDictionary<TOperationObject> => {
-	const result: TDictionary<TOperationObject> = {};
+export const getOperationsFromPath = (path: PathItemObject): Dictionary<OperationObject> => {
+	const result: Dictionary<OperationObject> = {};
 	const operations = array.compact([
 		pipe(
 			path.get,
@@ -59,24 +59,24 @@ export const getOperationsFromPath = (path: TPathItemObject): TDictionary<TOpera
 	return result;
 };
 
-export const getTagsFromPath = (path: TPathItemObject): string[] => {
+export const getTagsFromPath = (path: PathItemObject): string[] => {
 	const operations = getOperationsFromPath(path);
 	const tags = flatten(array.compact(Object.keys(operations).map(key => operations[key].tags)));
 	return uniq(eqString)(tags);
 };
 
-type TParam = TParameterObject | TReferenceObject;
-const paramSetoid = getStructEq<TParam>({
+type Param = ParameterObject | ReferenceObject;
+const paramSetoid = getStructEq<Param>({
 	name: eqString,
 	$ref: eqString,
 });
 
-const addPathParametersToTag = (pathParams: TParam[]): Endomorphism<TParam[]> => tagParams =>
+const addPathParametersToTag = (pathParams: Param[]): Endomorphism<Param[]> => tagParams =>
 	uniq(paramSetoid)([...pathParams, ...tagParams]);
 
-const resolveTagParameter = (fileParameters: TParametersDefinitionsObject) => (
-	parameter: TParam,
-): Option<TParameterObject> => {
+const resolveTagParameter = (fileParameters: ParametersDefinitionsObject) => (
+	parameter: Param,
+): Option<ParameterObject> => {
 	if (!isOperationReferenceParameterObject(parameter)) {
 		return some(parameter);
 	}
@@ -87,13 +87,13 @@ const resolveTagParameter = (fileParameters: TParametersDefinitionsObject) => (
 };
 
 const getTagWithResolvedParameters = (
-	addPathParametersToTag: Endomorphism<TParam[]>,
-	resolveTagParameter: (parameter: TParam) => Option<TParameterObject>,
-) => (tag: TOperationObject): TOperationObject => ({
+	addPathParametersToTag: Endomorphism<Param[]>,
+	resolveTagParameter: (parameter: Param) => Option<ParameterObject>,
+) => (tag: OperationObject): OperationObject => ({
 	...tag,
 	parameters: pipe(
 		tag.parameters,
-		alt<TParam[]>(constant(some([]))),
+		alt<Param[]>(constant(some([]))),
 		map(addPathParametersToTag),
 		map(parameters => parameters.map(resolveTagParameter)),
 		chain(array.sequence(option)),
@@ -101,11 +101,11 @@ const getTagWithResolvedParameters = (
 });
 
 export const groupPathsByTag = (
-	paths: TPathsObject,
-	parameters: Option<TParametersDefinitionsObject>,
-): TDictionary<TDictionary<TPathItemObject>> => {
+	paths: PathsObject,
+	parameters: Option<ParametersDefinitionsObject>,
+): Dictionary<Dictionary<PathItemObject>> => {
 	const keys = Object.keys(paths);
-	const result: TDictionary<TDictionary<TPathItemObject>> = {};
+	const result: Dictionary<Dictionary<PathItemObject>> = {};
 	const resolveTagParam = pipe(
 		parameters,
 		map(resolveTagParameter),
@@ -125,9 +125,9 @@ export const groupPathsByTag = (
 					map(resolveTagParam => getTagWithResolvedParameters(addPathParamsToTag, resolveTagParam)),
 				),
 			),
-			getOrElse<Endomorphism<TOperationObject>>(() => identity),
+			getOrElse<Endomorphism<OperationObject>>(() => identity),
 		);
-		const pathWithParams: TPathItemObject = pipe(
+		const pathWithParams: PathItemObject = pipe(
 			pathParams,
 			map(() => ({
 				...path,
@@ -161,40 +161,38 @@ export const groupPathsByTag = (
 	return result;
 };
 
-const isOperationReferenceParameterObject = (parameter: TParam): parameter is TReferenceObject =>
+const isOperationReferenceParameterObject = (parameter: Param): parameter is ReferenceObject =>
 	typeof (parameter as any)['$ref'] === 'string';
-const isOperationNonReferenceParameterObject = (parameter: TParam): parameter is TParameterObject =>
+const isOperationNonReferenceParameterObject = (parameter: Param): parameter is ParameterObject =>
 	!isOperationReferenceParameterObject(parameter);
 
-const isPathParameterObject = (parameter: TParameterObject): parameter is TPathParameterObject =>
-	parameter.in === 'path';
-const isOperationPathParameterObject = (parameter: TParam): parameter is TPathParameterObject =>
+const isPathParameterObject = (parameter: ParameterObject): parameter is PathParameterObject => parameter.in === 'path';
+const isOperationPathParameterObject = (parameter: Param): parameter is PathParameterObject =>
 	isOperationNonReferenceParameterObject(parameter) && isPathParameterObject(parameter);
-export const getOperationParametersInPath = (operation: TOperationObject): TPathParameterObject[] =>
+export const getOperationParametersInPath = (operation: OperationObject): PathParameterObject[] =>
 	pipe(
 		operation.parameters,
 		map(parameters => parameters.filter(isOperationPathParameterObject)),
-		getOrElse(constant<TPathParameterObject[]>([])),
+		getOrElse(constant<PathParameterObject[]>([])),
 	);
 
-const isQueryParameterObject = (parameter: TParameterObject): parameter is TQueryParameterObject =>
+const isQueryParameterObject = (parameter: ParameterObject): parameter is QueryParameterObject =>
 	parameter.in === 'query';
-const isOperationQueryParameterObject = (parameter: TParam): parameter is TQueryParameterObject =>
+const isOperationQueryParameterObject = (parameter: Param): parameter is QueryParameterObject =>
 	isOperationNonReferenceParameterObject(parameter) && isQueryParameterObject(parameter);
-export const getOperationParametersInQuery = (operation: TOperationObject): TQueryParameterObject[] =>
+export const getOperationParametersInQuery = (operation: OperationObject): QueryParameterObject[] =>
 	pipe(
 		operation.parameters,
 		map(parameters => parameters.filter(isOperationQueryParameterObject)),
-		getOrElse(constant<TQueryParameterObject[]>([])),
+		getOrElse(constant<QueryParameterObject[]>([])),
 	);
 
-const isBodyParameterObject = (parameter: TParameterObject): parameter is TBodyParameterObject =>
-	parameter.in === 'body';
-const isOperationBodyParameterObject = (parameter: TParam): parameter is TBodyParameterObject =>
+const isBodyParameterObject = (parameter: ParameterObject): parameter is BodyParameterObject => parameter.in === 'body';
+const isOperationBodyParameterObject = (parameter: Param): parameter is BodyParameterObject =>
 	isOperationNonReferenceParameterObject(parameter) && isBodyParameterObject(parameter);
-export const getOperationParametersInBody = (operation: TOperationObject): TBodyParameterObject[] =>
+export const getOperationParametersInBody = (operation: OperationObject): BodyParameterObject[] =>
 	pipe(
 		operation.parameters,
 		map(parameters => parameters.filter(isOperationBodyParameterObject)),
-		getOrElse(constant<TBodyParameterObject[]>([])),
+		getOrElse(constant<BodyParameterObject[]>([])),
 	);

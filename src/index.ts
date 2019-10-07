@@ -1,12 +1,12 @@
-import { SwaggerObject, TSwaggerObject } from './schema/2.0/swagger';
+import { SwaggerObject } from './schema/2.0/swagger';
 import * as prettier from 'prettier';
-import { map, read, TFSEntity, write } from './fs';
-import { TSerializer } from './utils';
+import { map, read, FSEntity, write } from './fs';
+import { Serializer } from './utils';
 import * as fs from 'fs-extra';
 import { fromNullable, getOrElse, Option, map as mapOption } from 'fp-ts/lib/Option';
 import * as path from 'path';
 import { head, last } from 'fp-ts/lib/Array';
-import { TFileReader } from './fileReader';
+import { FileReader } from './fileReader';
 import { isLeft, Right } from 'fp-ts/lib/Either';
 import * as del from 'del';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -15,7 +15,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 
 const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
 
-export type TGenerateOptions = {
+export type GenerateOptions = {
 	/**
 	 * Paths to spec files
 	 */
@@ -27,7 +27,7 @@ export type TGenerateOptions = {
 	/**
 	 * Spec serializer
 	 */
-	serialize: TSerializer;
+	serialize: Serializer;
 	/**
 	 * Path to prettier config
 	 */
@@ -36,16 +36,16 @@ export type TGenerateOptions = {
 	 * Buffer to JSON converter
 	 * @param buffer - File Buffer
 	 */
-	fileReader: TFileReader;
+	fileReader: FileReader;
 };
 
 const cwd = process.cwd();
 const resolvePath = (p: string) => (path.isAbsolute(p) ? p : path.resolve(cwd, p));
 
-const serializeDecode = (serializer: TSerializer) => async (
-	decoded: Right<TSwaggerObject>,
+const serializeDecode = (serializer: Serializer) => async (
+	decoded: Right<SwaggerObject>,
 	out: string,
-): Promise<TFSEntity> => serializer(path.basename(out), decoded.right);
+): Promise<FSEntity> => serializer(path.basename(out), decoded.right);
 
 const getPrettierConfig = async (pathToPrettierConfig?: string): Promise<Option<prettier.Options>> =>
 	fromNullable(
@@ -58,16 +58,16 @@ const getPrettierConfig = async (pathToPrettierConfig?: string): Promise<Option<
 		),
 	);
 
-const formatSerialized = (serialized: TFSEntity, prettierConfig: Option<prettier.Options>): TFSEntity =>
+const formatSerialized = (serialized: FSEntity, prettierConfig: Option<prettier.Options>): FSEntity =>
 	pipe(
 		prettierConfig,
 		mapOption(config => map(serialized, content => prettier.format(content, config))),
 		getOrElse(() => serialized),
 	);
 
-const writeFormatted = (out: string, formatted: TFSEntity) => write(path.dirname(out), formatted);
+const writeFormatted = (out: string, formatted: FSEntity) => write(path.dirname(out), formatted);
 
-export const generate = async (options: TGenerateOptions): Promise<void> => {
+export const generate = async (options: GenerateOptions): Promise<void> => {
 	const out = resolvePath(options.out);
 	const isPathExist = await fs.pathExists(out);
 
