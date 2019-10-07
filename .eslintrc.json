@@ -1,0 +1,6 @@
+{
+  "extends": "./node_modules/@devexperts/lint/.eslintrc.json",
+  "parserOptions": {
+    "createDefaultProgram": true
+  }
+}
