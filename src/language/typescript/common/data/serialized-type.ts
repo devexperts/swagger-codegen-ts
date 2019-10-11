@@ -1,8 +1,9 @@
-import { SerializedDependency, monoidDependencies } from './serialized-dependency';
+import { monoidDependencies, SerializedDependency } from './serialized-dependency';
 import { fold, getStructMonoid, Monoid, monoidString } from 'fp-ts/lib/Monoid';
 import { monoidStrings } from '../../../../utils/monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
-import { array } from 'fp-ts/lib/Array';
+import { array, uniq } from 'fp-ts/lib/Array';
+import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
 
 export interface SerializedType {
 	readonly type: string;
@@ -32,3 +33,8 @@ export const monoidSerializedType: Monoid<SerializedType> = getStructMonoid({
 
 export const foldSerializedTypes = fold(monoidSerializedType);
 export const intercalateSerializedTypes = intercalate(monoidSerializedType, array);
+const eqSerializedTypeWithoutDependencies: Eq<SerializedType> = getStructEq<Pick<SerializedType, 'type' | 'io'>>({
+	type: eqString,
+	io: eqString,
+});
+export const uniqSerializedTypesWithoutDependencies = uniq(eqSerializedTypeWithoutDependencies);

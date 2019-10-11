@@ -1,5 +1,5 @@
 import { OperationObject } from '../../../../schema/2.0/operation-object';
-import { serializedType, SerializedType } from '../data/serialized-type';
+import { serializedType, SerializedType } from '../../common/data/serialized-type';
 import {
 	getOperationParametersInBody,
 	getOperationParametersInPath,
@@ -13,19 +13,19 @@ import { serializeOperationResponses } from './responses-object';
 import { fromArray } from 'fp-ts/lib/NonEmptyArray';
 import { serializeQueryParameterObjects } from './query-parameter-object';
 import { serializeBodyParameterObjects } from './body-parameter-object';
-import { intercalateSerializedParameters, serializedParameter } from '../data/serialized-parameter';
-import { dependency, EMPTY_DEPENDENCIES } from '../data/serialized-dependency';
-import { EMPTY_REFS, getRelativeClientPath } from '../utils';
-import { SerializedPathParameter } from '../data/serialized-path-parameter';
+import { intercalateSerializedParameters, serializedParameter } from '../../common/data/serialized-parameter';
+import { dependency, EMPTY_DEPENDENCIES } from '../../common/data/serialized-dependency';
+import { EMPTY_REFS } from '../utils';
 import { identity } from 'fp-ts/lib/function';
 import { QueryParameterObject } from '../../../../schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
 import { BodyParameterObject } from '../../../../schema/2.0/parameter-object/body-parameter-object';
 import { concatIf, concatIfL } from '../../../../utils/array';
-import { unless, when } from '../../../../utils/string';
+import { when } from '../../../../utils/string';
+import { getRelativeClientPath, getURL, HTTPMethod, getJSDoc } from '../../common/utils';
 
 export const serializeOperationObject = (
 	url: string,
-	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS',
+	method: HTTPMethod,
 	operation: OperationObject,
 	rootName: string,
 	cwd: string,
@@ -48,7 +48,7 @@ export const serializeOperationObject = (
 
 	const operationName = getOperationName(operation, method);
 
-	const serializedUrl = serializeURL(url, serializedPathParameters);
+	const serializedUrl = getURL(url, serializedPathParameters);
 
 	const serializedQueryParameters = pipe(
 		fromArray(queryParameters),
@@ -74,7 +74,7 @@ export const serializeOperationObject = (
 	]).join(',');
 
 	const type = `
-		${jsdoc(array.compact([deprecated, operation.summary, ...pathParamsSummary.map(some), paramsSummary]))}
+		${getJSDoc(array.compact([deprecated, operation.summary, ...pathParamsSummary.map(some), paramsSummary]))}
 		readonly ${operationName}: (${argsType}) => LiveData<Error, ${serializedResponses.type}>;
 	`;
 
@@ -126,20 +126,6 @@ export const serializeOperationObject = (
 
 	return serializedType(type, io, dependencies, serializedParameters.refs);
 };
-
-const jsdoc = (lines: string[]): string =>
-	unless(
-		lines.length === 0,
-		`/** 
-			 ${lines.map(line => `* ${line}`).join('\n')}
-		 */`,
-	);
-
-const serializeURL = (url: string, pathParameters: SerializedPathParameter[]): string =>
-	pathParameters.reduce(
-		(acc, p) => acc.replace(`{${p.name}}`, `\$\{encodeURIComponent(${p.io}.toString())\}`),
-		`\`${url}\``,
-	);
 
 const getOperationName = (operation: OperationObject, httpMethod: string) =>
 	pipe(

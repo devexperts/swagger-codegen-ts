@@ -1,11 +1,11 @@
 import { PathParameterObject } from '../../../../schema/2.0/parameter-object/path-parameter-object/path-parameter-object';
 import { QueryParameterObject } from '../../../../schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
-import { serializedParameter, SerializedParameter } from '../data/serialized-parameter';
+import { serializedParameter, SerializedParameter } from '../../common/data/serialized-parameter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getOrElse } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';
 import { serializeNonArrayItemsObject } from './non-array-items-object';
-import { dependency } from '../data/serialized-dependency';
+import { dependency } from '../../common/data/serialized-dependency';
 import { EMPTY_REFS } from '../utils';
 
 export const serializePathOrQueryParameterObject = (

@@ -1,5 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { fromCompare, Ord } from 'fp-ts/lib/Ord';
+import { sort } from 'fp-ts/lib/Array';
 
 export interface File {
 	readonly type: 'FILE';
@@ -67,4 +69,47 @@ export const read = async (_pathToFile: string, cwd: string): Promise<BufferWith
 		buffer: await fs.readFile(pathToFile),
 		fileName: path.basename(pathToFile),
 	};
+};
+
+const ordFSEntity: Ord<FSEntity> = fromCompare((x, y) => {
+	switch (x.type) {
+		case 'DIRECTORY': {
+			switch (y.type) {
+				case 'DIRECTORY': {
+					return 0;
+				}
+				case 'FILE': {
+					return 1;
+				}
+			}
+			break;
+		}
+		case 'FILE': {
+			switch (y.type) {
+				case 'DIRECTORY': {
+					return -1;
+				}
+				case 'FILE': {
+					return 0;
+				}
+			}
+			break;
+		}
+	}
+	return 0;
+});
+const sortFSEntities = sort(ordFSEntity);
+
+export const show = (fs: FSEntity, indent = ''): string => {
+	switch (fs.type) {
+		case 'FILE': {
+			return `${indent}${fs.name}`;
+		}
+		case 'DIRECTORY': {
+			const children = sortFSEntities(fs.content)
+				.map(e => show(e, indent + '  '))
+				.join('\n');
+			return `${indent}${fs.name}/\n${children}`;
+		}
+	}
 };

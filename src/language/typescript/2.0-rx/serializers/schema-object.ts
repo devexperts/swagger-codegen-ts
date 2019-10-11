@@ -1,6 +1,6 @@
-import { foldSerializedTypes, serializedType, SerializedType } from '../data/serialized-type';
-import { dependency, EMPTY_DEPENDENCIES, monoidDependencies, OPTION_DEPENDENCIES } from '../data/serialized-dependency';
-import { EMPTY_REFS, getIOName, getRelativeOutRefPath, getRelativeRefPath, getRelativeUtilsPath } from '../utils';
+import { foldSerializedTypes, serializedType, SerializedType } from '../../common/data/serialized-type';
+import { dependency, EMPTY_DEPENDENCIES, monoidDependencies, OPTION_DEPENDENCIES } from '../../common/data/serialized-dependency';
+import { EMPTY_REFS, getRelativeOutRefPath, getRelativeRefPath} from '../utils';
 import { SchemaObject } from '../../../../schema/2.0/schema-object/schema-object';
 import {
 	alt,
@@ -26,6 +26,7 @@ import { concatIf, concatIfL } from '../../../../utils/array';
 import { ReferenceSchemaObject } from '../../../../schema/2.0/schema-object/reference-schema-object';
 import { AllOfSchemaObject } from '../../../../schema/2.0/schema-object/all-of-schema-object';
 import { camelize } from '@devexperts/utils/dist/string';
+import { getIOName, getRelativeUtilsPath } from '../../common/utils';
 
 export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cwd: string): SerializedType => {
 	switch (schema.type) {

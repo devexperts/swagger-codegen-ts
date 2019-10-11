@@ -1,11 +1,11 @@
 import { Serializer } from '../../../../utils';
 import { directory, Directory, file } from '../../../../fs';
-import { CLIENT_DIRECTORY, CLIENT_FILENAME, UTILS_DIRECTORY, UTILS_FILENAME } from '../utils';
 import { array } from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map } from 'fp-ts/lib/Option';
 import { serializeDefinitions } from './definitions-object';
 import { serializePaths } from './paths-object';
+import { CLIENT_DIRECTORY, CLIENT_FILENAME, UTILS_DIRECTORY, UTILS_FILENAME } from '../../common/utils';
 
 export const serializeSwaggerObject: Serializer = (name, swaggerObject): Directory =>
 	directory(name, [
@@ -104,3 +104,4 @@ const utils = `
 
 	export const report: (validation: Validation<unknown>) => string[] = fold(fail, ok);
 `;
+

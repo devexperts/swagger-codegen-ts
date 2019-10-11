@@ -30,5 +30,5 @@ export const serializeDependencies = (dependencies: SerializedDependency[]): str
 
 export const monoidDependencies = getArrayMonoid<SerializedDependency>();
 const dependencyOption = dependency('Option', 'fp-ts/lib/Option');
-const dependencyCreateOptionFromNullable = dependency('optionFromNullable', 'io-ts-types/lib/optionFromNullable');
-export const OPTION_DEPENDENCIES: SerializedDependency[] = [dependencyOption, dependencyCreateOptionFromNullable];
+const dependencyOptionFromNullable = dependency('optionFromNullable', 'io-ts-types/lib/optionFromNullable');
+export const OPTION_DEPENDENCIES: SerializedDependency[] = [dependencyOption, dependencyOptionFromNullable];

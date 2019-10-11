@@ -3,15 +3,15 @@ import {
 	intercalateSerializedParameters,
 	serializedParameter,
 	SerializedParameter,
-} from '../data/serialized-parameter';
+} from '../../common/data/serialized-parameter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getOrElse } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';
 import { serializePathOrQueryParameterObject } from './path-or-query-parameter-object';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
-import { dependency, EMPTY_DEPENDENCIES, OPTION_DEPENDENCIES } from '../data/serialized-dependency';
+import { dependency, EMPTY_DEPENDENCIES, OPTION_DEPENDENCIES } from '../../common/data/serialized-dependency';
 import { EMPTY_REFS } from '../utils';
-import { serializedType, SerializedType } from '../data/serialized-type';
+import { serializedType, SerializedType } from '../../common/data/serialized-type';
 import { unless } from '../../../../utils/string';
 
 const serializeRequired = (name: string, type: string, io: string, isRequired: boolean): SerializedType =>

@@ -1,14 +1,14 @@
 import { PathItemObject } from '../../../../schema/2.0/path-item-object';
-import { foldSerializedTypes, SerializedType } from '../data/serialized-type';
+import { foldSerializedTypes, SerializedType } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map } from 'fp-ts/lib/Option';
 import { serializeOperationObject } from './operation-object';
 import { array } from 'fp-ts/lib/Array';
 import { Dictionary, serializeDictionary } from '../../../../utils/types';
 import { file, File } from '../../../../fs';
-import { dependency, serializeDependencies } from '../data/serialized-dependency';
-import { getRelativeClientPath } from '../utils';
+import { dependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { decapitalize } from '@devexperts/utils/dist/string';
+import { getRelativeClientPath } from '../../common/utils';
 
 export const serializePathGroup = (name: string, group: Dictionary<PathItemObject>, cwd: string): File => {
 	const groupName = `${name}Controller`;

@@ -1,6 +1,6 @@
 import { NonArrayItemsObject } from '../../../../schema/2.0/items-object/non-array-items-object';
-import { serializedType, SerializedType } from '../data/serialized-type';
-import { dependency } from '../data/serialized-dependency';
+import { serializedType, SerializedType } from '../../common/data/serialized-type';
+import { dependency } from '../../common/data/serialized-dependency';
 import { EMPTY_REFS } from '../utils';
 
 export const serializeNonArrayItemsObject = (items: NonArrayItemsObject): SerializedType => {

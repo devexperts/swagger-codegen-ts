@@ -1,20 +1,19 @@
 import { ResponsesObject } from '../../../../schema/2.0/responses-object';
-import { intercalateSerializedTypes, serializedType, SerializedType } from '../data/serialized-type';
-import { array, uniq } from 'fp-ts/lib/Array';
-import { EMPTY_REFS, SUCCESSFUL_CODES } from '../utils';
+import {
+	intercalateSerializedTypes,
+	serializedType,
+	SerializedType,
+	uniqSerializedTypesWithoutDependencies,
+} from '../../common/data/serialized-type';
+import { array } from 'fp-ts/lib/Array';
+import { EMPTY_REFS } from '../utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { lookup } from 'fp-ts/lib/Record';
 import { chain } from 'fp-ts/lib/Option';
 import { serializeOperationResponse } from './response-object';
-import { dependency, EMPTY_DEPENDENCIES } from '../data/serialized-dependency';
-import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
+import { dependency, EMPTY_DEPENDENCIES } from '../../common/data/serialized-dependency';
 import { concatIfL } from '../../../../utils/array';
-
-const eqSerializedTypeWithoutDependencies: Eq<SerializedType> = getStructEq<Pick<SerializedType, 'type' | 'io'>>({
-	type: eqString,
-	io: eqString,
-});
-const uniqSerializedTypesWithoutDependencies = uniq(eqSerializedTypeWithoutDependencies);
+import { SUCCESSFUL_CODES } from '../../common/utils';
 
 export const serializeOperationResponses = (
 	responses: ResponsesObject,
