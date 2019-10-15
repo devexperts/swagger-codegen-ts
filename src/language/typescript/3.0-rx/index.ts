@@ -4,10 +4,13 @@ export { serializeDocument } from './serializers/document';
 
 import { OpenAPIV3 } from 'openapi-types';
 import { format, Options } from 'prettier';
-import { FSEntity, map as mapFS } from '../../../fs';
-import { Either, map as mapEither } from 'fp-ts/lib/Either';
+import { directory, FSEntity, map as mapFS } from '../../../fs';
+import { Either } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Dereference } from './utils';
+import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
+import { array, either, record } from 'fp-ts';
+import { Dictionary } from '../../../utils/types';
+import { sequenceEither } from '../../../utils/either';
 
 const defaultPrettierConfig: Options = {
 	bracketSpacing: true,
@@ -25,13 +28,20 @@ export interface SerializeOptions {
 	prettierConfig?: Options;
 }
 
-export const serialize = (
-	document: OpenAPIV3.Document,
-	dereference: Dereference,
-	options: SerializeOptions = {},
-): Either<Error, FSEntity> =>
-	pipe(
-		document,
-		serializeDocument(dereference),
-		mapEither(e => mapFS(e, content => format(content, options.prettierConfig || defaultPrettierConfig))),
-	);
+export const serialize = combineReader(
+	serializeDocument,
+	serializeDocument => (
+		out: string,
+		documents: Dictionary<OpenAPIV3.Document>,
+		options: SerializeOptions = {},
+	): Either<Error, FSEntity> =>
+		pipe(
+			documents,
+			record.collect((name, document) => serializeDocument(name)(document)),
+			sequenceEither,
+			either.map(
+				array.map(e => mapFS(e, content => format(content, options.prettierConfig || defaultPrettierConfig))),
+			),
+			either.map(content => directory(out, content)),
+		),
+);

@@ -4,21 +4,18 @@ import { serializePathsObject } from './paths-object';
 import { CLIENT_DIRECTORY, CLIENT_FILENAME } from '../../common/utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Either, map } from 'fp-ts/lib/Either';
-import { Dereference } from '../utils';
+import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 
-export const serializeDocument = (dereference: Dereference) => (
-	document: OpenAPIV3.Document,
-): Either<Error, Directory> => {
-	return pipe(
-		serializePathsObject(dereference, document.paths),
-		map(paths =>
-			directory(`${document.info.title}-${document.info.version}`, [
-				directory(CLIENT_DIRECTORY, [file(`${CLIENT_FILENAME}.ts`, client)]),
-				paths,
-			]),
+export const serializeDocument = combineReader(
+	serializePathsObject,
+	serializePathsObject => (name: string) => (document: OpenAPIV3.Document): Either<Error, Directory> =>
+		pipe(
+			serializePathsObject(document.paths),
+			map(paths =>
+				directory(name, [directory(CLIENT_DIRECTORY, [file(`${CLIENT_FILENAME}.ts`, client)]), paths]),
+			),
 		),
-	);
-};
+);
 
 const client = `
 	import { left } from 'fp-ts/lib/Either';

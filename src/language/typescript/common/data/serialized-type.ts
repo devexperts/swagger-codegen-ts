@@ -1,4 +1,10 @@
-import { monoidDependencies, SerializedDependency } from './serialized-dependency';
+import {
+	EMPTY_DEPENDENCIES,
+	monoidDependencies,
+	OPTION_DEPENDENCIES,
+	serializedDependency,
+	SerializedDependency,
+} from './serialized-dependency';
 import { fold, getStructMonoid, Monoid, monoidString } from 'fp-ts/lib/Monoid';
 import { monoidStrings } from '../../../../utils/monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
@@ -38,3 +44,33 @@ const eqSerializedTypeWithoutDependencies: Eq<SerializedType> = getStructEq<Pick
 	io: eqString,
 });
 export const uniqSerializedTypesWithoutDependencies = uniq(eqSerializedTypeWithoutDependencies);
+export const SERIALIZED_VOID_TYPE = serializedType(
+	'void',
+	'tvoid',
+	[serializedDependency('void as tvoid', 'io-ts')],
+	[],
+);
+export const SERIALIZED_UNKNOWN_TYPE = serializedType(
+	'unknown',
+	'unknown',
+	[serializedDependency('unknown', 'io-ts')],
+	[],
+);
+
+export const getSerializedPropertyType = (
+	name: string,
+	type: string,
+	io: string,
+	isRequired: boolean,
+): SerializedType =>
+	isRequired
+		? serializedType(`${name}: ${type}`, `${name}: ${io}`, EMPTY_DEPENDENCIES, [])
+		: serializedType(`${name}: Option<${type}>`, `${name}: optionFromNullable(${io})`, OPTION_DEPENDENCIES, []);
+
+export const getSerializedArrayType = (serialized: SerializedType): SerializedType =>
+	serializedType(
+		`Array<${serialized.type}>`,
+		`array(${serialized.io})`,
+		[...serialized.dependencies, serializedDependency('array', 'io-ts')],
+		serialized.refs,
+	);

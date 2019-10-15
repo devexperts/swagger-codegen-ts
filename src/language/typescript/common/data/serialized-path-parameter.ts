@@ -20,3 +20,10 @@ export const serializedPathParameter = (
 	dependencies,
 	refs,
 });
+
+export const fromSerializedParameter = (name: string) => (
+	serialized: SerializedParameter,
+): SerializedPathParameter => ({
+	...serialized,
+	name,
+});

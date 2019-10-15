@@ -10,4 +10,3 @@ export const getRelativeOutRefPath = (
 	outFileName: string,
 	refFileName: string,
 ): string => `${getRelativeRoot(cwd)}/../${outFileName}/${blockName}/${refFileName}`;
-

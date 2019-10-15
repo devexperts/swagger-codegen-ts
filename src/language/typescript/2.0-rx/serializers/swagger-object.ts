@@ -104,4 +104,3 @@ const utils = `
 
 	export const report: (validation: Validation<unknown>) => string[] = fold(fail, ok);
 `;
-

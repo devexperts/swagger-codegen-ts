@@ -5,20 +5,59 @@ import { OpenAPI, OpenAPIV3 } from 'openapi-types';
 import { write } from '../src/fs';
 import { Either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { toUndefined, tryCatch } from 'fp-ts/lib/Option';
+import { Context } from '../src/language/typescript/3.0-rx/utils';
+import { serializedType } from '../src/language/typescript/common/data/serialized-type';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as nullable from '../src/utils/nullable';
+import { before, trim } from '../src/utils/string';
+import { getIOName } from '../src/language/typescript/common/utils';
+import { serializedDependency } from '../src/language/typescript/common/data/serialized-dependency';
+import { parseRef } from '../src/utils/ref';
 
-const cwd = path.resolve(__dirname);
+const CWD = path.resolve(__dirname, 'specs', '3.0');
+const OUT = path.resolve(__dirname, './out');
+
 async function run() {
-	const pathToSpec = path.resolve(cwd, './specs/3.0/link-example.yaml');
-	const parser = new SwaggerParser();
-	await parser.validate(pathToSpec, { dereference: { circular: 'ignore' } });
-	if (!isV3(parser.api)) {
-		throw new Error('Document should be an OpenAPIV3.Document');
-	}
-	await write(
-		path.resolve(cwd, './out'),
-		getUnsafe(serialize(parser.api, ref => toUndefined(tryCatch(() => parser.$refs.get(ref.$ref))))),
-	);
+	const pathToSpec = path.resolve(CWD, 'link-example.yaml');
+	const refs = await SwaggerParser.resolve(pathToSpec, { dereference: { circular: 'ignore' } });
+
+	const specs = Object.entries(refs.values()).reduce((acc, [fullPath, spec]) => {
+		if (!isV3(spec)) {
+			throw new Error('Document should be an OpenAPIV3.Document');
+		}
+		return { ...acc, [path.relative(CWD, fullPath)]: spec };
+	}, {});
+
+	const context: Context = {
+		resolveRef: referenceObject => nullable.tryCatch(() => refs.get(referenceObject.$ref)),
+		serializeRef: cwd => referenceObject =>
+			pipe(
+				referenceObject.$ref,
+				parseRef,
+				nullable.map(({ target, path: parsedPath, name }) => {
+					const toRoot = path.relative(cwd, target === '' ? '.' : '..');
+					const p = `./${path.join(
+						toRoot,
+						target,
+						pipe(
+							referenceObject.$ref,
+							before('?'),
+							before('#'),
+							trim,
+						),
+						parsedPath,
+					)}`;
+					return serializedType(
+						name,
+						getIOName(name),
+						[serializedDependency(name, p), serializedDependency(getIOName(name), p)],
+						[name],
+					);
+				}),
+			),
+	};
+
+	await write(OUT, getUnsafe(serialize(context)(OUT, specs)));
 }
 
 const supported = ['3.0.0', '3.0.1', '3.0.2'];

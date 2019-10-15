@@ -1,6 +1,11 @@
 import { foldSerializedTypes, serializedType, SerializedType } from '../../common/data/serialized-type';
-import { dependency, EMPTY_DEPENDENCIES, monoidDependencies, OPTION_DEPENDENCIES } from '../../common/data/serialized-dependency';
-import { EMPTY_REFS, getRelativeOutRefPath, getRelativeRefPath} from '../utils';
+import {
+	serializedDependency,
+	EMPTY_DEPENDENCIES,
+	monoidDependencies,
+	OPTION_DEPENDENCIES,
+} from '../../common/data/serialized-dependency';
+import { EMPTY_REFS, getRelativeOutRefPath, getRelativeRefPath } from '../utils';
 import { SchemaObject } from '../../../../schema/2.0/schema-object/schema-object';
 import {
 	alt,
@@ -82,8 +87,8 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 					isRecursive
 						? EMPTY_DEPENDENCIES
 						: [
-								dependency(asDefName(type), definitionFilePath),
-								dependency(asDefName(io), definitionFilePath),
+								serializedDependency(asDefName(type), definitionFilePath),
+								serializedDependency(asDefName(io), definitionFilePath),
 						  ],
 					[type],
 				);
@@ -98,7 +103,7 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 			return serializedType(
 				intercalate(monoidString, array)(' & ', types),
 				`intersection([${intercalate(monoidString, array)(', ', ios)}])`,
-				[dependency('intersection', 'io-ts'), ...dependencies],
+				[serializedDependency('intersection', 'io-ts'), ...dependencies],
 				refs,
 			);
 		}
@@ -116,7 +121,12 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 										serializedType(
 											'Date',
 											'DateFromISOString',
-											[dependency('DateFromISOString', 'io-ts-types/lib/DateFromISOString')],
+											[
+												serializedDependency(
+													'DateFromISOString',
+													'io-ts-types/lib/DateFromISOString',
+												),
+											],
 											EMPTY_REFS,
 										),
 									);
@@ -126,22 +136,24 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 						}),
 					),
 				),
-				getOrElse(() => serializedType('string', 'string', [dependency('string', 'io-ts')], EMPTY_REFS)),
+				getOrElse(() =>
+					serializedType('string', 'string', [serializedDependency('string', 'io-ts')], EMPTY_REFS),
+				),
 			);
 		}
 		case 'boolean': {
-			return serializedType('boolean', 'boolean', [dependency('boolean', 'io-ts')], EMPTY_REFS);
+			return serializedType('boolean', 'boolean', [serializedDependency('boolean', 'io-ts')], EMPTY_REFS);
 		}
 		case 'integer':
 		case 'number': {
-			return serializedType('number', 'number', [dependency('number', 'io-ts')], EMPTY_REFS);
+			return serializedType('number', 'number', [serializedDependency('number', 'io-ts')], EMPTY_REFS);
 		}
 		case 'array': {
 			const result = serializeSchemaObject(schema.items, rootName, cwd);
 			return serializedType(
 				`Array<${result.type}>`,
 				`array(${result.io})`,
-				[...result.dependencies, dependency('array', 'io-ts')],
+				[...result.dependencies, serializedDependency('array', 'io-ts')],
 				result.refs,
 			);
 		}
@@ -183,7 +195,7 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 					serializedType(
 						'unknown',
 						'unknownType',
-						[dependency('unknownType', getRelativeUtilsPath(cwd))],
+						[serializedDependency('unknownType', getRelativeUtilsPath(cwd))],
 						EMPTY_REFS,
 					),
 				),
@@ -204,8 +216,8 @@ const toObjectType = (serialized: SerializedType, recursion: Option<string>): Se
 			}),
 			getOrElse(() => io),
 		),
-		concatIfL(isSome(recursion), [...serialized.dependencies, dependency('type', 'io-ts')], () => [
-			dependency('recursion', 'io-ts'),
+		concatIfL(isSome(recursion), [...serialized.dependencies, serializedDependency('type', 'io-ts')], () => [
+			serializedDependency('recursion', 'io-ts'),
 		]),
 		EMPTY_REFS,
 	);
@@ -217,7 +229,12 @@ const serializeEnum = (enumValue: Array<string | number | boolean>): SerializedT
 		enumValue.length === 1
 			? `literal(${type})`
 			: `union([${enumValue.map(value => `literal('${value}')`).join(',')}])`;
-	return serializedType(type, io, [dependency('union', 'io-ts'), dependency('literal', 'io-ts')], EMPTY_REFS);
+	return serializedType(
+		type,
+		io,
+		[serializedDependency('union', 'io-ts'), serializedDependency('literal', 'io-ts')],
+		EMPTY_REFS,
+	);
 };
 
 const serializeAdditionalProperties = (properties: SchemaObject, rootName: string, cwd: string): SerializedType => {
@@ -225,7 +242,11 @@ const serializeAdditionalProperties = (properties: SchemaObject, rootName: strin
 	return serializedType(
 		`{ [key: string]: ${additional.type} }`,
 		`dictionary(string, ${additional.io})`,
-		[...additional.dependencies, dependency('string', 'io-ts'), dependency('dictionary', 'io-ts')],
+		[
+			...additional.dependencies,
+			serializedDependency('string', 'io-ts'),
+			serializedDependency('dictionary', 'io-ts'),
+		],
 		additional.refs,
 	);
 };

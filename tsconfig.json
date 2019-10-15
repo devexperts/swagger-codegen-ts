@@ -4,8 +4,7 @@
     "strict": true,
     "target": "es2016",
     "module": "commonjs",
-    "outDir": "dist",
-    "noUnusedLocals": true
+    "outDir": "dist"
   },
   "exclude": [
     "dist"

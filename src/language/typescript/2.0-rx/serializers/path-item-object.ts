@@ -6,7 +6,7 @@ import { serializeOperationObject } from './operation-object';
 import { array } from 'fp-ts/lib/Array';
 import { Dictionary, serializeDictionary } from '../../../../utils/types';
 import { file, File } from '../../../../fs';
-import { dependency, serializeDependencies } from '../../common/data/serialized-dependency';
+import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { decapitalize } from '@devexperts/utils/dist/string';
 import { getRelativeClientPath } from '../../common/utils';
 
@@ -17,8 +17,8 @@ export const serializePathGroup = (name: string, group: Dictionary<PathItemObjec
 	);
 	const dependencies = serializeDependencies([
 		...serialized.dependencies,
-		dependency('asks', 'fp-ts/lib/Reader'),
-		dependency('APIClient', getRelativeClientPath(cwd)),
+		serializedDependency('asks', 'fp-ts/lib/Reader'),
+		serializedDependency('APIClient', getRelativeClientPath(cwd)),
 	]);
 	return file(
 		`${groupName}.ts`,

@@ -6,7 +6,8 @@
   "ignore": [
     "node_modules",
     "dist",
-    "./test/out"
+    "./test/out",
+    "./test/out_old"
   ],
   "ext": "ts",
   "optOut": true

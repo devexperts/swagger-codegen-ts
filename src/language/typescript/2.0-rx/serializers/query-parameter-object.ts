@@ -9,20 +9,10 @@ import { getOrElse } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';
 import { serializePathOrQueryParameterObject } from './path-or-query-parameter-object';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
-import { dependency, EMPTY_DEPENDENCIES, OPTION_DEPENDENCIES } from '../../common/data/serialized-dependency';
+import { EMPTY_DEPENDENCIES, serializedDependency } from '../../common/data/serialized-dependency';
 import { EMPTY_REFS } from '../utils';
-import { serializedType, SerializedType } from '../../common/data/serialized-type';
+import { getSerializedPropertyType } from '../../common/data/serialized-type';
 import { unless } from '../../../../utils/string';
-
-const serializeRequired = (name: string, type: string, io: string, isRequired: boolean): SerializedType =>
-	isRequired
-		? serializedType(`${name}: ${type}`, `${name}: ${io}`, EMPTY_DEPENDENCIES, EMPTY_REFS)
-		: serializedType(
-				`${name}: Option<${type}>`,
-				`${name}: optionFromNullable(${io})`,
-				OPTION_DEPENDENCIES,
-				EMPTY_REFS,
-		  );
 
 const serializeQueryParameterObject = (parameter: QueryParameterObject): SerializedParameter => {
 	const isRequired = pipe(
@@ -30,7 +20,7 @@ const serializeQueryParameterObject = (parameter: QueryParameterObject): Seriali
 		getOrElse(constFalse),
 	);
 	const serializedParameterType = serializePathOrQueryParameterObject(parameter);
-	const serializedRequired = serializeRequired(
+	const serializedRequired = getSerializedPropertyType(
 		parameter.name,
 		serializedParameterType.type,
 		serializedParameterType.io,
@@ -59,7 +49,7 @@ export const serializeQueryParameterObjects = (
 		`query${unless(isRequired, '?')}: { ${type} }`,
 		`query: type({ ${io} })`,
 		intercalated.isRequired,
-		[...dependencies, dependency('type', 'io-ts')],
+		[...dependencies, serializedDependency('type', 'io-ts')],
 		refs,
 	);
 };

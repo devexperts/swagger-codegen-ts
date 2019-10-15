@@ -11,7 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { lookup } from 'fp-ts/lib/Record';
 import { chain } from 'fp-ts/lib/Option';
 import { serializeOperationResponse } from './response-object';
-import { dependency, EMPTY_DEPENDENCIES } from '../../common/data/serialized-dependency';
+import { serializedDependency, EMPTY_DEPENDENCIES } from '../../common/data/serialized-dependency';
 import { concatIfL } from '../../../../utils/array';
 import { SUCCESSFUL_CODES } from '../../common/utils';
 
@@ -31,7 +31,7 @@ export const serializeOperationResponses = (
 		),
 	);
 	if (serializedResponses.length === 0) {
-		return serializedType('void', 'tvoid', [dependency('void as tvoid', 'io-ts')], EMPTY_REFS);
+		return serializedType('void', 'tvoid', [serializedDependency('void as tvoid', 'io-ts')], EMPTY_REFS);
 	}
 	const combined = intercalateSerializedTypes(
 		serializedType('|', ',', EMPTY_DEPENDENCIES, EMPTY_REFS),
@@ -43,7 +43,7 @@ export const serializeOperationResponses = (
 	return serializedType(
 		combined.type,
 		isUnion ? `union([${combined.io}])` : combined.io,
-		concatIfL(isUnion, combined.dependencies, () => [dependency('union', 'io-ts')]),
+		concatIfL(isUnion, combined.dependencies, () => [serializedDependency('union', 'io-ts')]),
 		EMPTY_REFS,
 	);
 };

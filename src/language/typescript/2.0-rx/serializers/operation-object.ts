@@ -14,7 +14,7 @@ import { fromArray } from 'fp-ts/lib/NonEmptyArray';
 import { serializeQueryParameterObjects } from './query-parameter-object';
 import { serializeBodyParameterObjects } from './body-parameter-object';
 import { intercalateSerializedParameters, serializedParameter } from '../../common/data/serialized-parameter';
-import { dependency, EMPTY_DEPENDENCIES } from '../../common/data/serialized-dependency';
+import { serializedDependency, EMPTY_DEPENDENCIES } from '../../common/data/serialized-dependency';
 import { EMPTY_REFS } from '../utils';
 import { identity } from 'fp-ts/lib/function';
 import { QueryParameterObject } from '../../../../schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
@@ -110,18 +110,18 @@ export const serializeOperationObject = (
 	const dependencies = concatIfL(
 		hasParameters,
 		[
-			dependency('map', 'rxjs/operators'),
-			dependency('fromEither', '@devexperts/remote-data-ts'),
-			dependency('chain', '@devexperts/remote-data-ts'),
-			dependency('ResponseValidationError', getRelativeClientPath(cwd)),
-			dependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
-			dependency('pipe', 'fp-ts/lib/pipeable'),
-			dependency('mapLeft', 'fp-ts/lib/Either'),
+			serializedDependency('map', 'rxjs/operators'),
+			serializedDependency('fromEither', '@devexperts/remote-data-ts'),
+			serializedDependency('chain', '@devexperts/remote-data-ts'),
+			serializedDependency('ResponseValidationError', getRelativeClientPath(cwd)),
+			serializedDependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
+			serializedDependency('pipe', 'fp-ts/lib/pipeable'),
+			serializedDependency('mapLeft', 'fp-ts/lib/Either'),
 			...flatten(serializedPathParameters.map(parameter => parameter.dependencies)),
 			...serializedResponses.dependencies,
 			...serializedParameters.dependencies,
 		],
-		() => [dependency('partial', 'io-ts')],
+		() => [serializedDependency('partial', 'io-ts')],
 	);
 
 	return serializedType(type, io, dependencies, serializedParameters.refs);

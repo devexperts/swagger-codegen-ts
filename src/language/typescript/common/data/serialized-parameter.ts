@@ -23,6 +23,11 @@ export const serializedParameter = (
 	refs,
 });
 
+export const fromSerializedType = (isRequired: boolean) => (serializedType: SerializedType): SerializedParameter => ({
+	...serializedType,
+	isRequired,
+});
+
 export const monoidSerializedParameter: Monoid<SerializedParameter> = getStructMonoid({
 	type: monoidString,
 	io: monoidString,
