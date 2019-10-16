@@ -4,13 +4,14 @@ import { OpenAPIV3 } from 'openapi-types';
 import { SerializedType } from '../../common/data/serialized-type';
 import { Either } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { isReferenceObject, serializeReferenceObject } from './reference-object';
+import { isReferenceObject, serializeRef } from './reference-object';
 import { fromNullable } from '../../../../utils/either';
 import { either } from 'fp-ts';
+import { fromString } from '../../../../utils/ref';
 
 export const serializeRequestBodyObject = combineReader(
 	serializeSchemaObject,
-	serializeReferenceObject,
+	serializeRef,
 	(serializeSchemaObject, serializeReferenceObject) => (rootName: string, cwd: string) => (
 		body: OpenAPIV3.RequestBodyObject,
 	): Either<Error, SerializedType> => {
@@ -22,16 +23,11 @@ export const serializeRequestBodyObject = combineReader(
 			either.chain(schema =>
 				isReferenceObject(schema)
 					? pipe(
-							schema,
-							serializeReferenceObject(cwd),
-							fromNullable(
-								() =>
-									new Error(
-										`Unable to resolve MediaObject.content.$ref "${
-											schema.$ref
-										}" for RequestBodyObject`,
-									),
+							schema.$ref,
+							fromString(
+								ref => new Error(`Invalid MediaObject.content.$ref "${ref}" for RequestBodyObject`),
 							),
+							either.map(serializeReferenceObject(cwd)),
 					  )
 					: serializeSchemaObject(rootName, cwd)(schema),
 			),

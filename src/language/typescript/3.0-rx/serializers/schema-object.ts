@@ -9,7 +9,7 @@ import {
 import { OPTION_DEPENDENCIES, serializedDependency } from '../../common/data/serialized-dependency';
 import { Either, left, right } from 'fp-ts/lib/Either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { isReferenceObject, serializeReferenceObject } from './reference-object';
+import { isReferenceObject, serializeRef } from './reference-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
 import * as nullable from '../../../../utils/nullable';
@@ -20,6 +20,7 @@ import { concatIfL, includes } from '../../../../utils/array';
 import { fromNullable, sequenceEither } from '../../../../utils/either';
 import { recursion } from 'io-ts';
 import { getIOName } from '../../common/utils';
+import { fromString } from '../../../../utils/ref';
 
 type AdditionalProperties = boolean | OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
 type AllowedAdditionalProperties = true | OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
@@ -55,7 +56,7 @@ export const isNonEmptyArraySchemaObject = (
 ): schemaObject is OpenAPIV3.NonArraySchemaObject =>
 	['null', 'boolean', 'object', 'number', 'string', 'integer'].includes(schemaObject.type);
 
-export const serializeSchemaObject = combineReader(serializeReferenceObject, serializeReferenceObject => {
+export const serializeSchemaObject = combineReader(serializeRef, serializeReferenceObject => {
 	const serializeAdditionalProperties = (rootName: string, cwd: string) => (
 		additionalProperties: true | OpenAPIV3.SchemaObject,
 	): Either<Error, SerializedType> =>
@@ -100,11 +101,9 @@ export const serializeSchemaObject = combineReader(serializeReferenceObject, ser
 				const { items } = schemaObject;
 				if (isReferenceObject(items)) {
 					return pipe(
-						items,
-						serializeReferenceObject(cwd),
-						fromNullable(
-							() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`),
-						),
+						items.$ref,
+						fromString(ref => new Error(`Unable to serialize SchemaObjeft array items ref "${ref}"`)),
+						either.map(serializeReferenceObject(cwd)),
 						either.map(getSerializedArrayType),
 					);
 				} else {
@@ -122,16 +121,14 @@ export const serializeSchemaObject = combineReader(serializeReferenceObject, ser
 					nullable.map(additionalProperties => {
 						if (isReferenceObject(additionalProperties)) {
 							return pipe(
-								additionalProperties,
-								serializeReferenceObject(cwd),
-								fromNullable(
-									() =>
+								additionalProperties.$ref,
+								fromString(
+									ref =>
 										new Error(
-											`Unablew to serialize SchemaObject additionalProperties ref "${
-												additionalProperties.$ref
-											}"`,
+											`Unablew to serialize SchemaObject additionalProperties ref "${ref}"`,
 										),
 								),
+								either.map(serializeReferenceObject(cwd)),
 							);
 						} else {
 							return serializeAdditionalProperties(rootName, cwd)(additionalProperties);
@@ -151,16 +148,14 @@ export const serializeSchemaObject = combineReader(serializeReferenceObject, ser
 
 								if (isReferenceObject(property)) {
 									return pipe(
-										property,
-										serializeReferenceObject(cwd),
-										fromNullable(
-											() =>
+										property.$ref,
+										fromString(
+											ref =>
 												new Error(
-													`Unable to serialize SchemaObject property "${name}" ref "${
-														property.$ref
-													}"`,
+													`Unable to serialize SchemaObject property "${name}" ref "${ref}"`,
 												),
 										),
+										either.map(serializeReferenceObject(cwd)),
 										either.map(toPropertyType(name, isRequired)),
 									);
 								} else {

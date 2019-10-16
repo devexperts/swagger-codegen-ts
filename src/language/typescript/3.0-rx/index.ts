@@ -37,7 +37,7 @@ export const serialize = combineReader(
 	): Either<Error, FSEntity> =>
 		pipe(
 			documents,
-			record.collect((name, document) => serializeDocument(name)(document)),
+			record.collect(serializeDocument),
 			sequenceEither,
 			either.map(
 				array.map(e => mapFS(e, content => format(content, options.prettierConfig || defaultPrettierConfig))),

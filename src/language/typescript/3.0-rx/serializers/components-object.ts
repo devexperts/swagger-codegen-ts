@@ -5,7 +5,7 @@ import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { serializeSchemaObject } from './schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as nullable from '../../../../utils/nullable';
-import { isReferenceObject, resolveReferenceObject, serializeReferenceObject } from './reference-object';
+import { isReferenceObject, resolveReferenceObject } from './reference-object';
 import { serializeDictionary } from '../../../../utils/types';
 import { sequenceEither } from '../../../../utils/either';
 import { either } from 'fp-ts';
@@ -43,7 +43,6 @@ export const serializeComponentsObject = combineReader(
 	serializeSchemaObject,
 	resolveReferenceObject,
 	serializeSchema,
-	serializeReferenceObject,
 	(serializeSchemaObject, resolveReferenceObject, serializeSchema) => (
 		componentsObject: OpenAPIV3.ComponentsObject,
 	): Either<Error, Directory> => {

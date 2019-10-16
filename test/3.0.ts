@@ -7,7 +7,6 @@ import { Either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { Context } from '../src/language/typescript/3.0-rx/utils';
 import { serializedType } from '../src/language/typescript/common/data/serialized-type';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as nullable from '../src/utils/nullable';
 import { getIOName, getTypeName } from '../src/language/typescript/common/utils';
 import { serializedDependency } from '../src/language/typescript/common/data/serialized-dependency';
@@ -29,23 +28,14 @@ async function run() {
 
 	const context: Context = {
 		resolveRef: referenceObject => nullable.tryCatch(() => refs.get(referenceObject.$ref)),
-		serializeRef: cwd => referenceObject =>
-			pipe(
-				referenceObject.$ref,
-				parseRef,
-				nullable.map(({ target, path: parsedPath, name }) => {
-					const toRoot = path.relative(cwd, target === '' ? '.' : '..');
-					const p = `./${path.join(toRoot, target, parsedPath)}`.replace(/^\.\/\.\./, '..');
-					const type = getTypeName(name);
-					const io = getIOName(name);
-					return serializedType(
-						type,
-						io,
-						[serializedDependency(type, p), serializedDependency(io, p)],
-						[type],
-					);
-				}),
-			),
+		serializeRef: cwd => ref => {
+			const { target, path: parsedPath, name } = parseRef(ref);
+			const toRoot = path.relative(cwd, target === '' ? '.' : '..');
+			const p = `./${path.join(toRoot, target, parsedPath)}`.replace(/^\.\/\.\./, '..');
+			const type = getTypeName(name);
+			const io = getIOName(name);
+			return serializedType(type, io, [serializedDependency(type, p), serializedDependency(io, p)], [type]);
+		},
 	};
 
 	await write(OUT, getUnsafe(serialize(context)(OUT, specs)));

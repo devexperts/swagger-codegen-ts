@@ -15,12 +15,13 @@ import { serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIfL } from '../../../../utils/array';
 import { fromNullable, sequenceEither } from '../../../../utils/either';
 import { array, either } from 'fp-ts';
-import { isReferenceObject, serializeReferenceObject } from './reference-object';
+import { isReferenceObject, serializeRef } from './reference-object';
 import { Either } from 'fp-ts/lib/Either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
+import { fromString } from '../../../../utils/ref';
 
 export const serializeResponsesObject = combineReader(
-	serializeReferenceObject,
+	serializeRef,
 	serializeResponseObject,
 	(serializeReferenceObject, serializeResponseObject) => (rootName: string, cwd: string) => (
 		responsesObject: OpenAPIV3.ResponsesObject,
@@ -33,14 +34,9 @@ export const serializeResponsesObject = combineReader(
 					nullable.map(r =>
 						isReferenceObject(r)
 							? pipe(
-									r,
-									serializeReferenceObject(cwd),
-									fromNullable(
-										() =>
-											new Error(
-												`Unable to resolve ${r.$ref} for ResponsesObject'c code "${code}"`,
-											),
-									),
+									r.$ref,
+									fromString(ref => new Error(`Invalid ${ref} for ResponsesObject'c code "${code}"`)),
+									either.map(serializeReferenceObject(cwd)),
 							  )
 							: serializeResponseObject(code, rootName, cwd, r),
 					),

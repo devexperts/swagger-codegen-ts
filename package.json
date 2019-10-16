@@ -52,6 +52,7 @@
     "@types/jest": "^24.0.18",
     "conventional-changelog-cli": "^2.0.21",
     "eslint": "^6.5.1",
+    "fast-check": "^1.17.0",
     "fp-ts": "^2.1.0",
     "io-ts": "^2.0.1",
     "io-ts-types": "^0.5.1",

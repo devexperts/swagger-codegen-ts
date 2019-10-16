@@ -4,13 +4,14 @@ import { SerializedType, SERIALIZED_VOID_TYPE } from '../../common/data/serializ
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializeSchemaObject } from './schema-object';
 import { Either, right } from 'fp-ts/lib/Either';
-import { isReferenceObject, serializeReferenceObject } from './reference-object';
+import { isReferenceObject, serializeRef } from './reference-object';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { fromNullable } from '../../../../utils/either';
+import { fromString } from '../../../../utils/ref';
+import { either } from 'fp-ts';
 
 export const serializeResponseObject = combineReader(
 	serializeSchemaObject,
-	serializeReferenceObject,
+	serializeRef,
 	(serializeSchemaObject, serializeReferenceObject) => (
 		code: string,
 		rootName: string,
@@ -26,16 +27,14 @@ export const serializeResponseObject = combineReader(
 				schema =>
 					isReferenceObject(schema)
 						? pipe(
-								schema,
-								serializeReferenceObject(cwd),
-								fromNullable(
-									() =>
+								schema.$ref,
+								fromString(
+									ref =>
 										new Error(
-											`Unable to resolve MediaObject.content.$ref "${
-												schema.$ref
-											}" for ResponseObject with code ${code}`,
+											`Invalid MediaObject.content.$ref "${ref}" for ResponseObject with code ${code}`,
 										),
 								),
+								either.map(serializeReferenceObject(cwd)),
 						  )
 						: serializeSchemaObject(rootName, cwd)(schema),
 			),

@@ -1,41 +1,29 @@
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as nullable from './nullable';
-import { last, lookup } from './array';
-import { Nullable, sequenceTNullable } from './nullable';
-import { split } from './string';
+import { Either, left, right } from 'fp-ts/lib/Either';
 
-const refMatcher = /^([^#]*)#\/([^#]*)$/;
-export const getRefTargetName = (ref: string): Nullable<string> => {
-	const match = ref.trim().match(refMatcher);
-	return pipe(
-		match,
-		nullable.chain(m => m[2]),
-		nullable.chain(p => last(p.split('/'))),
-	);
+export type Ref = string & {
+	readonly Ref: unique symbol;
 };
+
+const refMatcher = /^([^#]*)#\/([^#]+)$/;
+export const isRef = (ref: string): ref is Ref => refMatcher.test(ref);
+export const fromString = <E>(onFail: (ref: string) => E) => (ref: string): Either<E, Ref> =>
+	isRef(ref) ? right(ref) : left(onFail(ref));
+const match = (ref: Ref): RegExpMatchArray => ref.match(refMatcher)!;
 
 export interface ParsedRef {
 	readonly name: string;
 	readonly path: string;
 	readonly target: string;
 }
-export const parseRef = (ref: string): Nullable<ParsedRef> => {
-	const match = ref.trim().match(refMatcher);
-	const path = pipe(
-		match,
-		nullable.chain(lookup(2)),
-	);
-	const target = pipe(
-		match,
-		nullable.chain(lookup(1)),
-	);
-	const name = pipe(
+export const parseRef = (ref: Ref): ParsedRef => {
+	const m = match(ref);
+	const path = m[2];
+	const target = m[1];
+	const parts = path.split('/');
+	const name = parts[parts.length - 1];
+	return {
 		path,
-		nullable.chain(split('/')),
-		nullable.chain(last),
-	);
-	return pipe(
-		sequenceTNullable(path, name, target),
-		nullable.map(([path, name, target]) => ({ path, name, target })),
-	);
+		name,
+		target,
+	};
 };

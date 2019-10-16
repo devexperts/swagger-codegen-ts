@@ -10,34 +10,27 @@ import { serializedDependency } from '../../common/data/serialized-dependency';
 import { Either, left, map, right } from 'fp-ts/lib/Either';
 import { isNonEmptyArraySchemaObject, serializeNonArraySchemaObject, serializeSchemaObject } from './schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { isReferenceObject, serializeReferenceObject } from './reference-object';
+import { isReferenceObject, serializeRef } from './reference-object';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { array, either } from 'fp-ts';
-import { fromNullable, sequenceEither } from '../../../../utils/either';
-import {
-	getSerializedArrayType,
-	getSerializedPropertyType,
-	intercalateSerializedTypes,
-	SerializedType,
-	serializedType,
-} from '../../common/data/serialized-type';
-import { boolean } from 'io-ts';
+import { either } from 'fp-ts';
+import { getSerializedArrayType, getSerializedPropertyType } from '../../common/data/serialized-type';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { unless } from '../../../../utils/string';
 import { head } from 'fp-ts/lib/Array';
+import { fromString } from '../../../../utils/ref';
 
 const serializeParameterReference = combineReader(
-	serializeReferenceObject,
+	serializeRef,
 	serializeReferenceObject => (
 		cwd: string,
 		parameter: OpenAPIV3.ParameterObject,
 		reference: OpenAPIV3.ReferenceObject,
 	): Either<Error, SerializedParameter> =>
 		pipe(
-			reference,
-			serializeReferenceObject(cwd),
-			fromNullable(() => new Error(`Unable to resolve $ref "${reference.$ref}" ${forParameter(parameter)}`)),
-			either.map(fromSerializedType(Boolean(parameter.required))),
+			reference.$ref,
+			fromString(ref => new Error(`Invalid $ref "${ref}" ${forParameter(parameter)}`)),
+			either.map(serializeReferenceObject(cwd)),
+			either.map(fromSerializedType(parameter.required || false)),
 		),
 );
 

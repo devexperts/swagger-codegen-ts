@@ -1,16 +1,34 @@
-import { getRefTargetName } from '../ref';
+import { fromString, isRef, parseRef, Ref } from '../ref';
+import { Arbitrary, assert, property, string } from 'fast-check';
+import { trim } from '../string';
+import { nonEmptyArray } from '../fast-check';
+import { last } from 'fp-ts/lib/NonEmptyArray';
+
+export const $refArbitrary: Arbitrary<Ref> = string().filter(isRef) as any; // filter doesn't support refinements
 
 describe('ref.utils', () => {
-	describe('getRefTargetName', () => {
-		it('should fail for empty path', () => {
-			expect(getRefTargetName('')).toBe(undefined);
-		});
-		it('should return last part of url as name', () => {
-			expect(getRefTargetName('#/components/schemas/user')).toBe('User');
-		});
-		it('should support references', () => {
-			expect(getRefTargetName('petstore.yaml#/components/schemas/Pet')).toBe('Pet');
-			expect(getRefTargetName('https://petstore.swagger.io/v2/swagger.json#/components/schemas/Pet')).toBe('Pet');
-		});
+	it('parseRef', () => {
+		const target = string()
+			.map(trim)
+			.filter(t => !t.includes('#'));
+		const parts = nonEmptyArray(
+			string(1, 10)
+				.map(trim)
+				.filter(t => t !== '' && !t.includes('#') && !t.includes('/')),
+		);
+		assert(property(target, parts, (target, parts) => isRef(`${target}#/${parts.join('/')}`)));
+		assert(
+			property(target, parts, (target, parts) => {
+				const path = `${parts.join('/')}`;
+				const $ref = `${target}#/${path}`;
+				if (isRef($ref)) {
+					expect(parseRef($ref)).toEqual({
+						target,
+						name: last(parts),
+						path,
+					});
+				}
+			}),
+		);
 	});
 });
