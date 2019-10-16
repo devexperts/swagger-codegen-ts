@@ -151,7 +151,7 @@ export const groupPathsByTag = (
 			getOrElse(() => path),
 		);
 		const tags = getTagsFromPath(pathWithParams);
-		const tag = camelize(tags.join('').replace(/\s/g, ''), false);
+		const tag = tags.join('').replace(/\s/g, '');
 
 		result[tag] = {
 			...(result[tag] || {}),

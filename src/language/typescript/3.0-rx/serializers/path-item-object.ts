@@ -10,7 +10,6 @@ import { sequenceEither } from '../../../../utils/either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { either } from 'fp-ts';
 import { compactNullables, Nullable } from '../../../../utils/nullable';
-import { camelize } from '@devexperts/utils/dist/string';
 
 export const serializePathItemObject = combineReader(
 	serializeOperationObject,
@@ -71,10 +70,7 @@ export const serializePathItemObjectTags = (pathItemObject: OpenAPIV3.PathItemOb
 		const tags = uniqString(flatten(compactNullables(operations.map(operation => operation.tags))));
 
 		if (tags.length > 0) {
-			return tags
-				.map(tag => camelize(tag, false))
-				.join('')
-				.replace(/\s/g, '');
+			return tags.join('').replace(/\s/g, '');
 		}
 	}
 };

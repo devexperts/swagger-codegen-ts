@@ -187,9 +187,6 @@ const getParameters = combineReader(
 export const serializeOperationObject = combineReader(
 	serializeResponsesObject,
 	getParameters,
-	serializeRequestBodyObject,
-	serializeReferenceObject,
-	resolveReferenceObject,
 	(serializeResponsesObject, getParameters) => (
 		pattern: string,
 		method: HTTPMethod,

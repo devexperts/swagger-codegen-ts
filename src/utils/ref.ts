@@ -1,7 +1,6 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as nullable from './nullable';
-import { init, join, last, lookup } from './array';
-import { camelize } from '@devexperts/utils/dist/string';
+import { last, lookup } from './array';
 import { Nullable, sequenceTNullable } from './nullable';
 import { split } from './string';
 
@@ -12,7 +11,6 @@ export const getRefTargetName = (ref: string): Nullable<string> => {
 		match,
 		nullable.chain(m => m[2]),
 		nullable.chain(p => last(p.split('/'))),
-		nullable.map(name => camelize(name, false)),
 	);
 };
 
@@ -35,7 +33,6 @@ export const parseRef = (ref: string): Nullable<ParsedRef> => {
 		path,
 		nullable.chain(split('/')),
 		nullable.chain(last),
-		nullable.map(name => camelize(name, false)),
 	);
 	return pipe(
 		sequenceTNullable(path, name, target),

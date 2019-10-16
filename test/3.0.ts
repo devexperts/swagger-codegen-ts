@@ -9,8 +9,7 @@ import { Context } from '../src/language/typescript/3.0-rx/utils';
 import { serializedType } from '../src/language/typescript/common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as nullable from '../src/utils/nullable';
-import { before, trim } from '../src/utils/string';
-import { getIOName } from '../src/language/typescript/common/utils';
+import { getIOName, getTypeName } from '../src/language/typescript/common/utils';
 import { serializedDependency } from '../src/language/typescript/common/data/serialized-dependency';
 import { parseRef } from '../src/utils/ref';
 
@@ -36,22 +35,14 @@ async function run() {
 				parseRef,
 				nullable.map(({ target, path: parsedPath, name }) => {
 					const toRoot = path.relative(cwd, target === '' ? '.' : '..');
-					const p = `./${path.join(
-						toRoot,
-						target,
-						pipe(
-							referenceObject.$ref,
-							before('?'),
-							before('#'),
-							trim,
-						),
-						parsedPath,
-					)}`;
+					const p = `./${path.join(toRoot, target, parsedPath)}`.replace(/^\.\/\.\./, '..');
+					const type = getTypeName(name);
+					const io = getIOName(name);
 					return serializedType(
-						name,
-						getIOName(name),
-						[serializedDependency(name, p), serializedDependency(getIOName(name), p)],
-						[name],
+						type,
+						io,
+						[serializedDependency(type, p), serializedDependency(io, p)],
+						[type],
 					);
 				}),
 			),

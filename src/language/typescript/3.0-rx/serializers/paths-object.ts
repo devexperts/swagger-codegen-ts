@@ -4,11 +4,11 @@ import { collect } from 'fp-ts/lib/Record';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializePathItemObject, serializePathItemObjectTags } from './path-item-object';
 import { Dictionary, serializeDictionary } from '../../../../utils/types';
-import { getOrElse } from '../../../../utils/nullable';
+import * as nullable from '../../../../utils/nullable';
 import { foldSerializedTypes } from '../../common/data/serialized-type';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { getRelativeClientPath } from '../../common/utils';
-import { decapitalize } from '@devexperts/utils/dist/string';
+import { decapitalize, camelize } from '@devexperts/utils/dist/string';
 import { Either, map } from 'fp-ts/lib/Either';
 import { sequenceEither } from '../../../../utils/either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
@@ -21,7 +21,8 @@ const groupPathsByTag = (pathsObject: OpenAPIV3.PathsObject): Dictionary<OpenAPI
 		const path = pathsObject[key];
 		const tag = pipe(
 			serializePathItemObjectTags(path),
-			getOrElse(() => 'Unknown'),
+			nullable.map(p => camelize(p, false)),
+			nullable.getOrElse(() => 'Unknown'),
 		);
 		result[tag] = {
 			...(result[tag] || {}),

@@ -4,7 +4,6 @@ import { SerializedType, SERIALIZED_VOID_TYPE } from '../../common/data/serializ
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializeSchemaObject } from './schema-object';
 import { Either, right } from 'fp-ts/lib/Either';
-import { either } from 'fp-ts';
 import { isReferenceObject, serializeReferenceObject } from './reference-object';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { fromNullable } from '../../../../utils/either';

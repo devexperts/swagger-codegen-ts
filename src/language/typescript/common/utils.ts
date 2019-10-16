@@ -17,6 +17,8 @@ export const getRelativeClientPath = (cwd: string): string =>
 export const getRelativeUtilsPath = (cwd: string): string =>
 	`${getRelativeRoot(cwd)}/${UTILS_DIRECTORY}/${UTILS_FILENAME}`;
 
+const INVALID_NAMES = ['Error', 'Promise', 'PromiseLike', 'Array', 'ArrayLike', 'Function', 'Object'];
+export const getTypeName = (name: string): string => (INVALID_NAMES.includes(name) ? `${name}Type` : name);
 export const getIOName = (name: string): string => `${name}IO`;
 export const getURL = (pattern: string, pathParameters: SerializedPathParameter[]): string =>
 	pathParameters.reduce(
