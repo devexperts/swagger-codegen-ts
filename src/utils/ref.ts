@@ -1,4 +1,5 @@
 import { Either, left, right } from 'fp-ts/lib/Either';
+import * as path from 'path';
 
 export type Ref = string & {
 	readonly Ref: unique symbol;
@@ -28,4 +29,9 @@ export const parseRef = ($ref: Ref): ParsedRef => {
 		name,
 		target,
 	};
+};
+
+export const buildRelativePath = (cwd: string, ref: ParsedRef): string => {
+	const toRoot = path.relative(cwd, ref.target === '' ? '.' : '..');
+	return `./${path.join(toRoot, ref.target, ref.path)}`.replace(/^\.\/\.\./, '..');
 };

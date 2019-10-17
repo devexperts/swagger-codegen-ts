@@ -9,7 +9,6 @@ import {
 } from '../../common/data/serialized-type';
 import { OPTION_DEPENDENCIES, serializedDependency } from '../../common/data/serialized-dependency';
 import { Either, left, right } from 'fp-ts/lib/Either';
-import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { isReferenceObject } from './reference-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';

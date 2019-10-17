@@ -1,12 +1,13 @@
 import { isRef, parseRef, Ref } from '../ref';
-import { Arbitrary, assert, property, string } from 'fast-check';
+import { Arbitrary, array, assert, property, string, tuple } from 'fast-check';
 import { trim } from '../string';
 import { arbitrary, nonEmptyArray } from '../fast-check';
 import { last } from 'fp-ts/lib/NonEmptyArray';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 export const $refArbitrary: Arbitrary<Ref> = pipe(
-	string(),
+	tuple(string(), nonEmptyArray(string(1, 10).filter(s => !s.includes('/')))),
+	arbitrary.map(([target, paths]) => `${target}#/${paths.join('/')}`),
 	arbitrary.filter(isRef),
 );
 

@@ -7,6 +7,8 @@ import { assert, constant, constantFrom, property, record, string } from 'fast-c
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
+import { arbitrary } from '../../../../../utils/fast-check';
+import { isRef, parseRef } from '../../../../../utils/ref';
 
 const primitiveTypes: OpenAPIV3.NonArraySchemaObject['type'][] = ['null', 'boolean', 'number', 'string', 'integer'];
 
@@ -105,6 +107,42 @@ describe('SchemaObject', () => {
 						expect(serializeSchemaObject(rootName, cwd)(schema)).toEqual(right(expected));
 					}),
 				);
+			});
+		});
+		xdescribe('recursive', () => {
+			describe('local', () => {
+				it('self', () => {
+					const $ref = pipe(
+						rootName,
+						arbitrary.map(name => `#/components/schemas/${name}`),
+						arbitrary.filter(isRef),
+					);
+					const schema = record({
+						type: constant<'object'>('object'),
+						properties: record({
+							children: record({
+								$ref,
+							}),
+						}),
+						required: constant(['children']),
+					});
+					assert(
+						property(schema, rootName, cwd, (schema, rootName, cwd) => {
+							const serialized = serializeSchemaObject(rootName, cwd)(schema);
+							const expected = serializedType(
+								`{ children: Array<${rootName}> }`,
+								`recursion<${rootName}, unknown>(R => type({ children: array(R) }) )`,
+								[
+									serializedDependency('recursion', 'io-ts'),
+									serializedDependency('type', 'io-ts'),
+									serializedDependency('array', 'io-ts'),
+								],
+								[parseRef(schema.properties.children.$ref)],
+							);
+							expect(serialized).toEqual(right(expected));
+						}),
+					);
+				});
 			});
 		});
 	});

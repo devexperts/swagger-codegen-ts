@@ -6,12 +6,10 @@ import {
 	SerializedDependency,
 } from './serialized-dependency';
 import { fold, getStructMonoid, Monoid, monoidString } from 'fp-ts/lib/Monoid';
-import { monoidStrings } from '../../../../utils/monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
 import { array, getMonoid, uniq } from 'fp-ts/lib/Array';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
-import { ParsedRef, parseRef, Ref } from '../../../../utils/ref';
-import * as path from 'path';
+import { buildRelativePath, ParsedRef, parseRef, Ref } from '../../../../utils/ref';
 import { getIOName, getTypeName } from '../utils';
 
 export interface SerializedType {
@@ -79,8 +77,7 @@ export const getSerializedArrayType = (serialized: SerializedType): SerializedTy
 	);
 export const getSerializedRefType = (rootName: string, cwd: string) => (ref: Ref): SerializedType => {
 	const parsedRef = parseRef(ref);
-	const toRoot = path.relative(cwd, parsedRef.target === '' ? '.' : '..');
-	const p = `./${path.join(toRoot, parsedRef.target, parsedRef.path)}`.replace(/^\.\/\.\./, '..');
+	const p = buildRelativePath(cwd, parsedRef);
 	const type = getTypeName(parsedRef.name);
 	const io = getIOName(parsedRef.name);
 	return serializedType(
