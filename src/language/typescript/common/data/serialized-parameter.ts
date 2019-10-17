@@ -3,7 +3,8 @@ import { SerializedDependency, monoidDependencies } from './serialized-dependenc
 import { getStructMonoid, Monoid, monoidAny, monoidString } from 'fp-ts/lib/Monoid';
 import { monoidStrings } from '../../../../utils/monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
-import { array } from 'fp-ts/lib/Array';
+import { array, getMonoid } from 'fp-ts/lib/Array';
+import { ParsedRef } from '../../../../utils/ref';
 
 export interface SerializedParameter extends SerializedType {
 	readonly isRequired: boolean;
@@ -14,7 +15,7 @@ export const serializedParameter = (
 	io: string,
 	isRequired: boolean,
 	dependencies: SerializedDependency[],
-	refs: string[],
+	refs: ParsedRef[],
 ): SerializedParameter => ({
 	type,
 	io,
@@ -33,6 +34,6 @@ export const monoidSerializedParameter: Monoid<SerializedParameter> = getStructM
 	io: monoidString,
 	dependencies: monoidDependencies,
 	isRequired: monoidAny,
-	refs: monoidStrings,
+	refs: getMonoid<ParsedRef>(),
 });
 export const intercalateSerializedParameters = intercalate(monoidSerializedParameter, array);

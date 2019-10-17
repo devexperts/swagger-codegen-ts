@@ -6,7 +6,6 @@ import { getOrElse } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';
 import { serializeNonArrayItemsObject } from './non-array-items-object';
 import { serializedDependency } from '../../common/data/serialized-dependency';
-import { EMPTY_REFS } from '../utils';
 
 export const serializePathOrQueryParameterObject = (
 	parameter: PathParameterObject | QueryParameterObject,
@@ -30,13 +29,7 @@ export const serializePathOrQueryParameterObject = (
 			);
 		}
 		case 'string': {
-			return serializedParameter(
-				'string',
-				'string',
-				isRequired,
-				[serializedDependency('string', 'io-ts')],
-				EMPTY_REFS,
-			);
+			return serializedParameter('string', 'string', isRequired, [serializedDependency('string', 'io-ts')], []);
 		}
 		case 'boolean': {
 			return serializedParameter(
@@ -44,18 +37,12 @@ export const serializePathOrQueryParameterObject = (
 				'boolean',
 				isRequired,
 				[serializedDependency('boolean', 'io-ts')],
-				EMPTY_REFS,
+				[],
 			);
 		}
 		case 'integer':
 		case 'number': {
-			return serializedParameter(
-				'number',
-				'number',
-				isRequired,
-				[serializedDependency('number', 'io-ts')],
-				EMPTY_REFS,
-			);
+			return serializedParameter('number', 'number', isRequired, [serializedDependency('number', 'io-ts')], []);
 		}
 	}
 };

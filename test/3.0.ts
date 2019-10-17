@@ -6,11 +6,7 @@ import { write } from '../src/fs';
 import { Either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { Context } from '../src/language/typescript/3.0-rx/utils';
-import { serializedType } from '../src/language/typescript/common/data/serialized-type';
 import * as nullable from '../src/utils/nullable';
-import { getIOName, getTypeName } from '../src/language/typescript/common/utils';
-import { serializedDependency } from '../src/language/typescript/common/data/serialized-dependency';
-import { parseRef } from '../src/utils/ref';
 
 const CWD = path.resolve(__dirname, 'specs', '3.0');
 const OUT = path.resolve(__dirname, './out');

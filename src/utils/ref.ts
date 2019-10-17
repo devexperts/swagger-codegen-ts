@@ -11,17 +11,19 @@ export const fromString = <E>(onFail: (ref: string) => E) => (ref: string): Eith
 const match = (ref: Ref): RegExpMatchArray => ref.match(refMatcher)!;
 
 export interface ParsedRef {
+	readonly $ref: string;
 	readonly name: string;
 	readonly path: string;
 	readonly target: string;
 }
-export const parseRef = (ref: Ref): ParsedRef => {
-	const m = match(ref);
+export const parseRef = ($ref: Ref): ParsedRef => {
+	const m = match($ref);
 	const path = m[2];
 	const target = m[1];
 	const parts = path.split('/');
 	const name = parts[parts.length - 1];
 	return {
+		$ref,
 		path,
 		name,
 		target,

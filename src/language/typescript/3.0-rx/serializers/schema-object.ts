@@ -159,7 +159,9 @@ export const serializeSchemaObject = (rootName: string, cwd: string) => (
 						sequenceEither,
 						either.map(types => {
 							const serialized = foldSerializedTypes(types);
-							return toObjectType(serialized.refs.includes(rootName) ? rootName : undefined)(serialized);
+							return toObjectType(
+								serialized.refs.some(ref => ref.name === rootName) ? rootName : undefined,
+							)(serialized);
 						}),
 					),
 				),

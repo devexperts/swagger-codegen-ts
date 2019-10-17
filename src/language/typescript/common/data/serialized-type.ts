@@ -8,9 +8,9 @@ import {
 import { fold, getStructMonoid, Monoid, monoidString } from 'fp-ts/lib/Monoid';
 import { monoidStrings } from '../../../../utils/monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
-import { array, uniq } from 'fp-ts/lib/Array';
+import { array, getMonoid, uniq } from 'fp-ts/lib/Array';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
-import { parseRef, Ref } from '../../../../utils/ref';
+import { ParsedRef, parseRef, Ref } from '../../../../utils/ref';
 import * as path from 'path';
 import { getIOName, getTypeName } from '../utils';
 
@@ -18,14 +18,14 @@ export interface SerializedType {
 	readonly type: string;
 	readonly io: string;
 	readonly dependencies: SerializedDependency[];
-	readonly refs: string[];
+	readonly refs: ParsedRef[];
 }
 
 export const serializedType = (
 	type: string,
 	io: string,
 	dependencies: SerializedDependency[],
-	refs: string[],
+	refs: ParsedRef[],
 ): SerializedType => ({
 	type,
 	io,
@@ -37,7 +37,7 @@ export const monoidSerializedType: Monoid<SerializedType> = getStructMonoid({
 	type: monoidString,
 	io: monoidString,
 	dependencies: monoidDependencies,
-	refs: monoidStrings,
+	refs: getMonoid<ParsedRef>(),
 });
 
 export const foldSerializedTypes = fold(monoidSerializedType);
@@ -78,10 +78,15 @@ export const getSerializedArrayType = (serialized: SerializedType): SerializedTy
 		serialized.refs,
 	);
 export const getSerializedRefType = (rootName: string, cwd: string) => (ref: Ref): SerializedType => {
-	const { target, path: parsedPath, name } = parseRef(ref);
-	const toRoot = path.relative(cwd, target === '' ? '.' : '..');
-	const p = `./${path.join(toRoot, target, parsedPath)}`.replace(/^\.\/\.\./, '..');
-	const type = getTypeName(name);
-	const io = getIOName(name);
-	return serializedType(type, io, [serializedDependency(type, p), serializedDependency(io, p)], [type]);
+	const parsedRef = parseRef(ref);
+	const toRoot = path.relative(cwd, parsedRef.target === '' ? '.' : '..');
+	const p = `./${path.join(toRoot, parsedRef.target, parsedRef.path)}`.replace(/^\.\/\.\./, '..');
+	const type = getTypeName(parsedRef.name);
+	const io = getIOName(parsedRef.name);
+	return serializedType(
+		type,
+		io,
+		[serializedDependency(type, p), serializedDependency(io, p)],
+		[{ ...parsedRef, name: type }],
+	);
 };

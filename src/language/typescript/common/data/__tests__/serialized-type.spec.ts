@@ -1,17 +1,15 @@
 import { array, assert, boolean, property, string, tuple } from 'fast-check';
-import {
-	getSerializedArrayType,
-	getSerializedPropertyType,
-	serializedType,
-} from '../serialized-type';
+import { getSerializedArrayType, getSerializedPropertyType, serializedType } from '../serialized-type';
 import { serializedDependencyArbitrary } from './serialized-dependency.spec';
 import { serializedDependency } from '../serialized-dependency';
+import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
+import { parseRef } from '../../../../../utils/ref';
 
 export const serializedTypeArbitrary = tuple(
 	string(),
 	string(),
 	array(serializedDependencyArbitrary),
-	array(string()),
+	array($refArbitrary.map(parseRef)),
 ).map(([type, io, dependencies, refs]) => serializedType(type, io, dependencies, refs));
 
 describe('SerializedType', () => {

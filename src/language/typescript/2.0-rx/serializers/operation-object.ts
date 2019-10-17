@@ -15,7 +15,6 @@ import { serializeQueryParameterObjects } from './query-parameter-object';
 import { serializeBodyParameterObjects } from './body-parameter-object';
 import { intercalateSerializedParameters, serializedParameter } from '../../common/data/serialized-parameter';
 import { serializedDependency, EMPTY_DEPENDENCIES } from '../../common/data/serialized-dependency';
-import { EMPTY_REFS } from '../utils';
 import { identity } from 'fp-ts/lib/function';
 import { QueryParameterObject } from '../../../../schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
 import { BodyParameterObject } from '../../../../schema/2.0/parameter-object/body-parameter-object';
@@ -60,7 +59,7 @@ export const serializeOperationObject = (
 	);
 
 	const serializedParameters = intercalateSerializedParameters(
-		serializedParameter(',', ',', false, EMPTY_DEPENDENCIES, EMPTY_REFS),
+		serializedParameter(',', ',', false, EMPTY_DEPENDENCIES, []),
 		array.compact([serializedQueryParameters, serializedBodyParameters]),
 	);
 

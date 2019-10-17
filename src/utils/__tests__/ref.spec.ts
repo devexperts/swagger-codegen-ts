@@ -1,10 +1,14 @@
-import { fromString, isRef, parseRef, Ref } from '../ref';
+import { isRef, parseRef, Ref } from '../ref';
 import { Arbitrary, assert, property, string } from 'fast-check';
 import { trim } from '../string';
-import { nonEmptyArray } from '../fast-check';
+import { arbitrary, nonEmptyArray } from '../fast-check';
 import { last } from 'fp-ts/lib/NonEmptyArray';
+import { pipe } from 'fp-ts/lib/pipeable';
 
-export const $refArbitrary: Arbitrary<Ref> = string().filter(isRef) as any; // filter doesn't support refinements
+export const $refArbitrary: Arbitrary<Ref> = pipe(
+	string(),
+	arbitrary.filter(isRef),
+);
 
 describe('ref.utils', () => {
 	it('parseRef', () => {
@@ -23,6 +27,7 @@ describe('ref.utils', () => {
 				const $ref = `${target}#/${path}`;
 				if (isRef($ref)) {
 					expect(parseRef($ref)).toEqual({
+						$ref,
 						target,
 						name: last(parts),
 						path,

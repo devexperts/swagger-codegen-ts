@@ -9,8 +9,7 @@ import { getOrElse } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';
 import { serializePathOrQueryParameterObject } from './path-or-query-parameter-object';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
-import { EMPTY_DEPENDENCIES, serializedDependency } from '../../common/data/serialized-dependency';
-import { EMPTY_REFS } from '../utils';
+import { serializedDependency } from '../../common/data/serialized-dependency';
 import { getSerializedPropertyType } from '../../common/data/serialized-type';
 import { unless } from '../../../../utils/string';
 
@@ -41,7 +40,7 @@ export const serializeQueryParameterObjects = (
 ): SerializedParameter => {
 	const serializedParameters = parameters.map(serializeQueryParameterObject);
 	const intercalated = intercalateSerializedParameters(
-		serializedParameter(';', ',', false, EMPTY_DEPENDENCIES, EMPTY_REFS),
+		serializedParameter(';', ',', false, [], []),
 		serializedParameters,
 	);
 	const { isRequired, dependencies, refs, io, type } = intercalated;

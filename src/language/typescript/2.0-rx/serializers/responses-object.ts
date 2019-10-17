@@ -6,12 +6,11 @@ import {
 	uniqSerializedTypesWithoutDependencies,
 } from '../../common/data/serialized-type';
 import { array } from 'fp-ts/lib/Array';
-import { EMPTY_REFS } from '../utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { lookup } from 'fp-ts/lib/Record';
 import { chain } from 'fp-ts/lib/Option';
 import { serializeOperationResponse } from './response-object';
-import { serializedDependency, EMPTY_DEPENDENCIES } from '../../common/data/serialized-dependency';
+import { serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIfL } from '../../../../utils/array';
 import { SUCCESSFUL_CODES } from '../../common/utils';
 
@@ -31,12 +30,9 @@ export const serializeOperationResponses = (
 		),
 	);
 	if (serializedResponses.length === 0) {
-		return serializedType('void', 'tvoid', [serializedDependency('void as tvoid', 'io-ts')], EMPTY_REFS);
+		return serializedType('void', 'tvoid', [serializedDependency('void as tvoid', 'io-ts')], []);
 	}
-	const combined = intercalateSerializedTypes(
-		serializedType('|', ',', EMPTY_DEPENDENCIES, EMPTY_REFS),
-		serializedResponses,
-	);
+	const combined = intercalateSerializedTypes(serializedType('|', ',', [], []), serializedResponses);
 
 	const isUnion = serializedResponses.length > 1;
 
@@ -44,6 +40,6 @@ export const serializeOperationResponses = (
 		combined.type,
 		isUnion ? `union([${combined.io}])` : combined.io,
 		concatIfL(isUnion, combined.dependencies, () => [serializedDependency('union', 'io-ts')]),
-		EMPTY_REFS,
+		[],
 	);
 };

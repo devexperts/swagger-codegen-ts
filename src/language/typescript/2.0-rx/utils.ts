@@ -1,6 +1,7 @@
 import { getRelativeRoot } from '../common/utils';
+import { ParsedRef } from '../../../utils/ref';
 
-export const EMPTY_REFS: string[] = [];
+export const EMPTY_REFS: ParsedRef[] = [];
 
 export const getRelativeRefPath = (cwd: string, refBlockName: string, refFileName: string): string =>
 	`${getRelativeRoot(cwd)}/${refBlockName}/${refFileName}`;
