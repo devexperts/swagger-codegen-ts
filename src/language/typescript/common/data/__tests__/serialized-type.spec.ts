@@ -8,18 +8,17 @@ import {
 import { serializedDependencyArbitrary } from './serialized-dependency.spec';
 import { serializedDependency } from '../serialized-dependency';
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
-import { buildRelativePath, parseRef } from '../../../../../utils/ref';
+import { buildRelativePath } from '../../../../../utils/ref';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { arbitrary } from '../../../../../utils/fast-check';
 import { none, some } from 'fp-ts/lib/Option';
 import { getIOName, getTypeName } from '../../utils';
-import { right } from 'fp-ts/lib/Either';
 
 export const serializedTypeArbitrary = tuple(
 	string(),
 	string(),
 	array(serializedDependencyArbitrary),
-	array($refArbitrary.map(parseRef)),
+	pipe(array($refArbitrary)),
 ).map(([type, io, dependencies, refs]) => serializedType(type, io, dependencies, refs));
 
 describe('SerializedType', () => {
@@ -60,25 +59,22 @@ describe('SerializedType', () => {
 		const rootName = string();
 		const cwd = string();
 		it('should serialize non recursive', () => {
-			const $ref = pipe(
+			const ref = pipe(
 				tuple(rootName, $refArbitrary),
-				arbitrary.filterMap(([rootName, ref]) =>
-					parseRef(ref).name.trim() !== rootName.trim() ? some(ref) : none,
-				),
+				arbitrary.filterMap(([rootName, ref]) => (ref.name.trim() !== rootName.trim() ? some(ref) : none)),
 			);
 			assert(
-				property(rootName, cwd, $ref, (rootName, cwd, $ref) => {
-					const serialized = getSerializedRefType(rootName, cwd)($ref);
-					const parsedRef = parseRef($ref);
-					const type = getTypeName(parsedRef.name);
-					const io = getIOName(parsedRef.name);
-					const p = buildRelativePath(cwd, parsedRef);
+				property(rootName, cwd, ref, (rootName, cwd, ref) => {
+					const serialized = getSerializedRefType(cwd)(ref);
+					const type = getTypeName(ref.name);
+					const io = getIOName(ref.name);
+					const p = buildRelativePath(cwd, ref);
 
 					const expected = serializedType(
 						type,
 						io,
 						[serializedDependency(type, p), serializedDependency(io, p)],
-						[parsedRef],
+						[ref],
 					);
 
 					expect(serialized).toEqual(expected);
@@ -88,25 +84,16 @@ describe('SerializedType', () => {
 		xit('should serialize recursive skipping dependencies', () => {
 			const data = pipe(
 				tuple(rootName, $refArbitrary),
-				arbitrary.filterMap(([rootName, $ref]) =>
-					parseRef($ref).name === rootName ? some({ $ref, rootName }) : none,
-				),
+				arbitrary.filterMap(([rootName, ref]) => (ref.name === rootName ? some({ ref, rootName }) : none)),
 			);
 			assert(
 				property(cwd, data, (cwd, data) => {
-					const { $ref, rootName } = data;
-					const serialized = getSerializedRefType(rootName, cwd)($ref);
-					const parsedRef = parseRef($ref);
-					const type = getTypeName(parsedRef.name);
-					const io = getIOName(parsedRef.name);
+					const { ref } = data;
+					const serialized = getSerializedRefType(cwd)(ref);
+					const type = getTypeName(ref.name);
+					const io = getIOName(ref.name);
 
-					console.table({
-						rootName,
-						cwd,
-						...parsedRef,
-					});
-
-					const expected = serializedType(type, io, [], [parsedRef]);
+					const expected = serializedType(type, io, [], [ref]);
 
 					expect(serialized).toEqual(expected);
 				}),

@@ -1,6 +1,6 @@
 import { SerializedDependency } from './serialized-dependency';
 import { SerializedParameter } from './serialized-parameter';
-import { ParsedRef } from '../../../../utils/ref';
+import { Ref } from '../../../../utils/ref';
 
 export interface SerializedPathParameter extends SerializedParameter {
 	readonly name: string;
@@ -12,7 +12,7 @@ export const serializedPathParameter = (
 	io: string,
 	isRequired: boolean,
 	dependencies: SerializedDependency[],
-	refs: ParsedRef[],
+	refs: Ref[],
 ): SerializedPathParameter => ({
 	name,
 	type,

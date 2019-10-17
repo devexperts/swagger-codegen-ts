@@ -17,7 +17,7 @@ import { concatIfL } from '../../../../utils/array';
 import { sequenceEither } from '../../../../utils/either';
 import { array, either } from 'fp-ts';
 import { isReferenceObject } from './reference-object';
-import { Either } from 'fp-ts/lib/Either';
+import { Either, mapLeft } from 'fp-ts/lib/Either';
 import { fromString } from '../../../../utils/ref';
 
 export const serializeResponsesObject = (rootName: string, cwd: string) => (
@@ -32,8 +32,9 @@ export const serializeResponsesObject = (rootName: string, cwd: string) => (
 					isReferenceObject(r)
 						? pipe(
 								r.$ref,
-								fromString(ref => new Error(`Invalid ${ref} for ResponsesObject'c code "${code}"`)),
-								either.map(getSerializedRefType(rootName, cwd)),
+								fromString,
+								mapLeft(() => new Error(`Invalid ${r.$ref} for ResponsesObject'c code "${code}"`)),
+								either.map(getSerializedRefType(cwd)),
 						  )
 						: serializeResponseObject(code, rootName, cwd, r),
 				),

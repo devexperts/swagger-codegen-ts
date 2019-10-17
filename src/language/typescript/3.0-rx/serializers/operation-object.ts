@@ -15,7 +15,7 @@ import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { isReferenceObject, resolveReferenceObject } from './reference-object';
-import { isNonNullable, Nullable } from '../../../../utils/nullable';
+import { isNonNullable, isNullable, Nullable } from '../../../../utils/nullable';
 import {
 	fromSerializedType,
 	intercalateSerializedParameters,
@@ -27,7 +27,7 @@ import { concatIf, concatIfL } from '../../../../utils/array';
 import { unless, when } from '../../../../utils/string';
 import { serializeRequestBodyObject } from './request-body-object';
 import { fromArray } from '../../../../utils/non-empty-array';
-import { isRef } from '../../../../utils/ref';
+import { fromString } from '../../../../utils/ref';
 
 const getOperationName = (operation: OpenAPIV3.OperationObject, method: HTTPMethod): string =>
 	pipe(
@@ -54,16 +54,17 @@ const getParameters = combineReader(
 
 		for (const parameter of operation.parameters || []) {
 			if (isReferenceObject(parameter)) {
-				if (!isRef(parameter.$ref)) {
-					return left(new Error(`Invalid $ref "${parameter.$ref}"`));
+				const reference = fromString(parameter.$ref);
+				if (isLeft(reference)) {
+					return reference;
 				}
 				const resolved = resolveReferenceObject<OpenAPIV3.ParameterObject>(parameter);
 				if (!isNonNullable(resolved)) {
-					return left(new Error(`Unable to resolve parameter with ref ${parameter.$ref}`));
+					return left(new Error(`Unable to resolve parameter with ref ${reference.right.$ref}`));
 				}
 				const serializedReference = pipe(
-					parameter.$ref,
-					getSerializedRefType(rootName, cwd),
+					reference.right,
+					getSerializedRefType(cwd),
 				);
 
 				switch (resolved.in) {
@@ -139,7 +140,8 @@ const getParameters = combineReader(
 
 		if (isNonNullable(operation.requestBody)) {
 			if (isReferenceObject(operation.requestBody)) {
-				if (!isRef(operation.requestBody.$ref)) {
+				const reference = fromString(operation.requestBody.$ref);
+				if (isLeft(reference)) {
 					return left(new Error(`Invalid RequestBodyObject.$ref "${operation.requestBody.$ref}"`));
 				}
 				const resolved = resolveReferenceObject<OpenAPIV3.RequestBodyObject>(operation.requestBody);
@@ -149,8 +151,8 @@ const getParameters = combineReader(
 					);
 				}
 				const serializedReference = pipe(
-					operation.requestBody.$ref,
-					getSerializedRefType(rootName, cwd),
+					reference.right,
+					getSerializedRefType(cwd),
 				);
 				if (!isNonNullable(serializedReference)) {
 					return left(new Error(`Unable to serialize RequestBodyObject ref ${operation.requestBody.$ref}`));

@@ -8,7 +8,8 @@ import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
 import { arbitrary } from '../../../../../utils/fast-check';
-import { isRef, parseRef } from '../../../../../utils/ref';
+import { fromString } from '../../../../../utils/ref';
+import { fromEither } from 'fp-ts/lib/Option';
 
 const primitiveTypes: OpenAPIV3.NonArraySchemaObject['type'][] = ['null', 'boolean', 'number', 'string', 'integer'];
 
@@ -91,17 +92,17 @@ describe('SchemaObject', () => {
 				);
 			});
 			it('should support items.$ref', () => {
-				const schema = record({
-					type: constant<'array'>('array'),
-					items: record({
-						$ref: $refArbitrary,
-					}),
-				});
 				assert(
-					property(rootName, cwd, schema, (rootName, cwd, schema) => {
+					property(rootName, cwd, $refArbitrary, (rootName, cwd, $refArbitrary) => {
+						const schema: OpenAPIV3.SchemaObject = {
+							type: 'array',
+							items: {
+								$ref: $refArbitrary.$ref,
+							},
+						};
 						const expected = pipe(
-							schema.items.$ref,
-							getSerializedRefType(rootName, cwd),
+							$refArbitrary,
+							getSerializedRefType(cwd),
 							getSerializedArrayType,
 						);
 						expect(serializeSchemaObject(rootName, cwd)(schema)).toEqual(right(expected));
@@ -115,19 +116,19 @@ describe('SchemaObject', () => {
 					const $ref = pipe(
 						rootName,
 						arbitrary.map(name => `#/components/schemas/${name}`),
-						arbitrary.filter(isRef),
+						arbitrary.filterMap(s => fromEither(fromString(s))),
 					);
 					const schema = record({
 						type: constant<'object'>('object'),
 						properties: record({
 							children: record({
-								$ref,
+								$ref: $ref.map(r => r.$ref),
 							}),
 						}),
 						required: constant(['children']),
 					});
 					assert(
-						property(schema, rootName, cwd, (schema, rootName, cwd) => {
+						property(schema, rootName, cwd, $ref, (schema, rootName, cwd, $ref) => {
 							const serialized = serializeSchemaObject(rootName, cwd)(schema);
 							const expected = serializedType(
 								`{ children: Array<${rootName}> }`,
@@ -137,7 +138,7 @@ describe('SchemaObject', () => {
 									serializedDependency('type', 'io-ts'),
 									serializedDependency('array', 'io-ts'),
 								],
-								[parseRef(schema.properties.children.$ref)],
+								[$ref],
 							);
 							expect(serialized).toEqual(right(expected));
 						}),

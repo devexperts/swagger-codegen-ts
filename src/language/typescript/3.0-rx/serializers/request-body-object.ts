@@ -1,7 +1,7 @@
 import { serializeSchemaObject } from './schema-object';
 import { OpenAPIV3 } from 'openapi-types';
 import { getSerializedRefType, SerializedType } from '../../common/data/serialized-type';
-import { Either } from 'fp-ts/lib/Either';
+import { Either, mapLeft } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isReferenceObject } from './reference-object';
 import { fromNullable } from '../../../../utils/either';
@@ -20,8 +20,11 @@ export const serializeRequestBodyObject = (rootName: string, cwd: string) => (
 			isReferenceObject(schema)
 				? pipe(
 						schema.$ref,
-						fromString(ref => new Error(`Invalid MediaObject.content.$ref "${ref}" for RequestBodyObject`)),
-						either.map(getSerializedRefType(rootName, cwd)),
+						fromString,
+						mapLeft(
+							() => new Error(`Invalid MediaObject.content.$ref "${schema.$ref}" for RequestBodyObject`),
+						),
+						either.map(getSerializedRefType(cwd)),
 				  )
 				: serializeSchemaObject(rootName, cwd)(schema),
 		),

@@ -7,7 +7,7 @@ import {
 	SerializedParameter,
 } from '../../common/data/serialized-parameter';
 import { serializedDependency } from '../../common/data/serialized-dependency';
-import { Either, left, map, right } from 'fp-ts/lib/Either';
+import { Either, left, map, mapLeft, right } from 'fp-ts/lib/Either';
 import { isNonEmptyArraySchemaObject, serializeNonArraySchemaObject } from './schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isReferenceObject } from './reference-object';
@@ -29,8 +29,9 @@ const serializeParameterReference = (
 ): Either<Error, SerializedParameter> =>
 	pipe(
 		reference.$ref,
-		fromString(ref => new Error(`Invalid $ref "${ref}" ${forParameter(parameter)}`)),
-		either.map(getSerializedRefType(rootName, cwd)),
+		fromString,
+		mapLeft(() => new Error(`Invalid $ref "${reference.$ref}" ${forParameter(parameter)}`)),
+		either.map(getSerializedRefType(cwd)),
 		either.map(fromSerializedType(parameter.required || false)),
 	);
 

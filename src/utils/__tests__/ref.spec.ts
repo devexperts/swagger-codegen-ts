@@ -1,14 +1,17 @@
-import { isRef, parseRef, Ref } from '../ref';
-import { Arbitrary, array, assert, property, string, tuple } from 'fast-check';
+import { Ref, fromString } from '../ref';
+import { Arbitrary, assert, property, string, tuple } from 'fast-check';
 import { trim } from '../string';
 import { arbitrary, nonEmptyArray } from '../fast-check';
 import { last } from 'fp-ts/lib/NonEmptyArray';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { isRight, right } from 'fp-ts/lib/Either';
 
 export const $refArbitrary: Arbitrary<Ref> = pipe(
 	tuple(string(), nonEmptyArray(string(1, 10).filter(s => !s.includes('/')))),
 	arbitrary.map(([target, paths]) => `${target}#/${paths.join('/')}`),
-	arbitrary.filter(isRef),
+	arbitrary.map(fromString),
+	arbitrary.filter(isRight),
+	arbitrary.map(e => e.right),
 );
 
 describe('ref.utils', () => {
@@ -19,21 +22,24 @@ describe('ref.utils', () => {
 		const parts = nonEmptyArray(
 			string(1, 10)
 				.map(trim)
-				.filter(t => t !== '' && !t.includes('#') && !t.includes('/')),
+				.filter(t => t !== '' && !t.includes('#') && !t.includes('/'))
+				.map(p => `/${p}`),
 		);
-		assert(property(target, parts, (target, parts) => isRef(`${target}#/${parts.join('/')}`)));
+		assert(property(target, parts, (target, parts) => isRight(fromString(`${target}#${parts.join('')}`))));
 		assert(
 			property(target, parts, (target, parts) => {
-				const path = `${parts.join('/')}`;
-				const $ref = `${target}#/${path}`;
-				if (isRef($ref)) {
-					expect(parseRef($ref)).toEqual({
+				const path = `${parts.join('')}`;
+				const $ref = `${target}#${path}`;
+				const name = last(parts).slice(1); // skip leading '/'
+
+				expect(fromString($ref)).toEqual(
+					right({
 						$ref,
 						target,
-						name: last(parts),
+						name,
 						path,
-					});
-				}
+					}),
+				);
 			}),
 		);
 	});

@@ -9,21 +9,21 @@ import { fold, getStructMonoid, Monoid, monoidString } from 'fp-ts/lib/Monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
 import { array, getMonoid, uniq } from 'fp-ts/lib/Array';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
-import { buildRelativePath, ParsedRef, parseRef, Ref } from '../../../../utils/ref';
+import { buildRelativePath, Ref } from '../../../../utils/ref';
 import { getIOName, getTypeName } from '../utils';
 
 export interface SerializedType {
 	readonly type: string;
 	readonly io: string;
 	readonly dependencies: SerializedDependency[];
-	readonly refs: ParsedRef[];
+	readonly refs: Ref[];
 }
 
 export const serializedType = (
 	type: string,
 	io: string,
 	dependencies: SerializedDependency[],
-	refs: ParsedRef[],
+	refs: Ref[],
 ): SerializedType => ({
 	type,
 	io,
@@ -35,7 +35,7 @@ export const monoidSerializedType: Monoid<SerializedType> = getStructMonoid({
 	type: monoidString,
 	io: monoidString,
 	dependencies: monoidDependencies,
-	refs: getMonoid<ParsedRef>(),
+	refs: getMonoid<Ref>(),
 });
 
 export const foldSerializedTypes = fold(monoidSerializedType);
@@ -75,8 +75,7 @@ export const getSerializedArrayType = (serialized: SerializedType): SerializedTy
 		[...serialized.dependencies, serializedDependency('array', 'io-ts')],
 		serialized.refs,
 	);
-export const getSerializedRefType = (rootName: string, cwd: string) => (ref: Ref): SerializedType => {
-	const parsedRef = parseRef(ref);
+export const getSerializedRefType = (cwd: string) => (parsedRef: Ref): SerializedType => {
 	const p = buildRelativePath(cwd, parsedRef);
 	const type = getTypeName(parsedRef.name);
 	const io = getIOName(parsedRef.name);

@@ -3,7 +3,7 @@ import * as nullable from '../../../../utils/nullable';
 import { SerializedType, SERIALIZED_VOID_TYPE, getSerializedRefType } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializeSchemaObject } from './schema-object';
-import { Either, right } from 'fp-ts/lib/Either';
+import { Either, mapLeft, right } from 'fp-ts/lib/Either';
 import { isReferenceObject } from './reference-object';
 import { fromString } from '../../../../utils/ref';
 import { either } from 'fp-ts';
@@ -24,13 +24,16 @@ export const serializeResponseObject = (
 				isReferenceObject(schema)
 					? pipe(
 							schema.$ref,
-							fromString(
-								ref =>
+							fromString,
+							mapLeft(
+								() =>
 									new Error(
-										`Invalid MediaObject.content.$ref "${ref}" for ResponseObject with code ${code}`,
+										`Invalid MediaObject.content.$ref "${
+											schema.$ref
+										}" for ResponseObject with code ${code}`,
 									),
 							),
-							either.map(getSerializedRefType(rootName, cwd)),
+							either.map(getSerializedRefType(cwd)),
 					  )
 					: serializeSchemaObject(rootName, cwd)(schema),
 		),

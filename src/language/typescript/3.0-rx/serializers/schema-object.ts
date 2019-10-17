@@ -8,7 +8,7 @@ import {
 	getSerializedRefType,
 } from '../../common/data/serialized-type';
 import { OPTION_DEPENDENCIES, serializedDependency } from '../../common/data/serialized-dependency';
-import { Either, left, right } from 'fp-ts/lib/Either';
+import { Either, left, mapLeft, right } from 'fp-ts/lib/Either';
 import { isReferenceObject } from './reference-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
@@ -17,7 +17,7 @@ import { isNonNullable, Nullable } from '../../../../utils/nullable';
 import { serializeDictionary } from '../../../../utils/types';
 import { constFalse } from 'fp-ts/lib/function';
 import { concatIfL, includes } from '../../../../utils/array';
-import { sequenceEither } from '../../../../utils/either';
+import { fromNullable, sequenceEither } from '../../../../utils/either';
 import { recursion } from 'io-ts';
 import { getIOName } from '../../common/utils';
 import { fromString } from '../../../../utils/ref';
@@ -94,8 +94,9 @@ export const serializeSchemaObject = (rootName: string, cwd: string) => (
 			if (isReferenceObject(items)) {
 				return pipe(
 					items.$ref,
-					fromString(ref => new Error(`Unable to serialize SchemaObjeft array items ref "${ref}"`)),
-					either.map(getSerializedRefType(rootName, cwd)),
+					fromString,
+					mapLeft(() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`)),
+					either.map(getSerializedRefType(cwd)),
 					either.map(getSerializedArrayType),
 				);
 			} else {
@@ -114,10 +115,16 @@ export const serializeSchemaObject = (rootName: string, cwd: string) => (
 					if (isReferenceObject(additionalProperties)) {
 						return pipe(
 							additionalProperties.$ref,
-							fromString(
-								ref => new Error(`Unablew to serialize SchemaObject additionalProperties ref "${ref}"`),
+							fromString,
+							mapLeft(
+								() =>
+									new Error(
+										`Unablew to serialize SchemaObject additionalProperties ref "${
+											additionalProperties.$ref
+										}"`,
+									),
 							),
-							either.map(getSerializedRefType(rootName, cwd)),
+							either.map(getSerializedRefType(cwd)),
 						);
 					} else {
 						return serializeAdditionalProperties(rootName, cwd)(additionalProperties);
@@ -138,13 +145,16 @@ export const serializeSchemaObject = (rootName: string, cwd: string) => (
 							if (isReferenceObject(property)) {
 								return pipe(
 									property.$ref,
-									fromString(
-										ref =>
+									fromString,
+									mapLeft(
+										() =>
 											new Error(
-												`Unable to serialize SchemaObject property "${name}" ref "${ref}"`,
+												`Unable to serialize SchemaObject property "${name}" ref "${
+													property.$ref
+												}"`,
 											),
 									),
-									either.map(getSerializedRefType(rootName, cwd)),
+									either.map(getSerializedRefType(cwd)),
 									either.map(toPropertyType(name, isRequired)),
 								);
 							} else {

@@ -22,7 +22,6 @@ import {
 } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold, monoidString } from 'fp-ts/lib/Monoid';
-import { monoidStrings } from '../../../../utils/monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
 import { array, getMonoid } from 'fp-ts/lib/Array';
 import { serializeDictionary } from '../../../../utils/types';
@@ -32,7 +31,8 @@ import { ReferenceSchemaObject } from '../../../../schema/2.0/schema-object/refe
 import { AllOfSchemaObject } from '../../../../schema/2.0/schema-object/all-of-schema-object';
 import { camelize } from '@devexperts/utils/dist/string';
 import { getIOName, getRelativeUtilsPath } from '../../common/utils';
-import { isRef, ParsedRef, parseRef } from '../../../../utils/ref';
+import { Ref, fromString } from '../../../../utils/ref';
+import { isLeft } from 'fp-ts/lib/Either';
 
 export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cwd: string): SerializedType => {
 	switch (schema.type) {
@@ -54,10 +54,10 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 					mapNullable(parts => parts[6]),
 				);
 
-				if (isNone(safeType) || isNone(defBlock) || !isRef(schema.$ref)) {
+				const parsedRef = fromString(schema.$ref);
+				if (isNone(safeType) || isNone(defBlock) || isLeft(parsedRef)) {
 					throw new Error(`Invalid $ref: ${$ref}`);
 				}
-				const parsedRef = parseRef(schema.$ref);
 
 				const type = safeType.value;
 
@@ -92,7 +92,7 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 								serializedDependency(asDefName(type), definitionFilePath),
 								serializedDependency(asDefName(io), definitionFilePath),
 						  ],
-					[parsedRef],
+					[parsedRef.right],
 				);
 			}
 
@@ -100,7 +100,7 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 			const types = results.map(item => item.type);
 			const ios = results.map(item => item.io);
 			const dependencies = fold(monoidDependencies)(results.map(item => item.dependencies));
-			const refs = fold(getMonoid<ParsedRef>())(results.map(item => item.refs));
+			const refs = fold(getMonoid<Ref>())(results.map(item => item.refs));
 
 			return serializedType(
 				intercalate(monoidString, array)(' & ', types),

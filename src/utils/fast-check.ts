@@ -6,7 +6,7 @@ import { isSome } from 'fp-ts/lib/Option';
 import { Kind } from 'fp-ts/lib/HKT';
 import { Separated } from 'fp-ts/lib/Compactable';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
-import { pipe, pipeable } from 'fp-ts/lib/pipeable';
+import { pipeable } from 'fp-ts/lib/pipeable';
 
 declare module 'fp-ts/lib/HKT' {
 	interface URItoKind<A> {
