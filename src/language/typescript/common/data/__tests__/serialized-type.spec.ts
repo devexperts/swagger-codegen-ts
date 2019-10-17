@@ -1,5 +1,9 @@
 import { array, assert, boolean, property, string, tuple } from 'fast-check';
-import { getSerializedArrayType, getSerializedPropertyType, serializedType } from '../serialized-type';
+import {
+	getSerializedArrayType,
+	getSerializedPropertyType,
+	serializedType,
+} from '../serialized-type';
 import { serializedDependencyArbitrary } from './serialized-dependency.spec';
 import { serializedDependency } from '../serialized-dependency';
 

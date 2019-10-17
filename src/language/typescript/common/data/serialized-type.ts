@@ -10,6 +10,9 @@ import { monoidStrings } from '../../../../utils/monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
 import { array, uniq } from 'fp-ts/lib/Array';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
+import { parseRef, Ref } from '../../../../utils/ref';
+import * as path from 'path';
+import { getIOName, getTypeName } from '../utils';
 
 export interface SerializedType {
 	readonly type: string;
@@ -74,3 +77,11 @@ export const getSerializedArrayType = (serialized: SerializedType): SerializedTy
 		[...serialized.dependencies, serializedDependency('array', 'io-ts')],
 		serialized.refs,
 	);
+export const getSerializedRefType = (rootName: string, cwd: string) => (ref: Ref): SerializedType => {
+	const { target, path: parsedPath, name } = parseRef(ref);
+	const toRoot = path.relative(cwd, target === '' ? '.' : '..');
+	const p = `./${path.join(toRoot, target, parsedPath)}`.replace(/^\.\/\.\./, '..');
+	const type = getTypeName(name);
+	const io = getIOName(name);
+	return serializedType(type, io, [serializedDependency(type, p), serializedDependency(io, p)], [type]);
+};

@@ -1,5 +1,5 @@
 import { getJSDoc, getRelativeClientPath, getURL, HTTPMethod } from '../../common/utils';
-import { serializedType, SerializedType } from '../../common/data/serialized-type';
+import { getSerializedRefType, serializedType, SerializedType } from '../../common/data/serialized-type';
 import { OpenAPIV3 } from 'openapi-types';
 import {
 	serializePathParameterObject,
@@ -14,7 +14,7 @@ import { array, either } from 'fp-ts';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
-import { isReferenceObject, resolveReferenceObject, serializeRef } from './reference-object';
+import { isReferenceObject, resolveReferenceObject } from './reference-object';
 import { isNonNullable, Nullable } from '../../../../utils/nullable';
 import {
 	fromSerializedType,
@@ -44,17 +44,9 @@ interface Parameters {
 
 const getParameters = combineReader(
 	resolveReferenceObject,
-	serializePathParameterObject,
-	serializeRef,
-	serializeQueryParameterObject,
-	serializeRequestBodyObject,
-	(
-		resolveReferenceObject,
-		serializePathParameterObject,
-		serializeReferenceObject,
-		serializedQueryParameterObject,
-		serializeRequestBodyObject,
-	) => (rootName: string, cwd: string) => (operation: OpenAPIV3.OperationObject): Either<Error, Parameters> => {
+	resolveReferenceObject => (rootName: string, cwd: string) => (
+		operation: OpenAPIV3.OperationObject,
+	): Either<Error, Parameters> => {
 		const pathParameters: OpenAPIV3.ParameterObject[] = [];
 		const serializedPathParameters: SerializedPathParameter[] = [];
 		const serializedQueryParameters: SerializedParameter[] = [];
@@ -69,7 +61,10 @@ const getParameters = combineReader(
 				if (!isNonNullable(resolved)) {
 					return left(new Error(`Unable to resolve parameter with ref ${parameter.$ref}`));
 				}
-				const serializedReference = serializeReferenceObject(cwd)(parameter.$ref);
+				const serializedReference = pipe(
+					parameter.$ref,
+					getSerializedRefType(rootName, cwd),
+				);
 
 				switch (resolved.in) {
 					case 'query': {
@@ -109,7 +104,7 @@ const getParameters = combineReader(
 			} else {
 				switch (parameter.in) {
 					case 'query': {
-						const serialized = serializedQueryParameterObject(cwd)(parameter);
+						const serialized = serializeQueryParameterObject(rootName, cwd)(parameter);
 						if (isLeft(serialized)) {
 							return serialized;
 						}
@@ -121,7 +116,7 @@ const getParameters = combineReader(
 					case 'formData':
 						break;
 					case 'path': {
-						const serialized = serializePathParameterObject(cwd)(parameter);
+						const serialized = serializePathParameterObject(rootName, cwd)(parameter);
 						if (isLeft(serialized)) {
 							return serialized;
 						}
@@ -153,7 +148,10 @@ const getParameters = combineReader(
 						new Error(`Unable to resolve RequestBodyObject with ref ${operation.requestBody.$ref}`),
 					);
 				}
-				const serializedReference = serializeReferenceObject(cwd)(operation.requestBody.$ref);
+				const serializedReference = pipe(
+					operation.requestBody.$ref,
+					getSerializedRefType(rootName, cwd),
+				);
 				if (!isNonNullable(serializedReference)) {
 					return left(new Error(`Unable to serialize RequestBodyObject ref ${operation.requestBody.$ref}`));
 				}
@@ -191,14 +189,10 @@ const getParameters = combineReader(
 );
 
 export const serializeOperationObject = combineReader(
-	serializeResponsesObject,
 	getParameters,
-	(serializeResponsesObject, getParameters) => (
-		pattern: string,
-		method: HTTPMethod,
-		rootName: string,
-		cwd: string,
-	) => (operation: OpenAPIV3.OperationObject): Either<Error, SerializedType> => {
+	getParameters => (pattern: string, method: HTTPMethod, rootName: string, cwd: string) => (
+		operation: OpenAPIV3.OperationObject,
+	): Either<Error, SerializedType> => {
 		const parameters = getParameters(rootName, cwd)(operation);
 		const operationName = getOperationName(operation, method);
 

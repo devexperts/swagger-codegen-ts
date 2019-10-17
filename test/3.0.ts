@@ -28,14 +28,6 @@ async function run() {
 
 	const context: Context = {
 		resolveRef: referenceObject => nullable.tryCatch(() => refs.get(referenceObject.$ref)),
-		serializeRef: cwd => ref => {
-			const { target, path: parsedPath, name } = parseRef(ref);
-			const toRoot = path.relative(cwd, target === '' ? '.' : '..');
-			const p = `./${path.join(toRoot, target, parsedPath)}`.replace(/^\.\/\.\./, '..');
-			const type = getTypeName(name);
-			const io = getIOName(name);
-			return serializedType(type, io, [serializedDependency(type, p), serializedDependency(io, p)], [type]);
-		},
 	};
 
 	await write(OUT, getUnsafe(serialize(context)(OUT, specs)));

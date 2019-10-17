@@ -5,11 +5,12 @@ import {
 	SerializedType,
 	serializedType,
 	getSerializedArrayType,
+	getSerializedRefType,
 } from '../../common/data/serialized-type';
 import { OPTION_DEPENDENCIES, serializedDependency } from '../../common/data/serialized-dependency';
 import { Either, left, right } from 'fp-ts/lib/Either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { isReferenceObject, serializeRef } from './reference-object';
+import { isReferenceObject } from './reference-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
 import * as nullable from '../../../../utils/nullable';
@@ -17,7 +18,7 @@ import { isNonNullable, Nullable } from '../../../../utils/nullable';
 import { serializeDictionary } from '../../../../utils/types';
 import { constFalse } from 'fp-ts/lib/function';
 import { concatIfL, includes } from '../../../../utils/array';
-import { fromNullable, sequenceEither } from '../../../../utils/either';
+import { sequenceEither } from '../../../../utils/either';
 import { recursion } from 'io-ts';
 import { getIOName } from '../../common/utils';
 import { fromString } from '../../../../utils/ref';
@@ -56,137 +57,121 @@ export const isNonEmptyArraySchemaObject = (
 ): schemaObject is OpenAPIV3.NonArraySchemaObject =>
 	['null', 'boolean', 'object', 'number', 'string', 'integer'].includes(schemaObject.type);
 
-export const serializeSchemaObject = combineReader(serializeRef, serializeReferenceObject => {
-	const serializeAdditionalProperties = (rootName: string, cwd: string) => (
-		additionalProperties: true | OpenAPIV3.SchemaObject,
-	): Either<Error, SerializedType> =>
-		additionalProperties !== true
-			? pipe(
-					additionalProperties,
-					serializeSchemaObject(rootName, cwd),
-					either.map(serialized =>
-						serializedType(
-							`{[key: string]: ${serialized.type}}`,
-							`record(string, ${serialized.io})`,
-							[
-								...serialized.dependencies,
-								serializedDependency('string', 'io-ts'),
-								serializedDependency('record', 'io-ts'),
-							],
-							serialized.refs,
-						),
-					),
-			  )
-			: right(
+const serializeAdditionalProperties = (rootName: string, cwd: string) => (
+	additionalProperties: true | OpenAPIV3.SchemaObject,
+): Either<Error, SerializedType> =>
+	additionalProperties !== true
+		? pipe(
+				additionalProperties,
+				serializeSchemaObject(rootName, cwd),
+				either.map(serialized =>
 					serializedType(
-						'{[key: string]: unknown}',
-						'unknown',
-						[serializedDependency('unknown', 'io-ts')],
-						[],
+						`{[key: string]: ${serialized.type}}`,
+						`record(string, ${serialized.io})`,
+						[
+							...serialized.dependencies,
+							serializedDependency('string', 'io-ts'),
+							serializedDependency('record', 'io-ts'),
+						],
+						serialized.refs,
 					),
-			  );
+				),
+		  )
+		: right(serializedType('{[key: string]: unknown}', 'unknown', [serializedDependency('unknown', 'io-ts')], []));
 
-	const serializeSchemaObject = (rootName: string, cwd: string) => (
-		schemaObject: OpenAPIV3.SchemaObject,
-	): Either<Error, SerializedType> => {
-		switch (schemaObject.type) {
-			case 'null':
-			case 'boolean':
-			case 'number':
-			case 'string':
-			case 'integer': {
-				return serializeNonArraySchemaObject(schemaObject);
-			}
-			case 'array': {
-				const { items } = schemaObject;
-				if (isReferenceObject(items)) {
-					return pipe(
-						items.$ref,
-						fromString(ref => new Error(`Unable to serialize SchemaObjeft array items ref "${ref}"`)),
-						either.map(serializeReferenceObject(cwd)),
-						either.map(getSerializedArrayType),
-					);
-				} else {
-					return pipe(
-						items,
-						serializeSchemaObject(rootName, cwd),
-						either.map(getSerializedArrayType),
-					);
-				}
-			}
-			case 'object': {
-				const additionalProperties = pipe(
-					schemaObject.additionalProperties,
-					nullable.filter(isAllowedAdditionalProperties),
-					nullable.map(additionalProperties => {
-						if (isReferenceObject(additionalProperties)) {
-							return pipe(
-								additionalProperties.$ref,
-								fromString(
-									ref =>
-										new Error(
-											`Unablew to serialize SchemaObject additionalProperties ref "${ref}"`,
-										),
-								),
-								either.map(serializeReferenceObject(cwd)),
-							);
-						} else {
-							return serializeAdditionalProperties(rootName, cwd)(additionalProperties);
-						}
-					}),
-				);
-				const properties = pipe(
-					schemaObject.properties,
-					nullable.map(properties =>
-						pipe(
-							serializeDictionary(properties, (name, property) => {
-								const isRequired = pipe(
-									schemaObject.required,
-									nullable.map(includes(name)),
-									nullable.getOrElse(constFalse),
-								);
-
-								if (isReferenceObject(property)) {
-									return pipe(
-										property.$ref,
-										fromString(
-											ref =>
-												new Error(
-													`Unable to serialize SchemaObject property "${name}" ref "${ref}"`,
-												),
-										),
-										either.map(serializeReferenceObject(cwd)),
-										either.map(toPropertyType(name, isRequired)),
-									);
-								} else {
-									return pipe(
-										property,
-										serializeSchemaObject(rootName, cwd),
-										either.map(toPropertyType(name, isRequired)),
-									);
-								}
-							}),
-							sequenceEither,
-							either.map(types => {
-								const serialized = foldSerializedTypes(types);
-								return toObjectType(serialized.refs.includes(rootName) ? rootName : undefined)(
-									serialized,
-								);
-							}),
-						),
-					),
-				);
+export const serializeSchemaObject = (rootName: string, cwd: string) => (
+	schemaObject: OpenAPIV3.SchemaObject,
+): Either<Error, SerializedType> => {
+	switch (schemaObject.type) {
+		case 'null':
+		case 'boolean':
+		case 'number':
+		case 'string':
+		case 'integer': {
+			return serializeNonArraySchemaObject(schemaObject);
+		}
+		case 'array': {
+			const { items } = schemaObject;
+			if (isReferenceObject(items)) {
 				return pipe(
-					additionalProperties,
-					nullable.alt(() => properties),
-					nullable.getOrElse(() => right(SERIALIZED_UNKNOWN_TYPE)),
+					items.$ref,
+					fromString(ref => new Error(`Unable to serialize SchemaObjeft array items ref "${ref}"`)),
+					either.map(getSerializedRefType(rootName, cwd)),
+					either.map(getSerializedArrayType),
+				);
+			} else {
+				return pipe(
+					items,
+					serializeSchemaObject(rootName, cwd),
+					either.map(getSerializedArrayType),
 				);
 			}
 		}
-	};
+		case 'object': {
+			const additionalProperties = pipe(
+				schemaObject.additionalProperties,
+				nullable.filter(isAllowedAdditionalProperties),
+				nullable.map(additionalProperties => {
+					if (isReferenceObject(additionalProperties)) {
+						return pipe(
+							additionalProperties.$ref,
+							fromString(
+								ref => new Error(`Unablew to serialize SchemaObject additionalProperties ref "${ref}"`),
+							),
+							either.map(getSerializedRefType(rootName, cwd)),
+						);
+					} else {
+						return serializeAdditionalProperties(rootName, cwd)(additionalProperties);
+					}
+				}),
+			);
+			const properties = pipe(
+				schemaObject.properties,
+				nullable.map(properties =>
+					pipe(
+						serializeDictionary(properties, (name, property) => {
+							const isRequired = pipe(
+								schemaObject.required,
+								nullable.map(includes(name)),
+								nullable.getOrElse(constFalse),
+							);
 
-	return serializeSchemaObject;
-});
+							if (isReferenceObject(property)) {
+								return pipe(
+									property.$ref,
+									fromString(
+										ref =>
+											new Error(
+												`Unable to serialize SchemaObject property "${name}" ref "${ref}"`,
+											),
+									),
+									either.map(getSerializedRefType(rootName, cwd)),
+									either.map(toPropertyType(name, isRequired)),
+								);
+							} else {
+								return pipe(
+									property,
+									serializeSchemaObject(rootName, cwd),
+									either.map(toPropertyType(name, isRequired)),
+								);
+							}
+						}),
+						sequenceEither,
+						either.map(types => {
+							const serialized = foldSerializedTypes(types);
+							return toObjectType(serialized.refs.includes(rootName) ? rootName : undefined)(serialized);
+						}),
+					),
+				),
+			);
+			return pipe(
+				additionalProperties,
+				nullable.alt(() => properties),
+				nullable.getOrElse(() => right(SERIALIZED_UNKNOWN_TYPE)),
+			);
+		}
+	}
+};
 
 const toPropertyType = (name: string, isRequired: boolean) => (serialized: SerializedType): SerializedType =>
 	isRequired

@@ -12,11 +12,7 @@ import { sequenceEither } from '../../../../utils/either';
 
 export const serializeDocument = combineReader(
 	serializePathsObject,
-	serializeComponentsObject,
-	(serializePathsObject, serializeComponentsObject) => (
-		name: string,
-		document: OpenAPIV3.Document,
-	): Either<Error, Directory> => {
+	serializePathsObject => (name: string, document: OpenAPIV3.Document): Either<Error, Directory> => {
 		const paths = serializePathsObject(document.paths);
 		const components = pipe(
 			document.components,
