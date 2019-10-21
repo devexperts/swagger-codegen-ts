@@ -3,21 +3,46 @@ import { directory, Directory, file } from '../../../../fs';
 import { serializePathsObject } from './paths-object';
 import { CLIENT_DIRECTORY, CLIENT_FILENAME } from '../../common/utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Either } from 'fp-ts/lib/Either';
+import { Either, right } from 'fp-ts/lib/Either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { serializeComponentsObject } from './components-object';
 import * as nullable from '../../../../utils/nullable';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { sequenceEither } from '../../../../utils/either';
+import { fromString, Refs } from '../../../../utils/ref';
+import { either } from 'fp-ts';
+import { applyTo } from '../../../../utils/function';
+import { nonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+
+const pathsRef = pipe(
+	fromString('#/paths'),
+	either.map(nonEmptyArray.of),
+);
+const componentsRef = pipe(
+	fromString('#/components'),
+	either.map(nonEmptyArray.of),
+);
 
 export const serializeDocument = combineReader(
 	serializePathsObject,
 	serializePathsObject => (name: string, document: OpenAPIV3.Document): Either<Error, Directory> => {
-		const paths = serializePathsObject(document.paths);
+		const paths = pipe(
+			pathsRef,
+			either.map(serializePathsObject),
+			either.chain(applyTo(document.paths)),
+		);
+
 		const components = pipe(
 			document.components,
-			nullable.map(serializeComponentsObject),
+			nullable.map(components =>
+				pipe(
+					componentsRef,
+					either.map(serializeComponentsObject),
+					either.chain(applyTo(components)),
+				),
+			),
 		);
+
 		const additional = pipe(
 			nullable.compactNullables([components]),
 			sequenceEither,

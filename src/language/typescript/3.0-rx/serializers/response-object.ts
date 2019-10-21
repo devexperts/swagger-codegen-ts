@@ -10,7 +10,6 @@ import { either } from 'fp-ts';
 
 export const serializeResponseObject = (
 	code: string,
-	rootName: string,
 	cwd: string,
 	responseObject: OpenAPIV3.ResponseObject,
 ): Either<Error, SerializedType> =>
@@ -35,6 +34,6 @@ export const serializeResponseObject = (
 							),
 							either.map(getSerializedRefType(cwd)),
 					  )
-					: serializeSchemaObject(rootName, cwd)(schema),
+					: serializeSchemaObject(cwd)(schema),
 		),
 	);

@@ -20,7 +20,7 @@ import { isReferenceObject } from './reference-object';
 import { Either, mapLeft } from 'fp-ts/lib/Either';
 import { fromString } from '../../../../utils/ref';
 
-export const serializeResponsesObject = (rootName: string, cwd: string) => (
+export const serializeResponsesObject = (cwd: string) => (
 	responsesObject: OpenAPIV3.ResponsesObject,
 ): Either<Error, SerializedType> => {
 	const serializedResponses = pipe(
@@ -36,7 +36,7 @@ export const serializeResponsesObject = (rootName: string, cwd: string) => (
 								mapLeft(() => new Error(`Invalid ${r.$ref} for ResponsesObject'c code "${code}"`)),
 								either.map(getSerializedRefType(cwd)),
 						  )
-						: serializeResponseObject(code, rootName, cwd, r),
+						: serializeResponseObject(code, cwd, r),
 				),
 			),
 		),

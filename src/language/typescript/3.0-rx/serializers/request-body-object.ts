@@ -6,9 +6,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { isReferenceObject } from './reference-object';
 import { fromNullable } from '../../../../utils/either';
 import { either } from 'fp-ts';
-import { fromString } from '../../../../utils/ref';
+import { fromString, Refs } from '../../../../utils/ref';
 
-export const serializeRequestBodyObject = (rootName: string, cwd: string) => (
+export const serializeRequestBodyObject = (cwd: string) => (
 	body: OpenAPIV3.RequestBodyObject,
 ): Either<Error, SerializedType> => {
 	return pipe(
@@ -26,7 +26,7 @@ export const serializeRequestBodyObject = (rootName: string, cwd: string) => (
 						),
 						either.map(getSerializedRefType(cwd)),
 				  )
-				: serializeSchemaObject(rootName, cwd)(schema),
+				: serializeSchemaObject(cwd)(schema),
 		),
 	);
 };

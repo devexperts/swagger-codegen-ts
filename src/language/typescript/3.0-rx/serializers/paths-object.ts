@@ -13,6 +13,7 @@ import { Either, map } from 'fp-ts/lib/Either';
 import { sequenceEither } from '../../../../utils/either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { either } from 'fp-ts';
+import { Ref, Refs } from '../../../../utils/ref';
 
 const groupPathsByTag = (pathsObject: OpenAPIV3.PathsObject): Dictionary<OpenAPIV3.PathsObject> => {
 	const keys = Object.keys(pathsObject);
@@ -67,7 +68,7 @@ const serializeGrouppedPaths = combineReader(
 
 export const serializePathsObject = combineReader(
 	serializeGrouppedPaths,
-	serializeGrouppedPaths => (pathsObject: OpenAPIV3.PathsObject): Either<Error, Directory> =>
+	serializeGrouppedPaths => (refs: Refs) => (pathsObject: OpenAPIV3.PathsObject): Either<Error, Directory> =>
 		pipe(
 			groupPathsByTag(pathsObject),
 			collect((name, groupped) => serializeGrouppedPaths(name, groupped, './controllers')),

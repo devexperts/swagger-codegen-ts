@@ -17,7 +17,7 @@ import { isNonNullable, Nullable } from '../../../../utils/nullable';
 import { serializeDictionary } from '../../../../utils/types';
 import { constFalse } from 'fp-ts/lib/function';
 import { concatIfL, includes } from '../../../../utils/array';
-import { fromNullable, sequenceEither } from '../../../../utils/either';
+import { sequenceEither } from '../../../../utils/either';
 import { recursion } from 'io-ts';
 import { getIOName } from '../../common/utils';
 import { fromString } from '../../../../utils/ref';
@@ -56,13 +56,13 @@ export const isNonEmptyArraySchemaObject = (
 ): schemaObject is OpenAPIV3.NonArraySchemaObject =>
 	['null', 'boolean', 'object', 'number', 'string', 'integer'].includes(schemaObject.type);
 
-const serializeAdditionalProperties = (rootName: string, cwd: string) => (
+const serializeAdditionalProperties = (cwd: string) => (
 	additionalProperties: true | OpenAPIV3.SchemaObject,
 ): Either<Error, SerializedType> =>
 	additionalProperties !== true
 		? pipe(
 				additionalProperties,
-				serializeSchemaObject(rootName, cwd),
+				serializeSchemaObject(cwd),
 				either.map(serialized =>
 					serializedType(
 						`{[key: string]: ${serialized.type}}`,
@@ -78,7 +78,7 @@ const serializeAdditionalProperties = (rootName: string, cwd: string) => (
 		  )
 		: right(serializedType('{[key: string]: unknown}', 'unknown', [serializedDependency('unknown', 'io-ts')], []));
 
-export const serializeSchemaObject = (rootName: string, cwd: string) => (
+export const serializeSchemaObject = (cwd: string) => (
 	schemaObject: OpenAPIV3.SchemaObject,
 ): Either<Error, SerializedType> => {
 	switch (schemaObject.type) {
@@ -102,7 +102,7 @@ export const serializeSchemaObject = (rootName: string, cwd: string) => (
 			} else {
 				return pipe(
 					items,
-					serializeSchemaObject(rootName, cwd),
+					serializeSchemaObject(cwd),
 					either.map(getSerializedArrayType),
 				);
 			}
@@ -127,7 +127,7 @@ export const serializeSchemaObject = (rootName: string, cwd: string) => (
 							either.map(getSerializedRefType(cwd)),
 						);
 					} else {
-						return serializeAdditionalProperties(rootName, cwd)(additionalProperties);
+						return serializeAdditionalProperties(cwd)(additionalProperties);
 					}
 				}),
 			);
@@ -160,7 +160,7 @@ export const serializeSchemaObject = (rootName: string, cwd: string) => (
 							} else {
 								return pipe(
 									property,
-									serializeSchemaObject(rootName, cwd),
+									serializeSchemaObject(cwd),
 									either.map(toPropertyType(name, isRequired)),
 								);
 							}
@@ -168,9 +168,7 @@ export const serializeSchemaObject = (rootName: string, cwd: string) => (
 						sequenceEither,
 						either.map(types => {
 							const serialized = foldSerializedTypes(types);
-							return toObjectType(
-								serialized.refs.some(ref => ref.name === rootName) ? rootName : undefined,
-							)(serialized);
+							return toObjectType(undefined)(serialized);
 						}),
 					),
 				),

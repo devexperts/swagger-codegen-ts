@@ -1,7 +1,9 @@
 import * as path from 'path';
 import { isNonEmpty } from 'fp-ts/lib/Array';
-import { last } from 'fp-ts/lib/NonEmptyArray';
+import { cons, head, last, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { Either, left, right } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { either } from 'fp-ts';
 
 export interface Ref {
 	readonly $ref: string;
@@ -76,3 +78,11 @@ export const buildRelativePath = (cwd: string, ref: Ref): string => {
 	const joined = path.join(toRoot, ref.target, ref.path);
 	return joined.startsWith('..') ? joined : `./${joined}`;
 };
+
+export const addPathParts = (...parts: NonEmptyArray<string>) => (refs: Refs): Either<Error, Refs> =>
+	pipe(
+		fromString(`${head(refs).$ref}/${parts.join('/')}`),
+		either.map(ref => cons(ref, refs)),
+	);
+
+export interface Refs extends NonEmptyArray<Ref> {}

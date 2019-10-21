@@ -79,10 +79,6 @@ export const getSerializedRefType = (cwd: string) => (parsedRef: Ref): Serialize
 	const p = buildRelativePath(cwd, parsedRef);
 	const type = getTypeName(parsedRef.name);
 	const io = getIOName(parsedRef.name);
-	return serializedType(
-		type,
-		io,
-		[serializedDependency(type, p), serializedDependency(io, p)],
-		[{ ...parsedRef, name: type }],
-	);
+	const ref = parsedRef.name === type ? parsedRef : { ...parsedRef, name: type };
+	return serializedType(type, io, [serializedDependency(type, p), serializedDependency(io, p)], [ref]);
 };

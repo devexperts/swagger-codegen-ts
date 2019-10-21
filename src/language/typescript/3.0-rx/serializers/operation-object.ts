@@ -166,7 +166,7 @@ const getParameters = combineReader(
 			} else {
 				const serialized = pipe(
 					operation.requestBody,
-					serializeRequestBodyObject(rootName, cwd),
+					serializeRequestBodyObject(cwd),
 					either.map(fromSerializedType(operation.requestBody.required || false)),
 					either.map(toBodyParameter),
 				);
@@ -206,7 +206,7 @@ export const serializeOperationObject = combineReader(
 		const serializedResponses = pipe(
 			operation.responses,
 			either.fromNullable(new Error('Operation should contain responses field')),
-			either.chain(serializeResponsesObject(rootName, cwd)),
+			either.chain(serializeResponsesObject(cwd)),
 		);
 
 		return combineEither(parameters, serializedResponses, (parameters, serializedResponses) => {
