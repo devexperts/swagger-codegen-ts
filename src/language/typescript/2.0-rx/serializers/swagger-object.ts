@@ -1,5 +1,5 @@
-import { Serializer } from '../../../../utils';
-import { directory, Directory, file } from '../../../../fs';
+import { Serializer } from '../../../../utils/utils';
+import { directory, Directory, file } from '../../../../utils/fs';
 import { array } from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map } from 'fp-ts/lib/Option';

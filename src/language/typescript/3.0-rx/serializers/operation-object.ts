@@ -27,7 +27,8 @@ import { concatIf, concatIfL } from '../../../../utils/array';
 import { unless, when } from '../../../../utils/string';
 import { serializeRequestBodyObject } from './request-body-object';
 import { fromArray } from '../../../../utils/non-empty-array';
-import { fromString } from '../../../../utils/ref';
+import { fromString, getRelativePath, Ref } from '../../../../utils/ref';
+import { clientRef } from '../utils';
 
 const getOperationName = (operation: OpenAPIV3.OperationObject, method: HTTPMethod): string =>
 	pipe(
@@ -44,9 +45,7 @@ interface Parameters {
 
 const getParameters = combineReader(
 	resolveReferenceObject,
-	resolveReferenceObject => (rootName: string, cwd: string) => (
-		operation: OpenAPIV3.OperationObject,
-	): Either<Error, Parameters> => {
+	resolveReferenceObject => (from: Ref) => (operation: OpenAPIV3.OperationObject): Either<Error, Parameters> => {
 		const pathParameters: OpenAPIV3.ParameterObject[] = [];
 		const serializedPathParameters: SerializedPathParameter[] = [];
 		const serializedQueryParameters: SerializedParameter[] = [];
@@ -64,7 +63,7 @@ const getParameters = combineReader(
 				}
 				const serializedReference = pipe(
 					reference.right,
-					getSerializedRefType(cwd),
+					getSerializedRefType(from),
 				);
 
 				switch (resolved.in) {
@@ -105,7 +104,7 @@ const getParameters = combineReader(
 			} else {
 				switch (parameter.in) {
 					case 'query': {
-						const serialized = serializeQueryParameterObject(rootName, cwd)(parameter);
+						const serialized = serializeQueryParameterObject(from)(parameter);
 						if (isLeft(serialized)) {
 							return serialized;
 						}
@@ -117,7 +116,7 @@ const getParameters = combineReader(
 					case 'formData':
 						break;
 					case 'path': {
-						const serialized = serializePathParameterObject(rootName, cwd)(parameter);
+						const serialized = serializePathParameterObject(from)(parameter);
 						if (isLeft(serialized)) {
 							return serialized;
 						}
@@ -152,7 +151,7 @@ const getParameters = combineReader(
 				}
 				const serializedReference = pipe(
 					reference.right,
-					getSerializedRefType(cwd),
+					getSerializedRefType(from),
 				);
 				if (!isNonNullable(serializedReference)) {
 					return left(new Error(`Unable to serialize RequestBodyObject ref ${operation.requestBody.$ref}`));
@@ -166,7 +165,7 @@ const getParameters = combineReader(
 			} else {
 				const serialized = pipe(
 					operation.requestBody,
-					serializeRequestBodyObject(cwd),
+					serializeRequestBodyObject(from),
 					either.map(fromSerializedType(operation.requestBody.required || false)),
 					either.map(toBodyParameter),
 				);
@@ -192,10 +191,10 @@ const getParameters = combineReader(
 
 export const serializeOperationObject = combineReader(
 	getParameters,
-	getParameters => (pattern: string, method: HTTPMethod, rootName: string, cwd: string) => (
+	getParameters => (pattern: string, method: HTTPMethod, from: Ref) => (
 		operation: OpenAPIV3.OperationObject,
 	): Either<Error, SerializedType> => {
-		const parameters = getParameters(rootName, cwd)(operation);
+		const parameters = getParameters(from)(operation);
 		const operationName = getOperationName(operation, method);
 
 		const deprecated = pipe(
@@ -206,44 +205,48 @@ export const serializeOperationObject = combineReader(
 		const serializedResponses = pipe(
 			operation.responses,
 			either.fromNullable(new Error('Operation should contain responses field')),
-			either.chain(serializeResponsesObject(cwd)),
+			either.chain(serializeResponsesObject(from)),
 		);
 
-		return combineEither(parameters, serializedResponses, (parameters, serializedResponses) => {
-			const {
-				serializedPathParameters,
-				pathParameters,
-				serializedQueryParameters,
-				serializedBodyParameter,
-			} = parameters;
-			const serializedUrl = getURL(pattern, serializedPathParameters);
+		return combineEither(
+			parameters,
+			serializedResponses,
+			clientRef,
+			(parameters, serializedResponses, clientRef) => {
+				const {
+					serializedPathParameters,
+					pathParameters,
+					serializedQueryParameters,
+					serializedBodyParameter,
+				} = parameters;
+				const serializedUrl = getURL(pattern, serializedPathParameters);
 
-			const serializedParameters = intercalateSerializedParameters(
-				serializedParameter(',', ';', false, [], []),
-				nullable.compactNullables([serializedQueryParameters, serializedBodyParameter]),
-			);
-			const hasQueryParameters = isNonNullable(serializedQueryParameters);
-			const hasBodyParameter = isNonNullable(serializedBodyParameter);
-			const hasParameters = hasQueryParameters || hasBodyParameter;
+				const serializedParameters = intercalateSerializedParameters(
+					serializedParameter(',', ';', false, [], []),
+					nullable.compactNullables([serializedQueryParameters, serializedBodyParameter]),
+				);
+				const hasQueryParameters = isNonNullable(serializedQueryParameters);
+				const hasBodyParameter = isNonNullable(serializedBodyParameter);
+				const hasParameters = hasQueryParameters || hasBodyParameter;
 
-			const argsName = pipe(
-				pathParameters,
-				array.map(p => p.name),
-				names => concatIf(hasParameters, names, ['parameters']),
-			).join(',');
+				const argsName = pipe(
+					pathParameters,
+					array.map(p => p.name),
+					names => concatIf(hasParameters, names, ['parameters']),
+				).join(',');
 
-			const argsType = pipe(
-				serializedPathParameters,
-				array.map(p => p.type),
-				types => concatIf(hasParameters, types, [`parameters: { ${serializedParameters.type} }`]),
-			).join(',');
+				const argsType = pipe(
+					serializedPathParameters,
+					array.map(p => p.type),
+					types => concatIf(hasParameters, types, [`parameters: { ${serializedParameters.type} }`]),
+				).join(',');
 
-			const type = `
+				const type = `
 				${getJSDoc(nullable.compactNullables([deprecated, operation.summary]))}
 				readonly ${operationName}: (${argsType}) => LiveData<Error, ${serializedResponses.type}>;
 			`;
 
-			const io = `
+				const io = `
 				${operationName}: (${argsName}) => {
 					${when(hasParameters, `const encoded = partial({ ${serializedParameters.io} }).encode(parameters);`)}
 
@@ -272,39 +275,40 @@ export const serializeOperationObject = combineReader(
 				},
 			`;
 
-			const dependencies = concatIfL(
-				hasParameters,
-				[
-					serializedDependency('map', 'rxjs/operators'),
-					serializedDependency('fromEither', '@devexperts/remote-data-ts'),
-					serializedDependency('chain', '@devexperts/remote-data-ts'),
-					serializedDependency('ResponseValidationError', getRelativeClientPath(cwd)),
-					serializedDependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
-					serializedDependency('pipe', 'fp-ts/lib/pipeable'),
-					serializedDependency('mapLeft', 'fp-ts/lib/Either'),
+				const dependencies = concatIfL(
+					hasParameters,
+					[
+						serializedDependency('map', 'rxjs/operators'),
+						serializedDependency('fromEither', '@devexperts/remote-data-ts'),
+						serializedDependency('chain', '@devexperts/remote-data-ts'),
+						serializedDependency('ResponseValidationError', getRelativePath(from, clientRef)),
+						serializedDependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
+						serializedDependency('pipe', 'fp-ts/lib/pipeable'),
+						serializedDependency('mapLeft', 'fp-ts/lib/Either'),
+						...pipe(
+							serializedPathParameters,
+							array.map(p => p.dependencies),
+							array.flatten,
+						),
+						...serializedResponses.dependencies,
+						...serializedParameters.dependencies,
+					],
+					() => [serializedDependency('partial', 'io-ts')],
+				);
+
+				const refs = [
 					...pipe(
 						serializedPathParameters,
-						array.map(p => p.dependencies),
+						array.map(p => p.refs),
 						array.flatten,
 					),
-					...serializedResponses.dependencies,
-					...serializedParameters.dependencies,
-				],
-				() => [serializedDependency('partial', 'io-ts')],
-			);
+					...serializedResponses.refs,
+					...serializedParameters.refs,
+				];
 
-			const refs = [
-				...pipe(
-					serializedPathParameters,
-					array.map(p => p.refs),
-					array.flatten,
-				),
-				...serializedResponses.refs,
-				...serializedParameters.refs,
-			];
-
-			return serializedType(type, io, dependencies, refs);
-		});
+				return serializedType(type, io, dependencies, refs);
+			},
+		);
 	},
 );
 

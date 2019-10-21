@@ -1,5 +1,5 @@
 import { OpenAPIV3 } from 'openapi-types';
-import { directory, Directory, file, File } from '../../../../fs';
+import { directory, Directory, file, File } from '../../../../utils/fs';
 import { collect } from 'fp-ts/lib/Record';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializePathItemObject, serializePathItemObjectTags } from './path-item-object';
@@ -7,13 +7,15 @@ import { Dictionary, serializeDictionary } from '../../../../utils/types';
 import * as nullable from '../../../../utils/nullable';
 import { foldSerializedTypes } from '../../common/data/serialized-type';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
-import { getRelativeClientPath } from '../../common/utils';
 import { decapitalize, camelize } from '@devexperts/utils/dist/string';
-import { Either, map } from 'fp-ts/lib/Either';
+import { Either } from 'fp-ts/lib/Either';
 import { sequenceEither } from '../../../../utils/either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { either } from 'fp-ts';
-import { Ref, Refs } from '../../../../utils/ref';
+import { addPathParts, getRelativePath, Ref } from '../../../../utils/ref';
+import { clientRef } from '../utils';
+import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
+import { applyTo } from '../../../../utils/function';
 
 const groupPathsByTag = (pathsObject: OpenAPIV3.PathsObject): Dictionary<OpenAPIV3.PathsObject> => {
 	const keys = Object.keys(pathsObject);
@@ -35,44 +37,50 @@ const groupPathsByTag = (pathsObject: OpenAPIV3.PathsObject): Dictionary<OpenAPI
 
 const serializeGrouppedPaths = combineReader(
 	serializePathItemObject,
-	serializePathItemObject => (name: string, groupped: OpenAPIV3.PathsObject, cwd: string): Either<Error, File> => {
-		const groupName = `${name}Controller`;
-		return pipe(
-			serializeDictionary(groupped, (pattern, item) => serializePathItemObject(pattern, item, groupName, cwd)),
+	serializePathItemObject => (from: Ref) => (groupped: OpenAPIV3.PathsObject): Either<Error, File> => {
+		const serialized = pipe(
+			serializeDictionary(groupped, (pattern, item) => serializePathItemObject(pattern, item, from)),
 			sequenceEither,
 			either.map(foldSerializedTypes),
-			either.map(serialized => {
-				const dependencies = serializeDependencies([
-					...serialized.dependencies,
-					serializedDependency('Reader', 'fp-ts/lib/Reader'),
-					serializedDependency('APIClient', getRelativeClientPath(cwd)),
-				]);
-				return file(
-					`${groupName}.ts`,
-					`
+		);
+		return combineEither(serialized, clientRef, (serialized, clientRef) => {
+			const dependencies = serializeDependencies([
+				...serialized.dependencies,
+				serializedDependency('Reader', 'fp-ts/lib/Reader'),
+				serializedDependency('APIClient', getRelativePath(from, clientRef)),
+			]);
+			return file(
+				`${from.name}.ts`,
+				`
 						${dependencies}
 						
-						export interface ${groupName} {
+						export interface ${from.name} {
 							${serialized.type}
 						}
 						
-						export const ${decapitalize(groupName)}: Reader<{ apiClient: APIClient }, ${groupName}> = e => ({
+						export const ${decapitalize(from.name)}: Reader<{ apiClient: APIClient }, ${from.name}> = e => ({
 							${serialized.io}
 						})
 					`,
-				);
-			}),
-		);
+			);
+		});
 	},
 );
 
 export const serializePathsObject = combineReader(
 	serializeGrouppedPaths,
-	serializeGrouppedPaths => (refs: Refs) => (pathsObject: OpenAPIV3.PathsObject): Either<Error, Directory> =>
+	serializeGrouppedPaths => (from: Ref) => (pathsObject: OpenAPIV3.PathsObject): Either<Error, Directory> =>
 		pipe(
 			groupPathsByTag(pathsObject),
-			collect((name, groupped) => serializeGrouppedPaths(name, groupped, './controllers')),
+			collect((name, groupped) =>
+				pipe(
+					from,
+					addPathParts(`${name}Controller`),
+					either.map(serializeGrouppedPaths),
+					either.chain(applyTo(groupped)),
+				),
+			),
 			sequenceEither,
-			map(children => directory('paths', children)),
+			either.map(children => directory('paths', children)),
 		),
 );

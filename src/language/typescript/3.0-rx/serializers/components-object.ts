@@ -1,6 +1,6 @@
 import { OpenAPIV3 } from 'openapi-types';
 import { Either, left } from 'fp-ts/lib/Either';
-import { directory, Directory, File, file } from '../../../../fs';
+import { directory, Directory, File, file } from '../../../../utils/fs';
 import { serializeSchemaObject } from './schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as nullable from '../../../../utils/nullable';
@@ -12,15 +12,13 @@ import { serializeDependencies } from '../../common/data/serialized-dependency';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { getIOName, getTypeName } from '../../common/utils';
 import { compactNullables } from '../../../../utils/nullable';
-import { addPathParts, Refs } from '../../../../utils/ref';
+import { addPathParts, Ref, Refs } from '../../../../utils/ref';
 import { applyTo } from '../../../../utils/function';
-import { head } from 'fp-ts/lib/NonEmptyArray';
 
-const serializeSchema = (refs: Refs) => (schema: OpenAPIV3.SchemaObject, cwd: string): Either<Error, File> => {
-	const name = head(refs).name;
+const serializeSchema = (from: Ref) => (schema: OpenAPIV3.SchemaObject): Either<Error, File> => {
 	const serialized = pipe(
 		schema,
-		serializeSchemaObject(cwd),
+		serializeSchemaObject(from),
 	);
 	const dependencies = pipe(
 		serialized,
@@ -28,18 +26,18 @@ const serializeSchema = (refs: Refs) => (schema: OpenAPIV3.SchemaObject, cwd: st
 	);
 	return combineEither(serialized, dependencies, (serialized, dependencies) =>
 		file(
-			`${name}.ts`,
+			`${from.name}.ts`,
 			`
 			${dependencies}
 			
-			export type ${getTypeName(name)} = ${serialized.type};
-			export const ${getIOName(name)} = ${serialized.io};
+			export type ${getTypeName(from.name)} = ${serialized.type};
+			export const ${getIOName(from.name)} = ${serialized.io};
 		`,
 		),
 	);
 };
 
-export const serializeComponentsObject = (refs: Refs) => (
+export const serializeComponentsObject = (from: Ref) => (
 	componentsObject: OpenAPIV3.ComponentsObject,
 ): Either<Error, Directory> => {
 	const schemas = pipe(
@@ -53,10 +51,10 @@ export const serializeComponentsObject = (refs: Refs) => (
 						);
 					} else {
 						return pipe(
-							refs,
+							from,
 							addPathParts('schemas', name),
 							either.map(serializeSchema),
-							either.chain(applyTo(schema, `./components/schemas`)),
+							either.chain(applyTo(schema)),
 						);
 					}
 				}),

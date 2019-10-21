@@ -4,7 +4,7 @@ import {
 	getOperationParametersInBody,
 	getOperationParametersInPath,
 	getOperationParametersInQuery,
-} from '../../../../utils';
+} from '../../../../utils/utils';
 import { serializePathParameter, serializePathParameterDescription } from './path-parameter-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exists, getOrElse, map, none, Option, some } from 'fp-ts/lib/Option';

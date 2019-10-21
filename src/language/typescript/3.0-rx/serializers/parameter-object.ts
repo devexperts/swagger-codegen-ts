@@ -19,11 +19,10 @@ import {
 } from '../../common/data/serialized-type';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { unless } from '../../../../utils/string';
-import { fromString } from '../../../../utils/ref';
+import { fromString, Ref } from '../../../../utils/ref';
 
 const serializeParameterReference = (
-	rootName: string,
-	cwd: string,
+	from: Ref,
 	parameter: OpenAPIV3.ParameterObject,
 	reference: OpenAPIV3.ReferenceObject,
 ): Either<Error, SerializedParameter> =>
@@ -31,14 +30,14 @@ const serializeParameterReference = (
 		reference.$ref,
 		fromString,
 		mapLeft(() => new Error(`Invalid $ref "${reference.$ref}" ${forParameter(parameter)}`)),
-		either.map(getSerializedRefType(cwd)),
+		either.map(getSerializedRefType(from)),
 		either.map(fromSerializedType(parameter.required || false)),
 	);
 
 const forParameter = (parameter: OpenAPIV3.ParameterObject): string =>
 	`for parameter "${parameter.name}" in "${parameter.in}"`;
 
-const serializePathOrQueryParameterObject = (rootName: string, cwd: string) => (
+const serializePathOrQueryParameterObject = (from: Ref) => (
 	parameter: OpenAPIV3.ParameterObject,
 ): Either<Error, SerializedParameter> => {
 	const { schema, required = false } = parameter;
@@ -49,7 +48,7 @@ const serializePathOrQueryParameterObject = (rootName: string, cwd: string) => (
 	const toSerializedParameter = fromSerializedType(required);
 
 	if (isReferenceObject(schema)) {
-		return serializeParameterReference(rootName, cwd, parameter, schema);
+		return serializeParameterReference(from, parameter, schema);
 	} else {
 		switch (schema.type) {
 			case 'null':
@@ -68,7 +67,7 @@ const serializePathOrQueryParameterObject = (rootName: string, cwd: string) => (
 			}
 			case 'array': {
 				if (isReferenceObject(schema.items)) {
-					return serializeParameterReference(rootName, cwd, parameter, schema.items);
+					return serializeParameterReference(from, parameter, schema.items);
 				} else {
 					return pipe(
 						schema.items,
@@ -92,12 +91,12 @@ const validateNonEmptyArraySchemaObjects = (parameter: OpenAPIV3.ParameterObject
 		? left(new Error(`Array items should be NonEmptyArraySchemaObjects ${forParameter(parameter)}`))
 		: right(schema);
 
-export const serializePathParameterObject = (rootName: string, cwd: string) => (
+export const serializePathParameterObject = (from: Ref) => (
 	parameter: OpenAPIV3.ParameterObject,
 ): Either<Error, SerializedPathParameter> =>
 	pipe(
 		parameter,
-		serializePathOrQueryParameterObject(rootName, cwd),
+		serializePathOrQueryParameterObject(from),
 		map(serialized =>
 			serializedPathParameter(
 				parameter.name,
@@ -110,12 +109,12 @@ export const serializePathParameterObject = (rootName: string, cwd: string) => (
 		),
 	);
 
-export const serializeQueryParameterObject = (rootName: string, cwd: string) => (
+export const serializeQueryParameterObject = (from: Ref) => (
 	parameter: OpenAPIV3.ParameterObject,
 ): Either<Error, SerializedParameter> =>
 	pipe(
 		parameter,
-		serializePathOrQueryParameterObject(rootName, cwd),
+		serializePathOrQueryParameterObject(from),
 		either.map(serializedParameterType => {
 			const r = getSerializedPropertyType(
 				parameter.name,

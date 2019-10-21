@@ -9,7 +9,7 @@ import { fold, getStructMonoid, Monoid, monoidString } from 'fp-ts/lib/Monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
 import { array, getMonoid, uniq } from 'fp-ts/lib/Array';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
-import { buildRelativePath, Ref } from '../../../../utils/ref';
+import { buildRelativePath, getRelativePath, Ref } from '../../../../utils/ref';
 import { getIOName, getTypeName } from '../utils';
 
 export interface SerializedType {
@@ -75,10 +75,10 @@ export const getSerializedArrayType = (serialized: SerializedType): SerializedTy
 		[...serialized.dependencies, serializedDependency('array', 'io-ts')],
 		serialized.refs,
 	);
-export const getSerializedRefType = (cwd: string) => (parsedRef: Ref): SerializedType => {
-	const p = buildRelativePath(cwd, parsedRef);
-	const type = getTypeName(parsedRef.name);
-	const io = getIOName(parsedRef.name);
-	const ref = parsedRef.name === type ? parsedRef : { ...parsedRef, name: type };
+export const getSerializedRefType = (from: Ref) => (to: Ref): SerializedType => {
+	const p = getRelativePath(from, to);
+	const type = getTypeName(to.name);
+	const io = getIOName(to.name);
+	const ref = to.name === type ? to : { ...to, name: type };
 	return serializedType(type, io, [serializedDependency(type, p), serializedDependency(io, p)], [ref]);
 };

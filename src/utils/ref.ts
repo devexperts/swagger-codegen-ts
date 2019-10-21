@@ -1,9 +1,9 @@
 import * as path from 'path';
 import { isNonEmpty } from 'fp-ts/lib/Array';
-import { cons, head, last, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import { last, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { Either, left, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { either } from 'fp-ts';
+import { either, nonEmptyArray } from 'fp-ts';
 
 export interface Ref {
 	readonly $ref: string;
@@ -79,10 +79,23 @@ export const buildRelativePath = (cwd: string, ref: Ref): string => {
 	return joined.startsWith('..') ? joined : `./${joined}`;
 };
 
-export const addPathParts = (...parts: NonEmptyArray<string>) => (refs: Refs): Either<Error, Refs> =>
+export interface Refs extends NonEmptyArray<Ref> {}
+
+export const fromStrings = (...paths: NonEmptyArray<string>): Either<Error, Refs> =>
 	pipe(
-		fromString(`${head(refs).$ref}/${parts.join('/')}`),
-		either.map(ref => cons(ref, refs)),
+		paths,
+		nonEmptyArray.map(fromString),
+		nonEmptyArray.nonEmptyArray.sequence(either.either),
 	);
 
-export interface Refs extends NonEmptyArray<Ref> {}
+export const addPathParts = (...parts: NonEmptyArray<string>) => (ref: Ref): Either<Error, Ref> =>
+	fromString(`${ref.$ref}/${parts.join('/')}`);
+
+export const getRelativePath = (from: Ref, to: Ref): string => {
+	const toSelf = path.relative(path.dirname(from.path), '/');
+	const toRoot = to.target === '' ? toSelf : path.join('..', toSelf);
+	const joined = path.join(toRoot, to.target, to.path);
+	return joined.startsWith('..') ? joined : `./${joined}`;
+};
+
+export const getFullPath = (ref: Ref): string => path.join(ref.target, ref.path);

@@ -2,6 +2,10 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { fromCompare, Ord } from 'fp-ts/lib/Ord';
 import { sort } from 'fp-ts/lib/Array';
+import { getFullPath, Ref } from './ref';
+import { split } from './string';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { head, last, reverse, tail } from 'fp-ts/lib/NonEmptyArray';
 
 export interface File {
 	readonly type: 'FILE';
@@ -112,4 +116,17 @@ export const show = (fs: FSEntity, indent = ''): string => {
 			return `${indent}${fs.name}/\n${children}`;
 		}
 	}
+};
+
+export const fromRef = (ref: Ref, extname: string, content: string): FSEntity => {
+	const parts = pipe(
+		ref,
+		getFullPath,
+		split('/'),
+		reverse,
+	);
+	return tail(parts).reduce(
+		(acc: FSEntity, part: string): FSEntity => directory(part, [acc]),
+		file(`${head(parts)}${extname}`, content),
+	);
 };

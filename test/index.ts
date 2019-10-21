@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { generate } from '../src';
-import { fromJSON, fromYaml } from '../src/fileReader';
+import { fromJSON, fromYaml } from '../src/utils/fileReader';
 import { resolve } from 'path';
 import { serialize } from '../src/language/typescript/2.0-rx';
 

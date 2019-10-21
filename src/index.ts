@@ -1,11 +1,11 @@
 import * as prettier from 'prettier';
-import { map, read, FSEntity, write } from './fs';
-import { Serializer } from './utils';
+import { map, read, FSEntity, write } from './utils/fs';
+import { Serializer } from './utils/utils';
 import * as fs from 'fs-extra';
 import { fromNullable, getOrElse, Option, map as mapOption } from 'fp-ts/lib/Option';
 import * as path from 'path';
 import { head, last } from 'fp-ts/lib/Array';
-import { FileReader } from './fileReader';
+import { FileReader } from './utils/fileReader';
 import { isLeft, Right } from 'fp-ts/lib/Either';
 import * as del from 'del';
 import { pipe } from 'fp-ts/lib/pipeable';

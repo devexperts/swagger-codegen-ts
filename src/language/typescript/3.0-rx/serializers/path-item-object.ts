@@ -10,42 +10,42 @@ import { sequenceEither } from '../../../../utils/either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { either } from 'fp-ts';
 import { compactNullables, Nullable } from '../../../../utils/nullable';
+import { Ref } from '../../../../utils/ref';
 
 export const serializePathItemObject = combineReader(
 	serializeOperationObject,
 	serializeOperationObject => (
 		pattern: string,
 		item: OpenAPIV3.PathItemObject,
-		rootName: string,
-		cwd: string,
+		from: Ref,
 	): Either<Error, SerializedType> => {
 		const get = pipe(
 			item.get,
-			nullable.map(serializeOperationObject(pattern, 'GET', rootName, cwd)),
+			nullable.map(serializeOperationObject(pattern, 'GET', from)),
 		);
 		const post = pipe(
 			item.post,
-			nullable.map(serializeOperationObject(pattern, 'POST', rootName, cwd)),
+			nullable.map(serializeOperationObject(pattern, 'POST', from)),
 		);
 		const put = pipe(
 			item.put,
-			nullable.map(serializeOperationObject(pattern, 'PUT', rootName, cwd)),
+			nullable.map(serializeOperationObject(pattern, 'PUT', from)),
 		);
 		const remove = pipe(
 			item.delete,
-			nullable.map(serializeOperationObject(pattern, 'DELETE', rootName, cwd)),
+			nullable.map(serializeOperationObject(pattern, 'DELETE', from)),
 		);
 		const patch = pipe(
 			item.patch,
-			nullable.map(serializeOperationObject(pattern, 'PATCH', rootName, cwd)),
+			nullable.map(serializeOperationObject(pattern, 'PATCH', from)),
 		);
 		const head = pipe(
 			item.head,
-			nullable.map(serializeOperationObject(pattern, 'HEAD', rootName, cwd)),
+			nullable.map(serializeOperationObject(pattern, 'HEAD', from)),
 		);
 		const options = pipe(
 			item.options,
-			nullable.map(serializeOperationObject(pattern, 'OPTIONS', rootName, cwd)),
+			nullable.map(serializeOperationObject(pattern, 'OPTIONS', from)),
 		);
 		return pipe(
 			compactNullables([get, post, put, remove, patch, head, options]),

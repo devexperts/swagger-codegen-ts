@@ -8,7 +8,7 @@ import {
 import { serializedDependencyArbitrary } from './serialized-dependency.spec';
 import { serializedDependency } from '../serialized-dependency';
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
-import { buildRelativePath } from '../../../../../utils/ref';
+import { buildRelativePath, getRelativePath } from '../../../../../utils/ref';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { arbitrary } from '../../../../../utils/fast-check';
 import { none, some } from 'fp-ts/lib/Option';
@@ -64,11 +64,11 @@ describe('SerializedType', () => {
 				arbitrary.filterMap(([rootName, ref]) => (ref.name.trim() !== rootName.trim() ? some(ref) : none)),
 			);
 			assert(
-				property(rootName, cwd, ref, (rootName, cwd, ref) => {
-					const serialized = getSerializedRefType(cwd)(ref);
+				property(rootName, $refArbitrary, ref, (rootName, from, ref) => {
+					const serialized = getSerializedRefType(from)(ref);
 					const type = getTypeName(ref.name);
 					const io = getIOName(ref.name);
-					const p = buildRelativePath(cwd, ref);
+					const p = getRelativePath(from, ref);
 
 					const expected = serializedType(
 						type,
@@ -87,9 +87,9 @@ describe('SerializedType', () => {
 				arbitrary.filterMap(([rootName, ref]) => (ref.name === rootName ? some({ ref, rootName }) : none)),
 			);
 			assert(
-				property(cwd, data, (cwd, data) => {
+				property($refArbitrary, data, (from, data) => {
 					const { ref } = data;
-					const serialized = getSerializedRefType(cwd)(ref);
+					const serialized = getSerializedRefType(from)(ref);
 					const type = getTypeName(ref.name);
 					const io = getIOName(ref.name);
 

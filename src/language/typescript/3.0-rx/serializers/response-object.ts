@@ -5,12 +5,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { serializeSchemaObject } from './schema-object';
 import { Either, mapLeft, right } from 'fp-ts/lib/Either';
 import { isReferenceObject } from './reference-object';
-import { fromString } from '../../../../utils/ref';
+import { fromString, Ref } from '../../../../utils/ref';
 import { either } from 'fp-ts';
 
-export const serializeResponseObject = (
+export const serializeResponseObject = (from: Ref) => (
 	code: string,
-	cwd: string,
 	responseObject: OpenAPIV3.ResponseObject,
 ): Either<Error, SerializedType> =>
 	pipe(
@@ -32,8 +31,8 @@ export const serializeResponseObject = (
 										}" for ResponseObject with code ${code}`,
 									),
 							),
-							either.map(getSerializedRefType(cwd)),
+							either.map(getSerializedRefType(from)),
 					  )
-					: serializeSchemaObject(cwd)(schema),
+					: serializeSchemaObject(from)(schema),
 		),
 	);

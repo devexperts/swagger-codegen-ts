@@ -63,8 +63,8 @@ describe('SchemaObject', () => {
 		it('should use serializeNonArraySchemaObject for primitives', () => {
 			const schema = constantFrom(...primitiveTypes).map(type => ({ type }));
 			assert(
-				property(cwd, schema, (cwd, schema) => {
-					expect(serializeSchemaObject(cwd)(schema)).toEqual(serializeNonArraySchemaObject(schema));
+				property($refArbitrary, schema, (from, schema) => {
+					expect(serializeSchemaObject(from)(schema)).toEqual(serializeNonArraySchemaObject(schema));
 				}),
 			);
 		});
@@ -77,15 +77,15 @@ describe('SchemaObject', () => {
 					}),
 				});
 				assert(
-					property(cwd, schema, (cwd, schema) => {
+					property($refArbitrary, schema, (from, schema) => {
 						const expected = pipe(
 							schema.items,
-							serializeSchemaObject(cwd),
+							serializeSchemaObject(from),
 							either.map(getSerializedArrayType),
 						);
 						const serialized = pipe(
 							schema,
-							serializeSchemaObject(cwd),
+							serializeSchemaObject(from),
 						);
 						expect(serialized).toEqual(expected);
 					}),
@@ -93,7 +93,7 @@ describe('SchemaObject', () => {
 			});
 			it('should support items.$ref', () => {
 				assert(
-					property(cwd, $refArbitrary, (cwd, $refArbitrary) => {
+					property($refArbitrary, $refArbitrary, (from, $refArbitrary) => {
 						const schema: OpenAPIV3.SchemaObject = {
 							type: 'array',
 							items: {
@@ -102,10 +102,10 @@ describe('SchemaObject', () => {
 						};
 						const expected = pipe(
 							$refArbitrary,
-							getSerializedRefType(cwd),
+							getSerializedRefType(from),
 							getSerializedArrayType,
 						);
-						expect(serializeSchemaObject(cwd)(schema)).toEqual(right(expected));
+						expect(serializeSchemaObject(from)(schema)).toEqual(right(expected));
 					}),
 				);
 			});
@@ -128,8 +128,8 @@ describe('SchemaObject', () => {
 						required: constant(['children']),
 					});
 					assert(
-						property(schema, rootName, cwd, $ref, (schema, rootName, cwd, $ref) => {
-							const serialized = serializeSchemaObject(cwd)(schema);
+						property(schema, rootName, $refArbitrary, $ref, (schema, rootName, from, $ref) => {
+							const serialized = serializeSchemaObject(from)(schema);
 							const expected = serializedType(
 								`{ children: Array<${rootName}> }`,
 								`recursion<${rootName}, unknown>(R => type({ children: array(R) }) )`,

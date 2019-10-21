@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as SwaggerParser from 'swagger-parser';
 import { serialize } from '../src/language/typescript/3.0-rx';
 import { OpenAPI, OpenAPIV3 } from 'openapi-types';
-import { write } from '../src/fs';
+import { write } from '../src/utils/fs';
 import { Either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { Context } from '../src/language/typescript/3.0-rx/utils';

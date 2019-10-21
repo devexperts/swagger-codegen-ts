@@ -5,7 +5,7 @@ import { map } from 'fp-ts/lib/Option';
 import { serializeOperationObject } from './operation-object';
 import { array } from 'fp-ts/lib/Array';
 import { Dictionary, serializeDictionary } from '../../../../utils/types';
-import { file, File } from '../../../../fs';
+import { file, File } from '../../../../utils/fs';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { decapitalize } from '@devexperts/utils/dist/string';
 import { getRelativeClientPath } from '../../common/utils';

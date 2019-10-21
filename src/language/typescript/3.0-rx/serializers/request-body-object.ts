@@ -6,9 +6,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { isReferenceObject } from './reference-object';
 import { fromNullable } from '../../../../utils/either';
 import { either } from 'fp-ts';
-import { fromString, Refs } from '../../../../utils/ref';
+import { fromString, Ref, Refs } from '../../../../utils/ref';
 
-export const serializeRequestBodyObject = (cwd: string) => (
+export const serializeRequestBodyObject = (from: Ref) => (
 	body: OpenAPIV3.RequestBodyObject,
 ): Either<Error, SerializedType> => {
 	return pipe(
@@ -24,9 +24,9 @@ export const serializeRequestBodyObject = (cwd: string) => (
 						mapLeft(
 							() => new Error(`Invalid MediaObject.content.$ref "${schema.$ref}" for RequestBodyObject`),
 						),
-						either.map(getSerializedRefType(cwd)),
+						either.map(getSerializedRefType(from)),
 				  )
-				: serializeSchemaObject(cwd)(schema),
+				: serializeSchemaObject(from)(schema),
 		),
 	);
 };

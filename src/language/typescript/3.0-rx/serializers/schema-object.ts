@@ -20,7 +20,7 @@ import { concatIfL, includes } from '../../../../utils/array';
 import { sequenceEither } from '../../../../utils/either';
 import { recursion } from 'io-ts';
 import { getIOName } from '../../common/utils';
-import { fromString } from '../../../../utils/ref';
+import { fromString, Ref } from '../../../../utils/ref';
 
 type AdditionalProperties = boolean | OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
 type AllowedAdditionalProperties = true | OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
@@ -56,13 +56,13 @@ export const isNonEmptyArraySchemaObject = (
 ): schemaObject is OpenAPIV3.NonArraySchemaObject =>
 	['null', 'boolean', 'object', 'number', 'string', 'integer'].includes(schemaObject.type);
 
-const serializeAdditionalProperties = (cwd: string) => (
+const serializeAdditionalProperties = (from: Ref) => (
 	additionalProperties: true | OpenAPIV3.SchemaObject,
 ): Either<Error, SerializedType> =>
 	additionalProperties !== true
 		? pipe(
 				additionalProperties,
-				serializeSchemaObject(cwd),
+				serializeSchemaObject(from),
 				either.map(serialized =>
 					serializedType(
 						`{[key: string]: ${serialized.type}}`,
@@ -78,7 +78,7 @@ const serializeAdditionalProperties = (cwd: string) => (
 		  )
 		: right(serializedType('{[key: string]: unknown}', 'unknown', [serializedDependency('unknown', 'io-ts')], []));
 
-export const serializeSchemaObject = (cwd: string) => (
+export const serializeSchemaObject = (from: Ref) => (
 	schemaObject: OpenAPIV3.SchemaObject,
 ): Either<Error, SerializedType> => {
 	switch (schemaObject.type) {
@@ -96,13 +96,13 @@ export const serializeSchemaObject = (cwd: string) => (
 					items.$ref,
 					fromString,
 					mapLeft(() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`)),
-					either.map(getSerializedRefType(cwd)),
+					either.map(getSerializedRefType(from)),
 					either.map(getSerializedArrayType),
 				);
 			} else {
 				return pipe(
 					items,
-					serializeSchemaObject(cwd),
+					serializeSchemaObject(from),
 					either.map(getSerializedArrayType),
 				);
 			}
@@ -124,10 +124,10 @@ export const serializeSchemaObject = (cwd: string) => (
 										}"`,
 									),
 							),
-							either.map(getSerializedRefType(cwd)),
+							either.map(getSerializedRefType(from)),
 						);
 					} else {
-						return serializeAdditionalProperties(cwd)(additionalProperties);
+						return serializeAdditionalProperties(from)(additionalProperties);
 					}
 				}),
 			);
@@ -154,13 +154,13 @@ export const serializeSchemaObject = (cwd: string) => (
 												}"`,
 											),
 									),
-									either.map(getSerializedRefType(cwd)),
+									either.map(getSerializedRefType(from)),
 									either.map(toPropertyType(name, isRequired)),
 								);
 							} else {
 								return pipe(
 									property,
-									serializeSchemaObject(cwd),
+									serializeSchemaObject(from),
 									either.map(toPropertyType(name, isRequired)),
 								);
 							}
