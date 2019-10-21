@@ -19,12 +19,7 @@ const serializeQueryParameterObject = (parameter: QueryParameterObject): Seriali
 		getOrElse(constFalse),
 	);
 	const serializedParameterType = serializePathOrQueryParameterObject(parameter);
-	const serializedRequired = getSerializedPropertyType(
-		parameter.name,
-		serializedParameterType.type,
-		serializedParameterType.io,
-		isRequired,
-	);
+	const serializedRequired = getSerializedPropertyType(parameter.name, isRequired)(serializedParameterType);
 
 	return serializedParameter(
 		serializedRequired.type,

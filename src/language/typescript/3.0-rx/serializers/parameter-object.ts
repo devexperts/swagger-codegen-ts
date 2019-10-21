@@ -116,12 +116,7 @@ export const serializeQueryParameterObject = (from: Ref) => (
 		parameter,
 		serializePathOrQueryParameterObject(from),
 		either.map(serializedParameterType => {
-			const r = getSerializedPropertyType(
-				parameter.name,
-				serializedParameterType.type,
-				serializedParameterType.io,
-				parameter.required || false,
-			);
+			const r = getSerializedPropertyType(parameter.name, parameter.required || false)(serializedParameterType);
 			return serializedParameter(
 				r.type,
 				r.io,

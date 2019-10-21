@@ -9,8 +9,9 @@ import { fold, getStructMonoid, Monoid, monoidString } from 'fp-ts/lib/Monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
 import { array, getMonoid, uniq } from 'fp-ts/lib/Array';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
-import { buildRelativePath, getRelativePath, Ref } from '../../../../utils/ref';
+import { getRelativePath, Ref } from '../../../../utils/ref';
 import { getIOName, getTypeName } from '../utils';
+import { concatIfL } from '../../../../utils/array';
 
 export interface SerializedType {
 	readonly type: string;
@@ -58,15 +59,22 @@ export const SERIALIZED_UNKNOWN_TYPE = serializedType(
 	[],
 );
 
-export const getSerializedPropertyType = (
-	name: string,
-	type: string,
-	io: string,
-	isRequired: boolean,
+export const getSerializedPropertyType = (name: string, isRequired: boolean) => (
+	serialized: SerializedType,
 ): SerializedType =>
 	isRequired
-		? serializedType(`${name}: ${type}`, `${name}: ${io}`, EMPTY_DEPENDENCIES, [])
-		: serializedType(`${name}: Option<${type}>`, `${name}: optionFromNullable(${io})`, OPTION_DEPENDENCIES, []);
+		? serializedType(
+				`${name}: ${serialized.type}`,
+				`${name}: ${serialized.io}`,
+				serialized.dependencies,
+				serialized.refs,
+		  )
+		: serializedType(
+				`${name}: Option<${serialized.type}>`,
+				`${name}: optionFromNullable(${serialized.io})`,
+				[...serialized.dependencies, ...OPTION_DEPENDENCIES],
+				serialized.refs,
+		  );
 
 export const getSerializedArrayType = (serialized: SerializedType): SerializedType =>
 	serializedType(
@@ -75,10 +83,43 @@ export const getSerializedArrayType = (serialized: SerializedType): SerializedTy
 		[...serialized.dependencies, serializedDependency('array', 'io-ts')],
 		serialized.refs,
 	);
+
 export const getSerializedRefType = (from: Ref) => (to: Ref): SerializedType => {
+	const isRecursive = from.$ref === to.$ref;
 	const p = getRelativePath(from, to);
 	const type = getTypeName(to.name);
 	const io = getIOName(to.name);
 	const ref = to.name === type ? to : { ...to, name: type };
-	return serializedType(type, io, [serializedDependency(type, p), serializedDependency(io, p)], [ref]);
+	const dependencies = concatIfL(!isRecursive, [], () => [
+		serializedDependency(type, p),
+		serializedDependency(io, p),
+	]);
+	return serializedType(type, io, dependencies, [ref]);
+};
+
+export const getSerializedObjectType = (serialized: SerializedType): SerializedType =>
+	serializedType(
+		`{ ${serialized.type} }`,
+		`type({ ${serialized.io} })`,
+		[...serialized.dependencies, serializedDependency('type', 'io-ts')],
+		serialized.refs,
+	);
+
+export const getSerializedDictionaryType = (serialized: SerializedType): SerializedType =>
+	serializedType(
+		`{ [key: string]: ${serialized.type} }`,
+		`record(string, ${serialized.io})`,
+		[...serialized.dependencies, serializedDependency('record', 'io-ts'), serializedDependency('string', 'io-ts')],
+		serialized.refs,
+	);
+
+export const getSerializedRecursiveType = (from: Ref) => (serialized: SerializedType): SerializedType => {
+	const typeName = getTypeName(from.name);
+	const ioName = getIOName(from.name);
+	return serializedType(
+		serialized.type,
+		`recursion<${typeName}, unknown>('${ioName}', ${ioName} => ${serialized.io})`,
+		[...serialized.dependencies, serializedDependency('recursion', 'io-ts')],
+		serialized.refs,
+	);
 };

@@ -94,6 +94,8 @@ components:
           type: string
         tag:
           type: string
+        self:
+          $ref: "#/components/schemas/Pet"
     Pets:
       type: array
       items:

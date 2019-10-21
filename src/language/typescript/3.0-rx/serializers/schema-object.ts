@@ -1,25 +1,26 @@
 import { OpenAPIV3 } from 'openapi-types';
 import {
-	foldSerializedTypes,
 	SERIALIZED_UNKNOWN_TYPE,
 	SerializedType,
 	serializedType,
 	getSerializedArrayType,
 	getSerializedRefType,
+	getSerializedDictionaryType,
+	getSerializedRecursiveType,
+	getSerializedPropertyType,
+	getSerializedObjectType,
+	intercalateSerializedTypes,
 } from '../../common/data/serialized-type';
-import { OPTION_DEPENDENCIES, serializedDependency } from '../../common/data/serialized-dependency';
+import { serializedDependency } from '../../common/data/serialized-dependency';
 import { Either, left, mapLeft, right } from 'fp-ts/lib/Either';
 import { isReferenceObject } from './reference-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
 import * as nullable from '../../../../utils/nullable';
-import { isNonNullable, Nullable } from '../../../../utils/nullable';
 import { serializeDictionary } from '../../../../utils/types';
 import { constFalse } from 'fp-ts/lib/function';
-import { concatIfL, includes } from '../../../../utils/array';
+import { includes } from '../../../../utils/array';
 import { sequenceEither } from '../../../../utils/either';
-import { recursion } from 'io-ts';
-import { getIOName } from '../../common/utils';
 import { fromString, Ref } from '../../../../utils/ref';
 
 type AdditionalProperties = boolean | OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
@@ -56,29 +57,12 @@ export const isNonEmptyArraySchemaObject = (
 ): schemaObject is OpenAPIV3.NonArraySchemaObject =>
 	['null', 'boolean', 'object', 'number', 'string', 'integer'].includes(schemaObject.type);
 
-const serializeAdditionalProperties = (from: Ref) => (
-	additionalProperties: true | OpenAPIV3.SchemaObject,
-): Either<Error, SerializedType> =>
-	additionalProperties !== true
-		? pipe(
-				additionalProperties,
-				serializeSchemaObject(from),
-				either.map(serialized =>
-					serializedType(
-						`{[key: string]: ${serialized.type}}`,
-						`record(string, ${serialized.io})`,
-						[
-							...serialized.dependencies,
-							serializedDependency('string', 'io-ts'),
-							serializedDependency('record', 'io-ts'),
-						],
-						serialized.refs,
-					),
-				),
-		  )
-		: right(serializedType('{[key: string]: unknown}', 'unknown', [serializedDependency('unknown', 'io-ts')], []));
+export const serializeSchemaObject = (
+	from: Ref,
+): ((schemaObject: OpenAPIV3.SchemaObject) => Either<Error, SerializedType>) =>
+	serializeSchemaObjectWithRecursion(from, true);
 
-export const serializeSchemaObject = (from: Ref) => (
+const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boolean) => (
 	schemaObject: OpenAPIV3.SchemaObject,
 ): Either<Error, SerializedType> => {
 	switch (schemaObject.type) {
@@ -93,8 +77,7 @@ export const serializeSchemaObject = (from: Ref) => (
 			const { items } = schemaObject;
 			if (isReferenceObject(items)) {
 				return pipe(
-					items.$ref,
-					fromString,
+					fromString(items.$ref),
 					mapLeft(() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`)),
 					either.map(getSerializedRefType(from)),
 					either.map(getSerializedArrayType),
@@ -102,7 +85,7 @@ export const serializeSchemaObject = (from: Ref) => (
 			} else {
 				return pipe(
 					items,
-					serializeSchemaObject(from),
+					serializeSchemaObjectWithRecursion(from, false),
 					either.map(getSerializedArrayType),
 				);
 			}
@@ -127,9 +110,16 @@ export const serializeSchemaObject = (from: Ref) => (
 							either.map(getSerializedRefType(from)),
 						);
 					} else {
-						return serializeAdditionalProperties(from)(additionalProperties);
+						return additionalProperties !== true
+							? pipe(
+									additionalProperties,
+									serializeSchemaObjectWithRecursion(from, false),
+							  )
+							: right(SERIALIZED_UNKNOWN_TYPE);
 					}
 				}),
+				nullable.map(either.map(getSerializedDictionaryType)),
+				nullable.map(either.map(checkRecursion(from, shouldTrackRecursion))),
 			);
 			const properties = pipe(
 				schemaObject.properties,
@@ -155,21 +145,20 @@ export const serializeSchemaObject = (from: Ref) => (
 											),
 									),
 									either.map(getSerializedRefType(from)),
-									either.map(toPropertyType(name, isRequired)),
+									either.map(getSerializedPropertyType(name, isRequired)),
 								);
 							} else {
 								return pipe(
 									property,
-									serializeSchemaObject(from),
-									either.map(toPropertyType(name, isRequired)),
+									serializeSchemaObjectWithRecursion(from, false),
+									either.map(getSerializedPropertyType(name, isRequired)),
 								);
 							}
 						}),
 						sequenceEither,
-						either.map(types => {
-							const serialized = foldSerializedTypes(types);
-							return toObjectType(undefined)(serialized);
-						}),
+						either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
+						either.map(getSerializedObjectType),
+						either.map(checkRecursion(from, shouldTrackRecursion)),
 					),
 				),
 			);
@@ -182,36 +171,7 @@ export const serializeSchemaObject = (from: Ref) => (
 	}
 };
 
-const toPropertyType = (name: string, isRequired: boolean) => (serialized: SerializedType): SerializedType =>
-	isRequired
-		? serializedType(
-				`${name}: ${serialized.type};`,
-				`${name}: ${serialized.io},`,
-				serialized.dependencies,
-				serialized.refs,
-		  )
-		: serializedType(
-				`${name}: Option<${serialized.type}>;`,
-				`${name}: optionFromNullable(${serialized.io}),`,
-				[...serialized.dependencies, ...OPTION_DEPENDENCIES],
-				serialized.refs,
-		  );
-
-const toObjectType = (recursion: Nullable<string>) => (serialized: SerializedType): SerializedType => {
-	const io = `type({ ${serialized.io} })`;
-	return serializedType(
-		`{ ${serialized.type} }`,
-		pipe(
-			recursion,
-			nullable.map(recursion => {
-				const recursionIO = getIOName(recursion);
-				return `recursion<${recursion}, unknown>('${recursionIO}', ${recursionIO} => ${io})`;
-			}),
-			nullable.getOrElse(() => io),
-		),
-		concatIfL(isNonNullable(recursion), [...serialized.dependencies, serializedDependency('type', 'io-ts')], () => [
-			serializedDependency('recursion', 'io-ts'),
-		]),
-		[],
-	);
-};
+const checkRecursion = (from: Ref, shouldTrackRecursion: boolean) => (serialized: SerializedType): SerializedType =>
+	shouldTrackRecursion && serialized.refs.some(ref => ref.$ref === from.$ref)
+		? getSerializedRecursiveType(from)(serialized)
+		: serialized;

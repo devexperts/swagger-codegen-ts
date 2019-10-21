@@ -1,14 +1,17 @@
 import { array, assert, boolean, property, string, tuple } from 'fast-check';
 import {
 	getSerializedArrayType,
+	getSerializedDictionaryType,
+	getSerializedObjectType,
 	getSerializedPropertyType,
+	getSerializedRecursiveType,
 	getSerializedRefType,
 	serializedType,
 } from '../serialized-type';
 import { serializedDependencyArbitrary } from './serialized-dependency.spec';
 import { serializedDependency } from '../serialized-dependency';
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
-import { buildRelativePath, getRelativePath } from '../../../../../utils/ref';
+import { getRelativePath } from '../../../../../utils/ref';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { arbitrary } from '../../../../../utils/fast-check';
 import { none, some } from 'fp-ts/lib/Option';
@@ -38,66 +41,114 @@ describe('SerializedType', () => {
 	});
 	it('getSerializedPropertyType', () => {
 		assert(
-			property(string(), string(), string(), boolean(), (name, type, io, isRequired) => {
-				const serialized = getSerializedPropertyType(name, type, io, isRequired);
+			property(string(), serializedTypeArbitrary, boolean(), (name, s, isRequired) => {
+				const serialized = getSerializedPropertyType(name, isRequired)(s);
 				const expected = isRequired
-					? serializedType(`${name}: ${type}`, `${name}: ${io}`, [], [])
+					? serializedType(`${name}: ${s.type}`, `${name}: ${s.io}`, s.dependencies, s.refs)
 					: serializedType(
-							`${name}: Option<${type}>`,
-							`${name}: optionFromNullable(${io})`,
+							`${name}: Option<${s.type}>`,
+							`${name}: optionFromNullable(${s.io})`,
 							[
+								...s.dependencies,
 								serializedDependency('Option', 'fp-ts/lib/Option'),
 								serializedDependency('optionFromNullable', 'io-ts-types/lib/optionFromNullable'),
 							],
-							[],
+							s.refs,
 					  );
 				expect(serialized).toEqual(expected);
 			}),
 		);
 	});
 	describe('getSerializedRefType', () => {
-		const rootName = string();
-		const cwd = string();
 		it('should serialize non recursive', () => {
-			const ref = pipe(
-				tuple(rootName, $refArbitrary),
-				arbitrary.filterMap(([rootName, ref]) => (ref.name.trim() !== rootName.trim() ? some(ref) : none)),
+			const refs = pipe(
+				tuple($refArbitrary, $refArbitrary),
+				arbitrary.filterMap(([from, to]) =>
+					to.$ref !== from.$ref
+						? some({
+								from,
+								to,
+						  })
+						: none,
+				),
 			);
 			assert(
-				property(rootName, $refArbitrary, ref, (rootName, from, ref) => {
-					const serialized = getSerializedRefType(from)(ref);
-					const type = getTypeName(ref.name);
-					const io = getIOName(ref.name);
-					const p = getRelativePath(from, ref);
+				property(refs, refs => {
+					const { from, to } = refs;
+					const serialized = getSerializedRefType(from)(to);
+					const type = getTypeName(to.name);
+					const io = getIOName(to.name);
+					const p = getRelativePath(from, to);
 
 					const expected = serializedType(
 						type,
 						io,
 						[serializedDependency(type, p), serializedDependency(io, p)],
-						[ref],
+						[to],
 					);
 
 					expect(serialized).toEqual(expected);
 				}),
 			);
 		});
-		xit('should serialize recursive skipping dependencies', () => {
-			const data = pipe(
-				tuple(rootName, $refArbitrary),
-				arbitrary.filterMap(([rootName, ref]) => (ref.name === rootName ? some({ ref, rootName }) : none)),
-			);
+		it('should skip self-reference dependencies', () => {
 			assert(
-				property($refArbitrary, data, (from, data) => {
-					const { ref } = data;
-					const serialized = getSerializedRefType(from)(ref);
+				property($refArbitrary, ref => {
 					const type = getTypeName(ref.name);
 					const io = getIOName(ref.name);
-
 					const expected = serializedType(type, io, [], [ref]);
-
+					const serialized = getSerializedRefType(ref)(ref);
 					expect(serialized).toEqual(expected);
 				}),
 			);
 		});
+	});
+	it('getSerializedObjectType', () => {
+		assert(
+			property(serializedTypeArbitrary, s => {
+				expect(getSerializedObjectType(s)).toEqual(
+					serializedType(
+						`{ ${s.type} }`,
+						`type({ ${s.io} })`,
+						[...s.dependencies, serializedDependency('type', 'io-ts')],
+						s.refs,
+					),
+				);
+			}),
+		);
+	});
+	it('getSerializedDictionaryType', () => {
+		assert(
+			property(serializedTypeArbitrary, s => {
+				expect(getSerializedDictionaryType(s)).toEqual(
+					serializedType(
+						`{ [key: string]: ${s.type} }`,
+						`record(string, ${s.io})`,
+						[
+							...s.dependencies,
+							serializedDependency('record', 'io-ts'),
+							serializedDependency('string', 'io-ts'),
+						],
+						s.refs,
+					),
+				);
+			}),
+		);
+	});
+	it('getSerializedRecursiveType', () => {
+		assert(
+			property($refArbitrary, serializedTypeArbitrary, (from, s) => {
+				const typeName = getTypeName(from.name);
+				const ioName = getIOName(from.name);
+				expect(getSerializedRecursiveType(from)(s)).toEqual(
+					serializedType(
+						s.type,
+						`recursion<${typeName}, unknown>('${ioName}', ${ioName} => ${s.io})`,
+						[...s.dependencies, serializedDependency('recursion', 'io-ts')],
+						s.refs,
+					),
+				);
+			}),
+		);
 	});
 });

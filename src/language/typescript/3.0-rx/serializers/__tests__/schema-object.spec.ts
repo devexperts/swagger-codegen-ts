@@ -1,15 +1,20 @@
 import { isNonEmptyArraySchemaObject, serializeNonArraySchemaObject, serializeSchemaObject } from '../schema-object';
 import { OpenAPIV3 } from 'openapi-types';
-import { getSerializedArrayType, getSerializedRefType, serializedType } from '../../../common/data/serialized-type';
+import {
+	getSerializedArrayType,
+	getSerializedDictionaryType,
+	getSerializedObjectType,
+	getSerializedPropertyType,
+	getSerializedRecursiveType,
+	getSerializedRefType,
+	serializedType,
+} from '../../../common/data/serialized-type';
 import { serializedDependency } from '../../../common/data/serialized-dependency';
 import { isLeft, right } from 'fp-ts/lib/Either';
 import { assert, constant, constantFrom, property, record, string } from 'fast-check';
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
-import { arbitrary } from '../../../../../utils/fast-check';
-import { fromString } from '../../../../../utils/ref';
-import { fromEither } from 'fp-ts/lib/Option';
 
 const primitiveTypes: OpenAPIV3.NonArraySchemaObject['type'][] = ['null', 'boolean', 'number', 'string', 'integer'];
 
@@ -58,8 +63,6 @@ describe('SchemaObject', () => {
 		});
 	});
 	describe('serializeSchemaObject', () => {
-		const rootName = string();
-		const cwd = string();
 		it('should use serializeNonArraySchemaObject for primitives', () => {
 			const schema = constantFrom(...primitiveTypes).map(type => ({ type }));
 			assert(
@@ -110,36 +113,87 @@ describe('SchemaObject', () => {
 				);
 			});
 		});
-		xdescribe('recursive', () => {
+		describe('recursive', () => {
 			describe('local', () => {
-				it('self', () => {
-					const $ref = pipe(
-						rootName,
-						arbitrary.map(name => `#/components/schemas/${name}`),
-						arbitrary.filterMap(s => fromEither(fromString(s))),
-					);
-					const schema = record({
-						type: constant<'object'>('object'),
-						properties: record({
-							children: record({
-								$ref: $ref.map(r => r.$ref),
-							}),
-						}),
-						required: constant(['children']),
-					});
+				it('object with array of items of self type', () => {
 					assert(
-						property(schema, rootName, $refArbitrary, $ref, (schema, rootName, from, $ref) => {
-							const serialized = serializeSchemaObject(from)(schema);
-							const expected = serializedType(
-								`{ children: Array<${rootName}> }`,
-								`recursion<${rootName}, unknown>(R => type({ children: array(R) }) )`,
-								[
-									serializedDependency('recursion', 'io-ts'),
-									serializedDependency('type', 'io-ts'),
-									serializedDependency('array', 'io-ts'),
-								],
-								[$ref],
+						property($refArbitrary, ref => {
+							const schema: OpenAPIV3.SchemaObject = {
+								type: 'object',
+								required: ['children'],
+								properties: {
+									children: {
+										type: 'array',
+										items: {
+											$ref: ref.$ref, // references self
+										},
+									},
+								},
+							};
+							const expected = pipe(
+								ref,
+								getSerializedRefType(ref),
+								getSerializedArrayType,
+								getSerializedPropertyType('children', true),
+								getSerializedObjectType,
+								getSerializedRecursiveType(ref),
 							);
+							const serialized = serializeSchemaObject(ref)(schema);
+
+							expect(serialized).toEqual(right(expected));
+						}),
+					);
+				});
+				it('object with array of items of object type with one of properties of self type', () => {
+					assert(
+						property($refArbitrary, ref => {
+							const schema: OpenAPIV3.SchemaObject = {
+								type: 'object',
+								required: ['children'],
+								properties: {
+									children: {
+										type: 'object',
+										properties: {
+											self: {
+												$ref: ref.$ref, // references self
+											},
+										},
+										required: ['self'],
+									},
+								},
+							};
+							const serialized = serializeSchemaObject(ref)(schema);
+							const expected = pipe(
+								ref,
+								getSerializedRefType(ref),
+								getSerializedPropertyType('self', true),
+								getSerializedObjectType,
+								getSerializedPropertyType('children', true),
+								getSerializedObjectType,
+								getSerializedRecursiveType(ref),
+							);
+							expect(serialized).toEqual(right(expected));
+						}),
+					);
+				});
+				it('object with additionalProperties of self type', () => {
+					assert(
+						property($refArbitrary, ref => {
+							const schema: OpenAPIV3.SchemaObject = {
+								type: 'object',
+								additionalProperties: {
+									$ref: ref.$ref, // references self
+								},
+							};
+							const serialized = serializeSchemaObject(ref)(schema);
+
+							const expected = pipe(
+								ref,
+								getSerializedRefType(ref),
+								getSerializedDictionaryType,
+								getSerializedRecursiveType(ref),
+							);
+
 							expect(serialized).toEqual(right(expected));
 						}),
 					);
