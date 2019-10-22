@@ -32,7 +32,11 @@ const serializeSchema = (from: Ref) => (schema: OpenAPIV3.SchemaObject): Either<
 			`
 			${dependencies}
 			
-			export type ${typeName} = ${serialized.type};
+			${
+				schema.type === 'object'
+					? `export interface ${typeName} ${serialized.type}`
+					: `export type ${typeName} = ${serialized.type};`
+			}
 			export const ${ioName} = ${serialized.io};
 		`,
 		),
