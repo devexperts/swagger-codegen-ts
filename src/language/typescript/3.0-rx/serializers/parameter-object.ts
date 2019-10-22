@@ -73,7 +73,7 @@ const serializePathOrQueryParameterObject = (from: Ref) => (
 						schema.items,
 						validateNonEmptyArraySchemaObjects(parameter),
 						either.chain(serializeNonArraySchemaObject),
-						either.map(getSerializedArrayType),
+						either.map(getSerializedArrayType()),
 						either.map(fromSerializedType(required)),
 					);
 				}

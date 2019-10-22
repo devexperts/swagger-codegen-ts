@@ -22,6 +22,7 @@ import { constFalse } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
 import { sequenceEither } from '../../../../utils/either';
 import { fromString, Ref } from '../../../../utils/ref';
+import { string } from 'io-ts';
 
 type AdditionalProperties = boolean | OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
 type AllowedAdditionalProperties = true | OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
@@ -59,10 +60,11 @@ export const isNonEmptyArraySchemaObject = (
 
 export const serializeSchemaObject = (
 	from: Ref,
+	name?: string,
 ): ((schemaObject: OpenAPIV3.SchemaObject) => Either<Error, SerializedType>) =>
-	serializeSchemaObjectWithRecursion(from, true);
+	serializeSchemaObjectWithRecursion(from, true, name);
 
-const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boolean) => (
+const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boolean, name?: string) => (
 	schemaObject: OpenAPIV3.SchemaObject,
 ): Either<Error, SerializedType> => {
 	switch (schemaObject.type) {
@@ -75,20 +77,20 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 		}
 		case 'array': {
 			const { items } = schemaObject;
-			if (isReferenceObject(items)) {
-				return pipe(
-					fromString(items.$ref),
-					mapLeft(() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`)),
-					either.map(getSerializedRefType(from)),
-					either.map(getSerializedArrayType),
-				);
-			} else {
-				return pipe(
-					items,
-					serializeSchemaObjectWithRecursion(from, false),
-					either.map(getSerializedArrayType),
-				);
-			}
+			const serialized = isReferenceObject(items)
+				? pipe(
+						fromString(items.$ref),
+						mapLeft(() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`)),
+						either.map(getSerializedRefType(from)),
+				  )
+				: pipe(
+						items,
+						serializeSchemaObjectWithRecursion(from, false, undefined),
+				  );
+			return pipe(
+				serialized,
+				either.map(getSerializedArrayType(name)),
+			);
 		}
 		case 'object': {
 			const additionalProperties = pipe(
@@ -113,12 +115,12 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 						return additionalProperties !== true
 							? pipe(
 									additionalProperties,
-									serializeSchemaObjectWithRecursion(from, false),
+									serializeSchemaObjectWithRecursion(from, false, undefined),
 							  )
 							: right(SERIALIZED_UNKNOWN_TYPE);
 					}
 				}),
-				nullable.map(either.map(getSerializedDictionaryType)),
+				nullable.map(either.map(getSerializedDictionaryType(name))),
 				nullable.map(either.map(checkRecursion(from, shouldTrackRecursion))),
 			);
 			const properties = pipe(
@@ -150,14 +152,14 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 							} else {
 								return pipe(
 									property,
-									serializeSchemaObjectWithRecursion(from, false),
+									serializeSchemaObjectWithRecursion(from, false, undefined),
 									either.map(getSerializedPropertyType(name, isRequired)),
 								);
 							}
 						}),
 						sequenceEither,
 						either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
-						either.map(getSerializedObjectType),
+						either.map(getSerializedObjectType(name)),
 						either.map(checkRecursion(from, shouldTrackRecursion)),
 					),
 				),

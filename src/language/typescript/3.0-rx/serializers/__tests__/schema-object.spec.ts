@@ -66,8 +66,8 @@ describe('SchemaObject', () => {
 		it('should use serializeNonArraySchemaObject for primitives', () => {
 			const schema = constantFrom(...primitiveTypes).map(type => ({ type }));
 			assert(
-				property($refArbitrary, schema, (from, schema) => {
-					expect(serializeSchemaObject(from)(schema)).toEqual(serializeNonArraySchemaObject(schema));
+				property($refArbitrary, schema, string(), (from, schema, name) => {
+					expect(serializeSchemaObject(from, name)(schema)).toEqual(serializeNonArraySchemaObject(schema));
 				}),
 			);
 		});
@@ -80,15 +80,15 @@ describe('SchemaObject', () => {
 					}),
 				});
 				assert(
-					property($refArbitrary, schema, (from, schema) => {
+					property($refArbitrary, schema, string(), (from, schema, name) => {
 						const expected = pipe(
 							schema.items,
-							serializeSchemaObject(from),
-							either.map(getSerializedArrayType),
+							serializeSchemaObject(from, name),
+							either.map(getSerializedArrayType(name)),
 						);
 						const serialized = pipe(
 							schema,
-							serializeSchemaObject(from),
+							serializeSchemaObject(from, name),
 						);
 						expect(serialized).toEqual(expected);
 					}),
@@ -96,7 +96,7 @@ describe('SchemaObject', () => {
 			});
 			it('should support items.$ref', () => {
 				assert(
-					property($refArbitrary, $refArbitrary, (from, $refArbitrary) => {
+					property($refArbitrary, $refArbitrary, string(), (from, $refArbitrary, name) => {
 						const schema: OpenAPIV3.SchemaObject = {
 							type: 'array',
 							items: {
@@ -106,9 +106,9 @@ describe('SchemaObject', () => {
 						const expected = pipe(
 							$refArbitrary,
 							getSerializedRefType(from),
-							getSerializedArrayType,
+							getSerializedArrayType(name),
 						);
-						expect(serializeSchemaObject(from)(schema)).toEqual(right(expected));
+						expect(serializeSchemaObject(from, name)(schema)).toEqual(right(expected));
 					}),
 				);
 			});
@@ -133,9 +133,9 @@ describe('SchemaObject', () => {
 							const expected = pipe(
 								ref,
 								getSerializedRefType(ref),
-								getSerializedArrayType,
+								getSerializedArrayType(undefined),
 								getSerializedPropertyType('children', true),
-								getSerializedObjectType,
+								getSerializedObjectType(undefined),
 								getSerializedRecursiveType(ref),
 							);
 							const serialized = serializeSchemaObject(ref)(schema);
@@ -167,9 +167,9 @@ describe('SchemaObject', () => {
 								ref,
 								getSerializedRefType(ref),
 								getSerializedPropertyType('self', true),
-								getSerializedObjectType,
+								getSerializedObjectType(undefined),
 								getSerializedPropertyType('children', true),
-								getSerializedObjectType,
+								getSerializedObjectType(undefined),
 								getSerializedRecursiveType(ref),
 							);
 							expect(serialized).toEqual(right(expected));
@@ -190,7 +190,7 @@ describe('SchemaObject', () => {
 							const expected = pipe(
 								ref,
 								getSerializedRefType(ref),
-								getSerializedDictionaryType,
+								getSerializedDictionaryType(undefined),
 								getSerializedRecursiveType(ref),
 							);
 

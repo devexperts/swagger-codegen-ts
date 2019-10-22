@@ -12,13 +12,15 @@ import { serializeDependencies } from '../../common/data/serialized-dependency';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { getIOName, getTypeName } from '../../common/utils';
 import { compactNullables } from '../../../../utils/nullable';
-import { addPathParts, Ref, Refs } from '../../../../utils/ref';
+import { addPathParts, Ref } from '../../../../utils/ref';
 import { applyTo } from '../../../../utils/function';
 
 const serializeSchema = (from: Ref) => (schema: OpenAPIV3.SchemaObject): Either<Error, File> => {
+	const typeName = getTypeName(from.name);
+	const ioName = getIOName(from.name);
 	const serialized = pipe(
 		schema,
-		serializeSchemaObject(from),
+		serializeSchemaObject(from, typeName),
 	);
 	const dependencies = pipe(
 		serialized,
@@ -30,8 +32,8 @@ const serializeSchema = (from: Ref) => (schema: OpenAPIV3.SchemaObject): Either<
 			`
 			${dependencies}
 			
-			export type ${getTypeName(from.name)} = ${serialized.type};
-			export const ${getIOName(from.name)} = ${serialized.io};
+			export type ${typeName} = ${serialized.type};
+			export const ${ioName} = ${serialized.io};
 		`,
 		),
 	);

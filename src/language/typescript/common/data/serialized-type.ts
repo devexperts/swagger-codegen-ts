@@ -12,6 +12,8 @@ import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
 import { getRelativePath, Ref } from '../../../../utils/ref';
 import { getIOName, getTypeName } from '../utils';
 import { concatIfL } from '../../../../utils/array';
+import { isNonNullable } from '../../../../utils/nullable';
+import { when } from '../../../../utils/string';
 
 export interface SerializedType {
 	readonly type: string;
@@ -76,10 +78,10 @@ export const getSerializedPropertyType = (name: string, isRequired: boolean) => 
 				serialized.refs,
 		  );
 
-export const getSerializedArrayType = (serialized: SerializedType): SerializedType =>
+export const getSerializedArrayType = (name?: string) => (serialized: SerializedType): SerializedType =>
 	serializedType(
 		`Array<${serialized.type}>`,
-		`array(${serialized.io})`,
+		`array(${serialized.io}${when(isNonNullable(name), `, '${name}'`)})`,
 		[...serialized.dependencies, serializedDependency('array', 'io-ts')],
 		serialized.refs,
 	);
@@ -97,18 +99,18 @@ export const getSerializedRefType = (from: Ref) => (to: Ref): SerializedType => 
 	return serializedType(type, io, dependencies, [ref]);
 };
 
-export const getSerializedObjectType = (serialized: SerializedType): SerializedType =>
+export const getSerializedObjectType = (name?: string) => (serialized: SerializedType): SerializedType =>
 	serializedType(
 		`{ ${serialized.type} }`,
-		`type({ ${serialized.io} })`,
+		`type({ ${serialized.io} }${when(isNonNullable(name), `, '${name}'`)})`,
 		[...serialized.dependencies, serializedDependency('type', 'io-ts')],
 		serialized.refs,
 	);
 
-export const getSerializedDictionaryType = (serialized: SerializedType): SerializedType =>
+export const getSerializedDictionaryType = (name?: string) => (serialized: SerializedType): SerializedType =>
 	serializedType(
 		`{ [key: string]: ${serialized.type} }`,
-		`record(string, ${serialized.io})`,
+		`record(string, ${serialized.io}${when(isNonNullable(name), `, '${name}'`)})`,
 		[...serialized.dependencies, serializedDependency('record', 'io-ts'), serializedDependency('string', 'io-ts')],
 		serialized.refs,
 	);

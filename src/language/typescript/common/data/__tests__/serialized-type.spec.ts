@@ -1,4 +1,4 @@
-import { array, assert, boolean, property, string, tuple } from 'fast-check';
+import { Arbitrary, array, assert, boolean, constant, oneof, property, string, tuple } from 'fast-check';
 import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
@@ -16,6 +16,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { arbitrary } from '../../../../../utils/fast-check';
 import { none, some } from 'fp-ts/lib/Option';
 import { getIOName, getTypeName } from '../../utils';
+import { when } from '../../../../../utils/string';
+import { isNonNullable, Nullable } from '../../../../../utils/nullable';
 
 export const serializedTypeArbitrary = tuple(
 	string(),
@@ -24,14 +26,21 @@ export const serializedTypeArbitrary = tuple(
 	pipe(array($refArbitrary)),
 ).map(([type, io, dependencies, refs]) => serializedType(type, io, dependencies, refs));
 
+const name = oneof(string(), constant(undefined));
+
 describe('SerializedType', () => {
 	it('getSerializedArrayType', () => {
 		assert(
-			property(serializedTypeArbitrary, s => {
-				expect(getSerializedArrayType(s)).toEqual(
+			property(serializedTypeArbitrary, name, (s, name) => {
+				expect(
+					pipe(
+						s,
+						getSerializedArrayType(name),
+					),
+				).toEqual(
 					serializedType(
 						`Array<${s.type}>`,
-						`array(${s.io})`,
+						`array(${s.io}${when(isNonNullable(name), `, '${name}'`)})`,
 						[...s.dependencies, serializedDependency('array', 'io-ts')],
 						s.refs,
 					),
@@ -105,11 +114,11 @@ describe('SerializedType', () => {
 	});
 	it('getSerializedObjectType', () => {
 		assert(
-			property(serializedTypeArbitrary, s => {
-				expect(getSerializedObjectType(s)).toEqual(
+			property(serializedTypeArbitrary, oneof(string(), constant(undefined)), (s, name) => {
+				expect(getSerializedObjectType(name)(s)).toEqual(
 					serializedType(
 						`{ ${s.type} }`,
-						`type({ ${s.io} })`,
+						`type({ ${s.io} }${when(isNonNullable(name), `, '${name}'`)})`,
 						[...s.dependencies, serializedDependency('type', 'io-ts')],
 						s.refs,
 					),
@@ -119,11 +128,11 @@ describe('SerializedType', () => {
 	});
 	it('getSerializedDictionaryType', () => {
 		assert(
-			property(serializedTypeArbitrary, s => {
-				expect(getSerializedDictionaryType(s)).toEqual(
+			property(serializedTypeArbitrary, string(), (s, name) => {
+				expect(getSerializedDictionaryType(name)(s)).toEqual(
 					serializedType(
 						`{ [key: string]: ${s.type} }`,
-						`record(string, ${s.io})`,
+						`record(string, ${s.io}${when(isNonNullable(name), `, '${name}'`)})`,
 						[
 							...s.dependencies,
 							serializedDependency('record', 'io-ts'),
