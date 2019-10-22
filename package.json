@@ -30,7 +30,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@devexperts/utils": "^0.12.6",
+    "@devexperts/utils": "^1.0.0-alpha.2",
     "@types/del": "^3.0.1",
     "@types/fs-extra": "^8.0.0",
     "@types/js-yaml": "^3.11.2",

@@ -50,14 +50,6 @@
     querystring "^0.2.0"
     tslib "^1.10.0"
 
-"@devexperts/utils@^0.12.6":
-  version "0.12.6"
-  resolved "https://registry.yarnpkg.com/@devexperts/utils/-/utils-0.12.6.tgz#6bb435edf28446dc2c4f0963ab6fdc9f51882e56"
-  integrity sha512-YBSUhysRk9iUFdNGIMBYeCnTO3RiD6Hfox+fw2wm5NM0pIdteXwfnKKNbK8ZFTZ8P98niVDxu2cBL8HSm3qwoA==
-  dependencies:
-    tslib "^1.9.0"
-    typelevel-ts "^0.2.2"
-
 "@devexperts/utils@^1.0.0-alpha.2":
   version "1.0.0-alpha.2"
   resolved "https://registry.yarnpkg.com/@devexperts/utils/-/utils-1.0.0-alpha.2.tgz#2cbb001667701080c703d3bfdaefea912515aef3"
@@ -3383,11 +3375,6 @@ type-check@~0.3.2:
   integrity sha1-WITKtRLPHTVeP7eE8wgEsrUg23I=
   dependencies:
     prelude-ls "~1.1.2"
-
-typelevel-ts@^0.2.2:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/typelevel-ts/-/typelevel-ts-0.2.4.tgz#d4832c6fb739abe0bc1c29b098e158fe0778f3f0"
-  integrity sha512-6JziXaV7iqPXE14nR4voqPlXOqKhNyZ+voXvF5uvnP8RN/bf/q2vA4BxiX/MBUJWMNqwANKq7Kme4bl4RYSOKA==
 
 typelevel-ts@^0.3.5:
   version "0.3.5"
