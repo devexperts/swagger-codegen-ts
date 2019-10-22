@@ -1,3 +1,28 @@
+# [2.0.0-alpha.0](https://github.com/devexperts/swagger-codegen-ts/compare/v0.7.0...v2.0.0-alpha.0) (2019-10-22)
+
+
+### Code Refactoring
+
+* make interface fields readonly ([4aec16b](https://github.com/devexperts/swagger-codegen-ts/commit/4aec16b))
+* move schema ([78d6513](https://github.com/devexperts/swagger-codegen-ts/commit/78d6513))
+* remove `T` symbol from types ([b4ef46c](https://github.com/devexperts/swagger-codegen-ts/commit/b4ef46c))
+* split typescript language ([2a82892](https://github.com/devexperts/swagger-codegen-ts/commit/2a82892))
+
+
+### Features
+
+* fp-ts@2 ([fb0a3a2](https://github.com/devexperts/swagger-codegen-ts/commit/fb0a3a2))
+
+
+### BREAKING CHANGES
+
+* typescript template was moved to `typescript/2.0-rx/index.ts`
+* interface fields were made readonly
+* `T` symbol was removed from types
+* schema was moved to separate directory
+
+
+
 # [0.7.0](https://github.com/devexperts/swagger-codegen-ts/compare/v0.6.1...v0.7.0) (2019-09-02)
 
 
