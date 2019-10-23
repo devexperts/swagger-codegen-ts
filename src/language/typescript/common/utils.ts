@@ -1,6 +1,7 @@
 import * as path from 'path';
 import { SerializedPathParameter } from './data/serialized-path-parameter';
 import { unless } from '../../../utils/string';
+import { Options } from 'prettier';
 
 export const SUCCESSFUL_CODES = ['200', '201', 'default'];
 export const ROOT_DIRECTORY = '.';
@@ -32,3 +33,18 @@ export const getJSDoc = (lines: string[]): string =>
 			 ${lines.map(line => `* ${line}`).join('\n')}
 		 */`,
 	);
+export const defaultPrettierConfig: Options = {
+	bracketSpacing: true,
+	jsxBracketSameLine: true,
+	parser: 'typescript',
+	printWidth: 120,
+	semi: true,
+	singleQuote: true,
+	tabWidth: 4,
+	trailingComma: 'all',
+	useTabs: true,
+};
+
+export interface SerializeOptions {
+	prettierConfig?: Options;
+}

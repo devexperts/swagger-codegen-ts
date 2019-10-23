@@ -1,8 +1,5 @@
 import { serializeDocument } from './serializers/document';
-
-export { serializeDocument } from './serializers/document';
-
-import { format, Options } from 'prettier';
+import { format } from 'prettier';
 import { directory, fromRef, FSEntity, map as mapFS } from '../../../utils/fs';
 import { Either } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -13,22 +10,9 @@ import { sequenceEither } from '../../../utils/either';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { clientRef } from './utils';
 import { OpenapiObject } from '../../../schema/3.0/openapi-object';
+import { defaultPrettierConfig, SerializeOptions } from '../common/utils';
 
-const defaultPrettierConfig: Options = {
-	bracketSpacing: true,
-	jsxBracketSameLine: true,
-	parser: 'typescript',
-	printWidth: 120,
-	semi: true,
-	singleQuote: true,
-	tabWidth: 4,
-	trailingComma: 'all',
-	useTabs: true,
-};
-
-export interface SerializeOptions {
-	prettierConfig?: Options;
-}
+export { serializeDocument } from './serializers/document';
 
 export const serialize = combineReader(
 	serializeDocument,
