@@ -18,7 +18,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'petstore.yaml#/components/schemas/Pet'
+                $ref: '../petstore.yaml#/components/schemas/Pet'
           links:
             userRepositories:
               $ref: '#/components/links/UserRepositories'
@@ -97,7 +97,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: 'petstore.yaml#/components/schemas/Pet'
+                  $ref: '../petstore.yaml#/components/schemas/Pet'
   /2.0/repositories/{username}/{slug}/pullrequests/{pid}:
     get:
       operationId: getPullRequestsById
@@ -184,7 +184,7 @@ components:
         uuid:
           type: string
         local:
-          $ref: 'petstore.yaml#/components/schemas/Pet'
+          $ref: '../petstore.yaml#/components/schemas/Pet'
     repository:
       type: object
       properties:

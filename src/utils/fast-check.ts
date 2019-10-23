@@ -1,9 +1,8 @@
 import { Arbitrary, array } from 'fast-check';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { Filterable1 } from 'fp-ts/lib/Filterable';
-import { identity, not, Predicate, Refinement } from 'fp-ts/lib/function';
+import { identity, not, Predicate } from 'fp-ts/lib/function';
 import { isSome } from 'fp-ts/lib/Option';
-import { Kind } from 'fp-ts/lib/HKT';
 import { Separated } from 'fp-ts/lib/Compactable';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
 import { pipeable } from 'fp-ts/lib/pipeable';

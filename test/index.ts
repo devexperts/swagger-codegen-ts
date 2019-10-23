@@ -1,43 +1,64 @@
-import { serialize } from '../src/language/typescript/2.0-rx';
+import { serialize as serializeSwagger2 } from '../src/language/typescript/2.0-rx';
 import * as path from 'path';
-import * as del from 'del';
 import { SwaggerObject } from '../src/schema/2.0/swagger-object';
+import { generate } from '../src';
+import { Either, right } from 'fp-ts/lib/Either';
+import { serialize as serializeOpenAPI3 } from '../src/language/typescript/3.0-rx';
+import * as nullable from '../src/utils/nullable';
+import { OpenapiObjectCodec } from '../src/schema/3.0/openapi-object';
+import * as del from 'del';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { array } from 'fp-ts';
-import { getUnsafe, log, runUnsafe } from './utils';
-import { reportIfFailed } from '../src/utils/io-ts';
-import { write } from '../src/utils/fs';
-import * as $RefParser from 'json-schema-ref-parser';
+import { either, taskEither } from 'fp-ts';
+import { identity } from 'fp-ts/lib/function';
+import { TaskEither } from 'fp-ts/lib/TaskEither';
 
-const OUT = path.resolve(__dirname, './out');
-const CWD = path.resolve(__dirname, 'specs');
+const cwd = path.resolve(__dirname);
+const out = path.resolve(cwd, 'out');
 
-async function run() {
-	log('Removing', OUT);
-	await del(OUT);
+const test1 = generate({
+	spec: path.resolve(__dirname, 'specs/json/swagger.json'),
+	out,
+	language: (out, documents) => right(serializeSwagger2(out, documents)),
+	decoder: SwaggerObject,
+});
 
-	const $refs = await $RefParser.resolve(path.resolve(CWD, 'yaml/swagger.yml'), {
-		dereference: {
-			circular: 'ignore',
-		},
-	});
+const test2 = generate({
+	spec: path.resolve(__dirname, 'specs/yaml/swagger.yml'),
+	out,
+	language: (out, documents) => right(serializeSwagger2(out, documents)),
+	decoder: SwaggerObject,
+});
 
-	const specs: Record<string, SwaggerObject> = pipe(
-		Object.entries($refs.values()),
-		array.reduce({}, (acc, [fullPath, spec]) => {
-			log('Decoding', fullPath);
-			return {
-				...acc,
-				[path.relative(CWD, fullPath)]: getUnsafe(reportIfFailed(SwaggerObject.decode(spec))),
-			};
-		}),
-	);
+const test3 = generate({
+	spec: path.resolve(__dirname, 'specs/3.0/nested/link-example.yaml'),
+	out,
+	language: (out, documents, resolveRef) =>
+		serializeOpenAPI3({
+			resolveRef: referenceObject => nullable.fromEither(resolveRef(referenceObject.$ref)),
+		})(out, documents),
+	decoder: OpenapiObjectCodec,
+});
 
-	log('Writing', OUT);
+const clean = taskEither.tryCatch(async () => await del(out), identity);
 
-	await write(OUT, serialize(OUT, specs));
+const rethrow = (e: unknown): never => {
+	throw e;
+};
+const getUnsafe: <A>(ea: Either<unknown, A>) => A = either.fold(rethrow, identity);
+const terminateUnsafe = (e: unknown) => {
+	console.error(e);
+	process.exit(1);
+};
+const runUnsafe = (task: TaskEither<unknown, unknown>): void => {
+	task()
+		.then(getUnsafe)
+		.catch(terminateUnsafe);
+};
 
-	log('Done');
-}
+const program = pipe(
+	clean,
+	// taskEither.chain(() => test2),
+	taskEither.chain(() => test3),
+);
 
-runUnsafe(run);
+runUnsafe(program);
