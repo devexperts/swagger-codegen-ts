@@ -1,4 +1,3 @@
-import { OpenAPIV3 } from 'openapi-types';
 import { directory, Directory, file, File } from '../../../../utils/fs';
 import { collect } from 'fp-ts/lib/Record';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -16,10 +15,11 @@ import { addPathParts, getRelativePath, Ref } from '../../../../utils/ref';
 import { clientRef } from '../utils';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { applyTo } from '../../../../utils/function';
+import { PathsObject } from '../../../../schema/3.0/paths-object';
 
-const groupPathsByTag = (pathsObject: OpenAPIV3.PathsObject): Dictionary<OpenAPIV3.PathsObject> => {
+const groupPathsByTag = (pathsObject: PathsObject): Dictionary<PathsObject> => {
 	const keys = Object.keys(pathsObject);
-	const result: Record<string, OpenAPIV3.PathsObject> = {};
+	const result: Record<string, PathsObject> = {};
 	for (const key of keys) {
 		const path = pathsObject[key];
 		const tag = pipe(
@@ -37,7 +37,7 @@ const groupPathsByTag = (pathsObject: OpenAPIV3.PathsObject): Dictionary<OpenAPI
 
 const serializeGrouppedPaths = combineReader(
 	serializePathItemObject,
-	serializePathItemObject => (from: Ref) => (groupped: OpenAPIV3.PathsObject): Either<Error, File> => {
+	serializePathItemObject => (from: Ref) => (groupped: PathsObject): Either<Error, File> => {
 		const serialized = pipe(
 			serializeDictionary(groupped, (pattern, item) => serializePathItemObject(pattern, item, from)),
 			sequenceEither,
@@ -69,7 +69,7 @@ const serializeGrouppedPaths = combineReader(
 
 export const serializePathsObject = combineReader(
 	serializeGrouppedPaths,
-	serializeGrouppedPaths => (from: Ref) => (pathsObject: OpenAPIV3.PathsObject): Either<Error, Directory> =>
+	serializeGrouppedPaths => (from: Ref) => (pathsObject: PathsObject): Either<Error, Directory> =>
 		pipe(
 			groupPathsByTag(pathsObject),
 			collect((name, groupped) =>

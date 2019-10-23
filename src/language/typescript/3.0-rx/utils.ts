@@ -1,9 +1,9 @@
 import { Nullable } from '../../../utils/nullable';
-import { OpenAPIV3 } from 'openapi-types';
 import { fromString } from '../../../utils/ref';
+import { ReferenceObject } from '../../../schema/3.0/reference-object';
 
 export interface Context {
-	readonly resolveRef: <A = unknown>(referenceObject: OpenAPIV3.ReferenceObject) => Nullable<A>;
+	readonly resolveRef: (referenceObject: ReferenceObject) => Nullable<unknown>;
 }
 
 export const clientRef = fromString('client#/client'); // relative to output root so that all specs share the same client

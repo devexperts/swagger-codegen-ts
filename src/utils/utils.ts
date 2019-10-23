@@ -2,7 +2,6 @@ import { array, uniq, flatten, last } from 'fp-ts/lib/Array';
 import { constant, Endomorphism, identity, tuple } from 'fp-ts/lib/function';
 import { getStructEq, eqString } from 'fp-ts/lib/Eq';
 import { FSEntity } from './fs';
-import { camelize } from '@devexperts/utils/dist/string/string';
 import { alt, map, mapNullable, option, Option, some, chain, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { SwaggerObject } from '../schema/2.0/swagger-object';

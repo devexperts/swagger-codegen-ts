@@ -1,5 +1,4 @@
 import {
-	EMPTY_DEPENDENCIES,
 	monoidDependencies,
 	OPTION_DEPENDENCIES,
 	serializedDependency,

@@ -2,18 +2,17 @@ import { serializeDocument } from './serializers/document';
 
 export { serializeDocument } from './serializers/document';
 
-import { OpenAPIV3 } from 'openapi-types';
 import { format, Options } from 'prettier';
-import { directory, file, fromRef, FSEntity, map as mapFS } from '../../../utils/fs';
+import { directory, fromRef, FSEntity, map as mapFS } from '../../../utils/fs';
 import { Either } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { array, either, record } from 'fp-ts';
+import { either, record } from 'fp-ts';
 import { Dictionary } from '../../../utils/types';
 import { sequenceEither } from '../../../utils/either';
-import { CLIENT_DIRECTORY, CLIENT_FILENAME } from '../common/utils';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { clientRef } from './utils';
+import { OpenapiObject } from '../../../schema/3.0/openapi-object';
 
 const defaultPrettierConfig: Options = {
 	bracketSpacing: true,
@@ -35,7 +34,7 @@ export const serialize = combineReader(
 	serializeDocument,
 	serializeDocument => (
 		out: string,
-		documents: Dictionary<OpenAPIV3.Document>,
+		documents: Dictionary<OpenapiObject>,
 		options: SerializeOptions = {},
 	): Either<Error, FSEntity> => {
 		const serialized = pipe(

@@ -1,7 +1,6 @@
 import { SerializedType } from './serialized-type';
 import { SerializedDependency, monoidDependencies } from './serialized-dependency';
 import { getStructMonoid, Monoid, monoidAny, monoidString } from 'fp-ts/lib/Monoid';
-import { monoidStrings } from '../../../../utils/monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
 import { array, getMonoid } from 'fp-ts/lib/Array';
 import { Ref } from '../../../../utils/ref';

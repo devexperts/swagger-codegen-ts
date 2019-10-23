@@ -1,4 +1,3 @@
-import { OpenAPIV3 } from 'openapi-types';
 import { Either, left } from 'fp-ts/lib/Either';
 import { directory, Directory, File, file } from '../../../../utils/fs';
 import { serializeSchemaObject } from './schema-object';
@@ -14,8 +13,10 @@ import { getIOName, getTypeName } from '../../common/utils';
 import { compactNullables } from '../../../../utils/nullable';
 import { addPathParts, Ref } from '../../../../utils/ref';
 import { applyTo } from '../../../../utils/function';
+import { SchemaObject } from '../../../../schema/3.0/schema-object';
+import { ComponentsObject } from '../../../../schema/3.0/components-object';
 
-const serializeSchema = (from: Ref) => (schema: OpenAPIV3.SchemaObject): Either<Error, File> => {
+const serializeSchema = (from: Ref) => (schema: SchemaObject): Either<Error, File> => {
 	const typeName = getTypeName(from.name);
 	const ioName = getIOName(from.name);
 	const serialized = pipe(
@@ -44,7 +45,7 @@ const serializeSchema = (from: Ref) => (schema: OpenAPIV3.SchemaObject): Either<
 };
 
 export const serializeComponentsObject = (from: Ref) => (
-	componentsObject: OpenAPIV3.ComponentsObject,
+	componentsObject: ComponentsObject,
 ): Either<Error, Directory> => {
 	const schemas = pipe(
 		componentsObject.schemas,

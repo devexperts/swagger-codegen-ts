@@ -1,5 +1,4 @@
-import { isNonEmptyArraySchemaObject, serializeNonArraySchemaObject, serializeSchemaObject } from '../schema-object';
-import { OpenAPIV3 } from 'openapi-types';
+import { serializeNonArraySchemaObject, serializeSchemaObject } from '../schema-object';
 import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
@@ -10,36 +9,16 @@ import {
 	serializedType,
 } from '../../../common/data/serialized-type';
 import { serializedDependency } from '../../../common/data/serialized-dependency';
-import { isLeft, right } from 'fp-ts/lib/Either';
-import { assert, constant, constantFrom, property, record, string } from 'fast-check';
+import { right } from 'fp-ts/lib/Either';
+import { assert, constant, property, record, string } from 'fast-check';
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
-
-const primitiveTypes: OpenAPIV3.NonArraySchemaObject['type'][] = ['null', 'boolean', 'number', 'string', 'integer'];
+import { SchemaObject } from '../../../../../schema/3.0/schema-object';
 
 describe('SchemaObject', () => {
-	describe('isNonEmptyArraySchemaObject', () => {
-		it('should detect', () => {
-			assert(
-				property(constantFrom(...primitiveTypes), type =>
-					expect(isNonEmptyArraySchemaObject({ type })).toBeTruthy(),
-				),
-			);
-			expect(isNonEmptyArraySchemaObject({ type: 'object' })).toBeTruthy();
-			expect(isNonEmptyArraySchemaObject({ type: 'array', items: { $ref: '' } })).toBeFalsy();
-		});
-	});
 	describe('serializeNonArraySchemaObject', () => {
-		it('should fail for objects', () => {
-			expect(isLeft(serializeNonArraySchemaObject({ type: 'object' }))).toBeTruthy();
-		});
 		describe('should serialize', () => {
-			it('null', () => {
-				expect(serializeNonArraySchemaObject({ type: 'null' })).toEqual(
-					right(serializedType('null', 'literal(null)', [serializedDependency('literal', 'io-ts')], [])),
-				);
-			});
 			it('string', () => {
 				expect(serializeNonArraySchemaObject({ type: 'string' })).toEqual(
 					right(serializedType('string', 'string', [serializedDependency('string', 'io-ts')], [])),
@@ -63,14 +42,6 @@ describe('SchemaObject', () => {
 		});
 	});
 	describe('serializeSchemaObject', () => {
-		it('should use serializeNonArraySchemaObject for primitives', () => {
-			const schema = constantFrom(...primitiveTypes).map(type => ({ type }));
-			assert(
-				property($refArbitrary, schema, string(), (from, schema, name) => {
-					expect(serializeSchemaObject(from, name)(schema)).toEqual(serializeNonArraySchemaObject(schema));
-				}),
-			);
-		});
 		describe('array', () => {
 			it('should serialize using getSerializedArrayType', () => {
 				const schema = record({
@@ -97,7 +68,7 @@ describe('SchemaObject', () => {
 			it('should support items.$ref', () => {
 				assert(
 					property($refArbitrary, $refArbitrary, string(), (from, $refArbitrary, name) => {
-						const schema: OpenAPIV3.SchemaObject = {
+						const schema: SchemaObject = {
 							type: 'array',
 							items: {
 								$ref: $refArbitrary.$ref,
@@ -118,7 +89,7 @@ describe('SchemaObject', () => {
 				it('object with array of items of self type', () => {
 					assert(
 						property($refArbitrary, ref => {
-							const schema: OpenAPIV3.SchemaObject = {
+							const schema: SchemaObject = {
 								type: 'object',
 								required: ['children'],
 								properties: {
@@ -147,7 +118,7 @@ describe('SchemaObject', () => {
 				it('object with array of items of object type with one of properties of self type', () => {
 					assert(
 						property($refArbitrary, ref => {
-							const schema: OpenAPIV3.SchemaObject = {
+							const schema: SchemaObject = {
 								type: 'object',
 								required: ['children'],
 								properties: {
@@ -179,7 +150,7 @@ describe('SchemaObject', () => {
 				it('object with additionalProperties of self type', () => {
 					assert(
 						property($refArbitrary, ref => {
-							const schema: OpenAPIV3.SchemaObject = {
+							const schema: SchemaObject = {
 								type: 'object',
 								additionalProperties: {
 									$ref: ref.$ref, // references self

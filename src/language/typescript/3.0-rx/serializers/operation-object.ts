@@ -1,6 +1,5 @@
-import { getJSDoc, getRelativeClientPath, getURL, HTTPMethod } from '../../common/utils';
+import { getJSDoc, getURL, HTTPMethod } from '../../common/utils';
 import { getSerializedRefType, serializedType, SerializedType } from '../../common/data/serialized-type';
-import { OpenAPIV3 } from 'openapi-types';
 import {
 	serializePathParameterObject,
 	serializeQueryParameterObject,
@@ -15,7 +14,7 @@ import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { isReferenceObject, resolveReferenceObject } from './reference-object';
-import { isNonNullable, isNullable, Nullable } from '../../../../utils/nullable';
+import { isNonNullable, Nullable } from '../../../../utils/nullable';
 import {
 	fromSerializedType,
 	intercalateSerializedParameters,
@@ -29,15 +28,18 @@ import { serializeRequestBodyObject } from './request-body-object';
 import { fromArray } from '../../../../utils/non-empty-array';
 import { fromString, getRelativePath, Ref } from '../../../../utils/ref';
 import { clientRef } from '../utils';
+import { OperationObject } from '../../../../schema/3.0/operation-object';
+import { ParameterObject, ParameterObjectCodec } from '../../../../schema/3.0/parameter-object';
+import { RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
 
-const getOperationName = (operation: OpenAPIV3.OperationObject, method: HTTPMethod): string =>
+const getOperationName = (operation: OperationObject, method: HTTPMethod): string =>
 	pipe(
 		operation.operationId,
 		nullable.getOrElse(() => method.toString()),
 	);
 
 interface Parameters {
-	readonly pathParameters: OpenAPIV3.ParameterObject[];
+	readonly pathParameters: ParameterObject[];
 	readonly serializedPathParameters: SerializedPathParameter[];
 	readonly serializedQueryParameters: Nullable<SerializedParameter>;
 	readonly serializedBodyParameter: Nullable<SerializedParameter>;
@@ -45,8 +47,8 @@ interface Parameters {
 
 const getParameters = combineReader(
 	resolveReferenceObject,
-	resolveReferenceObject => (from: Ref) => (operation: OpenAPIV3.OperationObject): Either<Error, Parameters> => {
-		const pathParameters: OpenAPIV3.ParameterObject[] = [];
+	resolveReferenceObject => (from: Ref) => (operation: OperationObject): Either<Error, Parameters> => {
+		const pathParameters: ParameterObject[] = [];
 		const serializedPathParameters: SerializedPathParameter[] = [];
 		const serializedQueryParameters: SerializedParameter[] = [];
 		let serializedBodyParameter: Nullable<SerializedParameter>;
@@ -57,7 +59,12 @@ const getParameters = combineReader(
 				if (isLeft(reference)) {
 					return reference;
 				}
-				const resolved = resolveReferenceObject<OpenAPIV3.ParameterObject>(parameter);
+				const resolved = pipe(
+					parameter,
+					resolveReferenceObject,
+					ParameterObjectCodec.decode,
+					nullable.fromEither,
+				);
 				if (!isNonNullable(resolved)) {
 					return left(new Error(`Unable to resolve parameter with ref ${reference.right.$ref}`));
 				}
@@ -77,8 +84,6 @@ const getParameters = combineReader(
 						break;
 					}
 					case 'header':
-						break;
-					case 'formData':
 						break;
 					case 'path': {
 						pathParameters.push(resolved);
@@ -113,8 +118,6 @@ const getParameters = combineReader(
 					}
 					case 'header':
 						break;
-					case 'formData':
-						break;
 					case 'path': {
 						const serialized = serializePathParameterObject(from)(parameter);
 						if (isLeft(serialized)) {
@@ -143,7 +146,12 @@ const getParameters = combineReader(
 				if (isLeft(reference)) {
 					return left(new Error(`Invalid RequestBodyObject.$ref "${operation.requestBody.$ref}"`));
 				}
-				const resolved = resolveReferenceObject<OpenAPIV3.RequestBodyObject>(operation.requestBody);
+				const resolved = pipe(
+					operation.requestBody,
+					resolveReferenceObject,
+					RequestBodyObjectCodec.decode,
+					nullable.fromEither,
+				);
 				if (!isNonNullable(resolved)) {
 					return left(
 						new Error(`Unable to resolve RequestBodyObject with ref ${operation.requestBody.$ref}`),
@@ -192,7 +200,7 @@ const getParameters = combineReader(
 export const serializeOperationObject = combineReader(
 	getParameters,
 	getParameters => (pattern: string, method: HTTPMethod, from: Ref) => (
-		operation: OpenAPIV3.OperationObject,
+		operation: OperationObject,
 	): Either<Error, SerializedType> => {
 		const parameters = getParameters(from)(operation);
 		const operationName = getOperationName(operation, method);

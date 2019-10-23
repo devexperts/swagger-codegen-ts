@@ -1,4 +1,3 @@
-import { OpenAPIV3 } from 'openapi-types';
 import * as nullable from '../../../../utils/nullable';
 import { flatten } from 'fp-ts/lib/Array';
 import { uniqString } from '../../../../utils/array';
@@ -11,14 +10,11 @@ import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { either } from 'fp-ts';
 import { compactNullables, Nullable } from '../../../../utils/nullable';
 import { Ref } from '../../../../utils/ref';
+import { PathItemObject } from '../../../../schema/3.0/path-item-object';
 
 export const serializePathItemObject = combineReader(
 	serializeOperationObject,
-	serializeOperationObject => (
-		pattern: string,
-		item: OpenAPIV3.PathItemObject,
-		from: Ref,
-	): Either<Error, SerializedType> => {
+	serializeOperationObject => (pattern: string, item: PathItemObject, from: Ref): Either<Error, SerializedType> => {
 		const get = pipe(
 			item.get,
 			nullable.map(serializeOperationObject(pattern, 'GET', from)),
@@ -55,7 +51,7 @@ export const serializePathItemObject = combineReader(
 	},
 );
 
-export const serializePathItemObjectTags = (pathItemObject: OpenAPIV3.PathItemObject): Nullable<string> => {
+export const serializePathItemObjectTags = (pathItemObject: PathItemObject): Nullable<string> => {
 	const operations = compactNullables([
 		pathItemObject.get,
 		pathItemObject.post,

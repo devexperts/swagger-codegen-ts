@@ -1,4 +1,3 @@
-import { OpenAPIV3 } from 'openapi-types';
 import { serializedPathParameter, SerializedPathParameter } from '../../common/data/serialized-path-parameter';
 import {
 	fromSerializedType,
@@ -8,7 +7,7 @@ import {
 } from '../../common/data/serialized-parameter';
 import { serializedDependency } from '../../common/data/serialized-dependency';
 import { Either, left, map, mapLeft, right } from 'fp-ts/lib/Either';
-import { isNonEmptyArraySchemaObject, serializeNonArraySchemaObject } from './schema-object';
+import { isPrimitiveSchemaObject, serializeNonArraySchemaObject } from './schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isReferenceObject } from './reference-object';
 import { either } from 'fp-ts';
@@ -20,11 +19,14 @@ import {
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { unless } from '../../../../utils/string';
 import { fromString, Ref } from '../../../../utils/ref';
+import { ParameterObject } from '../../../../schema/3.0/parameter-object';
+import { ReferenceObject } from '../../../../schema/3.0/reference-object';
+import { PrimitiveSchemaObject, SchemaObject } from '../../../../schema/3.0/schema-object';
 
 const serializeParameterReference = (
 	from: Ref,
-	parameter: OpenAPIV3.ParameterObject,
-	reference: OpenAPIV3.ReferenceObject,
+	parameter: ParameterObject,
+	reference: ReferenceObject,
 ): Either<Error, SerializedParameter> =>
 	pipe(
 		reference.$ref,
@@ -34,11 +36,10 @@ const serializeParameterReference = (
 		either.map(fromSerializedType(parameter.required || false)),
 	);
 
-const forParameter = (parameter: OpenAPIV3.ParameterObject): string =>
-	`for parameter "${parameter.name}" in "${parameter.in}"`;
+const forParameter = (parameter: ParameterObject): string => `for parameter "${parameter.name}" in "${parameter.in}"`;
 
 const serializePathOrQueryParameterObject = (from: Ref) => (
-	parameter: OpenAPIV3.ParameterObject,
+	parameter: ParameterObject,
 ): Either<Error, SerializedParameter> => {
 	const { schema, required = false } = parameter;
 	if (!schema) {
@@ -51,7 +52,6 @@ const serializePathOrQueryParameterObject = (from: Ref) => (
 		return serializeParameterReference(from, parameter, schema);
 	} else {
 		switch (schema.type) {
-			case 'null':
 			case 'string':
 			case 'number':
 			case 'integer':
@@ -71,7 +71,7 @@ const serializePathOrQueryParameterObject = (from: Ref) => (
 				} else {
 					return pipe(
 						schema.items,
-						validateNonEmptyArraySchemaObjects(parameter),
+						validatePrimitiveShemaObject(parameter),
 						either.chain(serializeNonArraySchemaObject),
 						either.map(getSerializedArrayType()),
 						either.map(fromSerializedType(required)),
@@ -84,15 +84,15 @@ const serializePathOrQueryParameterObject = (from: Ref) => (
 	return left(new Error(`Serialization failed ${forParameter(parameter)}`));
 };
 
-const validateNonEmptyArraySchemaObjects = (parameter: OpenAPIV3.ParameterObject) => (
-	schema: OpenAPIV3.SchemaObject,
-): Either<Error, OpenAPIV3.NonArraySchemaObject> =>
-	!isNonEmptyArraySchemaObject(schema)
-		? left(new Error(`Array items should be NonEmptyArraySchemaObjects ${forParameter(parameter)}`))
+const validatePrimitiveShemaObject = (parameter: ParameterObject) => (
+	schema: SchemaObject,
+): Either<Error, PrimitiveSchemaObject> =>
+	!isPrimitiveSchemaObject(schema)
+		? left(new Error(`Array items should be PrimitiveSchemaObjects ${forParameter(parameter)}`))
 		: right(schema);
 
 export const serializePathParameterObject = (from: Ref) => (
-	parameter: OpenAPIV3.ParameterObject,
+	parameter: ParameterObject,
 ): Either<Error, SerializedPathParameter> =>
 	pipe(
 		parameter,
@@ -110,7 +110,7 @@ export const serializePathParameterObject = (from: Ref) => (
 	);
 
 export const serializeQueryParameterObject = (from: Ref) => (
-	parameter: OpenAPIV3.ParameterObject,
+	parameter: ParameterObject,
 ): Either<Error, SerializedParameter> =>
 	pipe(
 		parameter,

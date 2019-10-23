@@ -3,10 +3,11 @@ import { constUndefined, identity, Predicate } from 'fp-ts/lib/function';
 import { pipeable } from 'fp-ts/lib/pipeable';
 import { Filterable1 } from 'fp-ts/lib/Filterable';
 import { isSome, toUndefined } from 'fp-ts/lib/Option';
-import { isLeft, isRight } from 'fp-ts/lib/Either';
+import { Either, isLeft, isRight } from 'fp-ts/lib/Either';
 import { Separated } from 'fp-ts/lib/Compactable';
 import { Alternative1 } from 'fp-ts/lib/Alternative';
 import { sequenceT } from 'fp-ts/lib/Apply';
+import { either } from 'fp-ts';
 
 export type Nullable<A> = A | null | undefined;
 
@@ -88,3 +89,4 @@ export const tryCatch = <A>(thunk: () => A): Nullable<A> => {
 	}
 };
 export const sequenceTNullable = sequenceT(nullable);
+export const fromEither: <A>(ea: Either<unknown, A>) => Nullable<A> = either.fold(constUndefined, identity);

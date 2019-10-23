@@ -1,4 +1,3 @@
-import { OpenAPIV3 } from 'openapi-types';
 import {
 	SERIALIZED_UNKNOWN_TYPE,
 	SerializedType,
@@ -12,7 +11,7 @@ import {
 	intercalateSerializedTypes,
 } from '../../common/data/serialized-type';
 import { serializedDependency } from '../../common/data/serialized-dependency';
-import { Either, left, mapLeft, right } from 'fp-ts/lib/Either';
+import { Either, mapLeft, right } from 'fp-ts/lib/Either';
 import { isReferenceObject } from './reference-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
@@ -22,21 +21,17 @@ import { constFalse } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
 import { sequenceEither } from '../../../../utils/either';
 import { fromString, Ref } from '../../../../utils/ref';
-import { string } from 'io-ts';
+import { PrimitiveSchemaObject, SchemaObject } from '../../../../schema/3.0/schema-object';
+import { ReferenceObject } from '../../../../schema/3.0/reference-object';
 
-type AdditionalProperties = boolean | OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
-type AllowedAdditionalProperties = true | OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
+type AdditionalProperties = boolean | ReferenceObject | SchemaObject;
+type AllowedAdditionalProperties = true | ReferenceObject | SchemaObject;
 const isAllowedAdditionalProperties = (
 	additionalProperties: AdditionalProperties,
 ): additionalProperties is AllowedAdditionalProperties => additionalProperties !== false;
 
-export const serializeNonArraySchemaObject = (
-	schemaObject: OpenAPIV3.NonArraySchemaObject,
-): Either<Error, SerializedType> => {
+export const serializeNonArraySchemaObject = (schemaObject: PrimitiveSchemaObject): Either<Error, SerializedType> => {
 	switch (schemaObject.type) {
-		case 'null': {
-			return right(serializedType('null', 'literal(null)', [serializedDependency('literal', 'io-ts')], []));
-		}
 		case 'string': {
 			return right(serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []));
 		}
@@ -47,28 +42,22 @@ export const serializeNonArraySchemaObject = (
 		case 'number': {
 			return right(serializedType('number', 'number', [serializedDependency('number', 'io-ts')], []));
 		}
-		case 'object': {
-			return left(new Error('Objects are not supported as NonArraySchemaObject type'));
-		}
 	}
 };
 
-export const isNonEmptyArraySchemaObject = (
-	schemaObject: OpenAPIV3.SchemaObject,
-): schemaObject is OpenAPIV3.NonArraySchemaObject =>
-	['null', 'boolean', 'object', 'number', 'string', 'integer'].includes(schemaObject.type);
+export const isPrimitiveSchemaObject = (schemaObject: SchemaObject): schemaObject is PrimitiveSchemaObject =>
+	['boolean', 'number', 'string', 'integer'].includes(schemaObject.type);
 
 export const serializeSchemaObject = (
 	from: Ref,
 	name?: string,
-): ((schemaObject: OpenAPIV3.SchemaObject) => Either<Error, SerializedType>) =>
+): ((schemaObject: SchemaObject) => Either<Error, SerializedType>) =>
 	serializeSchemaObjectWithRecursion(from, true, name);
 
 const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boolean, name?: string) => (
-	schemaObject: OpenAPIV3.SchemaObject,
+	schemaObject: SchemaObject,
 ): Either<Error, SerializedType> => {
 	switch (schemaObject.type) {
-		case 'null':
 		case 'boolean':
 		case 'number':
 		case 'string':

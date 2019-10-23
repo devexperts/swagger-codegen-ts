@@ -1,4 +1,3 @@
-import { OpenAPIV3 } from 'openapi-types';
 import {
 	intercalateSerializedTypes,
 	serializedType,
@@ -19,9 +18,10 @@ import { array, either } from 'fp-ts';
 import { isReferenceObject } from './reference-object';
 import { Either, mapLeft } from 'fp-ts/lib/Either';
 import { fromString, Ref } from '../../../../utils/ref';
+import { ResponsesObject } from '../../../../schema/3.0/responses-object';
 
 export const serializeResponsesObject = (from: Ref) => (
-	responsesObject: OpenAPIV3.ResponsesObject,
+	responsesObject: ResponsesObject,
 ): Either<Error, SerializedType> => {
 	const serializedResponses = pipe(
 		SUCCESSFUL_CODES,
