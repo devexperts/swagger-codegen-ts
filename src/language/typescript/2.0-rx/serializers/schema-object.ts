@@ -39,7 +39,9 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 		case undefined: {
 			if (is$ref(schema)) {
 				const $ref = schema.$ref;
-				const parts = fromNullable($ref.match(/^((.+)\/(.+)\.(.+))?#\/(.+)\/(.+)$/));
+				const parts = fromNullable($ref.match(/^((.+)\/(.+))?#\/(.+)\/(.+)$/));
+				//											      2     3        4     5
+				const parsedRef = fromString(schema.$ref);
 
 				const refFileName = pipe(
 					parts,
@@ -47,14 +49,13 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 				);
 				const defBlock = pipe(
 					parts,
-					mapNullable(parts => parts[5]),
+					mapNullable(parts => parts[4]),
 				);
 				const safeType = pipe(
 					parts,
-					mapNullable(parts => parts[6]),
+					mapNullable(parts => parts[5]),
 				);
 
-				const parsedRef = fromString(schema.$ref);
 				if (isNone(safeType) || isNone(defBlock) || isLeft(parsedRef)) {
 					throw new Error(`Invalid $ref: ${$ref}`);
 				}
@@ -63,6 +64,15 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 
 				const io = getIOName(type);
 				const isRecursive = isNone(refFileName) && (rootName === type || rootName === io);
+				if (isSome(refFileName)) {
+					console.table({
+						refFileName,
+						cwd,
+						defBlockValue: defBlock.value,
+						refFileNameValue: refFileName.value,
+						type,
+					});
+				}
 				const definitionFilePath = isSome(refFileName)
 					? getRelativeOutRefPath(cwd, defBlock.value, refFileName.value, type)
 					: getRelativeRefPath(cwd, defBlock.value, type);

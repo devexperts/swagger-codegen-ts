@@ -1,4 +1,4 @@
-import { Arbitrary, array, assert, boolean, constant, oneof, property, string, tuple } from 'fast-check';
+import { array, assert, boolean, constant, oneof, property, string, tuple } from 'fast-check';
 import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
@@ -17,7 +17,7 @@ import { arbitrary } from '../../../../../utils/fast-check';
 import { none, some } from 'fp-ts/lib/Option';
 import { getIOName, getTypeName } from '../../utils';
 import { when } from '../../../../../utils/string';
-import { isNonNullable, Nullable } from '../../../../../utils/nullable';
+import { isNonNullable } from '../../../../../utils/nullable';
 
 export const serializedTypeArbitrary = tuple(
 	string(),

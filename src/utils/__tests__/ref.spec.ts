@@ -1,4 +1,4 @@
-import { Ref, fromString, getRelativePath, getFullPath } from '../ref';
+import { Ref, fromString, getRelativePath } from '../ref';
 import { Arbitrary, assert, property, string, tuple } from 'fast-check';
 import { trim } from '../string';
 import { arbitrary, nonEmptyArray } from '../fast-check';
@@ -6,7 +6,6 @@ import { last } from 'fp-ts/lib/NonEmptyArray';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isRight, right } from 'fp-ts/lib/Either';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
-import { either } from 'fp-ts';
 
 export const $refArbitrary: Arbitrary<Ref> = pipe(
 	tuple(string(), nonEmptyArray(string(1, 10).filter(s => !s.includes('/')))),

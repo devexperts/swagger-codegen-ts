@@ -57,7 +57,8 @@ const runUnsafe = (task: TaskEither<unknown, unknown>): void => {
 
 const program = pipe(
 	clean,
-	// taskEither.chain(() => test2),
+	taskEither.chain(() => test1),
+	taskEither.chain(() => test2),
 	taskEither.chain(() => test3),
 );
 
