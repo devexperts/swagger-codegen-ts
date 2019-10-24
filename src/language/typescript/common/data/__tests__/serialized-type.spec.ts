@@ -8,7 +8,6 @@ import {
 	getSerializedRefType,
 	serializedType,
 } from '../serialized-type';
-import { serializedDependencyArbitrary } from './serialized-dependency.spec';
 import { serializedDependency } from '../serialized-dependency';
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
 import { getRelativePath } from '../../../../../utils/ref';
@@ -17,6 +16,8 @@ import { arbitrary } from '../../../../../utils/fast-check';
 import { none, some } from 'fp-ts/lib/Option';
 import { getIOName, getTypeName } from '../../utils';
 import { when } from '../../../../../utils/string';
+
+const serializedDependencyArbitrary = tuple(string(), string()).map(([name, path]) => serializedDependency(name, path));
 
 export const serializedTypeArbitrary = tuple(
 	string(),
