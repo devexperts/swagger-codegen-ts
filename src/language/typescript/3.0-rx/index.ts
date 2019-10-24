@@ -6,7 +6,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { either, record } from 'fp-ts';
 import { Dictionary } from '../../../utils/types';
-import { sequenceEither } from '../../../utils/either';
+import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { OpenapiObject } from '../../../schema/3.0/openapi-object';
 import { defaultPrettierConfig, SerializeOptions } from '../common/utils';
 

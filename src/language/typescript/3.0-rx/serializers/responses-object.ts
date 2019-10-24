@@ -9,12 +9,10 @@ import {
 import { SUCCESSFUL_CODES } from '../../common/utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializeResponseObject } from './response-object';
-import { compactNullables } from '../../../../utils/nullable';
-import * as nullable from '../../../../utils/nullable';
 import { serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIfL } from '../../../../utils/array';
-import { sequenceEither } from '../../../../utils/either';
-import { array, either } from 'fp-ts';
+import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
+import { array, either, option, record } from 'fp-ts';
 import { isReferenceObject } from './reference-object';
 import { Either, mapLeft } from 'fp-ts/lib/Either';
 import { fromString, Ref } from '../../../../utils/ref';
@@ -27,8 +25,8 @@ export const serializeResponsesObject = (from: Ref) => (
 		SUCCESSFUL_CODES,
 		array.map(code =>
 			pipe(
-				responsesObject[code],
-				nullable.map(r =>
+				record.lookup(code, responsesObject),
+				option.map(r =>
 					isReferenceObject(r)
 						? pipe(
 								r.$ref,
@@ -40,7 +38,7 @@ export const serializeResponsesObject = (from: Ref) => (
 				),
 			),
 		),
-		compactNullables,
+		array.compact,
 		sequenceEither,
 		either.map(uniqSerializedTypesWithoutDependencies),
 	);

@@ -2,15 +2,13 @@ import { Either, left } from 'fp-ts/lib/Either';
 import { directory, Directory, File, file } from '../../../../utils/fs';
 import { serializeSchemaObject } from './schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
-import * as nullable from '../../../../utils/nullable';
 import { isReferenceObject } from './reference-object';
 import { serializeDictionary } from '../../../../utils/types';
-import { sequenceEither } from '../../../../utils/either';
-import { either } from 'fp-ts';
+import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
+import { array, either, option } from 'fp-ts';
 import { serializeDependencies } from '../../common/data/serialized-dependency';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { getIOName, getTypeName } from '../../common/utils';
-import { compactNullables } from '../../../../utils/nullable';
 import { addPathParts, Ref } from '../../../../utils/ref';
 import { applyTo } from '../../../../utils/function';
 import { SchemaObject } from '../../../../schema/3.0/schema-object';
@@ -49,7 +47,7 @@ export const serializeComponentsObject = (from: Ref) => (
 ): Either<Error, Directory> => {
 	const schemas = pipe(
 		componentsObject.schemas,
-		nullable.map(schemas =>
+		option.map(schemas =>
 			pipe(
 				serializeDictionary(schemas, (name, schema) => {
 					if (isReferenceObject(schema)) {
@@ -71,7 +69,7 @@ export const serializeComponentsObject = (from: Ref) => (
 		),
 	);
 	return pipe(
-		compactNullables([schemas]),
+		array.compact([schemas]),
 		sequenceEither,
 		either.map(content => directory('components', content)),
 	);

@@ -1,9 +1,11 @@
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import * as t from 'io-ts';
-import { Context, Mixed, record, RecordC, string, StringC, Validation, ValidationError } from 'io-ts';
+import { Context, Mixed, record, RecordC, string, StringC, Type, Validation, ValidationError } from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { array, either, option } from 'fp-ts';
 import { Either } from 'fp-ts/lib/Either';
+
+export interface Codec<A> extends Type<A, unknown> {}
 
 export const stringOption = optionFromNullable(t.string);
 export const booleanOption = optionFromNullable(t.boolean);

@@ -1,58 +1,57 @@
-import * as nullable from '../../../../utils/nullable';
 import { flatten } from 'fp-ts/lib/Array';
 import { uniqString } from '../../../../utils/array';
 import { foldSerializedTypes, SerializedType } from '../../common/data/serialized-type';
 import { serializeOperationObject } from './operation-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Either } from 'fp-ts/lib/Either';
-import { sequenceEither } from '../../../../utils/either';
+import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { either } from 'fp-ts';
-import { compactNullables, Nullable } from '../../../../utils/nullable';
+import { array, either, nonEmptyArray, option } from 'fp-ts';
 import { Ref } from '../../../../utils/ref';
 import { PathItemObject } from '../../../../schema/3.0/path-item-object';
+import { Option } from 'fp-ts/lib/Option';
 
 export const serializePathItemObject = combineReader(
 	serializeOperationObject,
 	serializeOperationObject => (pattern: string, item: PathItemObject, from: Ref): Either<Error, SerializedType> => {
 		const get = pipe(
 			item.get,
-			nullable.map(serializeOperationObject(pattern, 'GET', from)),
+			option.map(serializeOperationObject(pattern, 'GET', from)),
 		);
 		const post = pipe(
 			item.post,
-			nullable.map(serializeOperationObject(pattern, 'POST', from)),
+			option.map(serializeOperationObject(pattern, 'POST', from)),
 		);
 		const put = pipe(
 			item.put,
-			nullable.map(serializeOperationObject(pattern, 'PUT', from)),
+			option.map(serializeOperationObject(pattern, 'PUT', from)),
 		);
 		const remove = pipe(
 			item.delete,
-			nullable.map(serializeOperationObject(pattern, 'DELETE', from)),
+			option.map(serializeOperationObject(pattern, 'DELETE', from)),
 		);
 		const patch = pipe(
 			item.patch,
-			nullable.map(serializeOperationObject(pattern, 'PATCH', from)),
+			option.map(serializeOperationObject(pattern, 'PATCH', from)),
 		);
 		const head = pipe(
 			item.head,
-			nullable.map(serializeOperationObject(pattern, 'HEAD', from)),
+			option.map(serializeOperationObject(pattern, 'HEAD', from)),
 		);
 		const options = pipe(
 			item.options,
-			nullable.map(serializeOperationObject(pattern, 'OPTIONS', from)),
+			option.map(serializeOperationObject(pattern, 'OPTIONS', from)),
 		);
 		return pipe(
-			compactNullables([get, post, put, remove, patch, head, options]),
+			array.compact([get, post, put, remove, patch, head, options]),
 			sequenceEither,
 			either.map(foldSerializedTypes),
 		);
 	},
 );
 
-export const serializePathItemObjectTags = (pathItemObject: PathItemObject): Nullable<string> => {
-	const operations = compactNullables([
+export const serializePathItemObjectTags = (pathItemObject: PathItemObject): Option<string> => {
+	const operations = [
 		pathItemObject.get,
 		pathItemObject.post,
 		pathItemObject.put,
@@ -61,12 +60,11 @@ export const serializePathItemObjectTags = (pathItemObject: PathItemObject): Nul
 		pathItemObject.head,
 		pathItemObject.patch,
 		pathItemObject.trace,
-	]);
-	if (operations.length > 0) {
-		const tags = uniqString(flatten(compactNullables(operations.map(operation => operation.tags))));
-
-		if (tags.length > 0) {
-			return tags.join('').replace(/\s/g, '');
-		}
-	}
+	];
+	return pipe(
+		nonEmptyArray.fromArray(array.compact(operations)),
+		option.map(operations => uniqString(flatten(array.compact(operations.map(operation => operation.tags))))),
+		option.chain(nonEmptyArray.fromArray),
+		option.map(tags => tags.join('').replace(/\s/g, '')),
+	);
 };

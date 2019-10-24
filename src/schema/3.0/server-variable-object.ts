@@ -1,20 +1,19 @@
-import { array, intersection, partial, string, type } from 'io-ts';
+import { array, string, type } from 'io-ts';
+import { Codec } from '../../utils/io-ts';
+import { Option } from 'fp-ts/lib/Option';
+import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 
 export interface ServerVariableObject {
-	readonly enum?: string[];
+	readonly enum: Option<string[]>;
 	readonly default: string;
-	readonly description?: string;
+	readonly description: Option<string>;
 }
 
-export const ServerVariableObjectCodec = intersection(
-	[
-		type({
-			default: string,
-		}),
-		partial({
-			enum: array(string),
-			description: string,
-		}),
-	],
+export const ServerVariableObjectCodec: Codec<ServerVariableObject> = type(
+	{
+		default: string,
+		enum: optionFromNullable(array(string)),
+		description: optionFromNullable(string),
+	},
 	'ServerVariableObject',
 );

@@ -4,11 +4,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { Either } from 'fp-ts/lib/Either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { serializeComponentsObject } from './components-object';
-import * as nullable from '../../../../utils/nullable';
-import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
-import { sequenceEither } from '../../../../utils/either';
+import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { fromString } from '../../../../utils/ref';
-import { either } from 'fp-ts';
+import { array, either, option } from 'fp-ts';
 import { applyTo } from '../../../../utils/function';
 import { OpenapiObject } from '../../../../schema/3.0/openapi-object';
 import { clientRef } from '../utils';
@@ -27,7 +25,7 @@ export const serializeDocument = combineReader(
 
 		const components = pipe(
 			document.components,
-			nullable.map(components =>
+			option.map(components =>
 				pipe(
 					componentsRef,
 					either.map(serializeComponentsObject),
@@ -37,7 +35,7 @@ export const serializeDocument = combineReader(
 		);
 
 		const additional = pipe(
-			nullable.compactNullables([components]),
+			array.compact([components]),
 			sequenceEither,
 		);
 		return combineEither(paths, additional, clientRef, (paths, additional, clientRef) =>

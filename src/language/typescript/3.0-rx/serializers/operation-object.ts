@@ -5,16 +5,14 @@ import {
 	serializeQueryParameterObject,
 	foldSerializedQueryParameters,
 } from './parameter-object';
-import * as nullable from '../../../../utils/nullable';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializedDependency } from '../../common/data/serialized-dependency';
 import { serializeResponsesObject } from './responses-object';
-import { array, either } from 'fp-ts';
+import { array, either, nonEmptyArray, option } from 'fp-ts';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { isReferenceObject, resolveReferenceObject } from './reference-object';
-import { isNonNullable, Nullable } from '../../../../utils/nullable';
 import {
 	fromSerializedType,
 	intercalateSerializedParameters,
@@ -25,24 +23,26 @@ import { fromSerializedParameter, SerializedPathParameter } from '../../common/d
 import { concatIf, concatIfL } from '../../../../utils/array';
 import { unless, when } from '../../../../utils/string';
 import { serializeRequestBodyObject } from './request-body-object';
-import { fromArray } from '../../../../utils/non-empty-array';
 import { fromString, getRelativePath, Ref } from '../../../../utils/ref';
 import { clientRef } from '../utils';
 import { OperationObject } from '../../../../schema/3.0/operation-object';
 import { ParameterObject, ParameterObjectCodec } from '../../../../schema/3.0/parameter-object';
 import { RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
+import { isSome, none, Option, some } from 'fp-ts/lib/Option';
+import { ReferenceObject } from '../../../../schema/3.0/reference-object';
+import { constFalse } from 'fp-ts/lib/function';
 
 const getOperationName = (operation: OperationObject, method: HTTPMethod): string =>
 	pipe(
 		operation.operationId,
-		nullable.getOrElse(() => method.toString()),
+		option.getOrElse(() => method.toString()),
 	);
 
 interface Parameters {
 	readonly pathParameters: ParameterObject[];
 	readonly serializedPathParameters: SerializedPathParameter[];
-	readonly serializedQueryParameters: Nullable<SerializedParameter>;
-	readonly serializedBodyParameter: Nullable<SerializedParameter>;
+	readonly serializedQueryParameters: Option<SerializedParameter>;
+	readonly serializedBodyParameter: Option<SerializedParameter>;
 }
 
 const getParameters = combineReader(
@@ -51,9 +51,14 @@ const getParameters = combineReader(
 		const pathParameters: ParameterObject[] = [];
 		const serializedPathParameters: SerializedPathParameter[] = [];
 		const serializedQueryParameters: SerializedParameter[] = [];
-		let serializedBodyParameter: Nullable<SerializedParameter>;
+		let serializedBodyParameter: Option<SerializedParameter> = none;
 
-		for (const parameter of operation.parameters || []) {
+		const parameters = pipe(
+			operation.parameters,
+			option.getOrElse<Array<ReferenceObject | ParameterObject>>(() => array.empty),
+		);
+
+		for (const parameter of parameters) {
 			if (isReferenceObject(parameter)) {
 				const reference = fromString(parameter.$ref);
 				if (isLeft(reference)) {
@@ -63,9 +68,9 @@ const getParameters = combineReader(
 					parameter,
 					resolveReferenceObject,
 					ParameterObjectCodec.decode,
-					nullable.fromEither,
+					option.fromEither,
 				);
-				if (!isNonNullable(resolved)) {
+				if (!isSome(resolved)) {
 					return left(new Error(`Unable to resolve parameter with ref ${reference.right.$ref}`));
 				}
 				const serializedReference = pipe(
@@ -73,12 +78,17 @@ const getParameters = combineReader(
 					getSerializedRefType(from),
 				);
 
-				switch (resolved.in) {
+				switch (resolved.value.in) {
 					case 'query': {
 						serializedQueryParameters.push(
 							pipe(
 								serializedReference,
-								fromSerializedType(resolved.required || false),
+								fromSerializedType(
+									pipe(
+										resolved.value.required,
+										option.getOrElse(constFalse),
+									),
+								),
 							),
 						);
 						break;
@@ -86,12 +96,12 @@ const getParameters = combineReader(
 					case 'header':
 						break;
 					case 'path': {
-						pathParameters.push(resolved);
+						pathParameters.push(resolved.value);
 						serializedPathParameters.push(
 							pipe(
 								serializedReference,
 								fromSerializedType(true),
-								fromSerializedParameter(resolved.name),
+								fromSerializedParameter(resolved.value.name),
 							),
 						);
 						break;
@@ -99,8 +109,8 @@ const getParameters = combineReader(
 					default: {
 						return left(
 							new Error(
-								`Unsupported ParameterObject "in" value "${resolved.in}" for parameter "${
-									resolved.name
+								`Unsupported ParameterObject "in" value "${resolved.value.in}" for parameter "${
+									resolved.value.name
 								}"`,
 							),
 						);
@@ -140,47 +150,52 @@ const getParameters = combineReader(
 			}
 		}
 
-		if (isNonNullable(operation.requestBody)) {
-			if (isReferenceObject(operation.requestBody)) {
-				const reference = fromString(operation.requestBody.$ref);
+		if (isSome(operation.requestBody)) {
+			const requestBody = operation.requestBody.value;
+			if (isReferenceObject(requestBody)) {
+				const reference = fromString(requestBody.$ref);
 				if (isLeft(reference)) {
-					return left(new Error(`Invalid RequestBodyObject.$ref "${operation.requestBody.$ref}"`));
+					return left(new Error(`Invalid RequestBodyObject.$ref "${requestBody.$ref}"`));
 				}
-				const resolved = pipe(
-					operation.requestBody,
-					resolveReferenceObject,
-					RequestBodyObjectCodec.decode,
-					nullable.fromEither,
-				);
-				if (!isNonNullable(resolved)) {
-					return left(
-						new Error(`Unable to resolve RequestBodyObject with ref ${operation.requestBody.$ref}`),
-					);
+				const resolved = option.fromEither(RequestBodyObjectCodec.decode(resolveReferenceObject(requestBody)));
+
+				if (!isSome(resolved)) {
+					return left(new Error(`Unable to resolve RequestBodyObject with ref ${requestBody.$ref}`));
 				}
 				const serializedReference = pipe(
 					reference.right,
 					getSerializedRefType(from),
 				);
-				if (!isNonNullable(serializedReference)) {
-					return left(new Error(`Unable to serialize RequestBodyObject ref ${operation.requestBody.$ref}`));
-				}
 
 				serializedBodyParameter = pipe(
 					serializedReference,
-					fromSerializedType(resolved.required || false),
+					fromSerializedType(
+						pipe(
+							resolved.value.required,
+							option.getOrElse(constFalse),
+						),
+					),
 					toBodyParameter,
+					some,
 				);
 			} else {
 				const serialized = pipe(
-					operation.requestBody,
+					requestBody,
 					serializeRequestBodyObject(from),
-					either.map(fromSerializedType(operation.requestBody.required || false)),
+					either.map(
+						fromSerializedType(
+							pipe(
+								requestBody.required,
+								option.getOrElse(constFalse),
+							),
+						),
+					),
 					either.map(toBodyParameter),
 				);
 				if (isLeft(serialized)) {
 					return serialized;
 				}
-				serializedBodyParameter = serialized.right;
+				serializedBodyParameter = some(serialized.right);
 			}
 		}
 
@@ -188,9 +203,8 @@ const getParameters = combineReader(
 			pathParameters,
 			serializedPathParameters,
 			serializedQueryParameters: pipe(
-				serializedQueryParameters,
-				fromArray,
-				nullable.map(foldSerializedQueryParameters),
+				nonEmptyArray.fromArray(serializedQueryParameters),
+				option.map(foldSerializedQueryParameters),
 			),
 			serializedBodyParameter,
 		});
@@ -207,7 +221,7 @@ export const serializeOperationObject = combineReader(
 
 		const deprecated = pipe(
 			operation.deprecated,
-			nullable.map(() => '@deprecated'),
+			option.map(() => '@deprecated'),
 		);
 
 		const serializedResponses = pipe(
@@ -231,10 +245,10 @@ export const serializeOperationObject = combineReader(
 
 				const serializedParameters = intercalateSerializedParameters(
 					serializedParameter(',', ';', false, [], []),
-					nullable.compactNullables([serializedQueryParameters, serializedBodyParameter]),
+					array.compact([serializedQueryParameters, serializedBodyParameter]),
 				);
-				const hasQueryParameters = isNonNullable(serializedQueryParameters);
-				const hasBodyParameter = isNonNullable(serializedBodyParameter);
+				const hasQueryParameters = isSome(serializedQueryParameters);
+				const hasBodyParameter = isSome(serializedBodyParameter);
 				const hasParameters = hasQueryParameters || hasBodyParameter;
 
 				const argsName = pipe(
@@ -250,7 +264,7 @@ export const serializeOperationObject = combineReader(
 				).join(',');
 
 				const type = `
-				${getJSDoc(nullable.compactNullables([deprecated, operation.summary]))}
+				${getJSDoc(array.compact([deprecated, operation.summary]))}
 				readonly ${operationName}: (${argsType}) => LiveData<Error, ${serializedResponses.type}>;
 			`;
 

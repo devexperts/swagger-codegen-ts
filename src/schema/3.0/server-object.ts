@@ -1,21 +1,20 @@
 import { ServerVariableObject, ServerVariableObjectCodec } from './server-variable-object';
-import { intersection, partial, record, string, type } from 'io-ts';
+import { record, string, type } from 'io-ts';
+import { Option } from 'fp-ts/lib/Option';
+import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
+import { Codec } from '../../utils/io-ts';
 
 export interface ServerObject {
 	readonly url: string;
-	readonly description?: string;
-	readonly variables?: Record<string, ServerVariableObject>;
+	readonly description: Option<string>;
+	readonly variables: Option<Record<string, ServerVariableObject>>;
 }
 
-export const ServerObjectCodec = intersection(
-	[
-		type({
-			url: string,
-		}),
-		partial({
-			description: string,
-			variables: record(string, ServerVariableObjectCodec),
-		}),
-	],
+export const ServerObjectCodec: Codec<ServerObject> = type(
+	{
+		url: string,
+		description: optionFromNullable(string),
+		variables: optionFromNullable(record(string, ServerVariableObjectCodec)),
+	},
 	'ServerObject',
 );

@@ -10,7 +10,7 @@ import { Either, left, map, mapLeft, right } from 'fp-ts/lib/Either';
 import { isPrimitiveSchemaObject, serializeNonArraySchemaObject } from './schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isReferenceObject } from './reference-object';
-import { either } from 'fp-ts';
+import { either, option } from 'fp-ts';
 import {
 	getSerializedArrayType,
 	getSerializedPropertyType,
@@ -22,6 +22,7 @@ import { fromString, Ref } from '../../../../utils/ref';
 import { ParameterObject } from '../../../../schema/3.0/parameter-object';
 import { ReferenceObject } from '../../../../schema/3.0/reference-object';
 import { PrimitiveSchemaObject, SchemaObject } from '../../../../schema/3.0/schema-object';
+import { constFalse } from 'fp-ts/lib/function';
 
 const serializeParameterReference = (
 	from: Ref,
@@ -33,56 +34,57 @@ const serializeParameterReference = (
 		fromString,
 		mapLeft(() => new Error(`Invalid $ref "${reference.$ref}" ${forParameter(parameter)}`)),
 		either.map(getSerializedRefType(from)),
-		either.map(fromSerializedType(parameter.required || false)),
+		either.map(fromSerializedType(isRequired(parameter))),
 	);
 
 const forParameter = (parameter: ParameterObject): string => `for parameter "${parameter.name}" in "${parameter.in}"`;
 
 const serializePathOrQueryParameterObject = (from: Ref) => (
 	parameter: ParameterObject,
-): Either<Error, SerializedParameter> => {
-	const { schema, required = false } = parameter;
-	if (!schema) {
-		return left(new Error(`No schema provided ${forParameter(parameter)}`));
-	}
-
-	const toSerializedParameter = fromSerializedType(required);
-
-	if (isReferenceObject(schema)) {
-		return serializeParameterReference(from, parameter, schema);
-	} else {
-		switch (schema.type) {
-			case 'string':
-			case 'number':
-			case 'integer':
-			case 'boolean': {
-				return pipe(
-					schema,
-					serializeNonArraySchemaObject,
-					either.map(toSerializedParameter),
-				);
-			}
-			case 'object': {
-				return left(new Error(`"object" type is not supported ${forParameter(parameter)}`));
-			}
-			case 'array': {
-				if (isReferenceObject(schema.items)) {
-					return serializeParameterReference(from, parameter, schema.items);
+): Either<Error, SerializedParameter> =>
+	pipe(
+		parameter.schema,
+		option.fold(
+			() => left(new Error(`No schema provided ${forParameter(parameter)}`)),
+			schema => {
+				if (isReferenceObject(schema)) {
+					return serializeParameterReference(from, parameter, schema);
 				} else {
-					return pipe(
-						schema.items,
-						validatePrimitiveShemaObject(parameter),
-						either.chain(serializeNonArraySchemaObject),
-						either.map(getSerializedArrayType()),
-						either.map(fromSerializedType(required)),
-					);
+					const required = isRequired(parameter);
+					const toSerializedParameter = fromSerializedType(required);
+					switch (schema.type) {
+						case 'string':
+						case 'number':
+						case 'integer':
+						case 'boolean': {
+							return pipe(
+								schema,
+								serializeNonArraySchemaObject,
+								either.map(toSerializedParameter),
+							);
+						}
+						case 'object': {
+							return left(new Error(`"object" type is not supported ${forParameter(parameter)}`));
+						}
+						case 'array': {
+							if (isReferenceObject(schema.items)) {
+								return serializeParameterReference(from, parameter, schema.items);
+							} else {
+								return pipe(
+									schema.items,
+									validatePrimitiveShemaObject(parameter),
+									either.chain(serializeNonArraySchemaObject),
+									either.map(getSerializedArrayType()),
+									either.map(fromSerializedType(required)),
+								);
+							}
+						}
+					}
 				}
-			}
-		}
-	}
-
-	return left(new Error(`Serialization failed ${forParameter(parameter)}`));
-};
+				return left(new Error(`Serialization failed ${forParameter(parameter)}`));
+			},
+		),
+	);
 
 const validatePrimitiveShemaObject = (parameter: ParameterObject) => (
 	schema: SchemaObject,
@@ -116,13 +118,15 @@ export const serializeQueryParameterObject = (from: Ref) => (
 		parameter,
 		serializePathOrQueryParameterObject(from),
 		either.map(serializedParameterType => {
-			const r = getSerializedPropertyType(parameter.name, parameter.required || false)(serializedParameterType);
+			const serialized = getSerializedPropertyType(parameter.name, isRequired(parameter))(
+				serializedParameterType,
+			);
 			return serializedParameter(
-				r.type,
-				r.io,
-				serializedParameterType.isRequired || parameter.required || false,
-				serializedParameterType.dependencies.concat(r.dependencies),
-				serializedParameterType.refs.concat(r.refs),
+				serialized.type,
+				serialized.io,
+				serializedParameterType.isRequired || isRequired(parameter),
+				serializedParameterType.dependencies.concat(serialized.dependencies),
+				serializedParameterType.refs.concat(serialized.refs),
 			);
 		}),
 	);
@@ -142,3 +146,11 @@ export const foldSerializedQueryParameters = (
 		intercalated.refs,
 	);
 };
+
+export const isRequired = (parameter: ParameterObject): boolean =>
+	parameter.in === 'path'
+		? parameter.required
+		: pipe(
+				parameter.required,
+				option.getOrElse(constFalse),
+		  );

@@ -3,14 +3,13 @@ import { collect } from 'fp-ts/lib/Record';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializePathItemObject, serializePathItemObjectTags } from './path-item-object';
 import { Dictionary, serializeDictionary } from '../../../../utils/types';
-import * as nullable from '../../../../utils/nullable';
 import { foldSerializedTypes } from '../../common/data/serialized-type';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { decapitalize, camelize } from '@devexperts/utils/dist/string';
 import { Either } from 'fp-ts/lib/Either';
-import { sequenceEither } from '../../../../utils/either';
+import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { either } from 'fp-ts';
+import { either, option } from 'fp-ts';
 import { addPathParts, getRelativePath, Ref } from '../../../../utils/ref';
 import { clientRef } from '../utils';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
@@ -24,8 +23,8 @@ const groupPathsByTag = (pathsObject: PathsObject): Dictionary<PathsObject> => {
 		const path = pathsObject[key];
 		const tag = pipe(
 			serializePathItemObjectTags(path),
-			nullable.map(p => camelize(p, false)),
-			nullable.getOrElse(() => 'Unknown'),
+			option.map(p => camelize(p, false)),
+			option.getOrElse(() => 'Unknown'),
 		);
 		result[tag] = {
 			...(result[tag] || {}),

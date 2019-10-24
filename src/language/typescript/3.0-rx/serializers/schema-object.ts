@@ -14,12 +14,11 @@ import { serializedDependency } from '../../common/data/serialized-dependency';
 import { Either, mapLeft, right } from 'fp-ts/lib/Either';
 import { isReferenceObject } from './reference-object';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { either } from 'fp-ts';
-import * as nullable from '../../../../utils/nullable';
+import { either, option } from 'fp-ts';
 import { serializeDictionary } from '../../../../utils/types';
 import { constFalse } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
-import { sequenceEither } from '../../../../utils/either';
+import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { fromString, Ref } from '../../../../utils/ref';
 import { PrimitiveSchemaObject, SchemaObject } from '../../../../schema/3.0/schema-object';
 import { ReferenceObject } from '../../../../schema/3.0/reference-object';
@@ -84,8 +83,8 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 		case 'object': {
 			const additionalProperties = pipe(
 				schemaObject.additionalProperties,
-				nullable.filter(isAllowedAdditionalProperties),
-				nullable.map(additionalProperties => {
+				option.filter(isAllowedAdditionalProperties),
+				option.map(additionalProperties => {
 					if (isReferenceObject(additionalProperties)) {
 						return pipe(
 							additionalProperties.$ref,
@@ -109,18 +108,18 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 							: right(SERIALIZED_UNKNOWN_TYPE);
 					}
 				}),
-				nullable.map(either.map(getSerializedDictionaryType(name))),
-				nullable.map(either.map(checkRecursion(from, shouldTrackRecursion))),
+				option.map(either.map(getSerializedDictionaryType(name))),
+				option.map(either.map(checkRecursion(from, shouldTrackRecursion))),
 			);
 			const properties = pipe(
 				schemaObject.properties,
-				nullable.map(properties =>
+				option.map(properties =>
 					pipe(
 						serializeDictionary(properties, (name, property) => {
 							const isRequired = pipe(
 								schemaObject.required,
-								nullable.map(includes(name)),
-								nullable.getOrElse(constFalse),
+								option.map(includes(name)),
+								option.getOrElse(constFalse),
 							);
 
 							if (isReferenceObject(property)) {
@@ -155,8 +154,8 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 			);
 			return pipe(
 				additionalProperties,
-				nullable.alt(() => properties),
-				nullable.getOrElse(() => right(SERIALIZED_UNKNOWN_TYPE)),
+				option.alt(() => properties),
+				option.getOrElse(() => right(SERIALIZED_UNKNOWN_TYPE)),
 			);
 		}
 	}

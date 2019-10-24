@@ -17,7 +17,6 @@ import { arbitrary } from '../../../../../utils/fast-check';
 import { none, some } from 'fp-ts/lib/Option';
 import { getIOName, getTypeName } from '../../utils';
 import { when } from '../../../../../utils/string';
-import { isNonNullable } from '../../../../../utils/nullable';
 
 export const serializedTypeArbitrary = tuple(
 	string(),
@@ -40,7 +39,7 @@ describe('SerializedType', () => {
 				).toEqual(
 					serializedType(
 						`Array<${s.type}>`,
-						`array(${s.io}${when(isNonNullable(name), `, '${name}'`)})`,
+						`array(${s.io}${when(name !== undefined, `, '${name}'`)})`,
 						[...s.dependencies, serializedDependency('array', 'io-ts')],
 						s.refs,
 					),
@@ -118,7 +117,7 @@ describe('SerializedType', () => {
 				expect(getSerializedObjectType(name)(s)).toEqual(
 					serializedType(
 						`{ ${s.type} }`,
-						`type({ ${s.io} }${when(isNonNullable(name), `, '${name}'`)})`,
+						`type({ ${s.io} }${when(name !== undefined, `, '${name}'`)})`,
 						[...s.dependencies, serializedDependency('type', 'io-ts')],
 						s.refs,
 					),
@@ -132,7 +131,7 @@ describe('SerializedType', () => {
 				expect(getSerializedDictionaryType(name)(s)).toEqual(
 					serializedType(
 						`{ [key: string]: ${s.type} }`,
-						`record(string, ${s.io}${when(isNonNullable(name), `, '${name}'`)})`,
+						`record(string, ${s.io}${when(name !== undefined, `, '${name}'`)})`,
 						[
 							...s.dependencies,
 							serializedDependency('record', 'io-ts'),

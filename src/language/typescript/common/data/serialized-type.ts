@@ -11,7 +11,6 @@ import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
 import { getRelativePath, Ref } from '../../../../utils/ref';
 import { getIOName, getTypeName } from '../utils';
 import { concatIfL } from '../../../../utils/array';
-import { isNonNullable } from '../../../../utils/nullable';
 import { when } from '../../../../utils/string';
 
 export interface SerializedType {
@@ -80,7 +79,7 @@ export const getSerializedPropertyType = (name: string, isRequired: boolean) => 
 export const getSerializedArrayType = (name?: string) => (serialized: SerializedType): SerializedType =>
 	serializedType(
 		`Array<${serialized.type}>`,
-		`array(${serialized.io}${when(isNonNullable(name), `, '${name}'`)})`,
+		`array(${serialized.io}${when(name !== undefined, `, '${name}'`)})`,
 		[...serialized.dependencies, serializedDependency('array', 'io-ts')],
 		serialized.refs,
 	);
@@ -101,7 +100,7 @@ export const getSerializedRefType = (from: Ref) => (to: Ref): SerializedType => 
 export const getSerializedObjectType = (name?: string) => (serialized: SerializedType): SerializedType =>
 	serializedType(
 		`{ ${serialized.type} }`,
-		`type({ ${serialized.io} }${when(isNonNullable(name), `, '${name}'`)})`,
+		`type({ ${serialized.io} }${when(name !== undefined, `, '${name}'`)})`,
 		[...serialized.dependencies, serializedDependency('type', 'io-ts')],
 		serialized.refs,
 	);
@@ -109,7 +108,7 @@ export const getSerializedObjectType = (name?: string) => (serialized: Serialize
 export const getSerializedDictionaryType = (name?: string) => (serialized: SerializedType): SerializedType =>
 	serializedType(
 		`{ [key: string]: ${serialized.type} }`,
-		`record(string, ${serialized.io}${when(isNonNullable(name), `, '${name}'`)})`,
+		`record(string, ${serialized.io}${when(name !== undefined, `, '${name}'`)})`,
 		[...serialized.dependencies, serializedDependency('record', 'io-ts'), serializedDependency('string', 'io-ts')],
 		serialized.refs,
 	);
