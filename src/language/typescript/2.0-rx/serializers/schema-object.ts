@@ -64,15 +64,6 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 
 				const io = getIOName(type);
 				const isRecursive = isNone(refFileName) && (rootName === type || rootName === io);
-				if (isSome(refFileName)) {
-					console.table({
-						refFileName,
-						cwd,
-						defBlockValue: defBlock.value,
-						refFileNameValue: refFileName.value,
-						type,
-					});
-				}
 				const definitionFilePath = isSome(refFileName)
 					? getRelativeOutRefPath(cwd, defBlock.value, refFileName.value, type)
 					: getRelativeRefPath(cwd, defBlock.value, type);
