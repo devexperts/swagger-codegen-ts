@@ -1,108 +1,65 @@
-import * as prettier from 'prettier';
-import { map, read, FSEntity, write } from './fs';
-import { Serializer } from './utils';
-import * as fs from 'fs-extra';
-import { fromNullable, getOrElse, Option, map as mapOption } from 'fp-ts/lib/Option';
+import { Decoder } from 'io-ts';
+import { FSEntity, write } from './utils/fs';
 import * as path from 'path';
-import { head, last } from 'fp-ts/lib/Array';
-import { FileReader } from './fileReader';
-import { isLeft, Right } from 'fp-ts/lib/Either';
-import * as del from 'del';
+import * as $RefParser from 'json-schema-ref-parser';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { SwaggerObject } from './schema/2.0/swagger-object';
+import { array, either, taskEither } from 'fp-ts';
+import { Either } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { reportIfFailed } from './utils/io-ts';
+import { TaskEither } from 'fp-ts/lib/TaskEither';
 
-const log = console.log.bind(console, '[SWAGGER-CODEGEN-TS]:');
-
-export interface GenerateOptions {
-	/**
-	 * Paths to spec files
-	 */
-	readonly pathsToSpec: string[];
-	/**
-	 * Path to output directory (should be empty)
-	 */
+export interface GenerateOptions<A> {
 	readonly out: string;
-	/**
-	 * Spec serializer
-	 */
-	readonly serialize: Serializer;
-	/**
-	 * Path to prettier config
-	 */
-	readonly pathToPrettierConfig?: string;
-	/**
-	 * Buffer to JSON converter
-	 * @param buffer - File Buffer
-	 */
-	readonly fileReader: FileReader;
+	readonly spec: string;
+	readonly decoder: Decoder<unknown, A>;
+	readonly language: (
+		out: string,
+		documents: Record<string, A>,
+		resolveRef: (ref: string) => Either<unknown, unknown>,
+	) => Either<unknown, FSEntity>;
 }
 
-const cwd = process.cwd();
-const resolvePath = (p: string) => (path.isAbsolute(p) ? p : path.resolve(cwd, p));
+const log = (...args: unknown[]) => console.log('[SWAGGER-CODEGEN-TS]:', ...args);
+const getUnsafe: <E, A>(e: Either<E, A>) => A = either.fold(e => {
+	throw e;
+}, identity);
 
-const serializeDecode = (serializer: Serializer) => async (
-	decoded: Right<SwaggerObject>,
-	out: string,
-): Promise<FSEntity> => serializer(path.basename(out), decoded.right);
+export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, void> =>
+	taskEither.tryCatch(async () => {
+		const cwd = process.cwd();
+		log('cwd', cwd);
 
-const getPrettierConfig = async (pathToPrettierConfig?: string): Promise<Option<prettier.Options>> =>
-	fromNullable(
-		await prettier.resolveConfig(
-			pipe(
-				fromNullable(pathToPrettierConfig),
-				mapOption(resolvePath),
-				getOrElse(() => path.resolve(__dirname, '../.prettierrc')),
-			),
-		),
-	);
+		const out = path.isAbsolute(options.out) ? options.out : path.resolve(cwd, options.out);
+		log('out', out);
 
-const formatSerialized = (serialized: FSEntity, prettierConfig: Option<prettier.Options>): FSEntity =>
-	pipe(
-		prettierConfig,
-		mapOption(config => map(serialized, content => prettier.format(content, config))),
-		getOrElse(() => serialized),
-	);
+		const spec = path.isAbsolute(options.spec) ? options.spec : path.resolve(cwd, options.spec);
+		log('spec', spec);
 
-const writeFormatted = (out: string, formatted: FSEntity) => write(path.dirname(out), formatted);
+		const $refs = await $RefParser.resolve(spec, {
+			dereference: {
+				circular: 'ignore',
+			},
+		});
 
-export const generate = async (options: GenerateOptions): Promise<void> => {
-	const out = resolvePath(options.out);
-	const isPathExist = await fs.pathExists(out);
-
-	if (isPathExist) {
-		await del(out);
-	}
-	await fs.mkdirp(out);
-	const prettierConfig = await getPrettierConfig(options.pathToPrettierConfig);
-	const serializer = serializeDecode(options.serialize);
-
-	for (const pathToFile of options.pathsToSpec) {
-		const pathToSpec = resolvePath(pathToFile);
-		const buffer = await read(pathToSpec, cwd);
-		const dirName = pipe(
-			head(buffer.fileName.split('.')),
-			getOrElse(() => buffer.fileName),
+		const specs: Record<string, A> = pipe(
+			Object.entries($refs.values()),
+			array.reduce({}, (acc, [fullPath, spec]) => {
+				const relative = path.relative(cwd, fullPath);
+				log('Decoding', relative);
+				return {
+					...acc,
+					[relative]: getUnsafe(reportIfFailed(options.decoder.decode(spec))),
+				};
+			}),
 		);
-		const apiOut = path.resolve(out, `./${dirName}`);
-		await fs.mkdir(apiOut);
-		const json = options.fileReader(buffer.buffer);
-		const decoded = SwaggerObject.decode(json);
-		if (isLeft(decoded)) {
-			const report = PathReporter.report(decoded);
-			const lastReport = last(report);
-			log(
-				pipe(
-					lastReport,
-					getOrElse(() => 'Invalid spec'),
-				),
-			);
-			ThrowReporter.report(decoded);
-			return;
-		}
-		const seralized = await serializer(decoded, apiOut);
-		const formatted = formatSerialized(seralized, prettierConfig);
-		writeFormatted(apiOut, formatted);
-	}
-};
+
+		log('Writing to', out);
+
+		await write(
+			out,
+			getUnsafe(options.language(out, specs, ref => either.tryCatch(() => $refs.get(ref), identity))),
+		);
+
+		log('Done');
+	}, identity);

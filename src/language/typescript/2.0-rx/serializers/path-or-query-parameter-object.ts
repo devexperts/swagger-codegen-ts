@@ -1,12 +1,11 @@
 import { PathParameterObject } from '../../../../schema/2.0/parameter-object/path-parameter-object/path-parameter-object';
 import { QueryParameterObject } from '../../../../schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
-import { serializedParameter, SerializedParameter } from '../data/serialized-parameter';
+import { serializedParameter, SerializedParameter } from '../../common/data/serialized-parameter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getOrElse } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';
 import { serializeNonArrayItemsObject } from './non-array-items-object';
-import { dependency } from '../data/serialized-dependency';
-import { EMPTY_REFS } from '../utils';
+import { serializedDependency } from '../../common/data/serialized-dependency';
 
 export const serializePathOrQueryParameterObject = (
 	parameter: PathParameterObject | QueryParameterObject,
@@ -25,19 +24,25 @@ export const serializePathOrQueryParameterObject = (
 				`Array<${serializedArrayItems.type}>`,
 				`array(${serializedArrayItems.io})`,
 				isRequired,
-				[...serializedArrayItems.dependencies, dependency('array', 'io-ts')],
+				[...serializedArrayItems.dependencies, serializedDependency('array', 'io-ts')],
 				serializedArrayItems.refs,
 			);
 		}
 		case 'string': {
-			return serializedParameter('string', 'string', isRequired, [dependency('string', 'io-ts')], EMPTY_REFS);
+			return serializedParameter('string', 'string', isRequired, [serializedDependency('string', 'io-ts')], []);
 		}
 		case 'boolean': {
-			return serializedParameter('boolean', 'boolean', isRequired, [dependency('boolean', 'io-ts')], EMPTY_REFS);
+			return serializedParameter(
+				'boolean',
+				'boolean',
+				isRequired,
+				[serializedDependency('boolean', 'io-ts')],
+				[],
+			);
 		}
 		case 'integer':
 		case 'number': {
-			return serializedParameter('number', 'number', isRequired, [dependency('number', 'io-ts')], EMPTY_REFS);
+			return serializedParameter('number', 'number', isRequired, [serializedDependency('number', 'io-ts')], []);
 		}
 	}
 };

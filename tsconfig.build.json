@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/index.ts",
+    "src/language/typescript/2.0-rx/index.ts",
+    "src/language/typescript/3.0-rx/index.ts",
+    "src/schema/2.0/swagger-object.ts",
+    "src/schema/3.0/openapi-object.ts"
+  ],
+  "exclude": [
+    "**/__tests__"
+  ]
+}

@@ -11,7 +11,7 @@ export interface SerializedDependency {
 	readonly path: string;
 }
 
-export const dependency = (name: string, path: string): SerializedDependency => ({
+export const serializedDependency = (name: string, path: string): SerializedDependency => ({
 	name,
 	path,
 });
@@ -29,6 +29,6 @@ export const serializeDependencies = (dependencies: SerializedDependency[]): str
 	).join('');
 
 export const monoidDependencies = getArrayMonoid<SerializedDependency>();
-const dependencyOption = dependency('Option', 'fp-ts/lib/Option');
-const dependencyCreateOptionFromNullable = dependency('optionFromNullable', 'io-ts-types/lib/optionFromNullable');
-export const OPTION_DEPENDENCIES: SerializedDependency[] = [dependencyOption, dependencyCreateOptionFromNullable];
+const dependencyOption = serializedDependency('Option', 'fp-ts/lib/Option');
+const dependencyOptionFromNullable = serializedDependency('optionFromNullable', 'io-ts-types/lib/optionFromNullable');
+export const OPTION_DEPENDENCIES: SerializedDependency[] = [dependencyOption, dependencyOptionFromNullable];

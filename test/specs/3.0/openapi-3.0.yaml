@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: Link Example
+  version: 1.0.0
+paths:
+  /local:
+    get:
+      operationId: localReference
+      responses:
+        '200':
+          description: Local reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Local'
+  /local-file-reference:
+    get:
+      operationId: localFileReference
+      responses:
+        '200':
+          description: Local file reference
+          content:
+            application/json:
+              schema:
+                $ref: 'petstore.yaml#/components/schemas/Pet'
+  /remote-reference:
+    get:
+      operationId: remoteReference
+      responses:
+        '200':
+          description: Remote reference
+          content:
+            application/json:
+              schema:
+                $ref: 'https://petstore.swagger.io/v2/swagger.json#/definitions/Pet'
+components:
+  schemas:
+    Local:
+      type: string

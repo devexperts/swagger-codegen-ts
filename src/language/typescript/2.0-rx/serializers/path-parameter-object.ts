@@ -1,5 +1,5 @@
 import { PathParameterObject } from '../../../../schema/2.0/parameter-object/path-parameter-object/path-parameter-object';
-import { serializedPathParameter, SerializedPathParameter } from '../data/serialized-path-parameter';
+import { serializedPathParameter, SerializedPathParameter } from '../../common/data/serialized-path-parameter';
 import { serializePathOrQueryParameterObject } from './path-or-query-parameter-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, toUndefined } from 'fp-ts/lib/Option';

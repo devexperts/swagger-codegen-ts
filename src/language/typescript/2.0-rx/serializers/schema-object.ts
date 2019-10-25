@@ -1,6 +1,11 @@
-import { foldSerializedTypes, serializedType, SerializedType } from '../data/serialized-type';
-import { dependency, EMPTY_DEPENDENCIES, monoidDependencies, OPTION_DEPENDENCIES } from '../data/serialized-dependency';
-import { EMPTY_REFS, getIOName, getRelativeOutRefPath, getRelativeRefPath, getRelativeUtilsPath } from '../utils';
+import { foldSerializedTypes, serializedType, SerializedType } from '../../common/data/serialized-type';
+import {
+	serializedDependency,
+	EMPTY_DEPENDENCIES,
+	monoidDependencies,
+	OPTION_DEPENDENCIES,
+} from '../../common/data/serialized-dependency';
+import { getRelativeOutRefPath, getRelativeRefPath } from '../utils';
 import { SchemaObject } from '../../../../schema/2.0/schema-object/schema-object';
 import {
 	alt,
@@ -17,22 +22,26 @@ import {
 } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold, monoidString } from 'fp-ts/lib/Monoid';
-import { monoidStrings } from '../../../../utils/monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
-import { array } from 'fp-ts/lib/Array';
+import { array, getMonoid } from 'fp-ts/lib/Array';
 import { serializeDictionary } from '../../../../utils/types';
 import { constFalse } from 'fp-ts/lib/function';
 import { concatIf, concatIfL } from '../../../../utils/array';
 import { ReferenceSchemaObject } from '../../../../schema/2.0/schema-object/reference-schema-object';
 import { AllOfSchemaObject } from '../../../../schema/2.0/schema-object/all-of-schema-object';
 import { camelize } from '@devexperts/utils/dist/string';
+import { getIOName, getRelativeUtilsPath } from '../../common/utils';
+import { Ref, fromString } from '../../../../utils/ref';
+import { isLeft } from 'fp-ts/lib/Either';
 
 export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cwd: string): SerializedType => {
 	switch (schema.type) {
 		case undefined: {
 			if (is$ref(schema)) {
 				const $ref = schema.$ref;
-				const parts = fromNullable($ref.match(/^((.+)\/(.+)\.(.+))?#\/(.+)\/(.+)$/));
+				const parts = fromNullable($ref.match(/^((.+)\/(.+))?#\/(.+)\/(.+)$/));
+				//											      2     3        4     5
+				const parsedRef = fromString(schema.$ref);
 
 				const refFileName = pipe(
 					parts,
@@ -40,14 +49,14 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 				);
 				const defBlock = pipe(
 					parts,
-					mapNullable(parts => parts[5]),
+					mapNullable(parts => parts[4]),
 				);
 				const safeType = pipe(
 					parts,
-					mapNullable(parts => parts[6]),
+					mapNullable(parts => parts[5]),
 				);
 
-				if (isNone(safeType) || isNone(defBlock)) {
+				if (isNone(safeType) || isNone(defBlock) || isLeft(parsedRef)) {
 					throw new Error(`Invalid $ref: ${$ref}`);
 				}
 
@@ -81,10 +90,10 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 					isRecursive
 						? EMPTY_DEPENDENCIES
 						: [
-								dependency(asDefName(type), definitionFilePath),
-								dependency(asDefName(io), definitionFilePath),
+								serializedDependency(asDefName(type), definitionFilePath),
+								serializedDependency(asDefName(io), definitionFilePath),
 						  ],
-					[type],
+					[parsedRef.right],
 				);
 			}
 
@@ -92,12 +101,12 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 			const types = results.map(item => item.type);
 			const ios = results.map(item => item.io);
 			const dependencies = fold(monoidDependencies)(results.map(item => item.dependencies));
-			const refs = fold(monoidStrings)(results.map(item => item.refs));
+			const refs = fold(getMonoid<Ref>())(results.map(item => item.refs));
 
 			return serializedType(
 				intercalate(monoidString, array)(' & ', types),
 				`intersection([${intercalate(monoidString, array)(', ', ios)}])`,
-				[dependency('intersection', 'io-ts'), ...dependencies],
+				[serializedDependency('intersection', 'io-ts'), ...dependencies],
 				refs,
 			);
 		}
@@ -115,8 +124,13 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 										serializedType(
 											'Date',
 											'DateFromISOString',
-											[dependency('DateFromISOString', 'io-ts-types/lib/DateFromISOString')],
-											EMPTY_REFS,
+											[
+												serializedDependency(
+													'DateFromISOString',
+													'io-ts-types/lib/DateFromISOString',
+												),
+											],
+											[],
 										),
 									);
 								}
@@ -125,22 +139,22 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 						}),
 					),
 				),
-				getOrElse(() => serializedType('string', 'string', [dependency('string', 'io-ts')], EMPTY_REFS)),
+				getOrElse(() => serializedType('string', 'string', [serializedDependency('string', 'io-ts')], [])),
 			);
 		}
 		case 'boolean': {
-			return serializedType('boolean', 'boolean', [dependency('boolean', 'io-ts')], EMPTY_REFS);
+			return serializedType('boolean', 'boolean', [serializedDependency('boolean', 'io-ts')], []);
 		}
 		case 'integer':
 		case 'number': {
-			return serializedType('number', 'number', [dependency('number', 'io-ts')], EMPTY_REFS);
+			return serializedType('number', 'number', [serializedDependency('number', 'io-ts')], []);
 		}
 		case 'array': {
 			const result = serializeSchemaObject(schema.items, rootName, cwd);
 			return serializedType(
 				`Array<${result.type}>`,
 				`array(${result.io})`,
-				[...result.dependencies, dependency('array', 'io-ts')],
+				[...result.dependencies, serializedDependency('array', 'io-ts')],
 				result.refs,
 			);
 		}
@@ -174,7 +188,10 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 									);
 								}),
 							);
-							return toObjectType(serialized, serialized.refs.includes(rootName) ? some(rootName) : none);
+							return toObjectType(
+								serialized,
+								serialized.refs.some(ref => ref.name === rootName) ? some(rootName) : none,
+							);
 						}),
 					),
 				),
@@ -182,8 +199,8 @@ export const serializeSchemaObject = (schema: SchemaObject, rootName: string, cw
 					serializedType(
 						'unknown',
 						'unknownType',
-						[dependency('unknownType', getRelativeUtilsPath(cwd))],
-						EMPTY_REFS,
+						[serializedDependency('unknownType', getRelativeUtilsPath(cwd))],
+						[],
 					),
 				),
 			);
@@ -203,10 +220,10 @@ const toObjectType = (serialized: SerializedType, recursion: Option<string>): Se
 			}),
 			getOrElse(() => io),
 		),
-		concatIfL(isSome(recursion), [...serialized.dependencies, dependency('type', 'io-ts')], () => [
-			dependency('recursion', 'io-ts'),
+		concatIfL(isSome(recursion), [...serialized.dependencies, serializedDependency('type', 'io-ts')], () => [
+			serializedDependency('recursion', 'io-ts'),
 		]),
-		EMPTY_REFS,
+		[],
 	);
 };
 
@@ -216,7 +233,12 @@ const serializeEnum = (enumValue: Array<string | number | boolean>): SerializedT
 		enumValue.length === 1
 			? `literal(${type})`
 			: `union([${enumValue.map(value => `literal('${value}')`).join(',')}])`;
-	return serializedType(type, io, [dependency('union', 'io-ts'), dependency('literal', 'io-ts')], EMPTY_REFS);
+	return serializedType(
+		type,
+		io,
+		[serializedDependency('union', 'io-ts'), serializedDependency('literal', 'io-ts')],
+		[],
+	);
 };
 
 const serializeAdditionalProperties = (properties: SchemaObject, rootName: string, cwd: string): SerializedType => {
@@ -224,7 +246,11 @@ const serializeAdditionalProperties = (properties: SchemaObject, rootName: strin
 	return serializedType(
 		`{ [key: string]: ${additional.type} }`,
 		`dictionary(string, ${additional.io})`,
-		[...additional.dependencies, dependency('string', 'io-ts'), dependency('dictionary', 'io-ts')],
+		[
+			...additional.dependencies,
+			serializedDependency('string', 'io-ts'),
+			serializedDependency('dictionary', 'io-ts'),
+		],
 		additional.refs,
 	);
 };

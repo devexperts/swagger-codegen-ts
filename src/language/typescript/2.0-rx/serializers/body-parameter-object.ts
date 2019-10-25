@@ -1,5 +1,5 @@
 import { BodyParameterObject } from '../../../../schema/2.0/parameter-object/body-parameter-object';
-import { serializedParameter, SerializedParameter } from '../data/serialized-parameter';
+import { serializedParameter, SerializedParameter } from '../../common/data/serialized-parameter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getOrElse } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';

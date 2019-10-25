@@ -9,6 +9,5 @@
     "./test/out"
   ],
   "ext": "ts",
-  "exec": "ts-node ./test/index.ts",
   "optOut": true
 }

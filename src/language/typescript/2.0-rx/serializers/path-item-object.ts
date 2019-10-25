@@ -1,14 +1,14 @@
 import { PathItemObject } from '../../../../schema/2.0/path-item-object';
-import { foldSerializedTypes, SerializedType } from '../data/serialized-type';
+import { foldSerializedTypes, SerializedType } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map } from 'fp-ts/lib/Option';
 import { serializeOperationObject } from './operation-object';
 import { array } from 'fp-ts/lib/Array';
 import { Dictionary, serializeDictionary } from '../../../../utils/types';
-import { file, File } from '../../../../fs';
-import { dependency, serializeDependencies } from '../data/serialized-dependency';
-import { getRelativeClientPath } from '../utils';
+import { file, File } from '../../../../utils/fs';
+import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { decapitalize } from '@devexperts/utils/dist/string';
+import { getRelativeClientPath } from '../../common/utils';
 
 export const serializePathGroup = (name: string, group: Dictionary<PathItemObject>, cwd: string): File => {
 	const groupName = `${name}Controller`;
@@ -17,8 +17,8 @@ export const serializePathGroup = (name: string, group: Dictionary<PathItemObjec
 	);
 	const dependencies = serializeDependencies([
 		...serialized.dependencies,
-		dependency('asks', 'fp-ts/lib/Reader'),
-		dependency('APIClient', getRelativeClientPath(cwd)),
+		serializedDependency('asks', 'fp-ts/lib/Reader'),
+		serializedDependency('APIClient', getRelativeClientPath(cwd)),
 	]);
 	return file(
 		`${groupName}.ts`,
