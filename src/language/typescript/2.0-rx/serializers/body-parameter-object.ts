@@ -8,18 +8,18 @@ import { head, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { unless } from '../../../../utils/string';
 import { either } from 'fp-ts';
 import { Either } from 'fp-ts/lib/Either';
+import { Ref } from '../../../../utils/ref';
 
 const serializeBodyParameterObject = (
+	from: Ref,
 	parameter: BodyParameterObject,
-	rootName: string,
-	cwd: string,
 ): Either<Error, SerializedParameter> => {
 	const isRequired = pipe(
 		parameter.required,
 		getOrElse(constFalse),
 	);
 	return pipe(
-		serializeSchemaObject(parameter.schema, rootName, cwd),
+		serializeSchemaObject(from, parameter.schema),
 		either.map(serializedParameterType =>
 			serializedParameter(
 				serializedParameterType.type,
@@ -33,12 +33,11 @@ const serializeBodyParameterObject = (
 };
 
 export const serializeBodyParameterObjects = (
+	from: Ref,
 	parameters: NonEmptyArray<BodyParameterObject>,
-	rootName: string,
-	cwd: string,
 ): Either<Error, SerializedParameter> => {
 	// according to spec there can be only one body parameter
-	const serializedBodyParameter = serializeBodyParameterObject(head(parameters), rootName, cwd);
+	const serializedBodyParameter = serializeBodyParameterObject(from, head(parameters));
 	return pipe(
 		serializedBodyParameter,
 		either.map(serializedBodyParameter => {

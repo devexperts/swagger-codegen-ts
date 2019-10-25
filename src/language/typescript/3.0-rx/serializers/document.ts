@@ -1,4 +1,4 @@
-import { directory, Directory, fromRef } from '../../../../utils/fs';
+import { directory, Directory } from '../../../../utils/fs';
 import { serializePathsObject } from './paths-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Either } from 'fp-ts/lib/Either';
@@ -9,12 +9,12 @@ import { fromString } from '../../../../utils/ref';
 import { array, either, option } from 'fp-ts';
 import { applyTo } from '../../../../utils/function';
 import { OpenapiObject } from '../../../../schema/3.0/openapi-object';
-import { clientRef } from '../utils';
+import { pathsRef } from '../../common/utils';
+import { clientFile } from '../../common/client';
 
 export const serializeDocument = combineReader(
 	serializePathsObject,
 	serializePathsObject => (name: string, document: OpenapiObject): Either<Error, Directory> => {
-		const pathsRef = fromString('#/paths');
 		const componentsRef = fromString('#/components');
 
 		const paths = pipe(
@@ -38,41 +38,8 @@ export const serializeDocument = combineReader(
 			array.compact([components]),
 			sequenceEither,
 		);
-		return combineEither(paths, additional, clientRef, (paths, additional, clientRef) =>
-			directory(name, [paths, ...additional, fromRef(clientRef, '.ts', client)]),
+		return combineEither(paths, additional, clientFile, (paths, additional, clientFile) =>
+			directory(name, [paths, ...additional, clientFile]),
 		);
 	},
 );
-
-const client = `
-	import { left } from 'fp-ts/lib/Either';
-	import { Errors } from 'io-ts';
-	import { PathReporter } from 'io-ts/lib/PathReporter';
-	import { LiveData } from '@devexperts/rx-utils/dist/rd/live-data.utils'; 
-	
-	export interface APIRequest {
-		readonly url: string;
-		readonly query?: object;
-		readonly body?: unknown;
-	}
-	
-	export interface FullAPIRequest extends APIRequest {
-		readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
-	}
-	
-	export interface APIClient {
-		readonly request: (request: FullAPIRequest) => LiveData<Error, unknown>
-	}
-	
-	export class ResponseValidationError extends Error {
-		static create(errors: Errors): ResponseValidationError {
-			return new ResponseValidationError(errors);
-		}
-	
-		constructor(readonly errors: Errors) {
-			super(PathReporter.report(left(errors)).join('\\n\\n')); 
-			this.name = 'ResponseValidationError';
-			Object.setPrototypeOf(this, ResponseValidationError);
-		}
-	}
-`;

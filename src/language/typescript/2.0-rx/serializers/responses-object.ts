@@ -13,18 +13,15 @@ import { SUCCESSFUL_CODES } from '../../common/utils';
 import { array, either, option, record } from 'fp-ts';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { Either } from 'fp-ts/lib/Either';
+import { Ref } from '../../../../utils/ref';
 
-export const serializeOperationResponses = (
-	responses: ResponsesObject,
-	rootName: string,
-	cwd: string,
-): Either<Error, SerializedType> =>
+export const serializeOperationResponses = (from: Ref, responses: ResponsesObject): Either<Error, SerializedType> =>
 	pipe(
 		SUCCESSFUL_CODES,
 		array.map(code =>
 			pipe(
 				record.lookup(code, responses),
-				option.chain(response => serializeOperationResponse(code, response, rootName, cwd)),
+				option.chain(response => serializeOperationResponse(from, code, response)),
 			),
 		),
 		array.compact,

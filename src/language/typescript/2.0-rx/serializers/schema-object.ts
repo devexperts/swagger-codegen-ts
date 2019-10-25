@@ -1,121 +1,50 @@
 import {
-	foldSerializedTypes,
+	getSerializedRefType,
+	SERIALIZED_NUMERIC_TYPE,
+	SERIALIZED_BOOLEAN_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 	serializedType,
 	SerializedType,
+	SERIALIZED_DATE_TYPE,
+	SERIALIZED_STRING_TYPE,
+	getSerializedPropertyType,
+	intercalateSerializedTypes,
+	getSerializedObjectType,
+	getSerializedRecursiveType,
+	getSerializedDictionaryType,
 } from '../../common/data/serialized-type';
-import {
-	EMPTY_DEPENDENCIES,
-	monoidDependencies,
-	OPTION_DEPENDENCIES,
-	serializedDependency,
-} from '../../common/data/serialized-dependency';
-import { getRelativeOutRefPath, getRelativeRefPath } from '../utils';
+import { monoidDependencies, serializedDependency } from '../../common/data/serialized-dependency';
 import { AllOfSchemaObject, SchemaObject } from '../../../../schema/2.0/schema-object/schema-object';
-import {
-	alt,
-	chain,
-	fromNullable,
-	getOrElse,
-	isNone,
-	isSome,
-	map,
-	mapNullable,
-	none,
-	Option,
-	some,
-} from 'fp-ts/lib/Option';
+import { none, some } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold, monoidString } from 'fp-ts/lib/Monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
-import { getMonoid } from 'fp-ts/lib/Array';
 import { constFalse } from 'fp-ts/lib/function';
-import { concatIf, concatIfL } from '../../../../utils/array';
-import { camelize } from '@devexperts/utils/dist/string';
-import { getIOName } from '../../common/utils';
+import { includes } from '../../../../utils/array';
 import { fromString, Ref } from '../../../../utils/ref';
-import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
+import { Either, right } from 'fp-ts/lib/Either';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { array, either, option, record } from 'fp-ts';
 import { traverseArrayEither } from '../../../../utils/either';
 import { ReferenceObject } from '../../../../schema/2.0/reference-object';
 
-export const serializeSchemaObject = (
-	schema: SchemaObject,
-	rootName: string,
-	cwd: string,
-): Either<Error, SerializedType> => {
+export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<Error, SerializedType> => {
 	// check non-typed schemas first
 	if (ReferenceObject.is(schema)) {
-		const $ref = schema.$ref;
-		const parts = fromNullable($ref.match(/^((.+)\/(.+))?#\/(.+)\/(.+)$/));
-		//											      2     3        4     5
-		const parsedRef = fromString(schema.$ref);
-
-		const refFileName = pipe(
-			parts,
-			mapNullable(parts => parts[3]),
-		);
-		const defBlock = pipe(
-			parts,
-			mapNullable(parts => parts[4]),
-		);
-		const safeType = pipe(
-			parts,
-			mapNullable(parts => parts[5]),
-		);
-
-		if (isNone(safeType) || isNone(defBlock) || isLeft(parsedRef)) {
-			return left(new Error(`Invalid $ref: ${$ref}`));
-		}
-
-		const type = safeType.value;
-
-		const io = getIOName(type);
-		const isRecursive = isNone(refFileName) && (rootName === type || rootName === io);
-		const definitionFilePath = isSome(refFileName)
-			? getRelativeOutRefPath(cwd, defBlock.value, refFileName.value, type)
-			: getRelativeRefPath(cwd, defBlock.value, type);
-
-		const isSameOuterName = rootName === type && isSome(refFileName);
-		const defName = getDefIFSameName(
-			isSameOuterName,
-			pipe(
-				refFileName,
-				getOrElse(() => ''),
-			),
-		);
-		const asDefName = importAsFile(
-			isSameOuterName,
-			pipe(
-				refFileName,
-				getOrElse(() => ''),
-			),
-		);
-
-		return right(
-			serializedType(
-				defName(type),
-				defName(io),
-				isRecursive
-					? EMPTY_DEPENDENCIES
-					: [
-							serializedDependency(asDefName(type), definitionFilePath),
-							serializedDependency(asDefName(io), definitionFilePath),
-					  ],
-				[parsedRef.right],
-			),
+		return pipe(
+			fromString(schema.$ref),
+			either.map(getSerializedRefType(from)),
 		);
 	}
 
 	if (AllOfSchemaObject.is(schema)) {
 		return pipe(
-			traverseArrayEither(schema.allOf, item => serializeSchemaObject(item, rootName, cwd)),
+			traverseArrayEither(schema.allOf, item => serializeSchemaObject(from, item)),
 			either.map(results => {
 				const types = results.map(item => item.type);
 				const ios = results.map(item => item.io);
 				const dependencies = fold(monoidDependencies)(results.map(item => item.dependencies));
-				const refs = fold(getMonoid<Ref>())(results.map(item => item.refs));
+				const refs = fold(array.getMonoid<Ref>())(results.map(item => item.refs));
 
 				return serializedType(
 					intercalate(monoidString, array.array)(' & ', types),
@@ -132,46 +61,34 @@ export const serializeSchemaObject = (
 		case 'string': {
 			return pipe(
 				schema.enum,
-				map(serializeEnum),
-				alt(() =>
+				option.map(serializeEnum),
+				option.alt(() =>
 					pipe(
 						schema.format,
-						chain(format => {
+						option.chain(format => {
 							switch (format) {
 								case 'date-time': {
-									return some(
-										serializedType(
-											'Date',
-											'DateFromISOString',
-											[
-												serializedDependency(
-													'DateFromISOString',
-													'io-ts-types/lib/DateFromISOString',
-												),
-											],
-											[],
-										),
-									);
+									return some(SERIALIZED_DATE_TYPE);
 								}
 							}
 							return none;
 						}),
 					),
 				),
-				getOrElse(() => serializedType('string', 'string', [serializedDependency('string', 'io-ts')], [])),
+				option.getOrElse(() => SERIALIZED_STRING_TYPE),
 				right,
 			);
 		}
 		case 'boolean': {
-			return right(serializedType('boolean', 'boolean', [serializedDependency('boolean', 'io-ts')], []));
+			return right(SERIALIZED_BOOLEAN_TYPE);
 		}
 		case 'integer':
 		case 'number': {
-			return right(serializedType('number', 'number', [serializedDependency('number', 'io-ts')], []));
+			return right(SERIALIZED_NUMERIC_TYPE);
 		}
 		case 'array': {
 			return pipe(
-				serializeSchemaObject(schema.items, rootName, cwd),
+				serializeSchemaObject(from, schema.items),
 				either.map(result =>
 					serializedType(
 						`Array<${result.type}>`,
@@ -185,7 +102,7 @@ export const serializeSchemaObject = (
 		case 'object': {
 			const additionalProperties = pipe(
 				schema.additionalProperties,
-				option.map(additionalProperties => serializeAdditionalProperties(additionalProperties, rootName, cwd)),
+				option.map(additionalProperties => serializeAdditionalProperties(from, additionalProperties)),
 			);
 			const properties = () =>
 				pipe(
@@ -196,35 +113,18 @@ export const serializeSchemaObject = (
 							record.collect((name, value) => {
 								const isRequired = pipe(
 									schema.required,
-									map(required => required.includes(name)),
-									getOrElse(constFalse),
+									option.map(includes(name)),
+									option.getOrElse(constFalse),
 								);
 								return pipe(
-									serializeSchemaObject(value, rootName, cwd),
-									either.map(field => {
-										const type = isRequired
-											? `${name}: ${field.type}`
-											: `${name}: Option<${field.type}>`;
-										const io = isRequired
-											? `${name}: ${field.io}`
-											: `${name}: optionFromNullable(${field.io})`;
-										return serializedType(
-											`${type};`,
-											`${io},`,
-											concatIf(!isRequired, field.dependencies, OPTION_DEPENDENCIES),
-											field.refs,
-										);
-									}),
+									serializeSchemaObject(from, value),
+									either.map(getSerializedPropertyType(name, isRequired)),
 								);
 							}),
 							sequenceEither,
-							either.map(foldSerializedTypes),
-							either.map(serialized =>
-								toObjectType(
-									serialized,
-									serialized.refs.some(ref => ref.name === rootName) ? some(rootName) : none,
-								),
-							),
+							either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
+							either.map(getSerializedObjectType()),
+							either.map(getSerializedRecursiveType(from, true)),
 						),
 					),
 				);
@@ -232,31 +132,10 @@ export const serializeSchemaObject = (
 			return pipe(
 				additionalProperties,
 				option.alt(properties),
-				getOrElse(() => right(SERIALIZED_UNKNOWN_TYPE)),
+				option.getOrElse(() => right(SERIALIZED_UNKNOWN_TYPE)),
 			);
 		}
 	}
-	//
-	// return left(new Error(`Cannot serialize SchemaObject`));
-};
-
-const toObjectType = (serialized: SerializedType, recursion: Option<string>): SerializedType => {
-	const io = `type({ ${serialized.io} })`;
-	return serializedType(
-		`{ ${serialized.type} }`,
-		pipe(
-			recursion,
-			map(recursion => {
-				const recursionIO = getIOName(recursion);
-				return `recursion<${recursion}, unknown>('${recursionIO}', ${recursionIO} => ${io})`;
-			}),
-			getOrElse(() => io),
-		),
-		concatIfL(isSome(recursion), [...serialized.dependencies, serializedDependency('type', 'io-ts')], () => [
-			serializedDependency('recursion', 'io-ts'),
-		]),
-		[],
-	);
 };
 
 const serializeEnum = (enumValue: Array<string | number | boolean>): SerializedType => {
@@ -273,29 +152,9 @@ const serializeEnum = (enumValue: Array<string | number | boolean>): SerializedT
 	);
 };
 
-const serializeAdditionalProperties = (
-	properties: SchemaObject,
-	rootName: string,
-	cwd: string,
-): Either<Error, SerializedType> =>
+const serializeAdditionalProperties = (from: Ref, properties: SchemaObject): Either<Error, SerializedType> =>
 	pipe(
-		serializeSchemaObject(properties, rootName, cwd),
-		either.map(additional =>
-			serializedType(
-				`{ [key: string]: ${additional.type} }`,
-				`dictionary(string, ${additional.io})`,
-				[
-					...additional.dependencies,
-					serializedDependency('string', 'io-ts'),
-					serializedDependency('dictionary', 'io-ts'),
-				],
-				additional.refs,
-			),
-		),
+		serializeSchemaObject(from, properties),
+		either.map(getSerializedDictionaryType()),
+		either.map(getSerializedRecursiveType(from, true)),
 	);
-
-const getDefName = (name: string, prefix: string): string => `${camelize(prefix, true)}${name}`;
-const getDefIFSameName = (isSameOutName: boolean, prefix: string) => (name: string): string =>
-	!isSameOutName ? name : getDefName(name, prefix);
-const importAsFile = (isSameOutName: boolean, prefix: string) => (name: string) =>
-	!isSameOutName ? name : `${name} as ${getDefName(name, prefix)}`;

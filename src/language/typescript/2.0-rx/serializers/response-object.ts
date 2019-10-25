@@ -4,14 +4,14 @@ import { SerializedType } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializeSchemaObject } from './schema-object';
 import { Either } from 'fp-ts/lib/Either';
+import { Ref } from '../../../../utils/ref';
 
 export const serializeOperationResponse = (
+	from: Ref,
 	code: string,
 	response: ResponseObject,
-	rootName: string,
-	cwd: string,
 ): Option<Either<Error, SerializedType>> =>
 	pipe(
 		response.schema,
-		map(schema => serializeSchemaObject(schema, rootName, cwd)),
+		map(schema => serializeSchemaObject(from, schema)),
 	);

@@ -11,10 +11,10 @@ import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { either, option } from 'fp-ts';
 import { addPathParts, getRelativePath, Ref } from '../../../../utils/ref';
-import { clientRef } from '../utils';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { applyTo } from '../../../../utils/function';
 import { PathsObject } from '../../../../schema/3.0/paths-object';
+import { clientRef } from '../../common/client';
 
 const groupPathsByTag = (pathsObject: PathsObject): Dictionary<PathsObject> => {
 	const keys = Object.keys(pathsObject);
