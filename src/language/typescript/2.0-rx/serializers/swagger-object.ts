@@ -1,24 +1,33 @@
-import { Serializer } from '../../../../utils/utils';
 import { directory, Directory, file } from '../../../../utils/fs';
-import { array } from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { map } from 'fp-ts/lib/Option';
 import { serializeDefinitions } from './definitions-object';
 import { serializePaths } from './paths-object';
 import { CLIENT_DIRECTORY, CLIENT_FILENAME, UTILS_DIRECTORY, UTILS_FILENAME } from '../../common/utils';
+import { Either } from 'fp-ts/lib/Either';
+import { array, option } from 'fp-ts';
+import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
+import { SwaggerObject } from '../../../../schema/2.0/swagger-object';
 
-export const serializeSwaggerObject: Serializer = (name, swaggerObject): Directory =>
-	directory(name, [
-		directory(CLIENT_DIRECTORY, [file(`${CLIENT_FILENAME}.ts`, client)]),
-		directory(UTILS_DIRECTORY, [file(`${UTILS_FILENAME}.ts`, utils)]),
-		...array.compact([
-			pipe(
-				swaggerObject.definitions,
-				map(serializeDefinitions),
-			),
-		]),
-		serializePaths(swaggerObject.paths, swaggerObject.parameters),
-	]);
+export const serializeSwaggerObject = (name: string, swaggerObject: SwaggerObject): Either<Error, Directory> => {
+	const definitions = pipe(
+		swaggerObject.definitions,
+		option.map(serializeDefinitions),
+	);
+	const additional = pipe(
+		[definitions],
+		array.compact,
+		sequenceEither,
+	);
+	const paths = serializePaths(swaggerObject.paths, swaggerObject.parameters);
+	return combineEither(additional, paths, (additional, paths) => {
+		return directory(name, [
+			directory(CLIENT_DIRECTORY, [file(`${CLIENT_FILENAME}.ts`, client)]),
+			directory(UTILS_DIRECTORY, [file(`${UTILS_FILENAME}.ts`, utils)]),
+			...additional,
+			paths,
+		]);
+	});
+};
 
 const client = `
 	import { LiveData } from '@devexperts/rx-utils/dist/rd/live-data.utils';

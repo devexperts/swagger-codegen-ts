@@ -15,8 +15,6 @@ export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 
 export const getRelativeRoot = (cwd: string) => path.relative(cwd, ROOT_DIRECTORY);
 export const getRelativeClientPath = (cwd: string): string =>
 	`${getRelativeRoot(cwd)}/${CLIENT_DIRECTORY}/${CLIENT_FILENAME}`;
-export const getRelativeUtilsPath = (cwd: string): string =>
-	`${getRelativeRoot(cwd)}/${UTILS_DIRECTORY}/${UTILS_FILENAME}`;
 
 const INVALID_NAMES = ['Error', 'Promise', 'PromiseLike', 'Array', 'ArrayLike', 'Function', 'Object'];
 export const getTypeName = (name: string): string => (INVALID_NAMES.includes(name) ? `${name}Type` : name);

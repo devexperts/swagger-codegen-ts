@@ -2,7 +2,7 @@ import { serialize as serializeSwagger2 } from '../src/language/typescript/2.0-r
 import * as path from 'path';
 import { SwaggerObject } from '../src/schema/2.0/swagger-object';
 import { generate } from '../src';
-import { Either, right } from 'fp-ts/lib/Either';
+import { Either } from 'fp-ts/lib/Either';
 import { serialize as serializeOpenAPI3 } from '../src/language/typescript/3.0-rx';
 import { OpenapiObjectCodec } from '../src/schema/3.0/openapi-object';
 import * as del from 'del';
@@ -17,14 +17,14 @@ const out = path.resolve(cwd, 'out');
 const test1 = generate({
 	spec: path.resolve(__dirname, 'specs/json/swagger.json'),
 	out,
-	language: (out, documents) => right(serializeSwagger2(out, documents)),
+	language: (out, documents) => serializeSwagger2(out, documents),
 	decoder: SwaggerObject,
 });
 
 const test2 = generate({
 	spec: path.resolve(__dirname, 'specs/yaml/swagger.yml'),
 	out,
-	language: (out, documents) => right(serializeSwagger2(out, documents)),
+	language: (out, documents) => serializeSwagger2(out, documents),
 	decoder: SwaggerObject,
 });
 
