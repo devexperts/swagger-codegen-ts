@@ -2,7 +2,7 @@ import { stringOption } from '../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { OperationObject } from './operation-object';
 import { ParameterObject } from './parameter-object/parameter-object';
-import { Reference, ReferenceObject } from './reference-object';
+import { ReferenceObject } from './reference-object';
 import { Option } from 'fp-ts/lib/Option';
 import { array, type, union } from 'io-ts';
 
@@ -15,10 +15,10 @@ export interface PathItemObject {
 	readonly options: Option<OperationObject>;
 	readonly head: Option<OperationObject>;
 	readonly patch: Option<OperationObject>;
-	readonly parameters: Option<Reference<ParameterObject>[]>;
+	readonly parameters: Option<Array<ReferenceObject | ParameterObject>>;
 }
 
-export const PathItemObject = type(
+export const PathItemObjectCodec = type(
 	{
 		$ref: stringOption,
 		get: optionFromNullable(OperationObject),

@@ -1,10 +1,5 @@
 import { OperationObject } from '../../../../schema/2.0/operation-object';
 import { serializedType, SerializedType } from '../../common/data/serialized-type';
-import {
-	getOperationParametersInBody,
-	getOperationParametersInPath,
-	getOperationParametersInQuery,
-} from '../../../../utils/utils';
 import { serializePathParameter, serializePathParameterDescription } from './path-parameter-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exists, getOrElse, map, none, Option, some } from 'fp-ts/lib/Option';
@@ -15,7 +10,7 @@ import { serializeQueryParameterObjects } from './query-parameter-object';
 import { serializeBodyParameterObjects } from './body-parameter-object';
 import { intercalateSerializedParameters, serializedParameter } from '../../common/data/serialized-parameter';
 import { serializedDependency, EMPTY_DEPENDENCIES } from '../../common/data/serialized-dependency';
-import { identity } from 'fp-ts/lib/function';
+import { constant, identity } from 'fp-ts/lib/function';
 import { QueryParameterObject } from '../../../../schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
 import { BodyParameterObject } from '../../../../schema/2.0/parameter-object/body-parameter-object';
 import { concatIf, concatIfL } from '../../../../utils/array';
@@ -26,6 +21,9 @@ import { either, array } from 'fp-ts';
 import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { getRelativePath, Ref } from '../../../../utils/ref';
 import { clientRef } from '../../common/client';
+import { ParameterObject } from '../../../../schema/2.0/parameter-object/parameter-object';
+import { ReferenceObject } from '../../../../schema/2.0/reference-object';
+import { PathParameterObject } from '../../../../schema/2.0/parameter-object/path-parameter-object/path-parameter-object';
 
 export const serializeOperationObject = (
 	from: Ref,
@@ -158,3 +156,44 @@ const serializeParametersDescription = (
 		? none
 		: some(hasRequiredParameters ? '@param { object } parameters' : '@param { object } [parameters]');
 };
+
+const isOperationNonReferenceParameterObject = (
+	parameter: ReferenceObject | ParameterObject,
+): parameter is ParameterObject => !ReferenceObject.is(parameter);
+
+const isPathParameterObject = (parameter: ParameterObject): parameter is PathParameterObject => parameter.in === 'path';
+const isOperationPathParameterObject = (
+	parameter: ReferenceObject | ParameterObject,
+): parameter is PathParameterObject =>
+	isOperationNonReferenceParameterObject(parameter) && isPathParameterObject(parameter);
+export const getOperationParametersInPath = (operation: OperationObject): PathParameterObject[] =>
+	pipe(
+		operation.parameters,
+		map(parameters => parameters.filter(isOperationPathParameterObject)),
+		getOrElse(constant<PathParameterObject[]>([])),
+	);
+
+const isQueryParameterObject = (parameter: ParameterObject): parameter is QueryParameterObject =>
+	parameter.in === 'query';
+const isOperationQueryParameterObject = (
+	parameter: ReferenceObject | ParameterObject,
+): parameter is QueryParameterObject =>
+	isOperationNonReferenceParameterObject(parameter) && isQueryParameterObject(parameter);
+export const getOperationParametersInQuery = (operation: OperationObject): QueryParameterObject[] =>
+	pipe(
+		operation.parameters,
+		map(parameters => parameters.filter(isOperationQueryParameterObject)),
+		getOrElse(constant<QueryParameterObject[]>([])),
+	);
+
+const isBodyParameterObject = (parameter: ParameterObject): parameter is BodyParameterObject => parameter.in === 'body';
+const isOperationBodyParameterObject = (
+	parameter: ReferenceObject | ParameterObject,
+): parameter is BodyParameterObject =>
+	isOperationNonReferenceParameterObject(parameter) && isBodyParameterObject(parameter);
+export const getOperationParametersInBody = (operation: OperationObject): BodyParameterObject[] =>
+	pipe(
+		operation.parameters,
+		map(parameters => parameters.filter(isOperationBodyParameterObject)),
+		getOrElse(constant<BodyParameterObject[]>([])),
+	);

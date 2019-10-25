@@ -3,7 +3,7 @@ import { foldSerializedTypes, SerializedType } from '../../common/data/serialize
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map } from 'fp-ts/lib/Option';
 import { serializeOperationObject } from './operation-object';
-import { array } from 'fp-ts/lib/Array';
+import { array, flatten } from 'fp-ts/lib/Array';
 import { Dictionary } from '../../../../utils/types';
 import { file, File } from '../../../../utils/fs';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
@@ -13,6 +13,9 @@ import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either
 import { either, record } from 'fp-ts';
 import { getRelativePath, Ref } from '../../../../utils/ref';
 import { clientRef } from '../../common/client';
+import { OperationObject } from '../../../../schema/2.0/operation-object';
+import { tuple } from 'fp-ts/lib/function';
+import { uniqString } from '../../../../utils/array';
 
 export const serializePathGroup = (from: Ref, name: string, group: Dictionary<PathItemObject>): Either<Error, File> => {
 	const serialized = pipe(
@@ -81,4 +84,48 @@ const serializePath = (from: Ref, url: string, item: PathItemObject): Either<Err
 		sequenceEither,
 		either.map(foldSerializedTypes),
 	);
+};
+
+const getOperationsFromPath = (path: PathItemObject): Dictionary<OperationObject> => {
+	const result: Record<string, OperationObject> = {};
+	const operations = array.compact([
+		pipe(
+			path.get,
+			map(operation => tuple('get', operation)),
+		),
+		pipe(
+			path.post,
+			map(operation => tuple('post', operation)),
+		),
+		pipe(
+			path.put,
+			map(operation => tuple('put', operation)),
+		),
+		pipe(
+			path.delete,
+			map(operation => tuple('delete', operation)),
+		),
+		pipe(
+			path.head,
+			map(operation => tuple('head', operation)),
+		),
+		pipe(
+			path.options,
+			map(operation => tuple('options', operation)),
+		),
+		pipe(
+			path.patch,
+			map(operation => tuple('patch', operation)),
+		),
+	]);
+	for (const [name, operation] of operations) {
+		result[name] = operation;
+	}
+	return result;
+};
+
+export const getTagsFromPath = (path: PathItemObject): string[] => {
+	const operations = getOperationsFromPath(path);
+	const tags = flatten(array.compact(Object.keys(operations).map(key => operations[key].tags)));
+	return uniqString(tags);
 };
