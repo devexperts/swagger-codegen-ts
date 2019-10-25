@@ -11,7 +11,7 @@ import {
 	serializedDependency,
 } from '../../common/data/serialized-dependency';
 import { getRelativeOutRefPath, getRelativeRefPath } from '../utils';
-import { SchemaObject } from '../../../../schema/2.0/schema-object/schema-object';
+import { AllOfSchemaObject, SchemaObject } from '../../../../schema/2.0/schema-object/schema-object';
 import {
 	alt,
 	chain,
@@ -31,8 +31,6 @@ import { intercalate } from 'fp-ts/lib/Foldable';
 import { getMonoid } from 'fp-ts/lib/Array';
 import { constFalse } from 'fp-ts/lib/function';
 import { concatIf, concatIfL } from '../../../../utils/array';
-import { ReferenceSchemaObject } from '../../../../schema/2.0/schema-object/reference-schema-object';
-import { AllOfSchemaObject } from '../../../../schema/2.0/schema-object/all-of-schema-object';
 import { camelize } from '@devexperts/utils/dist/string';
 import { getIOName } from '../../common/utils';
 import { fromString, Ref } from '../../../../utils/ref';
@@ -40,93 +38,97 @@ import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { array, either, option, record } from 'fp-ts';
 import { traverseArrayEither } from '../../../../utils/either';
+import { ReferenceObject } from '../../../../schema/2.0/reference-object';
 
 export const serializeSchemaObject = (
 	schema: SchemaObject,
 	rootName: string,
 	cwd: string,
 ): Either<Error, SerializedType> => {
-	switch (schema.type) {
-		case undefined: {
-			if (is$ref(schema)) {
-				const $ref = schema.$ref;
-				const parts = fromNullable($ref.match(/^((.+)\/(.+))?#\/(.+)\/(.+)$/));
-				//											      2     3        4     5
-				const parsedRef = fromString(schema.$ref);
+	// check non-typed schemas first
+	if (ReferenceObject.is(schema)) {
+		const $ref = schema.$ref;
+		const parts = fromNullable($ref.match(/^((.+)\/(.+))?#\/(.+)\/(.+)$/));
+		//											      2     3        4     5
+		const parsedRef = fromString(schema.$ref);
 
-				const refFileName = pipe(
-					parts,
-					mapNullable(parts => parts[3]),
-				);
-				const defBlock = pipe(
-					parts,
-					mapNullable(parts => parts[4]),
-				);
-				const safeType = pipe(
-					parts,
-					mapNullable(parts => parts[5]),
-				);
+		const refFileName = pipe(
+			parts,
+			mapNullable(parts => parts[3]),
+		);
+		const defBlock = pipe(
+			parts,
+			mapNullable(parts => parts[4]),
+		);
+		const safeType = pipe(
+			parts,
+			mapNullable(parts => parts[5]),
+		);
 
-				if (isNone(safeType) || isNone(defBlock) || isLeft(parsedRef)) {
-					return left(new Error(`Invalid $ref: ${$ref}`));
-				}
-
-				const type = safeType.value;
-
-				const io = getIOName(type);
-				const isRecursive = isNone(refFileName) && (rootName === type || rootName === io);
-				const definitionFilePath = isSome(refFileName)
-					? getRelativeOutRefPath(cwd, defBlock.value, refFileName.value, type)
-					: getRelativeRefPath(cwd, defBlock.value, type);
-
-				const isSameOuterName = rootName === type && isSome(refFileName);
-				const defName = getDefIFSameName(
-					isSameOuterName,
-					pipe(
-						refFileName,
-						getOrElse(() => ''),
-					),
-				);
-				const asDefName = importAsFile(
-					isSameOuterName,
-					pipe(
-						refFileName,
-						getOrElse(() => ''),
-					),
-				);
-
-				return right(
-					serializedType(
-						defName(type),
-						defName(io),
-						isRecursive
-							? EMPTY_DEPENDENCIES
-							: [
-									serializedDependency(asDefName(type), definitionFilePath),
-									serializedDependency(asDefName(io), definitionFilePath),
-							  ],
-						[parsedRef.right],
-					),
-				);
-			}
-
-			return pipe(
-				traverseArrayEither(schema.allOf, item => serializeSchemaObject(item, rootName, cwd)),
-				either.map(results => {
-					const types = results.map(item => item.type);
-					const ios = results.map(item => item.io);
-					const dependencies = fold(monoidDependencies)(results.map(item => item.dependencies));
-					const refs = fold(getMonoid<Ref>())(results.map(item => item.refs));
-
-					return serializedType(
-						intercalate(monoidString, array.array)(' & ', types),
-						`intersection([${intercalate(monoidString, array.array)(', ', ios)}])`,
-						[serializedDependency('intersection', 'io-ts'), ...dependencies],
-						refs,
-					);
-				}),
-			);
+		if (isNone(safeType) || isNone(defBlock) || isLeft(parsedRef)) {
+			return left(new Error(`Invalid $ref: ${$ref}`));
 		}
+
+		const type = safeType.value;
+
+		const io = getIOName(type);
+		const isRecursive = isNone(refFileName) && (rootName === type || rootName === io);
+		const definitionFilePath = isSome(refFileName)
+			? getRelativeOutRefPath(cwd, defBlock.value, refFileName.value, type)
+			: getRelativeRefPath(cwd, defBlock.value, type);
+
+		const isSameOuterName = rootName === type && isSome(refFileName);
+		const defName = getDefIFSameName(
+			isSameOuterName,
+			pipe(
+				refFileName,
+				getOrElse(() => ''),
+			),
+		);
+		const asDefName = importAsFile(
+			isSameOuterName,
+			pipe(
+				refFileName,
+				getOrElse(() => ''),
+			),
+		);
+
+		return right(
+			serializedType(
+				defName(type),
+				defName(io),
+				isRecursive
+					? EMPTY_DEPENDENCIES
+					: [
+							serializedDependency(asDefName(type), definitionFilePath),
+							serializedDependency(asDefName(io), definitionFilePath),
+					  ],
+				[parsedRef.right],
+			),
+		);
+	}
+
+	if (AllOfSchemaObject.is(schema)) {
+		return pipe(
+			traverseArrayEither(schema.allOf, item => serializeSchemaObject(item, rootName, cwd)),
+			either.map(results => {
+				const types = results.map(item => item.type);
+				const ios = results.map(item => item.io);
+				const dependencies = fold(monoidDependencies)(results.map(item => item.dependencies));
+				const refs = fold(getMonoid<Ref>())(results.map(item => item.refs));
+
+				return serializedType(
+					intercalate(monoidString, array.array)(' & ', types),
+					`intersection([${intercalate(monoidString, array.array)(', ', ios)}])`,
+					[serializedDependency('intersection', 'io-ts'), ...dependencies],
+					refs,
+				);
+			}),
+		);
+	}
+
+	// schema is typed
+	switch (schema.type) {
 		case 'string': {
 			return pipe(
 				schema.enum,
@@ -234,6 +236,8 @@ export const serializeSchemaObject = (
 			);
 		}
 	}
+	//
+	// return left(new Error(`Cannot serialize SchemaObject`));
 };
 
 const toObjectType = (serialized: SerializedType, recursion: Option<string>): SerializedType => {
@@ -295,6 +299,3 @@ const getDefIFSameName = (isSameOutName: boolean, prefix: string) => (name: stri
 	!isSameOutName ? name : getDefName(name, prefix);
 const importAsFile = (isSameOutName: boolean, prefix: string) => (name: string) =>
 	!isSameOutName ? name : `${name} as ${getDefName(name, prefix)}`;
-
-const is$ref = (a: ReferenceSchemaObject | AllOfSchemaObject): a is ReferenceSchemaObject =>
-	Object.prototype.hasOwnProperty.bind(a)('$ref');
