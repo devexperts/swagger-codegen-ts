@@ -1,9 +1,9 @@
-import * as t from 'io-ts';
 import { stringOption } from '../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { ContactObject } from './contact-object';
 import { LicenseObject } from './license-object';
 import { Option } from 'fp-ts/lib/Option';
+import { string, type } from 'io-ts';
 
 export interface InfoObject {
 	readonly title: string;
@@ -14,14 +14,14 @@ export interface InfoObject {
 	readonly version: string;
 }
 
-export const InfoObject = t.type(
+export const InfoObject = type(
 	{
-		title: t.string,
+		title: string,
 		description: stringOption,
 		termsOfService: stringOption,
 		contact: optionFromNullable(ContactObject),
 		license: optionFromNullable(LicenseObject),
-		version: t.string,
+		version: string,
 	},
 	'InfoObject',
 );

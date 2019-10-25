@@ -1,8 +1,8 @@
-import * as t from 'io-ts';
 import { BaseParameterObjectProps } from './base-parameter-object';
 import { booleanOption } from '../../../utils/io-ts';
 import { SchemaObject } from '../schema-object/schema-object';
 import { Option } from 'fp-ts/lib/Option';
+import { literal, type } from 'io-ts';
 
 export interface BodyParameterObject extends BaseParameterObjectProps {
 	readonly in: 'body';
@@ -10,10 +10,10 @@ export interface BodyParameterObject extends BaseParameterObjectProps {
 	readonly schema: SchemaObject;
 }
 
-export const BodyParameterObject = t.type(
+export const BodyParameterObject = type(
 	{
 		...BaseParameterObjectProps,
-		in: t.literal('body'),
+		in: literal('body'),
 		required: booleanOption,
 		schema: SchemaObject,
 	},

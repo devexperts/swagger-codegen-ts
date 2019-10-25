@@ -1,16 +1,16 @@
 import { Option } from 'fp-ts/lib/Option';
-import * as t from 'io-ts';
 import { stringOption } from '../../utils/io-ts';
+import { string, type } from 'io-ts';
 
 export interface ExternalDocumentationObject {
 	readonly description: Option<string>;
 	readonly url: string;
 }
 
-export const ExternalDocumentationObject = t.type(
+export const ExternalDocumentationObject = type(
 	{
 		description: stringOption,
-		url: t.string,
+		url: string,
 	},
 	'ExternalDocumentationObject',
 );

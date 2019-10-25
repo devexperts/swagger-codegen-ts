@@ -1,8 +1,8 @@
 import { Option } from 'fp-ts/lib/Option';
 import { ExternalDocumentationObject } from './external-documentation-object';
-import * as t from 'io-ts';
 import { stringOption } from '../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
+import { string, type } from 'io-ts';
 
 export interface TagObject {
 	readonly name: string;
@@ -10,9 +10,9 @@ export interface TagObject {
 	readonly externalDocs: Option<ExternalDocumentationObject>;
 }
 
-export const TagObject = t.type(
+export const TagObject = type(
 	{
-		name: t.string,
+		name: string,
 		description: stringOption,
 		externalDocs: optionFromNullable(ExternalDocumentationObject),
 	},

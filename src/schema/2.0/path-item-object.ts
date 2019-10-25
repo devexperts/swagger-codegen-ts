@@ -1,10 +1,10 @@
-import * as t from 'io-ts';
 import { stringOption } from '../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { OperationObject } from './operation-object';
 import { ParameterObject } from './parameter-object/parameter-object';
 import { Reference, ReferenceObject } from './reference-object';
 import { Option } from 'fp-ts/lib/Option';
+import { array, type, union } from 'io-ts';
 
 export interface PathItemObject {
 	readonly $ref: Option<string>;
@@ -18,7 +18,7 @@ export interface PathItemObject {
 	readonly parameters: Option<Reference<ParameterObject>[]>;
 }
 
-export const PathItemObject = t.type(
+export const PathItemObject = type(
 	{
 		$ref: stringOption,
 		get: optionFromNullable(OperationObject),
@@ -28,7 +28,7 @@ export const PathItemObject = t.type(
 		options: optionFromNullable(OperationObject),
 		head: optionFromNullable(OperationObject),
 		patch: optionFromNullable(OperationObject),
-		parameters: optionFromNullable(t.array(t.union([ParameterObject, ReferenceObject]))),
+		parameters: optionFromNullable(array(union([ParameterObject, ReferenceObject]))),
 	},
 	'PathItemObject',
 );

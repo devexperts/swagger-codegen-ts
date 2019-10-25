@@ -1,14 +1,14 @@
 import { BaseItemsObject, BaseItemsObjectProps } from './base-items-object';
-import * as t from 'io-ts';
+import { literal, type } from 'io-ts';
 
 export interface NumberItemsObject extends BaseItemsObject {
 	readonly type: 'number';
 }
 
-export const NumberItemsObject = t.type(
+export const NumberItemsObject = type(
 	{
 		...BaseItemsObjectProps,
-		type: t.literal('number'),
+		type: literal('number'),
 	},
 	'NumberItemsObject',
 );

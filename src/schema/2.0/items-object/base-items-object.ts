@@ -1,7 +1,7 @@
 import { Option } from 'fp-ts/lib/Option';
 import { booleanOption, numberOption, primitiveArrayOption, stringOption } from '../../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
-import * as t from 'io-ts';
+import { literal, union } from 'io-ts';
 
 export interface BaseItemsObject {
 	readonly format: Option<string>;
@@ -22,9 +22,7 @@ export interface BaseItemsObject {
 
 export const BaseItemsObjectProps = {
 	format: stringOption,
-	collectionFormat: optionFromNullable(
-		t.union([t.literal('csv'), t.literal('ssv'), t.literal('tsv'), t.literal('pipes')]),
-	),
+	collectionFormat: optionFromNullable(union([literal('csv'), literal('ssv'), literal('tsv'), literal('pipes')])),
 	maximum: numberOption,
 	exclusiveMaximum: booleanOption,
 	minimum: numberOption,

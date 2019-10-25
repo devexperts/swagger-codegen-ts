@@ -1,14 +1,14 @@
 import { BasePathParameterObjectProps } from './base-parameter-object';
-import * as t from 'io-ts';
+import { literal, type } from 'io-ts';
 
 export interface BooleanPathParameterObject extends BasePathParameterObjectProps {
 	readonly type: 'boolean';
 }
 
-export const BooleanPathParameterObject = t.type(
+export const BooleanPathParameterObject = type(
 	{
 		...BasePathParameterObjectProps,
-		type: t.literal('boolean'),
+		type: literal('boolean'),
 	},
 	'BooleanPathParameterObject',
 );

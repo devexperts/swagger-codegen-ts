@@ -1,9 +1,9 @@
-import * as t from 'io-ts';
 import { StringPathParameterObject } from './string-parameter-object';
 import { NumberPathParameterObject } from './number-parameter-object';
 import { IntegerPathParameterObject } from './integer-parameter-object';
 import { BooleanPathParameterObject } from './boolean-parameter-object';
 import { ArrayPathParameterObject } from './array-parameter-object';
+import { union } from 'io-ts';
 
 export type PathParameterObject =
 	| StringPathParameterObject
@@ -12,7 +12,7 @@ export type PathParameterObject =
 	| BooleanPathParameterObject
 	| ArrayPathParameterObject;
 
-export const PathParameterObject = t.union(
+export const PathParameterObject = union(
 	[
 		StringPathParameterObject,
 		NumberPathParameterObject,

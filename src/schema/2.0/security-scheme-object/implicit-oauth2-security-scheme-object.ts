@@ -1,6 +1,6 @@
-import * as t from 'io-ts';
 import { BaseSecuritySchemeObjectProps } from './base-security-scheme-object';
 import { ScopesObject } from '../scopes-object';
+import { literal, string, type } from 'io-ts';
 
 export interface ImplicitOAuth2SecuritySchemeObject extends BaseSecuritySchemeObjectProps {
 	readonly type: 'oauth2';
@@ -9,12 +9,12 @@ export interface ImplicitOAuth2SecuritySchemeObject extends BaseSecuritySchemeOb
 	readonly scopes: ScopesObject;
 }
 
-export const ImplicitOAuth2SecuritySchemeObject = t.type(
+export const ImplicitOAuth2SecuritySchemeObject = type(
 	{
 		...BaseSecuritySchemeObjectProps,
-		type: t.literal('oauth2'),
-		flow: t.literal('implicit'),
-		authorizationUrl: t.string,
+		type: literal('oauth2'),
+		flow: literal('implicit'),
+		authorizationUrl: string,
 		scopes: ScopesObject,
 	},
 	'ImplicitOAuth2SecuritySchemeObject',

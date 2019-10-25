@@ -1,9 +1,9 @@
-import * as t from 'io-ts';
 import { StringQueryParameterObject } from './string-query-parameter-object';
 import { NumberQueryParameterObject } from './number-query-parameter-object';
 import { IntegerQueryParameterObject } from './integer-query-parameter-object';
 import { BooleanQueryParameterObject } from './boolean-query-parameter-object';
 import { ArrayQueryParameterObject } from './array-query-parameter-object';
+import { union } from 'io-ts';
 
 export type QueryParameterObject =
 	| StringQueryParameterObject
@@ -12,7 +12,7 @@ export type QueryParameterObject =
 	| BooleanQueryParameterObject
 	| ArrayQueryParameterObject;
 
-export const QueryParameterObject = t.union(
+export const QueryParameterObject = union(
 	[
 		StringQueryParameterObject,
 		NumberQueryParameterObject,

@@ -1,6 +1,6 @@
-import * as t from 'io-ts';
 import { booleanOption, stringOption } from '../../../../utils/io-ts';
 import { Option } from 'fp-ts/lib/Option';
+import { literal, string } from 'io-ts';
 
 export interface BaseQueryParameterObjectProps {
 	readonly name: string;
@@ -10,8 +10,8 @@ export interface BaseQueryParameterObjectProps {
 }
 
 export const BaseQueryParameterObjectProps = {
-	name: t.string,
-	in: t.literal('query'),
+	name: string,
+	in: literal('query'),
 	description: stringOption,
 	required: booleanOption,
 };

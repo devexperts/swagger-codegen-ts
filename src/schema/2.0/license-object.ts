@@ -1,15 +1,15 @@
 import { Option } from 'fp-ts/lib/Option';
-import * as t from 'io-ts';
 import { stringOption } from '../../utils/io-ts';
+import { string, type } from 'io-ts';
 
 export interface LicenseObject {
 	readonly name: string;
 	readonly url: Option<string>;
 }
 
-export const LicenseObject = t.type(
+export const LicenseObject = type(
 	{
-		name: t.string,
+		name: string,
 		url: stringOption,
 	},
 	'LicenseObject',

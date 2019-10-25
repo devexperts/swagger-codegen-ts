@@ -1,14 +1,14 @@
-import * as t from 'io-ts';
 import { BasePathParameterObjectProps } from './base-parameter-object';
+import { literal, type } from 'io-ts';
 
 export interface StringPathParameterObject extends BasePathParameterObjectProps {
 	readonly type: 'string';
 }
 
-export const StringPathParameterObject = t.type(
+export const StringPathParameterObject = type(
 	{
 		...BasePathParameterObjectProps,
-		type: t.literal('string'),
+		type: literal('string'),
 	},
 	'StringPathParameterObject',
 );

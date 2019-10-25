@@ -1,14 +1,14 @@
 import { BaseQueryParameterObjectProps } from './base-query-parameter-object';
-import * as t from 'io-ts';
+import { literal, type } from 'io-ts';
 
 export interface IntegerQueryParameterObject extends BaseQueryParameterObjectProps {
 	readonly type: 'integer';
 }
 
-export const IntegerQueryParameterObject = t.type(
+export const IntegerQueryParameterObject = type(
 	{
 		...BaseQueryParameterObjectProps,
-		type: t.literal('integer'),
+		type: literal('integer'),
 	},
 	'IntegerQueryParameterObject',
 );
