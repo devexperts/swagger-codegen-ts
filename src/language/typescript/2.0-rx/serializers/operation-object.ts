@@ -8,7 +8,7 @@ import {
 import { serializePathParameter, serializePathParameterDescription } from './path-parameter-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exists, getOrElse, map, none, Option, some } from 'fp-ts/lib/Option';
-import { array, flatten } from 'fp-ts/lib/Array';
+import { flatten } from 'fp-ts/lib/Array';
 import { serializeOperationResponses } from './responses-object';
 import { fromArray } from 'fp-ts/lib/NonEmptyArray';
 import { serializeQueryParameterObjects } from './query-parameter-object';
@@ -21,6 +21,9 @@ import { BodyParameterObject } from '../../../../schema/2.0/parameter-object/bod
 import { concatIf, concatIfL } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
 import { getRelativeClientPath, getURL, HTTPMethod, getJSDoc } from '../../common/utils';
+import { Either, right } from 'fp-ts/lib/Either';
+import { either, array } from 'fp-ts';
+import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 
 export const serializeOperationObject = (
 	url: string,
@@ -28,10 +31,13 @@ export const serializeOperationObject = (
 	operation: OperationObject,
 	rootName: string,
 	cwd: string,
-): SerializedType => {
+): Either<Error, SerializedType> => {
 	const pathParameters = getOperationParametersInPath(operation);
 	const queryParameters = getOperationParametersInQuery(operation);
 	const bodyParameters = getOperationParametersInBody(operation);
+	const hasQueryParameters = queryParameters.length > 0;
+	const hasBodyParameters = bodyParameters.length > 0;
+	const hasParameters = hasQueryParameters || hasBodyParameters;
 
 	const pathParamsSummary = pathParameters.map(serializePathParameterDescription);
 	const paramsSummary = serializeParametersDescription([...queryParameters, ...bodyParameters]);
@@ -51,79 +57,80 @@ export const serializeOperationObject = (
 
 	const serializedQueryParameters = pipe(
 		fromArray(queryParameters),
-		map(queryParameters => serializeQueryParameterObjects(queryParameters)),
+		map(queryParameters => right(serializeQueryParameterObjects(queryParameters))),
 	);
 	const serializedBodyParameters = pipe(
 		fromArray(bodyParameters),
 		map(bodyParameters => serializeBodyParameterObjects(bodyParameters, rootName, cwd)),
 	);
 
-	const serializedParameters = intercalateSerializedParameters(
-		serializedParameter(',', ',', false, EMPTY_DEPENDENCIES, []),
+	const serializedParameters = pipe(
 		array.compact([serializedQueryParameters, serializedBodyParameters]),
+		sequenceEither,
+		either.map(parameters =>
+			intercalateSerializedParameters(serializedParameter(',', ',', false, EMPTY_DEPENDENCIES, []), parameters),
+		),
 	);
 
-	const hasQueryParameters = queryParameters.length > 0;
-	const hasBodyParameters = bodyParameters.length > 0;
-	const hasParameters = hasQueryParameters || hasBodyParameters;
+	return combineEither(serializedResponses, serializedParameters, (serializedResponses, serializedParameters) => {
+		const argsName = concatIf(hasParameters, pathParameters.map(p => p.name), ['parameters']).join(',');
+		const argsType = concatIfL(hasParameters, serializedPathParameters.map(p => p.type), () => [
+			`parameters: { ${serializedParameters.type} }`,
+		]).join(',');
 
-	const argsName = concatIf(hasParameters, pathParameters.map(p => p.name), ['parameters']).join(',');
-	const argsType = concatIfL(hasParameters, serializedPathParameters.map(p => p.type), () => [
-		`parameters: { ${serializedParameters.type} }`,
-	]).join(',');
+		const type = `
+				${getJSDoc(array.compact([deprecated, operation.summary, ...pathParamsSummary.map(some), paramsSummary]))}
+				readonly ${operationName}: (${argsType}) => LiveData<Error, ${serializedResponses.type}>;
+			`;
 
-	const type = `
-		${getJSDoc(array.compact([deprecated, operation.summary, ...pathParamsSummary.map(some), paramsSummary]))}
-		readonly ${operationName}: (${argsType}) => LiveData<Error, ${serializedResponses.type}>;
-	`;
-
-	const io = `
-		${operationName}: (${argsName}) => {
-			${when(hasParameters, `const encoded = partial({ ${serializedParameters.io} }).encode(parameters);`)}
-	
-			return e.apiClient
-				.request({
-					url: ${serializedUrl},
-					method: '${method}',
-					${when(hasQueryParameters, 'query: encoded.query,')}
-					${when(hasBodyParameters, 'body: encoded.body,')}
-				})
-				.pipe(
-					map(data =>
-						pipe(
-							data,
-							chain(value =>
-								fromEither<Error, ${serializedResponses.type}>(
-									pipe(
-										${serializedResponses.io}.decode(value),
-										mapLeft(ResponseValidationError.create),
+		const io = `
+				${operationName}: (${argsName}) => {
+					${when(hasParameters, `const encoded = partial({ ${serializedParameters.io} }).encode(parameters);`)}
+			
+					return e.apiClient
+						.request({
+							url: ${serializedUrl},
+							method: '${method}',
+							${when(hasQueryParameters, 'query: encoded.query,')}
+							${when(hasBodyParameters, 'body: encoded.body,')}
+						})
+						.pipe(
+							map(data =>
+								pipe(
+									data,
+									chain(value =>
+										fromEither<Error, ${serializedResponses.type}>(
+											pipe(
+												${serializedResponses.io}.decode(value),
+												mapLeft(ResponseValidationError.create),
+											),
+										),
 									),
 								),
 							),
-						),
-					),
-				);
-		},
-	`;
+						);
+				},
+			`;
 
-	const dependencies = concatIfL(
-		hasParameters,
-		[
-			serializedDependency('map', 'rxjs/operators'),
-			serializedDependency('fromEither', '@devexperts/remote-data-ts'),
-			serializedDependency('chain', '@devexperts/remote-data-ts'),
-			serializedDependency('ResponseValidationError', getRelativeClientPath(cwd)),
-			serializedDependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
-			serializedDependency('pipe', 'fp-ts/lib/pipeable'),
-			serializedDependency('mapLeft', 'fp-ts/lib/Either'),
-			...flatten(serializedPathParameters.map(parameter => parameter.dependencies)),
-			...serializedResponses.dependencies,
-			...serializedParameters.dependencies,
-		],
-		() => [serializedDependency('partial', 'io-ts')],
-	);
+		const dependencies = concatIfL(
+			hasParameters,
+			[
+				serializedDependency('map', 'rxjs/operators'),
+				serializedDependency('fromEither', '@devexperts/remote-data-ts'),
+				serializedDependency('chain', '@devexperts/remote-data-ts'),
+				serializedDependency('ResponseValidationError', getRelativeClientPath(cwd)),
+				serializedDependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
+				serializedDependency('pipe', 'fp-ts/lib/pipeable'),
+				serializedDependency('mapLeft', 'fp-ts/lib/Either'),
+				...flatten(serializedPathParameters.map(parameter => parameter.dependencies)),
+				...serializedResponses.dependencies,
+				...serializedParameters.dependencies,
+			],
+			() => [serializedDependency('partial', 'io-ts')],
+		);
 
-	return serializedType(type, io, dependencies, serializedParameters.refs);
+		return serializedType(type, io, dependencies, serializedParameters.refs);
+	});
 };
 
 const getOperationName = (operation: OperationObject, httpMethod: string) =>

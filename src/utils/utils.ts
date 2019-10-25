@@ -1,10 +1,8 @@
 import { array, uniq, flatten, last } from 'fp-ts/lib/Array';
 import { constant, Endomorphism, identity, tuple } from 'fp-ts/lib/function';
 import { getStructEq, eqString } from 'fp-ts/lib/Eq';
-import { FSEntity } from './fs';
 import { alt, map, mapNullable, option, Option, some, chain, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { SwaggerObject } from '../schema/2.0/swagger-object';
 import { Dictionary } from './types';
 import { Reference, ReferenceObject } from '../schema/2.0/reference-object';
 import { QueryParameterObject } from '../schema/2.0/parameter-object/query-parameter-object/query-parameter-object';
@@ -15,10 +13,6 @@ import { OperationObject } from '../schema/2.0/operation-object';
 import { PathItemObject } from '../schema/2.0/path-item-object';
 import { PathsObject } from '../schema/2.0/paths-object';
 import { ParametersDefinitionsObject } from '../schema/2.0/parameters-definitions-object';
-
-export interface Serializer {
-	(name: string, schema: SwaggerObject): FSEntity;
-}
 
 export const getOperationsFromPath = (path: PathItemObject): Dictionary<OperationObject> => {
 	const result: Record<string, OperationObject> = {};

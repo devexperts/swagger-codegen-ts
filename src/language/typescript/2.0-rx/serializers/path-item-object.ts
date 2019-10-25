@@ -4,39 +4,56 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map } from 'fp-ts/lib/Option';
 import { serializeOperationObject } from './operation-object';
 import { array } from 'fp-ts/lib/Array';
-import { Dictionary, serializeDictionary } from '../../../../utils/types';
+import { Dictionary } from '../../../../utils/types';
 import { file, File } from '../../../../utils/fs';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { decapitalize } from '@devexperts/utils/dist/string';
 import { getRelativeClientPath } from '../../common/utils';
+import { Either } from 'fp-ts/lib/Either';
+import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
+import { either, record } from 'fp-ts';
 
-export const serializePathGroup = (name: string, group: Dictionary<PathItemObject>, cwd: string): File => {
+export const serializePathGroup = (
+	name: string,
+	group: Dictionary<PathItemObject>,
+	cwd: string,
+): Either<Error, File> => {
 	const groupName = `${name}Controller`;
-	const serialized = foldSerializedTypes(
-		serializeDictionary(group, (url, item) => serializePath(url, item, groupName, cwd)),
-	);
-	const dependencies = serializeDependencies([
-		...serialized.dependencies,
-		serializedDependency('asks', 'fp-ts/lib/Reader'),
-		serializedDependency('APIClient', getRelativeClientPath(cwd)),
-	]);
-	return file(
-		`${groupName}.ts`,
-		`
-			${dependencies}
-		
-			export interface ${groupName} {
-				${serialized.type}
-			}
-			
-			export const ${decapitalize(groupName)} = asks((e: { apiClient: APIClient }): ${groupName} => ({
-				${serialized.io}
-			}));
-		`,
+	return pipe(
+		group,
+		record.collect((url, item) => serializePath(url, item, groupName, cwd)),
+		sequenceEither,
+		either.map(foldSerializedTypes),
+		either.map(serialized => {
+			const dependencies = serializeDependencies([
+				...serialized.dependencies,
+				serializedDependency('asks', 'fp-ts/lib/Reader'),
+				serializedDependency('APIClient', getRelativeClientPath(cwd)),
+			]);
+			return file(
+				`${groupName}.ts`,
+				` 
+					${dependencies}
+				
+					export interface ${groupName} {
+						${serialized.type}
+					}
+					
+					export const ${decapitalize(groupName)} = asks((e: { apiClient: APIClient }): ${groupName} => ({
+						${serialized.io}
+					}));
+				`,
+			);
+		}),
 	);
 };
 
-const serializePath = (url: string, item: PathItemObject, rootName: string, cwd: string): SerializedType => {
+const serializePath = (
+	url: string,
+	item: PathItemObject,
+	rootName: string,
+	cwd: string,
+): Either<Error, SerializedType> => {
 	const get = pipe(
 		item.get,
 		map(operation => serializeOperationObject(url, 'GET', operation, rootName, cwd)),
@@ -65,6 +82,11 @@ const serializePath = (url: string, item: PathItemObject, rootName: string, cwd:
 		item.patch,
 		map(operation => serializeOperationObject(url, 'PATCH', operation, rootName, cwd)),
 	);
-	const operations = array.compact([get, put, post, remove, options, head, patch]);
-	return foldSerializedTypes(operations);
+	const operations = [get, put, post, remove, options, head, patch];
+	return pipe(
+		operations,
+		array.compact,
+		sequenceEither,
+		either.map(foldSerializedTypes),
+	);
 };

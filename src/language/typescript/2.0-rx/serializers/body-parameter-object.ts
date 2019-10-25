@@ -6,23 +6,29 @@ import { constFalse } from 'fp-ts/lib/function';
 import { serializeSchemaObject } from './schema-object';
 import { head, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { unless } from '../../../../utils/string';
+import { either } from 'fp-ts';
+import { Either } from 'fp-ts/lib/Either';
 
 const serializeBodyParameterObject = (
 	parameter: BodyParameterObject,
 	rootName: string,
 	cwd: string,
-): SerializedParameter => {
+): Either<Error, SerializedParameter> => {
 	const isRequired = pipe(
 		parameter.required,
 		getOrElse(constFalse),
 	);
-	const serializedParameterType = serializeSchemaObject(parameter.schema, rootName, cwd);
-	return serializedParameter(
-		serializedParameterType.type,
-		serializedParameterType.io,
-		isRequired,
-		serializedParameterType.dependencies,
-		serializedParameterType.refs,
+	return pipe(
+		serializeSchemaObject(parameter.schema, rootName, cwd),
+		either.map(serializedParameterType =>
+			serializedParameter(
+				serializedParameterType.type,
+				serializedParameterType.io,
+				isRequired,
+				serializedParameterType.dependencies,
+				serializedParameterType.refs,
+			),
+		),
 	);
 };
 
@@ -30,15 +36,20 @@ export const serializeBodyParameterObjects = (
 	parameters: NonEmptyArray<BodyParameterObject>,
 	rootName: string,
 	cwd: string,
-): SerializedParameter => {
+): Either<Error, SerializedParameter> => {
 	// according to spec there can be only one body parameter
 	const serializedBodyParameter = serializeBodyParameterObject(head(parameters), rootName, cwd);
-	const { type, isRequired, io, dependencies, refs } = serializedBodyParameter;
-	return serializedParameter(
-		`body${unless(isRequired, '?')}: ${type}`,
-		`body: ${io}`,
-		isRequired,
-		dependencies,
-		refs,
+	return pipe(
+		serializedBodyParameter,
+		either.map(serializedBodyParameter => {
+			const { type, isRequired, io, dependencies, refs } = serializedBodyParameter;
+			return serializedParameter(
+				`body${unless(isRequired, '?')}: ${type}`,
+				`body: ${io}`,
+				isRequired,
+				dependencies,
+				refs,
+			);
+		}),
 	);
 };
