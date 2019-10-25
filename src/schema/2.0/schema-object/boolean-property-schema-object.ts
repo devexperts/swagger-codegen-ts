@@ -1,12 +1,12 @@
-import * as t from 'io-ts';
+import { literal, type } from 'io-ts';
 
 export interface BooleanPropertySchemaObject {
 	readonly type: 'boolean';
 }
 
-export const BooleanPropertySchemaObject = t.type(
+export const BooleanPropertySchemaObject = type(
 	{
-		type: t.literal('boolean'),
+		type: literal('boolean'),
 	},
 	'BooleanPropertySchemaObject',
 );

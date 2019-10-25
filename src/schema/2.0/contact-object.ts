@@ -1,6 +1,6 @@
-import * as t from 'io-ts';
 import { Option } from 'fp-ts/lib/Option';
 import { stringOption } from '../../utils/io-ts';
+import { type } from 'io-ts';
 
 export interface ContactObject {
 	readonly name: Option<string>;
@@ -8,7 +8,7 @@ export interface ContactObject {
 	readonly email: Option<string>;
 }
 
-export const ContactObject = t.type(
+export const ContactObject = type(
 	{
 		name: stringOption,
 		url: stringOption,

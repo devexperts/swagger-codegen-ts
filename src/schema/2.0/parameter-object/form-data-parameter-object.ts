@@ -1,6 +1,6 @@
-import * as t from 'io-ts';
 import { booleanOption, stringOption } from '../../../utils/io-ts';
 import { Option } from 'fp-ts/lib/Option';
+import { literal, string, type } from 'io-ts';
 
 export interface FormDataParameterObject {
 	readonly name: string;
@@ -9,10 +9,10 @@ export interface FormDataParameterObject {
 	readonly required: Option<boolean>;
 }
 
-export const FormDataParameterObject = t.type(
+export const FormDataParameterObject = type(
 	{
-		name: t.string,
-		in: t.literal('formData'),
+		name: string,
+		in: literal('formData'),
 		description: stringOption,
 		required: booleanOption,
 	},

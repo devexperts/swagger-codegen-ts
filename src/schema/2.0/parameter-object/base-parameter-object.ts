@@ -1,6 +1,6 @@
 import { Option } from 'fp-ts/lib/Option';
-import * as t from 'io-ts';
 import { stringOption } from '../../../utils/io-ts';
+import { string } from 'io-ts';
 
 export interface BaseParameterObjectProps {
 	readonly name: string;
@@ -8,6 +8,6 @@ export interface BaseParameterObjectProps {
 }
 
 export const BaseParameterObjectProps = {
-	name: t.string,
+	name: string,
 	description: stringOption,
 };

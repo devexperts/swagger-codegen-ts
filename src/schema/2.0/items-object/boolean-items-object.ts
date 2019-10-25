@@ -1,14 +1,14 @@
-import * as t from 'io-ts';
 import { BaseItemsObject, BaseItemsObjectProps } from './base-items-object';
+import { literal, type } from 'io-ts';
 
 export interface BooleanItemsObject extends BaseItemsObject {
 	readonly type: 'boolean';
 }
 
-export const BooleanItemsObject = t.type(
+export const BooleanItemsObject = type(
 	{
 		...BaseItemsObjectProps,
-		type: t.literal('boolean'),
+		type: literal('boolean'),
 	},
 	'BooleanItemsObject',
 );

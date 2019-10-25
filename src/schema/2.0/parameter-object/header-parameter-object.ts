@@ -1,6 +1,6 @@
 import { Option } from 'fp-ts/lib/Option';
-import * as t from 'io-ts';
 import { booleanOption, stringOption } from '../../../utils/io-ts';
+import { literal, string, type } from 'io-ts';
 
 export interface HeaderParameterObject {
 	readonly name: string;
@@ -9,10 +9,10 @@ export interface HeaderParameterObject {
 	readonly required: Option<boolean>;
 }
 
-export const HeaderParameterObject = t.type(
+export const HeaderParameterObject = type(
 	{
-		name: t.string,
-		in: t.literal('header'),
+		name: string,
+		in: literal('header'),
 		description: stringOption,
 		required: booleanOption,
 	},

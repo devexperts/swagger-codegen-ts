@@ -1,6 +1,6 @@
 import { Option } from 'fp-ts/lib/Option';
-import * as t from 'io-ts';
 import { primitiveArrayOption, stringOption } from '../../../utils/io-ts';
+import { literal, type } from 'io-ts';
 
 export interface StringPropertySchemaObject {
 	readonly type: 'string';
@@ -8,9 +8,9 @@ export interface StringPropertySchemaObject {
 	readonly enum: Option<Array<string | number | boolean>>;
 }
 
-export const StringPropertySchemaObject = t.type(
+export const StringPropertySchemaObject = type(
 	{
-		type: t.literal('string'),
+		type: literal('string'),
 		format: stringOption,
 		enum: primitiveArrayOption,
 	},

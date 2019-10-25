@@ -1,14 +1,13 @@
 import { BaseQueryParameterObjectProps } from './base-query-parameter-object';
-import * as t from 'io-ts';
-
+import { literal, type } from 'io-ts';
 export interface StringQueryParameterObject extends BaseQueryParameterObjectProps {
 	readonly type: 'string';
 }
 
-export const StringQueryParameterObject = t.type(
+export const StringQueryParameterObject = type(
 	{
 		...BaseQueryParameterObjectProps,
-		type: t.literal('string'),
+		type: literal('string'),
 	},
 	'StringQueryParameterObject',
 );

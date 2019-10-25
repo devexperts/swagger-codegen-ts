@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { string, type } from 'io-ts';
 
 export interface ReferenceObject {
 	readonly $ref: string;
@@ -6,9 +6,9 @@ export interface ReferenceObject {
 
 export type Reference<A> = A | ReferenceObject;
 
-export const ReferenceObject = t.type(
+export const ReferenceObject = type(
 	{
-		$ref: t.string,
+		$ref: string,
 	},
 	'ReferenceObject',
 );

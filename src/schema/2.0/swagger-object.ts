@@ -1,4 +1,3 @@
-import * as t from 'io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { Option } from 'fp-ts/lib/Option';
 import { stringArrayOption, stringOption } from '../../utils/io-ts';
@@ -11,6 +10,7 @@ import { SecurityDefinitionsObject } from './security-definitions-object';
 import { DefinitionsObject } from './definitions-object';
 import { PathsObject } from './paths-object';
 import { ParametersDefinitionsObject } from './parameters-definitions-object';
+import { array, string, type } from 'io-ts';
 
 export interface SwaggerObject {
 	readonly basePath: Option<string>;
@@ -30,7 +30,7 @@ export interface SwaggerObject {
 	readonly tags: Option<TagObject[]>;
 }
 
-export const SwaggerObject = t.type(
+export const SwaggerObject = type(
 	{
 		basePath: stringOption,
 		consumes: stringArrayOption,
@@ -43,10 +43,10 @@ export const SwaggerObject = t.type(
 		produces: stringArrayOption,
 		responses: optionFromNullable(ResponsesDefinitionsObject),
 		schemes: stringArrayOption,
-		security: optionFromNullable(t.array(SecurityRequirementObject)),
+		security: optionFromNullable(array(SecurityRequirementObject)),
 		securityDefinitions: optionFromNullable(SecurityDefinitionsObject),
-		swagger: t.string,
-		tags: optionFromNullable(t.array(TagObject)),
+		swagger: string,
+		tags: optionFromNullable(array(TagObject)),
 	},
 	'SwaggerObject',
 );

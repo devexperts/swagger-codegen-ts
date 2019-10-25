@@ -1,14 +1,14 @@
 import { BaseQueryParameterObjectProps } from './base-query-parameter-object';
-import * as t from 'io-ts';
+import { literal, type } from 'io-ts';
 
 export interface BooleanQueryParameterObject extends BaseQueryParameterObjectProps {
 	readonly type: 'boolean';
 }
 
-export const BooleanQueryParameterObject = t.type(
+export const BooleanQueryParameterObject = type(
 	{
 		...BaseQueryParameterObjectProps,
-		type: t.literal('boolean'),
+		type: literal('boolean'),
 	},
 	'BooleanQueryParameterObject',
 );

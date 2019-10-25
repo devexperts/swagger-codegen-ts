@@ -1,5 +1,5 @@
-import * as t from 'io-ts';
 import { BaseSecuritySchemeObjectProps } from './base-security-scheme-object';
+import { literal, string, type, union } from 'io-ts';
 
 export interface ApiKeySecuritySchemeObject extends BaseSecuritySchemeObjectProps {
 	readonly type: 'apiKey';
@@ -7,12 +7,12 @@ export interface ApiKeySecuritySchemeObject extends BaseSecuritySchemeObjectProp
 	readonly name: string;
 }
 
-export const ApiKeySecuritySchemeObject = t.type(
+export const ApiKeySecuritySchemeObject = type(
 	{
 		...BaseSecuritySchemeObjectProps,
-		type: t.literal('apiKey'),
-		in: t.union([t.literal('query'), t.literal('header')]),
-		name: t.string,
+		type: literal('apiKey'),
+		in: union([literal('query'), literal('header')]),
+		name: string,
 	},
 	'ApiKeySecuritySchemeObject',
 );

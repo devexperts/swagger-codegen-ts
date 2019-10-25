@@ -1,5 +1,4 @@
-import * as t from 'io-ts';
-import { dictionary, stringArrayOption, stringOption } from '../../../utils/io-ts';
+import { Codec, dictionary, stringArrayOption, stringOption } from '../../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { ReferenceObject } from '../reference-object';
 import { StringPropertySchemaObject } from './string-property-schema-object';
@@ -10,6 +9,7 @@ import { ReferenceSchemaObject } from './reference-schema-object';
 import { AllOfSchemaObject } from './all-of-schema-object';
 import { ObjectSchemaObject } from './object-schema-object';
 import { ArraySchemaObject } from './array-schema-object';
+import { array, intersection, literal, recursion, type, union } from 'io-ts';
 
 export type SchemaObject =
 	| ReferenceSchemaObject
@@ -21,32 +21,32 @@ export type SchemaObject =
 	| BooleanPropertySchemaObject
 	| ArraySchemaObject;
 
-export const SchemaObject: t.Type<SchemaObject, unknown> = t.recursion('SchemaObject', SchemaObject => {
-	const ArraySchemaObject = t.type({
-		type: t.literal('array'),
+export const SchemaObject: Codec<SchemaObject> = recursion('SchemaObject', SchemaObject => {
+	const ArraySchemaObject = type({
+		type: literal('array'),
 		items: SchemaObject,
 	});
-	const ObjectSchemaObject = t.type({
+	const ObjectSchemaObject = type({
 		required: stringArrayOption,
-		type: t.literal('object'),
+		type: literal('object'),
 		properties: optionFromNullable(dictionary(SchemaObject, 'Dictionary<SchemaObject>')),
 		additionalProperties: optionFromNullable(SchemaObject),
 	});
-	const ReferenceOrAllOfSchemaObject = t.union([
-		t.intersection([
+	const ReferenceOrAllOfSchemaObject = union([
+		intersection([
 			ReferenceObject,
-			t.type({
-				type: t.literal(undefined as any),
+			type({
+				type: literal(undefined as any),
 			}),
 		]),
-		t.type({
+		type({
 			description: stringOption,
-			type: t.literal(undefined as any),
-			allOf: t.array(SchemaObject),
+			type: literal(undefined as any),
+			allOf: array(SchemaObject),
 		}),
 	]);
 
-	return t.union([
+	return union([
 		ReferenceOrAllOfSchemaObject,
 		ArraySchemaObject,
 		ObjectSchemaObject,
