@@ -9,29 +9,55 @@ import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either
 import { SwaggerObject } from '../../../../schema/2.0/swagger-object';
 import { fromString } from '../../../../utils/ref';
 import { clientFile } from '../../common/client';
+import { serializeParametersDefinitionsObject } from './parameters-definitions-object';
+import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
+import { serializeResponsesDefinitionsObject } from './responses-definitions-object';
 
 const definitionsRef = fromString('#/definitions');
+const parametersRef = fromString('#/parameters');
+const responsesRef = fromString('#/responses');
 
-export const serializeSwaggerObject = (name: string, swaggerObject: SwaggerObject): Either<Error, Directory> => {
-	const definitions = pipe(
-		swaggerObject.definitions,
-		option.map(definitions =>
-			pipe(
-				definitionsRef,
-				either.chain(from => serializeDefinitions(from, definitions)),
+export const serializeSwaggerObject = combineReader(
+	serializePaths,
+	serializePaths => (name: string, swaggerObject: SwaggerObject): Either<Error, Directory> => {
+		const definitions = pipe(
+			swaggerObject.definitions,
+			option.map(definitions =>
+				pipe(
+					definitionsRef,
+					either.chain(from => serializeDefinitions(from, definitions)),
+				),
 			),
-		),
-	);
-	const additional = pipe(
-		[definitions],
-		array.compact,
-		sequenceEither,
-	);
-	const paths = pipe(
-		pathsRef,
-		either.chain(from => serializePaths(from, swaggerObject.paths, swaggerObject.parameters)),
-	);
-	return combineEither(additional, paths, clientFile, (additional, paths, clientFile) => {
-		return directory(name, [clientFile, ...additional, paths]);
-	});
-};
+		);
+		const parameters = pipe(
+			swaggerObject.parameters,
+			option.map(parameters =>
+				pipe(
+					parametersRef,
+					either.chain(ref => serializeParametersDefinitionsObject(ref, parameters)),
+				),
+			),
+		);
+		const responses = pipe(
+			swaggerObject.responses,
+			option.map(responses =>
+				pipe(
+					responsesRef,
+					either.chain(ref => serializeResponsesDefinitionsObject(ref, responses)),
+				),
+			),
+		);
+		const additional = pipe(
+			[definitions, parameters, responses],
+			array.compact,
+			sequenceEither,
+		);
+		const paths = pipe(
+			pathsRef,
+			either.chain(from => serializePaths(from, swaggerObject.paths)),
+		);
+		return combineEither(additional, paths, clientFile, (additional, paths, clientFile) =>
+			directory(name, [clientFile, ...additional, paths]),
+		);
+	},
+);

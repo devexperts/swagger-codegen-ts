@@ -1,7 +1,7 @@
 import { stringOption } from '../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { OperationObject } from './operation-object';
-import { ParameterObject } from './parameter-object/parameter-object';
+import { ParameterObject, ParameterObjectCodec } from './parameter-object';
 import { ReferenceObject } from './reference-object';
 import { Option } from 'fp-ts/lib/Option';
 import { array, type, union } from 'io-ts';
@@ -28,7 +28,7 @@ export const PathItemObjectCodec = type(
 		options: optionFromNullable(OperationObject),
 		head: optionFromNullable(OperationObject),
 		patch: optionFromNullable(OperationObject),
-		parameters: optionFromNullable(array(union([ParameterObject, ReferenceObject]))),
+		parameters: optionFromNullable(array(union([ParameterObjectCodec, ReferenceObject]))),
 	},
 	'PathItemObject',
 );

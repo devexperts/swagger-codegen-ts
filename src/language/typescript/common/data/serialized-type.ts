@@ -41,11 +41,11 @@ export const monoidSerializedType: Monoid<SerializedType> = getStructMonoid({
 
 export const foldSerializedTypes = fold(monoidSerializedType);
 export const intercalateSerializedTypes = intercalate(monoidSerializedType, array);
-const eqSerializedTypeWithoutDependencies: Eq<SerializedType> = getStructEq<Pick<SerializedType, 'type' | 'io'>>({
+const eqSerializedTypeByTypeAndIO: Eq<SerializedType> = getStructEq<Pick<SerializedType, 'type' | 'io'>>({
 	type: eqString,
 	io: eqString,
 });
-export const uniqSerializedTypesWithoutDependencies = uniq(eqSerializedTypeWithoutDependencies);
+export const uniqSerializedTypesByTypeAndIO = uniq(eqSerializedTypeByTypeAndIO);
 export const SERIALIZED_VOID_TYPE = serializedType(
 	'void',
 	'tvoid',

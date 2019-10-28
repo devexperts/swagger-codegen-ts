@@ -2,6 +2,7 @@ import { SerializedPathParameter } from './data/serialized-path-parameter';
 import { unless } from '../../../utils/string';
 import { Options } from 'prettier';
 import { fromString } from '../../../utils/ref';
+import { ReferenceObject } from '../../../schema/3.0/reference-object';
 
 export const SUCCESSFUL_CODES = ['200', '201', 'default'];
 export const CONTROLLERS_DIRECTORY = 'controllers';
@@ -40,3 +41,7 @@ export interface SerializeOptions {
 }
 
 export const pathsRef = fromString('#/paths');
+
+export interface Context {
+	readonly resolveRef: (referenceObject: ReferenceObject) => unknown;
+}

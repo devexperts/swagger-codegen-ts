@@ -6,11 +6,7 @@ import { serializeSchemaObject } from './schema-object';
 import { Either } from 'fp-ts/lib/Either';
 import { Ref } from '../../../../utils/ref';
 
-export const serializeOperationResponse = (
-	from: Ref,
-	code: string,
-	response: ResponseObject,
-): Option<Either<Error, SerializedType>> =>
+export const serializeResponseObject = (from: Ref, response: ResponseObject): Option<Either<Error, SerializedType>> =>
 	pipe(
 		response.schema,
 		map(schema => serializeSchemaObject(from, schema)),

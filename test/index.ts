@@ -17,14 +17,20 @@ const out = path.resolve(cwd, 'out');
 const test1 = generate({
 	spec: path.resolve(__dirname, 'specs/json/swagger.json'),
 	out,
-	language: (out, documents) => serializeSwagger2(out, documents),
+	language: (out, documents, resolveRef) =>
+		serializeSwagger2({
+			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
+		})(out, documents),
 	decoder: SwaggerObject,
 });
 
 const test2 = generate({
-	spec: path.resolve(__dirname, 'specs/yaml/swagger.yml'),
+	spec: path.resolve(__dirname, 'specs/yaml/demo.yml'),
 	out,
-	language: (out, documents) => serializeSwagger2(out, documents),
+	language: (out, documents, resolveRef) =>
+		serializeSwagger2({
+			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
+		})(out, documents),
 	decoder: SwaggerObject,
 });
 

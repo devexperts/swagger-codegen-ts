@@ -2,7 +2,7 @@ import {
 	intercalateSerializedTypes,
 	serializedType,
 	SerializedType,
-	uniqSerializedTypesWithoutDependencies,
+	uniqSerializedTypesByTypeAndIO,
 	SERIALIZED_VOID_TYPE,
 	getSerializedRefType,
 } from '../../common/data/serialized-type';
@@ -40,7 +40,7 @@ export const serializeResponsesObject = (from: Ref) => (
 		),
 		array.compact,
 		sequenceEither,
-		either.map(uniqSerializedTypesWithoutDependencies),
+		either.map(uniqSerializedTypesByTypeAndIO),
 	);
 	return pipe(
 		serializedResponses,

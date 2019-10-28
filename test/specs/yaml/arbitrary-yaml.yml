@@ -1,0 +1,7 @@
+SharedPathItem:
+  description: shared path item
+  get:
+    operationId: sharedGet
+    responses:
+      200:
+        description: successful sharedGet result

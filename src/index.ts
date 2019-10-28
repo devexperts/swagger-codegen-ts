@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as $RefParser from 'json-schema-ref-parser';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { array, either, taskEither } from 'fp-ts';
-import { Either } from 'fp-ts/lib/Either';
+import { Either, isLeft } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { reportIfFailed } from './utils/io-ts';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
@@ -47,9 +47,14 @@ export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, vo
 			array.reduce({}, (acc, [fullPath, spec]) => {
 				const relative = path.relative(cwd, fullPath);
 				log('Decoding', relative);
+				const decoded = reportIfFailed(options.decoder.decode(spec));
+				if (isLeft(decoded)) {
+					log('Unable to decode', relative, 'as OpenAPI spec. Treat it as an arbitrary json');
+					return acc;
+				}
 				return {
 					...acc,
-					[relative]: getUnsafe(reportIfFailed(options.decoder.decode(spec))),
+					[relative]: decoded.right,
 				};
 			}),
 		);
