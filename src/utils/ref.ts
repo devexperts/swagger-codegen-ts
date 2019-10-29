@@ -3,14 +3,14 @@ import { isNonEmpty } from 'fp-ts/lib/Array';
 import { last, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { Either, left, right } from 'fp-ts/lib/Either';
 
-export interface Ref {
+export interface Ref<R extends string = string> {
 	readonly $ref: string;
 	readonly name: string;
 	readonly path: string;
 	readonly target: string;
 }
 
-export const fromString = ($ref: string): Either<Error, Ref> => {
+export const fromString = <R extends string>($ref: R): Either<Error, Ref<R>> => {
 	let target = '';
 	let inPath = false;
 	let pathPart = '';

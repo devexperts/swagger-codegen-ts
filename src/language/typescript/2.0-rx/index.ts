@@ -8,18 +8,22 @@ import { serializeSwaggerObject } from './serializers/swagger-object';
 import { format } from 'prettier';
 import { Either } from 'fp-ts/lib/Either';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
+import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 
-export const serialize = (
-	out: string,
-	documents: Dictionary<SwaggerObject>,
-	options: SerializeOptions = {},
-): Either<Error, FSEntity> =>
-	pipe(
-		documents,
-		record.collect(serializeSwaggerObject),
-		sequenceEither,
-		either.map(serialized => directory(out, serialized)),
-		either.map(serialized =>
-			map(serialized, content => format(content, options.prettierConfig || defaultPrettierConfig)),
+export const serialize = combineReader(
+	serializeSwaggerObject,
+	serializeSwaggerObject => (
+		out: string,
+		documents: Dictionary<SwaggerObject>,
+		options: SerializeOptions = {},
+	): Either<Error, FSEntity> =>
+		pipe(
+			documents,
+			record.collect(serializeSwaggerObject),
+			sequenceEither,
+			either.map(serialized => directory(out, serialized)),
+			either.map(serialized =>
+				map(serialized, content => format(content, options.prettierConfig || defaultPrettierConfig)),
+			),
 		),
-	);
+);

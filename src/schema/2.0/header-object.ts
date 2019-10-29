@@ -1,4 +1,4 @@
-import { ItemsObject } from './items-object/items-object';
+import { ItemsObject, ItemsObjectCodec } from './items-object';
 import { Option } from 'fp-ts/lib/Option';
 import { stringOption } from '../../utils/io-ts';
 import { intersection, type } from 'io-ts';
@@ -8,7 +8,7 @@ export type HeaderObject = ItemsObject & {
 };
 export const HeaderObject = intersection(
 	[
-		ItemsObject,
+		ItemsObjectCodec,
 		type({
 			description: stringOption,
 		}),

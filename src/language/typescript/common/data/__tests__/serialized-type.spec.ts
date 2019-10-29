@@ -144,20 +144,4 @@ describe('SerializedType', () => {
 			}),
 		);
 	});
-	it('getSerializedRecursiveType', () => {
-		assert(
-			property($refArbitrary, serializedTypeArbitrary, (from, s) => {
-				const typeName = getTypeName(from.name);
-				const ioName = getIOName(from.name);
-				expect(getSerializedRecursiveType(from)(s)).toEqual(
-					serializedType(
-						s.type,
-						`recursion<${typeName}, unknown>('${ioName}', ${ioName} => ${s.io})`,
-						[...s.dependencies, serializedDependency('recursion', 'io-ts')],
-						s.refs,
-					),
-				);
-			}),
-		);
-	});
 });

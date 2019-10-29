@@ -1,20 +1,13 @@
-import * as path from 'path';
 import { SerializedPathParameter } from './data/serialized-path-parameter';
 import { unless } from '../../../utils/string';
 import { Options } from 'prettier';
+import { fromString } from '../../../utils/ref';
+import { ReferenceObject } from '../../../schema/3.0/reference-object';
 
 export const SUCCESSFUL_CODES = ['200', '201', 'default'];
-export const ROOT_DIRECTORY = '.';
 export const CONTROLLERS_DIRECTORY = 'controllers';
 export const DEFINITIONS_DIRECTORY = 'definitions';
-export const CLIENT_DIRECTORY = 'client';
-export const CLIENT_FILENAME = 'client';
-export const UTILS_DIRECTORY = 'utils';
-export const UTILS_FILENAME = 'utils';
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
-export const getRelativeRoot = (cwd: string) => path.relative(cwd, ROOT_DIRECTORY);
-export const getRelativeClientPath = (cwd: string): string =>
-	`${getRelativeRoot(cwd)}/${CLIENT_DIRECTORY}/${CLIENT_FILENAME}`;
 
 const INVALID_NAMES = ['Error', 'Promise', 'PromiseLike', 'Array', 'ArrayLike', 'Function', 'Object'];
 export const getTypeName = (name: string): string => (INVALID_NAMES.includes(name) ? `${name}Type` : name);
@@ -45,4 +38,10 @@ export const defaultPrettierConfig: Options = {
 
 export interface SerializeOptions {
 	prettierConfig?: Options;
+}
+
+export const pathsRef = fromString('#/paths');
+
+export interface Context {
+	readonly resolveRef: (referenceObject: ReferenceObject) => unknown;
 }

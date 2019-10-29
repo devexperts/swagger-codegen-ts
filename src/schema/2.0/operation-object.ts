@@ -1,7 +1,7 @@
 import { Option } from 'fp-ts/lib/Option';
 import { ExternalDocumentationObject } from './external-documentation-object';
-import { ParameterObject } from './parameter-object/parameter-object';
-import { Reference, ReferenceObject } from './reference-object';
+import { ParameterObject, ParameterObjectCodec } from './parameter-object';
+import { ReferenceObject } from './reference-object';
 import { ResponsesObject } from './responses-object';
 import { SecurityRequirementObject } from './security-requirement-object';
 import { booleanOption, stringArrayOption, stringOption } from '../../utils/io-ts';
@@ -16,7 +16,7 @@ export interface OperationObject {
 	readonly operationId: Option<string>;
 	readonly consumes: Option<string[]>;
 	readonly produces: Option<string[]>;
-	readonly parameters: Option<Reference<ParameterObject>[]>;
+	readonly parameters: Option<Array<ReferenceObject | ParameterObject>>;
 	readonly responses: ResponsesObject;
 	readonly schemes: Option<string[]>;
 	readonly deprecated: Option<boolean>;
@@ -32,7 +32,7 @@ export const OperationObject = type(
 		operationId: stringOption,
 		consumes: stringArrayOption,
 		produces: stringArrayOption,
-		parameters: optionFromNullable(array(union([ParameterObject, ReferenceObject]))),
+		parameters: optionFromNullable(array(union([ParameterObjectCodec, ReferenceObject]))),
 		responses: ResponsesObject,
 		schemes: stringArrayOption,
 		deprecated: booleanOption,

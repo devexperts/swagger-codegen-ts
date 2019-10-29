@@ -41,11 +41,11 @@ export const monoidSerializedType: Monoid<SerializedType> = getStructMonoid({
 
 export const foldSerializedTypes = fold(monoidSerializedType);
 export const intercalateSerializedTypes = intercalate(monoidSerializedType, array);
-const eqSerializedTypeWithoutDependencies: Eq<SerializedType> = getStructEq<Pick<SerializedType, 'type' | 'io'>>({
+const eqSerializedTypeByTypeAndIO: Eq<SerializedType> = getStructEq<Pick<SerializedType, 'type' | 'io'>>({
 	type: eqString,
 	io: eqString,
 });
-export const uniqSerializedTypesWithoutDependencies = uniq(eqSerializedTypeWithoutDependencies);
+export const uniqSerializedTypesByTypeAndIO = uniq(eqSerializedTypeByTypeAndIO);
 export const SERIALIZED_VOID_TYPE = serializedType(
 	'void',
 	'tvoid',
@@ -58,6 +58,25 @@ export const SERIALIZED_UNKNOWN_TYPE = serializedType(
 	[serializedDependency('unknown', 'io-ts')],
 	[],
 );
+export const SERIALIZED_BOOLEAN_TYPE = serializedType(
+	'boolean',
+	'boolean',
+	[serializedDependency('boolean', 'io-ts')],
+	[],
+);
+export const SERIALIZED_NUMERIC_TYPE = serializedType(
+	'number',
+	'number',
+	[serializedDependency('number', 'io-ts')],
+	[],
+);
+export const SERIALIZED_DATE_TYPE = serializedType(
+	'Date',
+	'DateFromISOString',
+	[serializedDependency('DateFromISOString', 'io-ts-types/lib/DateFromISOString')],
+	[],
+);
+export const SERIALIZED_STRING_TYPE = serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []);
 
 export const getSerializedPropertyType = (name: string, isRequired: boolean) => (
 	serialized: SerializedType,
@@ -113,13 +132,17 @@ export const getSerializedDictionaryType = (name?: string) => (serialized: Seria
 		serialized.refs,
 	);
 
-export const getSerializedRecursiveType = (from: Ref) => (serialized: SerializedType): SerializedType => {
+export const getSerializedRecursiveType = (from: Ref, shouldTrackRecursion: boolean) => (
+	serialized: SerializedType,
+): SerializedType => {
 	const typeName = getTypeName(from.name);
 	const ioName = getIOName(from.name);
-	return serializedType(
-		serialized.type,
-		`recursion<${typeName}, unknown>('${ioName}', ${ioName} => ${serialized.io})`,
-		[...serialized.dependencies, serializedDependency('recursion', 'io-ts')],
-		serialized.refs,
-	);
+	return shouldTrackRecursion && serialized.refs.some(ref => ref.$ref === from.$ref)
+		? serializedType(
+				serialized.type,
+				`recursion<${typeName}, unknown>('${ioName}', ${ioName} => ${serialized.io})`,
+				[...serialized.dependencies, serializedDependency('recursion', 'io-ts')],
+				serialized.refs,
+		  )
+		: serialized;
 };

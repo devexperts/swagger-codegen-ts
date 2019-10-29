@@ -123,7 +123,7 @@ describe('SchemaObject', () => {
 								getSerializedArrayType(undefined),
 								getSerializedPropertyType('children', true),
 								getSerializedObjectType(undefined),
-								getSerializedRecursiveType(ref),
+								getSerializedRecursiveType(ref, true),
 							);
 							const serialized = pipe(
 								schema,
@@ -163,7 +163,7 @@ describe('SchemaObject', () => {
 								getSerializedObjectType(undefined),
 								getSerializedPropertyType('children', true),
 								getSerializedObjectType(undefined),
-								getSerializedRecursiveType(ref),
+								getSerializedRecursiveType(ref, true),
 							);
 							expect(serialized).toEqual(right(expected));
 						}),
@@ -187,7 +187,7 @@ describe('SchemaObject', () => {
 								ref,
 								getSerializedRefType(ref),
 								getSerializedDictionaryType(undefined),
-								getSerializedRecursiveType(ref),
+								getSerializedRecursiveType(ref, true),
 							);
 
 							expect(serialized).toEqual(right(expected));

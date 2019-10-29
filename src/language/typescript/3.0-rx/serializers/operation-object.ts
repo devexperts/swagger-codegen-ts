@@ -24,13 +24,13 @@ import { concatIf, concatIfL } from '../../../../utils/array';
 import { unless, when } from '../../../../utils/string';
 import { serializeRequestBodyObject } from './request-body-object';
 import { fromString, getRelativePath, Ref } from '../../../../utils/ref';
-import { clientRef } from '../utils';
 import { OperationObject } from '../../../../schema/3.0/operation-object';
 import { ParameterObject, ParameterObjectCodec } from '../../../../schema/3.0/parameter-object';
 import { RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
 import { isSome, none, Option, some } from 'fp-ts/lib/Option';
 import { ReferenceObject } from '../../../../schema/3.0/reference-object';
 import { constFalse } from 'fp-ts/lib/function';
+import { clientRef } from '../../common/client';
 
 const getOperationName = (operation: OperationObject, method: HTTPMethod): string =>
 	pipe(

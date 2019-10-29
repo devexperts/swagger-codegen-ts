@@ -5,14 +5,52 @@ import { StringPropertySchemaObject } from './string-property-schema-object';
 import { NumberPropertySchemaObject } from './number-property-schema-object';
 import { IntegerPropertySchemaObject } from './integer-property-schema-object';
 import { BooleanPropertySchemaObject } from './boolean-property-schema-object';
-import { ReferenceSchemaObject } from './reference-schema-object';
-import { AllOfSchemaObject } from './all-of-schema-object';
-import { ObjectSchemaObject } from './object-schema-object';
-import { ArraySchemaObject } from './array-schema-object';
-import { array, intersection, literal, recursion, type, union } from 'io-ts';
+import { array, literal, recursion, type, union } from 'io-ts';
+import { Option } from 'fp-ts/lib/Option';
+import { Dictionary } from '../../../utils/types';
+
+export interface ArraySchemaObject {
+	readonly type: 'array';
+	readonly items: SchemaObject;
+}
+
+const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaObject', () =>
+	type({
+		type: literal('array'),
+		items: SchemaObject,
+	}),
+);
+
+export interface ObjectSchemaObject {
+	readonly type: 'object';
+	readonly properties: Option<Dictionary<SchemaObject>>;
+	readonly required: Option<string[]>;
+	readonly additionalProperties: Option<SchemaObject>;
+}
+
+const ObjectSchemaObjectCodec: Codec<ObjectSchemaObject> = recursion('ObjectSchemaObject', () =>
+	type({
+		required: stringArrayOption,
+		type: literal('object'),
+		properties: optionFromNullable(dictionary(SchemaObject, 'Dictionary<SchemaObject>')),
+		additionalProperties: optionFromNullable(SchemaObject),
+	}),
+);
+
+export interface AllOfSchemaObject {
+	readonly allOf: SchemaObject[];
+	readonly description: Option<string>;
+}
+
+export const AllOfSchemaObject: Codec<AllOfSchemaObject> = recursion('ReferenceOrAllOfSchemaObject', () =>
+	type({
+		description: stringOption,
+		allOf: array(SchemaObject),
+	}),
+);
 
 export type SchemaObject =
-	| ReferenceSchemaObject
+	| ReferenceObject
 	| AllOfSchemaObject
 	| ObjectSchemaObject
 	| StringPropertySchemaObject
@@ -21,38 +59,15 @@ export type SchemaObject =
 	| BooleanPropertySchemaObject
 	| ArraySchemaObject;
 
-export const SchemaObject: Codec<SchemaObject> = recursion('SchemaObject', SchemaObject => {
-	const ArraySchemaObject = type({
-		type: literal('array'),
-		items: SchemaObject,
-	});
-	const ObjectSchemaObject = type({
-		required: stringArrayOption,
-		type: literal('object'),
-		properties: optionFromNullable(dictionary(SchemaObject, 'Dictionary<SchemaObject>')),
-		additionalProperties: optionFromNullable(SchemaObject),
-	});
-	const ReferenceOrAllOfSchemaObject = union([
-		intersection([
-			ReferenceObject,
-			type({
-				type: literal(undefined as any),
-			}),
-		]),
-		type({
-			description: stringOption,
-			type: literal(undefined as any),
-			allOf: array(SchemaObject),
-		}),
-	]);
-
-	return union([
-		ReferenceOrAllOfSchemaObject,
-		ArraySchemaObject,
-		ObjectSchemaObject,
+export const SchemaObject: Codec<SchemaObject> = recursion('SchemaObject', () =>
+	union([
+		ReferenceObject,
+		AllOfSchemaObject,
+		ArraySchemaObjectCodec,
+		ObjectSchemaObjectCodec,
 		StringPropertySchemaObject,
 		NumberPropertySchemaObject,
 		IntegerPropertySchemaObject,
 		BooleanPropertySchemaObject,
-	]);
-});
+	]),
+);

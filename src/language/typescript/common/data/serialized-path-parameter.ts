@@ -28,3 +28,13 @@ export const fromSerializedParameter = (name: string) => (
 	...serialized,
 	name,
 });
+
+export const getSerializedPathParameterType = (serialized: SerializedPathParameter): SerializedPathParameter =>
+	serializedPathParameter(
+		serialized.name,
+		`${serialized.name}: ${serialized.type}`,
+		`${serialized.io}.encode(${serialized.name})`,
+		serialized.isRequired,
+		serialized.dependencies,
+		serialized.refs,
+	);

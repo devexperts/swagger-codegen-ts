@@ -3,25 +3,30 @@ import { directory, Directory, file, File } from '../../../../utils/fs';
 import { serializeSchemaObject } from './schema-object';
 import { serializeDependencies } from '../../common/data/serialized-dependency';
 import { DefinitionsObject } from '../../../../schema/2.0/definitions-object';
-import { DEFINITIONS_DIRECTORY, getIOName, ROOT_DIRECTORY } from '../../common/utils';
+import { DEFINITIONS_DIRECTORY, getIOName } from '../../common/utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either, record } from 'fp-ts';
 import { Either } from 'fp-ts/lib/Either';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
+import { addPathParts, Ref } from '../../../../utils/ref';
 
-export const serializeDefinitions = (definitions: DefinitionsObject): Either<Error, Directory> =>
+export const serializeDefinitions = (from: Ref, definitions: DefinitionsObject): Either<Error, Directory> =>
 	pipe(
 		definitions,
 		record.collect((name, definition) =>
-			serializeDefinition(name, definition, `${ROOT_DIRECTORY}/${DEFINITIONS_DIRECTORY}`),
+			pipe(
+				from,
+				addPathParts(name),
+				either.chain(from => serializeDefinition(from, name, definition)),
+			),
 		),
 		sequenceEither,
 		either.map(serialized => directory(DEFINITIONS_DIRECTORY, serialized)),
 	);
 
-const serializeDefinition = (name: string, definition: SchemaObject, cwd: string): Either<Error, File> =>
+const serializeDefinition = (from: Ref, name: string, definition: SchemaObject): Either<Error, File> =>
 	pipe(
-		serializeSchemaObject(definition, name, cwd),
+		serializeSchemaObject(from, definition),
 		either.map(serialized => {
 			const dependencies = serializeDependencies(serialized.dependencies);
 			return file(

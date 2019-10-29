@@ -1,16 +1,18 @@
 import {
+	getSerializedArrayType,
+	getSerializedDictionaryType,
+	getSerializedObjectType,
+	getSerializedPropertyType,
+	getSerializedRecursiveType,
+	getSerializedRefType,
+	intercalateSerializedTypes,
+	SERIALIZED_BOOLEAN_TYPE,
+	SERIALIZED_NUMERIC_TYPE,
+	SERIALIZED_STRING_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 	SerializedType,
 	serializedType,
-	getSerializedArrayType,
-	getSerializedRefType,
-	getSerializedDictionaryType,
-	getSerializedRecursiveType,
-	getSerializedPropertyType,
-	getSerializedObjectType,
-	intercalateSerializedTypes,
 } from '../../common/data/serialized-type';
-import { serializedDependency } from '../../common/data/serialized-dependency';
 import { Either, mapLeft, right } from 'fp-ts/lib/Either';
 import { isReferenceObject } from './reference-object';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -32,14 +34,14 @@ const isAllowedAdditionalProperties = (
 export const serializeNonArraySchemaObject = (schemaObject: PrimitiveSchemaObject): Either<Error, SerializedType> => {
 	switch (schemaObject.type) {
 		case 'string': {
-			return right(serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []));
+			return right(SERIALIZED_STRING_TYPE);
 		}
 		case 'boolean': {
-			return right(serializedType('boolean', 'boolean', [serializedDependency('boolean', 'io-ts')], []));
+			return right(SERIALIZED_BOOLEAN_TYPE);
 		}
 		case 'integer':
 		case 'number': {
-			return right(serializedType('number', 'number', [serializedDependency('number', 'io-ts')], []));
+			return right(SERIALIZED_NUMERIC_TYPE);
 		}
 	}
 };
@@ -109,7 +111,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 					}
 				}),
 				option.map(either.map(getSerializedDictionaryType(name))),
-				option.map(either.map(checkRecursion(from, shouldTrackRecursion))),
+				option.map(either.map(getSerializedRecursiveType(from, shouldTrackRecursion))),
 			);
 			const properties = pipe(
 				schemaObject.properties,
@@ -148,7 +150,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 						sequenceEither,
 						either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
 						either.map(getSerializedObjectType(name)),
-						either.map(checkRecursion(from, shouldTrackRecursion)),
+						either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 					),
 				),
 			);
@@ -160,8 +162,3 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 		}
 	}
 };
-
-const checkRecursion = (from: Ref, shouldTrackRecursion: boolean) => (serialized: SerializedType): SerializedType =>
-	shouldTrackRecursion && serialized.refs.some(ref => ref.$ref === from.$ref)
-		? getSerializedRecursiveType(from)(serialized)
-		: serialized;

@@ -1,38 +1,43 @@
 import { ResponsesObject } from '../../../../schema/2.0/responses-object';
 import {
+	getSerializedRefType,
 	intercalateSerializedTypes,
+	SERIALIZED_VOID_TYPE,
 	serializedType,
 	SerializedType,
-	uniqSerializedTypesWithoutDependencies,
+	uniqSerializedTypesByTypeAndIO,
 } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { serializeOperationResponse } from './response-object';
+import { serializeResponseObject } from './response-object';
 import { serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIfL } from '../../../../utils/array';
-import { SUCCESSFUL_CODES } from '../../common/utils';
-import { array, either, option, record } from 'fp-ts';
+import { array, either, record } from 'fp-ts';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { Either } from 'fp-ts/lib/Either';
+import { fromString, Ref } from '../../../../utils/ref';
+import { ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
+import { some } from 'fp-ts/lib/Option';
 
-export const serializeOperationResponses = (
-	responses: ResponsesObject,
-	rootName: string,
-	cwd: string,
-): Either<Error, SerializedType> =>
+export const serializeOperationResponses = (from: Ref, responses: ResponsesObject): Either<Error, SerializedType> =>
 	pipe(
-		SUCCESSFUL_CODES,
-		array.map(code =>
-			pipe(
-				record.lookup(code, responses),
-				option.chain(response => serializeOperationResponse(code, response, rootName, cwd)),
-			),
-		),
+		responses,
+		record.collect((code, response) => {
+			if (ReferenceObjectCodec.is(response)) {
+				return pipe(
+					fromString(response.$ref),
+					either.map(getSerializedRefType(from)),
+					some,
+				);
+			} else {
+				return serializeResponseObject(from, response);
+			}
+		}),
 		array.compact,
 		sequenceEither,
 		either.map(responses => {
-			const serializedResponses = uniqSerializedTypesWithoutDependencies(responses);
+			const serializedResponses = uniqSerializedTypesByTypeAndIO(responses);
 			if (serializedResponses.length === 0) {
-				return serializedType('void', 'tvoid', [serializedDependency('void as tvoid', 'io-ts')], []);
+				return SERIALIZED_VOID_TYPE;
 			}
 			const combined = intercalateSerializedTypes(serializedType('|', ',', [], []), serializedResponses);
 

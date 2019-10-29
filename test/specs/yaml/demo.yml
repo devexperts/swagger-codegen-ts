@@ -1,0 +1,92 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+paths:
+  /test/{pathParam}/${inlinePathParam}:
+    get:
+      parameters:
+        - $ref: '#/parameters/PathParam'
+        - $ref: '#/parameters/QueryParam'
+        - name: inlinePathParam
+          in: path
+          required: true
+          type: string
+        - name: inlineQueryParam
+          in: query
+          required: true
+          type: number
+      operationId: test
+      responses:
+        200:
+          $ref: '#/responses/Successful'
+        404:
+          $ref: '#/responses/NotFound'
+        400:
+          $ref: '#/responses/IllegalInput'
+        500:
+          $ref: '#/responses/GeneralErrorResponse'
+    post:
+      operationId: testSharedparameters
+      responses:
+        200:
+          $ref: '#/responses/Successful'
+          404:
+            $ref: '#/responses/NotFound'
+          400:
+            $ref: '#/responses/IllegalInput'
+          500:
+            $ref: '#/responses/GeneralErrorResponse'
+    parameters:
+      - $ref: '#/parameters/PathParam'
+      - $ref: '#/parameters/QueryParam'
+      - name: inlinePathParam
+        in: path
+        required: true
+        type: string
+      - name: inlineQueryParam
+        in: query
+        required: true
+        type: number
+  /shared-path-item:
+    $ref: './arbitrary-yaml.yml#/SharedPathItem'
+definitions:
+  local:
+    type: object
+    required:
+      - pets
+      - self
+    properties:
+      pets:
+        type: array
+        items:
+          "$ref": "./common.yml#/definitions/Pet"
+      self:
+        $ref: '#/definitions/local'
+  GeneralError:
+    type: object
+parameters:
+  PathParam:
+    name: pathParam
+    in: path
+    required: true
+    type: string
+  QueryParam:
+    name: queryParam
+    in: query
+    type: number
+  HeaderParam:
+    name: headerParam
+    in: header
+    type: boolean
+responses:
+  Successful:
+    description: succesful operation
+  NotFound:
+    description: Entity not found.
+  IllegalInput:
+    description: Illegal input for operation.
+  GeneralErrorResponse:
+    description: General Error
+    schema:
+      $ref: '#/definitions/GeneralError'

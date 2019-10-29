@@ -1,7 +1,7 @@
+import { booleanOption, Codec, numberOption, primitiveArrayOption, stringOption } from '../../utils/io-ts';
+import { literal, recursion, type, union } from 'io-ts';
 import { Option } from 'fp-ts/lib/Option';
-import { booleanOption, numberOption, primitiveArrayOption, stringOption } from '../../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
-import { literal, union } from 'io-ts';
 
 export interface BaseItemsObject {
 	readonly format: Option<string>;
@@ -20,7 +20,7 @@ export interface BaseItemsObject {
 	readonly multipleOf: Option<number>;
 }
 
-export const BaseItemsObjectProps = {
+const BaseItemsObjectProps = {
 	format: stringOption,
 	collectionFormat: optionFromNullable(union([literal('csv'), literal('ssv'), literal('tsv'), literal('pipes')])),
 	maximum: numberOption,
@@ -36,3 +36,31 @@ export const BaseItemsObjectProps = {
 	enum: primitiveArrayOption,
 	multipleOf: numberOption,
 };
+
+export interface ArrayItemsObject extends BaseItemsObject {
+	readonly type: 'array';
+	readonly items: ItemsObject;
+}
+
+const ArrayItemsObjectCodec: Codec<ArrayItemsObject> = recursion('ArrayItemsObject', () =>
+	type({
+		...BaseItemsObjectProps,
+		type: literal('array'),
+		items: ItemsObjectCodec,
+	}),
+);
+
+export interface NonArrayItemsObject extends BaseItemsObject {
+	readonly type: 'string' | 'number' | 'integer' | 'boolean';
+}
+
+const NonArrayItemsObjectCodec: Codec<NonArrayItemsObject> = type({
+	...BaseItemsObjectProps,
+	type: union([literal('string'), literal('number'), literal('integer'), literal('boolean')]),
+});
+
+export type ItemsObject = ArrayItemsObject | NonArrayItemsObject;
+
+export const ItemsObjectCodec: Codec<ItemsObject> = recursion('ItemsObject', () =>
+	union([ArrayItemsObjectCodec, NonArrayItemsObjectCodec]),
+);
