@@ -4,7 +4,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { isSome, map, Option } from 'fp-ts/lib/Option';
 import { serializeOperationObject } from './operation-object';
 import { array, flatten } from 'fp-ts/lib/Array';
-import { Dictionary } from '../../../../utils/types';
+import { Dictionary, Kind } from '../../../../utils/types';
 import { file, File } from '../../../../utils/fs';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { decapitalize } from '@devexperts/utils/dist/string';
@@ -21,43 +21,43 @@ import { ask } from 'fp-ts/lib/Reader';
 import { Context } from '../../common/utils';
 
 const serializePath = combineReader(ask<Context>(), serializeOperationObject, (e, serializeOperationObject) => {
-	const run = (from: Ref, url: string, item: PathItemObject): Either<Error, SerializedType> => {
+	const run = (from: Ref, url: string, kind: Kind, item: PathItemObject): Either<Error, SerializedType> => {
 		if (isSome(item.$ref)) {
 			const $ref = item.$ref.value;
 			return pipe(
 				e.resolveRef({ $ref }),
 				PathItemObjectCodec.decode,
 				either.mapLeft(() => new Error(`Unable to resolve PathItem $ref: "${$ref}"`)),
-				either.chain(resolved => run(from, url, resolved)),
+				either.chain(resolved => run(from, url, kind, resolved)),
 			);
 		} else {
 			const get = pipe(
 				item.get,
-				map(operation => serializeOperationObject(from, url, 'GET', operation, item)),
+				map(operation => serializeOperationObject(from, url, 'GET', kind, operation, item)),
 			);
 			const put = pipe(
 				item.put,
-				map(operation => serializeOperationObject(from, url, 'PUT', operation, item)),
+				map(operation => serializeOperationObject(from, url, 'PUT', kind, operation, item)),
 			);
 			const post = pipe(
 				item.post,
-				map(operation => serializeOperationObject(from, url, 'POST', operation, item)),
+				map(operation => serializeOperationObject(from, url, 'POST', kind, operation, item)),
 			);
 			const remove = pipe(
 				item.delete,
-				map(operation => serializeOperationObject(from, url, 'DELETE', operation, item)),
+				map(operation => serializeOperationObject(from, url, 'DELETE', kind, operation, item)),
 			);
 			const options = pipe(
 				item.options,
-				map(operation => serializeOperationObject(from, url, 'OPTIONS', operation, item)),
+				map(operation => serializeOperationObject(from, url, 'OPTIONS', kind, operation, item)),
 			);
 			const head = pipe(
 				item.head,
-				map(operation => serializeOperationObject(from, url, 'HEAD', operation, item)),
+				map(operation => serializeOperationObject(from, url, 'HEAD', kind, operation, item)),
 			);
 			const patch = pipe(
 				item.patch,
-				map(operation => serializeOperationObject(from, url, 'PATCH', operation, item)),
+				map(operation => serializeOperationObject(from, url, 'PATCH', kind, operation, item)),
 			);
 			const operations = [get, put, post, remove, options, head, patch];
 			return pipe(
@@ -74,34 +74,72 @@ const serializePath = combineReader(ask<Context>(), serializeOperationObject, (e
 export const serializePathGroup = combineReader(
 	serializePath,
 	serializePath => (from: Ref, name: string, group: Dictionary<PathItemObject>): Either<Error, File> => {
-		const serialized = pipe(
+		const serializedHKT = pipe(
 			group,
-			record.collect((url, item) => serializePath(from, url, item)),
+			record.collect((url, item) => serializePath(from, url, 'HKT', item)),
 			sequenceEither,
 			either.map(foldSerializedTypes),
 		);
 
-		return combineEither(serialized, clientRef, (serialized, clientRef) => {
-			const dependencies = serializeDependencies([
-				...serialized.dependencies,
-				serializedDependency('asks', 'fp-ts/lib/Reader'),
-				serializedDependency('APIClient', getRelativePath(from, clientRef)),
-			]);
-			return file(
-				`${from.name}.ts`,
-				` 
+		const serializedKind = pipe(
+			group,
+			record.collect((url, item) => serializePath(from, url, '*', item)),
+			sequenceEither,
+			either.map(foldSerializedTypes),
+		);
+
+		const serializedKind2 = pipe(
+			group,
+			record.collect((url, item) => serializePath(from, url, '* -> *', item)),
+			sequenceEither,
+			either.map(foldSerializedTypes),
+		);
+
+		return combineEither(
+			serializedHKT,
+			serializedKind,
+			serializedKind2,
+			clientRef,
+			(serializedHKT, serializedKind, serializedKind2, clientRef) => {
+				const dependencies = serializeDependencies([
+					...serializedHKT.dependencies,
+					...serializedKind.dependencies,
+					...serializedKind2.dependencies,
+					serializedDependency('HTTPClient', getRelativePath(from, clientRef)),
+					serializedDependency('HTTPClient1', getRelativePath(from, clientRef)),
+					serializedDependency('HTTPClient2', getRelativePath(from, clientRef)),
+					serializedDependency('URIS', 'fp-ts/lib/HKT'),
+					serializedDependency('URIS2', 'fp-ts/lib/HKT'),
+				]);
+				return file(
+					`${from.name}.ts`,
+					` 
 					${dependencies} 
 				
-					export interface ${from.name} {
-						${serialized.type}
+					export interface ${from.name}<F> {
+						${serializedHKT.type}
 					}
 					
-					export const ${decapitalize(from.name)} = asks((e: { apiClient: APIClient }): ${from.name} => ({
-						${serialized.io}
-					}));
+					export interface ${from.name}1<F extends URIS> {
+						${serializedKind.type}					
+					}
+					
+					export interface ${from.name}2<F extends URIS2> {
+						${serializedKind2.type}					
+					}
+					
+					export function ${decapitalize(from.name)}<F extends URIS2>(e: { httpClient: HTTPClient2<F> }): ${from.name}2<F>
+					export function ${decapitalize(from.name)}<F extends URIS>(e: { httpClient: HTTPClient1<F> }): ${from.name}1<F>
+					export function ${decapitalize(from.name)}<F>(e: { httpClient: HTTPClient<F> }): ${from.name}<F>;
+					export function ${decapitalize(from.name)}<F>(e: { httpClient: HTTPClient<F> }): ${from.name}<F>; {
+						return {
+							${serializedHKT.io}
+						}
+					}
 				`,
-			);
-		});
+				);
+			},
+		);
 	},
 );
 

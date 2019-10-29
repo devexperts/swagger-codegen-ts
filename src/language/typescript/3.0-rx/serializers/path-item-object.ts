@@ -10,37 +10,43 @@ import { array, either, nonEmptyArray, option } from 'fp-ts';
 import { Ref } from '../../../../utils/ref';
 import { PathItemObject } from '../../../../schema/3.0/path-item-object';
 import { Option } from 'fp-ts/lib/Option';
+import { Kind } from '../../../../utils/types';
 
 export const serializePathItemObject = combineReader(
 	serializeOperationObject,
-	serializeOperationObject => (pattern: string, item: PathItemObject, from: Ref): Either<Error, SerializedType> => {
+	serializeOperationObject => (
+		pattern: string,
+		item: PathItemObject,
+		from: Ref,
+		kind: Kind,
+	): Either<Error, SerializedType> => {
 		const get = pipe(
 			item.get,
-			option.map(serializeOperationObject(pattern, 'GET', from)),
+			option.map(serializeOperationObject(pattern, 'GET', from, kind)),
 		);
 		const post = pipe(
 			item.post,
-			option.map(serializeOperationObject(pattern, 'POST', from)),
+			option.map(serializeOperationObject(pattern, 'POST', from, kind)),
 		);
 		const put = pipe(
 			item.put,
-			option.map(serializeOperationObject(pattern, 'PUT', from)),
+			option.map(serializeOperationObject(pattern, 'PUT', from, kind)),
 		);
 		const remove = pipe(
 			item.delete,
-			option.map(serializeOperationObject(pattern, 'DELETE', from)),
+			option.map(serializeOperationObject(pattern, 'DELETE', from, kind)),
 		);
 		const patch = pipe(
 			item.patch,
-			option.map(serializeOperationObject(pattern, 'PATCH', from)),
+			option.map(serializeOperationObject(pattern, 'PATCH', from, kind)),
 		);
 		const head = pipe(
 			item.head,
-			option.map(serializeOperationObject(pattern, 'HEAD', from)),
+			option.map(serializeOperationObject(pattern, 'HEAD', from, kind)),
 		);
 		const options = pipe(
 			item.options,
-			option.map(serializeOperationObject(pattern, 'OPTIONS', from)),
+			option.map(serializeOperationObject(pattern, 'OPTIONS', from, kind)),
 		);
 		return pipe(
 			array.compact([get, post, put, remove, patch, head, options]),
