@@ -1,3 +1,25 @@
+# [2.0.0-alpha.1](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.0...v2.0.0-alpha.1) (2019-10-29)
+
+
+### Features
+
+* full $ref support for typescript 2 ([#58](https://github.com/devexperts/swagger-codegen-ts/issues/58)) ([9aa17b5](https://github.com/devexperts/swagger-codegen-ts/commit/9aa17b5)), closes [#46](https://github.com/devexperts/swagger-codegen-ts/issues/46)
+* Openapi 3.0 ([#51](https://github.com/devexperts/swagger-codegen-ts/issues/51)) ([fe3face](https://github.com/devexperts/swagger-codegen-ts/commit/fe3face)), closes [#3](https://github.com/devexperts/swagger-codegen-ts/issues/3)
+
+
+### BREAKING CHANGES
+
+* SchemaObject codecs were changed
+* rootName/cwd was replaced with Ref
+* typescript 2.0 utils module was removed
+* output `utils` module was removed
+* all ts2 utils were moved to ts2 language
+* swagger2.0 spec was changed
+* API signatures as well as language signatures were changed
+* a lot of other breaking changes, see #51 
+
+
+
 # [2.0.0-alpha.0](https://github.com/devexperts/swagger-codegen-ts/compare/v0.7.0...v2.0.0-alpha.0) (2019-10-22)
 
 
