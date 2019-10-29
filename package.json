@@ -45,8 +45,6 @@
   },
   "devDependencies": {
     "@devexperts/lint": "^1.0.0-alpha.2",
-    "@devexperts/remote-data-ts": "^2.0.0",
-    "@devexperts/rx-utils": "^1.0.0-alpha.2",
     "@types/jest": "^24.0.18",
     "conventional-changelog-cli": "^2.0.21",
     "eslint": "^6.5.1",
@@ -56,13 +54,11 @@
     "io-ts-types": "^0.5.1",
     "jest": "^24.9.0",
     "nodemon": "^1.18.3",
-    "rxjs": "^6.3.3",
     "ts-jest": "^24.1.0",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.3"
   },
   "peerDependencies": {
-    "@devexperts/remote-data-ts": "^2.0.0",
     "fp-ts": "^2.1.0",
     "io-ts": "^2.0.1",
     "io-ts-types": "^0.5.1"
