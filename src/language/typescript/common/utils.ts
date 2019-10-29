@@ -3,6 +3,7 @@ import { unless } from '../../../utils/string';
 import { Options } from 'prettier';
 import { fromString } from '../../../utils/ref';
 import { ReferenceObject } from '../../../schema/3.0/reference-object';
+import { Kind } from '../../../utils/types';
 
 export const SUCCESSFUL_CODES = ['200', '201', 'default'];
 export const CONTROLLERS_DIRECTORY = 'controllers';
@@ -45,3 +46,19 @@ export const pathsRef = fromString('#/paths');
 export interface Context {
 	readonly resolveRef: (referenceObject: ReferenceObject) => unknown;
 }
+
+export const getKindValue = (kind: Kind, value: string): string => {
+	switch (kind) {
+		case 'HKT': {
+			return `HKT<F, ${value}>`;
+		}
+		case '*': {
+			return `Kind<F, ${value}>`;
+		}
+		case '* -> *': {
+			return `Kind2<F, Error, ${value}>`;
+		}
+	}
+};
+
+export const getControllerName = (name: string): string => `${name}Controller`;

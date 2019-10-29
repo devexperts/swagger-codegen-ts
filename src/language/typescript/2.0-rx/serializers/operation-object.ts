@@ -17,11 +17,15 @@ import {
 	SerializedParameter,
 	serializedParameter,
 } from '../../common/data/serialized-parameter';
-import { EMPTY_DEPENDENCIES, serializedDependency } from '../../common/data/serialized-dependency';
+import {
+	EMPTY_DEPENDENCIES,
+	getSerializedKindDependency,
+	serializedDependency,
+} from '../../common/data/serialized-dependency';
 import { identity } from 'fp-ts/lib/function';
 import { concatIf, concatIfL } from '../../../../utils/array';
 import { unless, when } from '../../../../utils/string';
-import { Context, getJSDoc, getURL, HTTPMethod } from '../../common/utils';
+import { Context, getJSDoc, getURL, HTTPMethod, getKindValue } from '../../common/utils';
 import { Either, isLeft, right } from 'fp-ts/lib/Either';
 import { array, either, nonEmptyArray, option } from 'fp-ts';
 import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
@@ -49,6 +53,7 @@ import { serializeSchemaObject } from './schema-object';
 import { traverseArrayEither } from '../../../../utils/either';
 import { PathItemObject } from '../../../../schema/2.0/path-item-object';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
+import { Kind } from '../../../../utils/types';
 
 interface Parameters {
 	readonly pathParameters: PathParameterObject[];
@@ -221,6 +226,7 @@ export const serializeOperationObject = combineReader(
 		from: Ref,
 		url: string,
 		method: HTTPMethod,
+		kind: Kind,
 		operation: OperationObject,
 		pathItem: PathItemObject,
 	): Either<Error, SerializedType> => {
@@ -283,7 +289,7 @@ export const serializeOperationObject = combineReader(
 
 				const type = `
 					${getJSDoc(array.compact([deprecated, operation.summary, paramsSummary]))}
-					readonly ${operationName}: (${argsType}) => LiveData<Error, ${serializedResponses.type}>;
+					readonly ${operationName}: (${argsType}) => ${getKindValue(kind, serializedResponses.type)};
 				`;
 
 				const serializedUrl = getURL(url, parameters.serializedPathParameters);
@@ -292,41 +298,30 @@ export const serializeOperationObject = combineReader(
 					${operationName}: (${argsName}) => {
 						${when(hasParameters, `const encoded = partial({ ${serializedParameters.io} }).encode(parameters);`)}
 				
-						return e.apiClient
-							.request({
+						return e.httpClient.chain(
+							e.httpClient.request({
 								url: ${serializedUrl},
 								method: '${method}',
 								${when(hasQueryParameters, 'query: encoded.query,')}
 								${when(hasBodyParameters, 'body: encoded.body,')}
-							})
-							.pipe(
-								map(data =>
-									pipe(
-										data,
-										chain(value =>
-											fromEither<Error, ${serializedResponses.type}>(
-												pipe(
-													${serializedResponses.io}.decode(value),
-													mapLeft(ResponseValidationError.create),
-												),
-											),
-										),
-									),
+							}),
+							value =>
+								pipe(
+									${serializedResponses.io}.decode(value),
+									either.mapLeft(ResponseValidationError.create),
+									either.fold(error => e.httpClient.throwError(error), decoded => e.httpClient.of(decoded)),
 								),
-							);
+						);
 					},
 				`;
 
 				const dependencies = concatIfL(
 					hasParameters,
 					[
-						serializedDependency('map', 'rxjs/operators'),
-						serializedDependency('fromEither', '@devexperts/remote-data-ts'),
-						serializedDependency('chain', '@devexperts/remote-data-ts'),
 						serializedDependency('ResponseValidationError', getRelativePath(from, clientRef)),
-						serializedDependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
 						serializedDependency('pipe', 'fp-ts/lib/pipeable'),
-						serializedDependency('mapLeft', 'fp-ts/lib/Either'),
+						serializedDependency('either', 'fp-ts'),
+						getSerializedKindDependency(kind),
 						...flatten(parameters.serializedPathParameters.map(parameter => parameter.dependencies)),
 						...serializedResponses.dependencies,
 						...serializedParameters.dependencies,

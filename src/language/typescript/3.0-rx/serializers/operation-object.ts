@@ -1,4 +1,4 @@
-import { getJSDoc, getURL, HTTPMethod } from '../../common/utils';
+import { getJSDoc, getKindValue, getURL, HTTPMethod } from '../../common/utils';
 import { getSerializedRefType, serializedType, SerializedType } from '../../common/data/serialized-type';
 import {
 	serializePathParameterObject,
@@ -6,7 +6,7 @@ import {
 	foldSerializedQueryParameters,
 } from './parameter-object';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { serializedDependency } from '../../common/data/serialized-dependency';
+import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
 import { serializeResponsesObject } from './responses-object';
 import { array, either, nonEmptyArray, option } from 'fp-ts';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
@@ -31,6 +31,7 @@ import { isSome, none, Option, some } from 'fp-ts/lib/Option';
 import { ReferenceObject } from '../../../../schema/3.0/reference-object';
 import { constFalse } from 'fp-ts/lib/function';
 import { clientRef } from '../../common/client';
+import { Kind } from '../../../../utils/types';
 
 const getOperationName = (operation: OperationObject, method: HTTPMethod): string =>
 	pipe(
@@ -213,7 +214,7 @@ const getParameters = combineReader(
 
 export const serializeOperationObject = combineReader(
 	getParameters,
-	getParameters => (pattern: string, method: HTTPMethod, from: Ref) => (
+	getParameters => (pattern: string, method: HTTPMethod, from: Ref, kind: Kind) => (
 		operation: OperationObject,
 	): Either<Error, SerializedType> => {
 		const parameters = getParameters(from)(operation);
@@ -264,49 +265,38 @@ export const serializeOperationObject = combineReader(
 				).join(',');
 
 				const type = `
-				${getJSDoc(array.compact([deprecated, operation.summary]))}
-				readonly ${operationName}: (${argsType}) => LiveData<Error, ${serializedResponses.type}>;
-			`;
+					${getJSDoc(array.compact([deprecated, operation.summary]))}
+					readonly ${operationName}: (${argsType}) => ${getKindValue(kind, serializedResponses.type)};
+				`;
 
 				const io = `
 				${operationName}: (${argsName}) => {
 					${when(hasParameters, `const encoded = partial({ ${serializedParameters.io} }).encode(parameters);`)}
 
-					return e.apiClient
-						.request({
+					return e.httpClient.chain(
+						e.httpClient.request({
 							url: ${serializedUrl},
 							method: '${method}',
 							${when(hasQueryParameters, 'query: encoded.query,')}
 							${when(hasBodyParameter, 'body: encoded.body,')}
-						})
-						.pipe(
-							map(data =>
-								pipe(
-									data,
-									chain(value =>
-										fromEither<Error, ${serializedResponses.type}>(
-											pipe(
-												${serializedResponses.io}.decode(value),
-												mapLeft(ResponseValidationError.create),
-											),
-										),
-									),
-								),
+						}),
+						value =>
+							pipe(
+								${serializedResponses.io}.decode(value),
+								either.mapLeft(ResponseValidationError.create),
+								either.fold(error => e.httpClient.throwError(error), decoded => e.httpClient.of(decoded)),
 							),
-						);
+					);
 				},
 			`;
 
 				const dependencies = concatIfL(
 					hasParameters,
 					[
-						serializedDependency('map', 'rxjs/operators'),
-						serializedDependency('fromEither', '@devexperts/remote-data-ts'),
-						serializedDependency('chain', '@devexperts/remote-data-ts'),
 						serializedDependency('ResponseValidationError', getRelativePath(from, clientRef)),
-						serializedDependency('LiveData', '@devexperts/rx-utils/dist/rd/live-data.utils'),
 						serializedDependency('pipe', 'fp-ts/lib/pipeable'),
-						serializedDependency('mapLeft', 'fp-ts/lib/Either'),
+						serializedDependency('either', 'fp-ts'),
+						getSerializedKindDependency(kind),
 						...pipe(
 							serializedPathParameters,
 							array.map(p => p.dependencies),
