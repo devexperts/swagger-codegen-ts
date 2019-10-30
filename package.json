@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "ts-node": "ts-node",
-    "test:lint": "eslint ./src/**/*.ts ./test/**/*.ts --fix",
+    "test:lint": "eslint './src/**/*.ts' './test/**/*.ts' --fix",
     "test:run": "ts-node ./test/index.ts",
     "test:build": "yarn test:run && tsc -p tsconfig.test.json",
     "test:unit": "jest",
