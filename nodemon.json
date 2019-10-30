@@ -8,6 +8,6 @@
     "dist",
     "./test/out"
   ],
-  "ext": "ts",
+  "ext": "ts,json,yml,yaml",
   "optOut": true
 }
