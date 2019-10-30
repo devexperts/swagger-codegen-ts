@@ -1,9 +1,9 @@
-import { serialize as serializeSwagger2 } from '../src/language/typescript/2.0-rx';
+import { serialize as serializeSwagger2 } from '../src/language/typescript/2.0';
 import * as path from 'path';
 import { SwaggerObject } from '../src/schema/2.0/swagger-object';
 import { generate } from '../src';
 import { Either } from 'fp-ts/lib/Either';
-import { serialize as serializeOpenAPI3 } from '../src/language/typescript/3.0-rx';
+import { serialize as serializeOpenAPI3 } from '../src/language/typescript/3.0';
 import { OpenapiObjectCodec } from '../src/schema/3.0/openapi-object';
 import * as del from 'del';
 import { pipe } from 'fp-ts/lib/pipeable';
