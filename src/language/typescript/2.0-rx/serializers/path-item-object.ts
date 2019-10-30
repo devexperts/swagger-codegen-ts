@@ -131,7 +131,7 @@ export const serializePathGroup = combineReader(
 					export function ${decapitalize(from.name)}<F extends URIS2>(e: { httpClient: HTTPClient2<F> }): ${from.name}2<F>
 					export function ${decapitalize(from.name)}<F extends URIS>(e: { httpClient: HTTPClient1<F> }): ${from.name}1<F>
 					export function ${decapitalize(from.name)}<F>(e: { httpClient: HTTPClient<F> }): ${from.name}<F>;
-					export function ${decapitalize(from.name)}<F>(e: { httpClient: HTTPClient<F> }): ${from.name}<F>; {
+					export function ${decapitalize(from.name)}<F>(e: { httpClient: HTTPClient<F> }): ${from.name}<F> {
 						return {
 							${serializedHKT.io}
 						}
