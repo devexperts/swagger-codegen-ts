@@ -49,7 +49,7 @@ paths:
         required: true
         type: number
   /shared-path-item:
-    $ref: './arbitrary-yaml.yml#/SharedPathItem'
+    $ref: '../../arbitrary.yml#/SharedPathItem'
 definitions:
   local:
     type: object
