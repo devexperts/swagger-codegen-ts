@@ -33,20 +33,18 @@
   },
   "dependencies": {
     "@devexperts/utils": "^1.0.0-alpha.2",
-    "@types/del": "^3.0.1",
     "@types/fs-extra": "^8.0.0",
-    "@types/js-yaml": "^3.11.2",
     "@types/prettier": "^1.13.2",
-    "del": "^3.0.0",
     "fs-extra": "^8.1.0",
-    "js-yaml": "^3.13.1",
     "json-schema-ref-parser": "^7.1.1",
     "prettier": "^1.15.3"
   },
   "devDependencies": {
     "@devexperts/lint": "^1.0.0-alpha.2",
+    "@types/del": "^4.0.0",
     "@types/jest": "^24.0.18",
     "conventional-changelog-cli": "^2.0.21",
+    "del": "^5.1.0",
     "eslint": "^6.5.1",
     "fast-check": "^1.17.0",
     "fp-ts": "^2.1.0",
