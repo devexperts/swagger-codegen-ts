@@ -1,5 +1,3 @@
-import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { ask } from 'fp-ts/lib/Reader';
 import { getIOName, getTypeName } from '../../common/utils';
 import { addPathParts, Ref } from '../../../../utils/ref';
 import { ResponsesDefinitionsObject } from '../../../../schema/2.0/responses-definitions-object';

@@ -4,7 +4,6 @@ import {
 	getSerializedDictionaryType,
 	getSerializedObjectType,
 	getSerializedPropertyType,
-	getSerializedRecursiveType,
 	getSerializedRefType,
 	serializedType,
 } from '../serialized-type';
