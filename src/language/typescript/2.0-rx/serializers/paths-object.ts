@@ -111,4 +111,3 @@ const groupPathsByTag = (pathsObject: PathsObject): Dictionary<Dictionary<PathIt
 	}
 	return result;
 };
-
