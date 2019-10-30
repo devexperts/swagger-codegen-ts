@@ -2,19 +2,18 @@ import { serializeSchemaObject } from './schema-object';
 import { getSerializedRefType, SerializedType } from '../../common/data/serialized-type';
 import { Either, mapLeft } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { isReferenceObject } from './reference-object';
-import { either, record } from 'fp-ts';
+import { either, option, record } from 'fp-ts';
 import { fromString, Ref } from '../../../../utils/ref';
 import { RequestBodyObject } from '../../../../schema/3.0/request-body-object';
+import { ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
+import { SchemaObject } from '../../../../schema/3.0/schema-object';
+import { ReferenceObject } from '../../../../schema/2.0/reference-object';
 
-export const serializeRequestBodyObject = (from: Ref) => (body: RequestBodyObject): Either<Error, SerializedType> => {
-	return pipe(
-		record.lookup('application/json', body.content),
-		either.fromOption(() => new Error(`RequestBodyObject.content should container "application/json" section`)),
-		either.map(media => media.schema),
-		either.chain(either.fromOption(() => new Error('RequestBodyObject.content should container schema'))),
+export const serializeRequestBodyObject = (from: Ref, body: RequestBodyObject): Either<Error, SerializedType> =>
+	pipe(
+		getSchema(body),
 		either.chain(schema =>
-			isReferenceObject(schema)
+			ReferenceObjectCodec.is(schema)
 				? pipe(
 						schema.$ref,
 						fromString,
@@ -26,4 +25,10 @@ export const serializeRequestBodyObject = (from: Ref) => (body: RequestBodyObjec
 				: serializeSchemaObject(from)(schema),
 		),
 	);
-};
+
+const getSchema = (requestBodyObject: RequestBodyObject): Either<Error, ReferenceObject | SchemaObject> =>
+	pipe(
+		record.lookup('application/json', requestBodyObject.content),
+		option.chain(media => media.schema),
+		either.fromOption(() => new Error('No schema found for ReqeustBodyObject')),
+	);

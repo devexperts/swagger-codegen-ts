@@ -35,7 +35,7 @@ const test2 = generate({
 });
 
 const test3 = generate({
-	spec: path.resolve(__dirname, 'specs/3.0/nested/link-example.yaml'),
+	spec: path.resolve(__dirname, 'specs/3.0/demo.yml'),
 	out,
 	language: (out, documents, resolveRef) =>
 		serializeOpenAPI3({

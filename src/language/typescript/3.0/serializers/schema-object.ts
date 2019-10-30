@@ -14,7 +14,6 @@ import {
 	serializedType,
 } from '../../common/data/serialized-type';
 import { Either, mapLeft, right } from 'fp-ts/lib/Either';
-import { isReferenceObject } from './reference-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either, option } from 'fp-ts';
 import { serializeDictionary } from '../../../../utils/types';
@@ -22,32 +21,14 @@ import { constFalse } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { fromString, Ref } from '../../../../utils/ref';
-import { PrimitiveSchemaObject, SchemaObject } from '../../../../schema/3.0/schema-object';
-import { ReferenceObject } from '../../../../schema/3.0/reference-object';
+import { SchemaObject } from '../../../../schema/3.0/schema-object';
+import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 
 type AdditionalProperties = boolean | ReferenceObject | SchemaObject;
 type AllowedAdditionalProperties = true | ReferenceObject | SchemaObject;
 const isAllowedAdditionalProperties = (
 	additionalProperties: AdditionalProperties,
 ): additionalProperties is AllowedAdditionalProperties => additionalProperties !== false;
-
-export const serializeNonArraySchemaObject = (schemaObject: PrimitiveSchemaObject): Either<Error, SerializedType> => {
-	switch (schemaObject.type) {
-		case 'string': {
-			return right(SERIALIZED_STRING_TYPE);
-		}
-		case 'boolean': {
-			return right(SERIALIZED_BOOLEAN_TYPE);
-		}
-		case 'integer':
-		case 'number': {
-			return right(SERIALIZED_NUMERIC_TYPE);
-		}
-	}
-};
-
-export const isPrimitiveSchemaObject = (schemaObject: SchemaObject): schemaObject is PrimitiveSchemaObject =>
-	['boolean', 'number', 'string', 'integer'].includes(schemaObject.type);
 
 export const serializeSchemaObject = (
 	from: Ref,
@@ -59,15 +40,19 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 	schemaObject: SchemaObject,
 ): Either<Error, SerializedType> => {
 	switch (schemaObject.type) {
-		case 'boolean':
-		case 'number':
-		case 'string':
-		case 'integer': {
-			return serializeNonArraySchemaObject(schemaObject);
+		case 'string': {
+			return right(SERIALIZED_STRING_TYPE);
+		}
+		case 'boolean': {
+			return right(SERIALIZED_BOOLEAN_TYPE);
+		}
+		case 'integer':
+		case 'number': {
+			return right(SERIALIZED_NUMERIC_TYPE);
 		}
 		case 'array': {
 			const { items } = schemaObject;
-			const serialized = isReferenceObject(items)
+			const serialized = ReferenceObjectCodec.is(items)
 				? pipe(
 						fromString(items.$ref),
 						mapLeft(() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`)),
@@ -87,7 +72,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 				schemaObject.additionalProperties,
 				option.filter(isAllowedAdditionalProperties),
 				option.map(additionalProperties => {
-					if (isReferenceObject(additionalProperties)) {
+					if (ReferenceObjectCodec.is(additionalProperties)) {
 						return pipe(
 							additionalProperties.$ref,
 							fromString,
@@ -124,7 +109,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 								option.getOrElse(constFalse),
 							);
 
-							if (isReferenceObject(property)) {
+							if (ReferenceObjectCodec.is(property)) {
 								return pipe(
 									property.$ref,
 									fromString,

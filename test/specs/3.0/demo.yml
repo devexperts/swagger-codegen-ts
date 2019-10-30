@@ -1,0 +1,99 @@
+openapi: '3.0.2'
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+paths:
+  /test/{pathParam}/${inlinePathParam}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/PathParam'
+        - $ref: '#/components/parameters/QueryParam'
+        - name: inlinePathParam
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: inlineQueryParam
+          in: query
+          required: true
+          schema:
+            type: number
+      requestBody:
+        description: inline request body
+        content:
+          application/json:
+            schema:
+              type: string
+      operationId: test
+      responses:
+        200:
+          $ref: '#/components/responses/Successful'
+        404:
+          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        500:
+          $ref: '#/components/responses/GeneralErrorResponse'
+    post:
+      operationId: testSharedParameters
+      requestBody:
+        $ref: '#/components/requestBodies/RefRequestBody'
+      responses:
+        200:
+          $ref: '#/components/responses/Successful'
+          404:
+            $ref: '#/components/responses/NotFound'
+          400:
+            $ref: '#/components/responses/IllegalInput'
+          500:
+            $ref: '#/components/responses/GeneralErrorResponse'
+    parameters:
+      - $ref: '#/components/parameters/PathParam'
+      - $ref: '#/components/parameters/QueryParam'
+      - name: inlinePathParam
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: inlineQueryParam
+        in: query
+        required: true
+        schema:
+          type: number
+  /shared-path-item:
+    $ref: '../arbitrary.yml#/SharedPathItem'
+components:
+  parameters:
+    PathParam:
+      $ref: './arbitrary.yml#/parameters/PathParam'
+    QueryParam:
+      name: queryParam
+      in: query
+      schema:
+        type: number
+    HeaderParam:
+      name: headerParam
+      in: header
+      schema:
+        type: boolean
+  responses:
+    Successful:
+      $ref: './arbitrary.yml#/responses/Successful'
+    NotFound:
+      description: Entity not found.
+    IllegalInput:
+      description: Illegal input for operation.
+    GeneralErrorResponse:
+      description: General Error
+      schema:
+        $ref: '#/components/definitions/GeneralError'
+  schemas:
+    GeneralError:
+      $ref: './arbitrary.yml#/schemas/GeneralError'
+  requestBodies:
+    RefRequestBody:
+      description: ref request body
+      content:
+        application/json:
+          schema:
+            type: string

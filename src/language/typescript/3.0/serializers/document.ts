@@ -13,8 +13,12 @@ import { pathsRef } from '../../common/utils';
 import { clientFile } from '../../common/client';
 
 export const serializeDocument = combineReader(
+	serializeComponentsObject,
 	serializePathsObject,
-	serializePathsObject => (name: string, document: OpenapiObject): Either<Error, Directory> => {
+	(serializeComponentsObject, serializePathsObject) => (
+		name: string,
+		document: OpenapiObject,
+	): Either<Error, Directory> => {
 		const componentsRef = fromString('#/components');
 
 		const paths = pipe(

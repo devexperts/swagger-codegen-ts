@@ -7,7 +7,7 @@ import {
 	SerializedType,
 } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { exists, getOrElse, map, none, Option, some } from 'fp-ts/lib/Option';
+import { getOrElse, map, Option } from 'fp-ts/lib/Option';
 import { flatten } from 'fp-ts/lib/Array';
 import { serializeOperationResponses } from './responses-object';
 import { fromArray, head, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
@@ -22,7 +22,6 @@ import {
 	getSerializedKindDependency,
 	serializedDependency,
 } from '../../common/data/serialized-dependency';
-import { identity } from 'fp-ts/lib/function';
 import { concatIf, concatIfL } from '../../../../utils/array';
 import { unless, when } from '../../../../utils/string';
 import { Context, getJSDoc, getURL, HTTPMethod, getKindValue } from '../../common/utils';
@@ -150,6 +149,7 @@ const getParameters = combineReader(
 					}
 				}
 			} else {
+				// if parameter has already been processed then skip it
 				if (contains(parameter, processedParameters)) {
 					continue;
 				}
@@ -169,7 +169,11 @@ const getParameters = combineReader(
 						break;
 					}
 					case 'query': {
-						const serialized = serializeQueryParameter(from, parameter);
+						const serialized = pipe(
+							serializeParameterObject(from, parameter),
+							either.map(getSerializedPropertyType(parameter.name, isRequired(parameter))),
+							either.map(fromSerializedType(isRequired(parameter))),
+						);
 						if (isLeft(serialized)) {
 							return serialized;
 						}
@@ -231,6 +235,7 @@ export const serializeOperationObject = combineReader(
 		pathItem: PathItemObject,
 	): Either<Error, SerializedType> => {
 		const parameters = getParameters(from, operation, pathItem);
+		const operationName = getOperationName(operation, method);
 
 		const serializedResponses = serializeOperationResponses(from, operation.responses);
 
@@ -274,25 +279,18 @@ export const serializeOperationObject = combineReader(
 				const hasBodyParameters = parameters.bodyParameters.length > 0;
 				const hasParameters = hasQueryParameters || hasBodyParameters;
 
-				const argsName = concatIf(hasParameters, parameters.pathParameters.map(p => p.name), [
-					'parameters',
-				]).join(',');
 				const argsType = concatIfL(hasParameters, parameters.serializedPathParameters.map(p => p.type), () => [
 					`parameters: { ${serializedParameters.type} }`,
 				]).join(',');
 
-				const paramsSummary = serializeParametersDescription([
-					...parameters.queryParameters,
-					...parameters.bodyParameters,
-				]);
-				const operationName = getOperationName(operation, method);
-
 				const type = `
-					${getJSDoc(array.compact([deprecated, operation.summary, paramsSummary]))}
+					${getJSDoc(array.compact([deprecated, operation.summary]))}
 					readonly ${operationName}: (${argsType}) => ${getKindValue(kind, serializedResponses.type)};
 				`;
 
-				const serializedUrl = getURL(url, parameters.serializedPathParameters);
+				const argsName = concatIf(hasParameters, parameters.pathParameters.map(p => p.name), [
+					'parameters',
+				]).join(',');
 
 				const io = `
 					${operationName}: (${argsName}) => {
@@ -300,7 +298,7 @@ export const serializeOperationObject = combineReader(
 				
 						return e.httpClient.chain(
 							e.httpClient.request({
-								url: ${serializedUrl},
+								url: ${getURL(url, parameters.serializedPathParameters)},
 								method: '${method}',
 								${when(hasQueryParameters, 'query: encoded.query,')}
 								${when(hasBodyParameters, 'body: encoded.body,')}
@@ -339,27 +337,6 @@ const getOperationName = (operation: OperationObject, httpMethod: string) =>
 	pipe(
 		operation.operationId,
 		getOrElse(() => httpMethod),
-	);
-
-const serializeParametersDescription = (
-	parameters: Array<QueryParameterObject | BodyParameterObject>,
-): Option<string> => {
-	const hasRequiredParameters = parameters.some(p =>
-		pipe(
-			p.required,
-			exists(identity),
-		),
-	);
-	return parameters.length === 0
-		? none
-		: some(hasRequiredParameters ? '@param { object } parameters' : '@param { object } [parameters]');
-};
-
-const serializeQueryParameter = (from: Ref, parameter: QueryParameterObject): Either<Error, SerializedParameter> =>
-	pipe(
-		serializeParameterObject(from, parameter),
-		either.map(getSerializedPropertyType(parameter.name, isRequired(parameter))),
-		either.map(fromSerializedType(isRequired(parameter))),
 	);
 
 const serializeBodyParameterObjects = (

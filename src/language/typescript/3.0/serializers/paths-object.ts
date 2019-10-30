@@ -46,7 +46,6 @@ const serializeGrouppedPaths = combineReader(
 					...serializedHKT.dependencies,
 					...serializedKind.dependencies,
 					...serializedKind2.dependencies,
-					serializedDependency('Reader', 'fp-ts/lib/Reader'),
 					serializedDependency('HTTPClient', getRelativePath(from, clientRef)),
 					serializedDependency('HTTPClient1', getRelativePath(from, clientRef)),
 					serializedDependency('HTTPClient2', getRelativePath(from, clientRef)),
