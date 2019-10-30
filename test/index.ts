@@ -15,7 +15,7 @@ const cwd = path.resolve(__dirname);
 const out = path.resolve(cwd, 'out');
 
 const test1 = generate({
-	spec: path.resolve(__dirname, 'specs/json/swagger.json'),
+	spec: path.resolve(__dirname, 'specs/2.0/json/swagger.json'),
 	out,
 	language: (out, documents, resolveRef) =>
 		serializeSwagger2({
@@ -25,7 +25,7 @@ const test1 = generate({
 });
 
 const test2 = generate({
-	spec: path.resolve(__dirname, 'specs/yaml/demo.yml'),
+	spec: path.resolve(__dirname, 'specs/2.0/yaml/demo.yml'),
 	out,
 	language: (out, documents, resolveRef) =>
 		serializeSwagger2({
