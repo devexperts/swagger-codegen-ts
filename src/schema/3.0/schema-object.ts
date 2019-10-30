@@ -18,7 +18,7 @@ export interface PrimitiveSchemaObject extends BaseSchemaObject {
 	readonly type: 'boolean' | 'string' | 'number' | 'integer';
 }
 
-const PrimitiveSchemaObject: Codec<PrimitiveSchemaObject> = type(
+const PrimitiveSchemaObjectCodec: Codec<PrimitiveSchemaObject> = type(
 	{
 		...BaseSchemaObjectProps,
 		type: union([literal('boolean'), literal('string'), literal('number'), literal('integer')]),
@@ -59,5 +59,5 @@ const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaO
 export type SchemaObject = PrimitiveSchemaObject | ObjectSchemaObject | ArraySchemaObject;
 
 export const SchemaObjectCodec: Codec<SchemaObject> = recursion('SchemaObject', () =>
-	union([PrimitiveSchemaObject, ObjectSchemaObjectCodec, ArraySchemaObjectCodec]),
+	union([PrimitiveSchemaObjectCodec, ObjectSchemaObjectCodec, ArraySchemaObjectCodec]),
 );

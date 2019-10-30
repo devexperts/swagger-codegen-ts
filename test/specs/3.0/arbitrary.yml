@@ -1,0 +1,31 @@
+parameters:
+  PathParam:
+    name: pathParam
+    in: path
+    required: true
+    schema:
+      type: string
+  QueryParam:
+    name: queryParam
+    in: query
+    schema:
+      type: number
+  HeaderParam:
+    name: headerParam
+    in: header
+    schema:
+      type: boolean
+responses:
+  Successful:
+    description: succesful operation
+  NotFound:
+    description: Entity not found.
+  IllegalInput:
+    description: Illegal input for operation.
+  GeneralErrorResponse:
+    description: General Error
+    schema:
+      $ref: '#/components/definitions/GeneralError'
+schemas:
+  GeneralError:
+    type: object

@@ -13,10 +13,11 @@ import { serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIfL } from '../../../../utils/array';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { array, either, option, record } from 'fp-ts';
-import { isReferenceObject } from './reference-object';
-import { Either, mapLeft } from 'fp-ts/lib/Either';
+import { Either } from 'fp-ts/lib/Either';
 import { fromString, Ref } from '../../../../utils/ref';
 import { ResponsesObject } from '../../../../schema/3.0/responses-object';
+import { some } from 'fp-ts/lib/Option';
+import { ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 
 export const serializeResponsesObject = (from: Ref) => (
 	responsesObject: ResponsesObject,
@@ -26,15 +27,17 @@ export const serializeResponsesObject = (from: Ref) => (
 		array.map(code =>
 			pipe(
 				record.lookup(code, responsesObject),
-				option.map(r =>
-					isReferenceObject(r)
+				option.chain(r =>
+					ReferenceObjectCodec.is(r)
 						? pipe(
-								r.$ref,
-								fromString,
-								mapLeft(() => new Error(`Invalid ${r.$ref} for ResponsesObject'c code "${code}"`)),
+								fromString(r.$ref),
+								either.mapLeft(
+									() => new Error(`Invalid ${r.$ref} for ResponsesObject'c code "${code}"`),
+								),
 								either.map(getSerializedRefType(from)),
+								some,
 						  )
-						: serializeResponseObject(from)(code, r),
+						: serializeResponseObject(from, r),
 				),
 			),
 		),

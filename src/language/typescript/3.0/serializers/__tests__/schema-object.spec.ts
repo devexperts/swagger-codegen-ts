@@ -1,4 +1,4 @@
-import { serializeNonArraySchemaObject, serializeSchemaObject } from '../schema-object';
+import { serializeSchemaObject } from '../schema-object';
 import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
@@ -6,9 +6,7 @@ import {
 	getSerializedPropertyType,
 	getSerializedRecursiveType,
 	getSerializedRefType,
-	serializedType,
 } from '../../../common/data/serialized-type';
-import { serializedDependency } from '../../../common/data/serialized-dependency';
 import { Either, right } from 'fp-ts/lib/Either';
 import { assert, constant, property, record, string } from 'fast-check';
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
@@ -24,30 +22,6 @@ const chainEither = <A, EB, B>(f: (a: A) => Either<EB, B>) => <EA>(fa: Either<EA
 	);
 
 describe('SchemaObject', () => {
-	describe('serializeNonArraySchemaObject', () => {
-		describe('should serialize', () => {
-			it('string', () => {
-				expect(serializeNonArraySchemaObject({ type: 'string', format: none, deprecated: none })).toEqual(
-					right(serializedType('string', 'string', [serializedDependency('string', 'io-ts')], [])),
-				);
-			});
-			it('boolean', () => {
-				expect(serializeNonArraySchemaObject({ type: 'boolean', format: none, deprecated: none })).toEqual(
-					right(serializedType('boolean', 'boolean', [serializedDependency('boolean', 'io-ts')], [])),
-				);
-			});
-			it('integer', () => {
-				expect(serializeNonArraySchemaObject({ type: 'integer', format: none, deprecated: none })).toEqual(
-					right(serializedType('number', 'number', [serializedDependency('number', 'io-ts')], [])),
-				);
-			});
-			it('number', () => {
-				expect(serializeNonArraySchemaObject({ type: 'number', format: none, deprecated: none })).toEqual(
-					right(serializedType('number', 'number', [serializedDependency('number', 'io-ts')], [])),
-				);
-			});
-		});
-	});
 	describe('serializeSchemaObject', () => {
 		describe('array', () => {
 			it('should serialize using getSerializedArrayType', () => {

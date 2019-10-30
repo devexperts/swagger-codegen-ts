@@ -1,4 +1,4 @@
-import { Decoder } from 'io-ts';
+import { Decoder, literal, type, union } from 'io-ts';
 import { FSEntity, write } from './utils/fs';
 import * as path from 'path';
 import * as $RefParser from 'json-schema-ref-parser';
@@ -28,13 +28,9 @@ const getUnsafe: <E, A>(e: Either<E, A>) => A = either.fold(e => {
 export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, void> =>
 	taskEither.tryCatch(async () => {
 		const cwd = process.cwd();
-		log('cwd', cwd);
-
 		const out = path.isAbsolute(options.out) ? options.out : path.resolve(cwd, options.out);
-		log('out', out);
-
 		const spec = path.isAbsolute(options.spec) ? options.spec : path.resolve(cwd, options.spec);
-		log('spec', spec);
+		log('Processing', spec);
 
 		const $refs = await $RefParser.resolve(spec, {
 			dereference: {
@@ -46,15 +42,18 @@ export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, vo
 			Object.entries($refs.values()),
 			array.reduce({}, (acc, [fullPath, spec]) => {
 				const relative = path.relative(cwd, fullPath);
-				log('Decoding', relative);
-				const decoded = reportIfFailed(options.decoder.decode(spec));
-				if (isLeft(decoded)) {
-					log('Unable to decode', relative, 'as OpenAPI spec. Treat it as an arbitrary json');
+				const specLike = specLikeCodec.decode(spec);
+				if (isLeft(specLike)) {
+					log('Unable to decode', relative, 'as spec. Treat it as an arbitrary json.');
+					// this is not a spec - treat as arbitrary json
 					return acc;
 				}
+				// use getUnsafe to fail fast if unable to decode a spec
+				const decoded = getUnsafe(reportIfFailed(options.decoder.decode(spec)));
+				log('Decoded', relative);
 				return {
 					...acc,
-					[relative]: decoded.right,
+					[relative]: decoded,
 				};
 			}),
 		);
@@ -68,3 +67,12 @@ export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, vo
 
 		log('Done');
 	}, identity);
+
+const specLikeCodec = union([
+	type({
+		swagger: literal('2.0'),
+	}),
+	type({
+		openapi: union([literal('3.0.0'), literal('3.0.1'), literal('3.0.2')]),
+	}),
+]);

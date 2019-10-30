@@ -22,31 +22,31 @@ export const serializePathItemObject = combineReader(
 	): Either<Error, SerializedType> => {
 		const get = pipe(
 			item.get,
-			option.map(serializeOperationObject(pattern, 'GET', from, kind)),
+			option.map(operation => serializeOperationObject(pattern, 'GET', from, kind, operation, item)),
 		);
 		const post = pipe(
 			item.post,
-			option.map(serializeOperationObject(pattern, 'POST', from, kind)),
+			option.map(operation => serializeOperationObject(pattern, 'POST', from, kind, operation, item)),
 		);
 		const put = pipe(
 			item.put,
-			option.map(serializeOperationObject(pattern, 'PUT', from, kind)),
+			option.map(operation => serializeOperationObject(pattern, 'PUT', from, kind, operation, item)),
 		);
 		const remove = pipe(
 			item.delete,
-			option.map(serializeOperationObject(pattern, 'DELETE', from, kind)),
+			option.map(operation => serializeOperationObject(pattern, 'DELETE', from, kind, operation, item)),
 		);
 		const patch = pipe(
 			item.patch,
-			option.map(serializeOperationObject(pattern, 'PATCH', from, kind)),
+			option.map(operation => serializeOperationObject(pattern, 'PATCH', from, kind, operation, item)),
 		);
 		const head = pipe(
 			item.head,
-			option.map(serializeOperationObject(pattern, 'HEAD', from, kind)),
+			option.map(operation => serializeOperationObject(pattern, 'HEAD', from, kind, operation, item)),
 		);
 		const options = pipe(
 			item.options,
-			option.map(serializeOperationObject(pattern, 'OPTIONS', from, kind)),
+			option.map(operation => serializeOperationObject(pattern, 'OPTIONS', from, kind, operation, item)),
 		);
 		return pipe(
 			array.compact([get, post, put, remove, patch, head, options]),
