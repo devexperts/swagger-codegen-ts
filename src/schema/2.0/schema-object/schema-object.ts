@@ -17,7 +17,7 @@ export interface ArraySchemaObject {
 const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaObject', () =>
 	type({
 		type: literal('array'),
-		items: SchemaObject,
+		items: SchemaObjectCodec,
 	}),
 );
 
@@ -32,8 +32,8 @@ const ObjectSchemaObjectCodec: Codec<ObjectSchemaObject> = recursion('ObjectSche
 	type({
 		required: stringArrayOption,
 		type: literal('object'),
-		properties: optionFromNullable(dictionary(SchemaObject, 'Dictionary<SchemaObject>')),
-		additionalProperties: optionFromNullable(SchemaObject),
+		properties: optionFromNullable(dictionary(SchemaObjectCodec, 'Dictionary<SchemaObject>')),
+		additionalProperties: optionFromNullable(SchemaObjectCodec),
 	}),
 );
 
@@ -45,7 +45,7 @@ export interface AllOfSchemaObject {
 export const AllOfSchemaObject: Codec<AllOfSchemaObject> = recursion('ReferenceOrAllOfSchemaObject', () =>
 	type({
 		description: stringOption,
-		allOf: array(SchemaObject),
+		allOf: array(SchemaObjectCodec),
 	}),
 );
 
@@ -59,7 +59,7 @@ export type SchemaObject =
 	| BooleanPropertySchemaObject
 	| ArraySchemaObject;
 
-export const SchemaObject: Codec<SchemaObject> = recursion('SchemaObject', () =>
+export const SchemaObjectCodec: Codec<SchemaObject> = recursion('SchemaObject', () =>
 	union([
 		ReferenceObject,
 		AllOfSchemaObject,

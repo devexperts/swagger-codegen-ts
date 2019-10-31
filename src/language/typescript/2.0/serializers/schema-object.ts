@@ -28,7 +28,14 @@ import { array, either, option, record } from 'fp-ts';
 import { traverseArrayEither } from '../../../../utils/either';
 import { ReferenceObject } from '../../../../schema/2.0/reference-object';
 
-export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<Error, SerializedType> => {
+export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<Error, SerializedType> =>
+	serializeSchemaObjectWithRecursion(from, schema, true);
+
+const serializeSchemaObjectWithRecursion = (
+	from: Ref,
+	schema: SchemaObject,
+	shouldTrackRecursion: boolean,
+): Either<Error, SerializedType> => {
 	// check non-typed schemas first
 	if (ReferenceObject.is(schema)) {
 		return pipe(
@@ -88,7 +95,7 @@ export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<E
 		}
 		case 'array': {
 			return pipe(
-				serializeSchemaObject(from, schema.items),
+				serializeSchemaObjectWithRecursion(from, schema.items, false),
 				either.map(result =>
 					serializedType(
 						`Array<${result.type}>`,
@@ -102,7 +109,13 @@ export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<E
 		case 'object': {
 			const additionalProperties = pipe(
 				schema.additionalProperties,
-				option.map(additionalProperties => serializeAdditionalProperties(from, additionalProperties)),
+				option.map(additionalProperties =>
+					pipe(
+						serializeSchemaObjectWithRecursion(from, additionalProperties, false),
+						either.map(getSerializedDictionaryType()),
+						either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
+					),
+				),
 			);
 			const properties = () =>
 				pipe(
@@ -117,14 +130,14 @@ export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<E
 									option.getOrElse(constFalse),
 								);
 								return pipe(
-									serializeSchemaObject(from, value),
+									serializeSchemaObjectWithRecursion(from, value, false),
 									either.map(getSerializedPropertyType(name, isRequired)),
 								);
 							}),
 							sequenceEither,
 							either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
 							either.map(getSerializedObjectType()),
-							either.map(getSerializedRecursiveType(from, true)),
+							either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 						),
 					),
 				);
@@ -151,10 +164,3 @@ const serializeEnum = (enumValue: Array<string | number | boolean>): SerializedT
 		[],
 	);
 };
-
-const serializeAdditionalProperties = (from: Ref, properties: SchemaObject): Either<Error, SerializedType> =>
-	pipe(
-		serializeSchemaObject(from, properties),
-		either.map(getSerializedDictionaryType()),
-		either.map(getSerializedRecursiveType(from, true)),
-	);

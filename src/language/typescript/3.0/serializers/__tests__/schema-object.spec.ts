@@ -7,19 +7,14 @@ import {
 	getSerializedRecursiveType,
 	getSerializedRefType,
 } from '../../../common/data/serialized-type';
-import { Either, right } from 'fp-ts/lib/Either';
+import { right } from 'fp-ts/lib/Either';
 import { assert, constant, property, record, string } from 'fast-check';
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either } from 'fp-ts';
 import { SchemaObjectCodec } from '../../../../../schema/3.0/schema-object';
 import { none } from 'fp-ts/lib/Option';
-
-const chainEither = <A, EB, B>(f: (a: A) => Either<EB, B>) => <EA>(fa: Either<EA, A>): Either<EA | EB, B> =>
-	pipe(
-		fa,
-		either.chain<EA | EB, A, B>(f),
-	);
+import { reportIfFailed } from '../../../../../utils/io-ts';
 
 describe('SchemaObject', () => {
 	describe('serializeSchemaObject', () => {
@@ -67,7 +62,8 @@ describe('SchemaObject', () => {
 						expect(
 							pipe(
 								schema,
-								chainEither(serializeSchemaObject(from, name)),
+								reportIfFailed,
+								either.chain(serializeSchemaObject(from, name)),
 							),
 						).toEqual(right(expected));
 					}),
@@ -75,99 +71,100 @@ describe('SchemaObject', () => {
 			});
 		});
 		describe('recursive', () => {
-			describe('local', () => {
-				it('object with array of items of self type', () => {
-					assert(
-						property($refArbitrary, ref => {
-							const schema = SchemaObjectCodec.decode({
-								type: 'object',
-								required: ['children'],
-								properties: {
-									children: {
-										type: 'array',
-										items: {
+			it('object with array of items of self type', () => {
+				assert(
+					property($refArbitrary, ref => {
+						const schema = SchemaObjectCodec.decode({
+							type: 'object',
+							required: ['children'],
+							properties: {
+								children: {
+									type: 'array',
+									items: {
+										$ref: ref.$ref, // references self
+									},
+								},
+							},
+						});
+						const expected = pipe(
+							ref,
+							getSerializedRefType(ref),
+							getSerializedArrayType(undefined),
+							getSerializedPropertyType('children', true),
+							getSerializedObjectType(undefined),
+							getSerializedRecursiveType(ref, true),
+						);
+						const serialized = pipe(
+							schema,
+							reportIfFailed,
+							either.chain(serializeSchemaObject(ref)),
+						);
+
+						expect(serialized).toEqual(right(expected));
+					}),
+				);
+			});
+			it('object with array of items of object type with one of properties of self type', () => {
+				assert(
+					property($refArbitrary, ref => {
+						const schema = SchemaObjectCodec.decode({
+							type: 'object',
+							required: ['children'],
+							properties: {
+								children: {
+									type: 'object',
+									properties: {
+										self: {
 											$ref: ref.$ref, // references self
 										},
 									},
+									required: ['self'],
 								},
-							});
-							const expected = pipe(
-								ref,
-								getSerializedRefType(ref),
-								getSerializedArrayType(undefined),
-								getSerializedPropertyType('children', true),
-								getSerializedObjectType(undefined),
-								getSerializedRecursiveType(ref, true),
-							);
-							const serialized = pipe(
-								schema,
-								chainEither(serializeSchemaObject(ref)),
-							);
+							},
+						});
+						const serialized = pipe(
+							schema,
+							reportIfFailed,
+							either.chain(serializeSchemaObject(ref)),
+						);
+						const expected = pipe(
+							ref,
+							getSerializedRefType(ref),
+							getSerializedPropertyType('self', true),
+							getSerializedObjectType(undefined),
+							getSerializedPropertyType('children', true),
+							getSerializedObjectType(undefined),
+							getSerializedRecursiveType(ref, true),
+						);
+						expect(serialized).toEqual(right(expected));
+					}),
+				);
+			});
+			it('object with additionalProperties of self type', () => {
+				assert(
+					property($refArbitrary, ref => {
+						const schema = SchemaObjectCodec.decode({
+							type: 'object',
+							additionalProperties: {
+								$ref: ref.$ref, // references self
+							},
+						});
+						const serialized = pipe(
+							schema,
+							reportIfFailed,
+							either.chain(serializeSchemaObject(ref)),
+						);
 
-							expect(serialized).toEqual(right(expected));
-						}),
-					);
-				});
-				it('object with array of items of object type with one of properties of self type', () => {
-					assert(
-						property($refArbitrary, ref => {
-							const schema = SchemaObjectCodec.decode({
-								type: 'object',
-								required: ['children'],
-								properties: {
-									children: {
-										type: 'object',
-										properties: {
-											self: {
-												$ref: ref.$ref, // references self
-											},
-										},
-										required: ['self'],
-									},
-								},
-							});
-							const serialized = pipe(
-								schema,
-								chainEither(serializeSchemaObject(ref)),
-							);
-							const expected = pipe(
-								ref,
-								getSerializedRefType(ref),
-								getSerializedPropertyType('self', true),
-								getSerializedObjectType(undefined),
-								getSerializedPropertyType('children', true),
-								getSerializedObjectType(undefined),
-								getSerializedRecursiveType(ref, true),
-							);
-							expect(serialized).toEqual(right(expected));
-						}),
-					);
-				});
-				it('object with additionalProperties of self type', () => {
-					assert(
-						property($refArbitrary, ref => {
-							const schema = SchemaObjectCodec.decode({
-								type: 'object',
-								additionalProperties: {
-									$ref: ref.$ref, // references self
-								},
-							});
-							const serialized = pipe(
-								schema,
-								chainEither(serializeSchemaObject(ref)),
-							);
+						const expected = pipe(
+							ref,
+							getSerializedRefType(ref),
+							getSerializedDictionaryType(undefined),
+							getSerializedRecursiveType(ref, true),
+						);
 
-							const expected = pipe(
-								ref,
-								getSerializedRefType(ref),
-								getSerializedDictionaryType(undefined),
-								getSerializedRecursiveType(ref, true),
-							);
-
-							expect(serialized).toEqual(right(expected));
-						}),
-					);
-				});
+						expect(serialized).toEqual(right(expected));
+					}),
+				);
 			});
 		});
 	});
