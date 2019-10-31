@@ -1,3 +1,25 @@
+# [2.0.0-alpha.2](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2019-10-31)
+
+
+### Code Refactoring
+
+* rename languages ([bb53cc7](https://github.com/devexperts/swagger-codegen-ts/commit/bb53cc7))
+
+
+### Features
+
+* abstract from data structure in client ([f33b5f5](https://github.com/devexperts/swagger-codegen-ts/commit/f33b5f5)), closes [#48](https://github.com/devexperts/swagger-codegen-ts/issues/48)
+
+
+### BREAKING CHANGES
+
+* 2.0-rx was renamed to 2.0, 3.0-rx was renamed to 3.0
+* apiClient dependency was renamed to httpClient
+* APIClient was renamed to HTTPClient<F> and now extends MonadThrow<F>
+* FullAPIRequest/APIRequest were joined and renamed to Request
+
+
+
 # [2.0.0-alpha.1](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.0...v2.0.0-alpha.1) (2019-10-29)
 
 
