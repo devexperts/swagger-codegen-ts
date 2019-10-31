@@ -8,6 +8,8 @@ import { BooleanPropertySchemaObject } from './boolean-property-schema-object';
 import { array, literal, recursion, type, union } from 'io-ts';
 import { Option } from 'fp-ts/lib/Option';
 import { Dictionary } from '../../../utils/types';
+import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import { nonEmptyArray } from 'io-ts-types/lib/nonEmptyArray';
 
 export interface ArraySchemaObject {
 	readonly type: 'array';
@@ -38,14 +40,14 @@ const ObjectSchemaObjectCodec: Codec<ObjectSchemaObject> = recursion('ObjectSche
 );
 
 export interface AllOfSchemaObject {
-	readonly allOf: SchemaObject[];
+	readonly allOf: NonEmptyArray<ReferenceObject | SchemaObject>;
 	readonly description: Option<string>;
 }
 
 export const AllOfSchemaObject: Codec<AllOfSchemaObject> = recursion('ReferenceOrAllOfSchemaObject', () =>
 	type({
 		description: stringOption,
-		allOf: array(SchemaObjectCodec),
+		allOf: nonEmptyArray(union([ReferenceObject, SchemaObjectCodec])),
 	}),
 );
 

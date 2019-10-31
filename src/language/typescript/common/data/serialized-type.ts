@@ -12,6 +12,7 @@ import { getRelativePath, Ref } from '../../../../utils/ref';
 import { getIOName, getTypeName } from '../utils';
 import { concatIfL } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
+import { head, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 
 export interface SerializedType {
 	readonly type: string;
@@ -145,4 +146,32 @@ export const getSerializedRecursiveType = (from: Ref, shouldTrackRecursion: bool
 				serialized.refs,
 		  )
 		: serialized;
+};
+
+export const getSerializedUnionType = (serialized: NonEmptyArray<SerializedType>): SerializedType => {
+	if (serialized.length === 1) {
+		return head(serialized);
+	} else {
+		const intercalated = intercalateSerializedTypes(serializedType(' | ', ',', [], []), serialized);
+		return serializedType(
+			intercalated.type,
+			`union([${intercalated.io}])`,
+			[...intercalated.dependencies, serializedDependency('union', 'io-ts')],
+			intercalated.refs,
+		);
+	}
+};
+
+export const getSerializedIntersectionType = (serialized: NonEmptyArray<SerializedType>): SerializedType => {
+	if (serialized.length === 1) {
+		return head(serialized);
+	} else {
+		const intercalated = intercalateSerializedTypes(serializedType(' & ', ',', [], []), serialized);
+		return serializedType(
+			intercalated.type,
+			`intersection([${intercalated.io}])`,
+			[...intercalated.dependencies, serializedDependency('intersection', 'io-ts')],
+			intercalated.refs,
+		);
+	}
 };
