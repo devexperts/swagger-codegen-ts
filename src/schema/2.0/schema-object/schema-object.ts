@@ -5,7 +5,7 @@ import { StringPropertySchemaObject } from './string-property-schema-object';
 import { NumberPropertySchemaObject } from './number-property-schema-object';
 import { IntegerPropertySchemaObject } from './integer-property-schema-object';
 import { BooleanPropertySchemaObject } from './boolean-property-schema-object';
-import { array, literal, recursion, type, union } from 'io-ts';
+import { literal, recursion, type, union } from 'io-ts';
 import { Option } from 'fp-ts/lib/Option';
 import { Dictionary } from '../../../utils/types';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
