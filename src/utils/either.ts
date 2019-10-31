@@ -1,4 +1,4 @@
-import { array } from 'fp-ts/lib/Array';
-import { either } from 'fp-ts';
+import { either, array, nonEmptyArray } from 'fp-ts';
 
-export const traverseArrayEither = array.traverse(either.either);
+export const traverseArrayEither = array.array.traverse(either.either);
+export const traverseNEAEither = nonEmptyArray.nonEmptyArray.traverse(either.either);

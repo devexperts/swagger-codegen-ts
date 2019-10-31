@@ -2,19 +2,23 @@ import { array, assert, boolean, constant, oneof, property, string, tuple } from
 import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
+	getSerializedIntersectionType,
 	getSerializedObjectType,
 	getSerializedPropertyType,
 	getSerializedRefType,
+	getSerializedUnionType,
+	intercalateSerializedTypes,
 	serializedType,
 } from '../serialized-type';
 import { serializedDependency } from '../serialized-dependency';
 import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
 import { getRelativePath } from '../../../../../utils/ref';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { arbitrary } from '../../../../../utils/fast-check';
+import { arbitrary, nonEmptyArray } from '../../../../../utils/fast-check';
 import { none, some } from 'fp-ts/lib/Option';
 import { getIOName, getTypeName } from '../../utils';
 import { when } from '../../../../../utils/string';
+import { head } from 'fp-ts/lib/NonEmptyArray';
 
 const serializedDependencyArbitrary = tuple(string(), string()).map(([name, path]) => serializedDependency(name, path));
 
@@ -140,6 +144,40 @@ describe('SerializedType', () => {
 						s.refs,
 					),
 				);
+			}),
+		);
+	});
+	it('getSerializedUnionType', () => {
+		assert(
+			property(nonEmptyArray(serializedTypeArbitrary), types => {
+				const intercalated = intercalateSerializedTypes(serializedType(' | ', ',', [], []), types);
+				const expected =
+					types.length === 1
+						? head(types)
+						: serializedType(
+								intercalated.type,
+								`union([${intercalated.io}])`,
+								[...intercalated.dependencies, serializedDependency('union', 'io-ts')],
+								intercalated.refs,
+						  );
+				expect(getSerializedUnionType(types)).toEqual(expected);
+			}),
+		);
+	});
+	it('getSerializedIntersectionType', () => {
+		assert(
+			property(nonEmptyArray(serializedTypeArbitrary), types => {
+				const intercalated = intercalateSerializedTypes(serializedType(' & ', ',', [], []), types);
+				const expected =
+					types.length === 1
+						? head(types)
+						: serializedType(
+								intercalated.type,
+								`intersection([${intercalated.io}])`,
+								[...intercalated.dependencies, serializedDependency('intersection', 'io-ts')],
+								intercalated.refs,
+						  );
+				expect(getSerializedIntersectionType(types)).toEqual(expected);
 			}),
 		);
 	});

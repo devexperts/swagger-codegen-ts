@@ -76,6 +76,10 @@ definitions:
             properties:
               nested3:
                 $ref: '#/definitions/local'
+      allOfProp:
+        allOf:
+          - $ref: '#/definitions/local'
+          - $ref: './common.yml#/definitions/Pet'
   GeneralError:
     type: object
 parameters:

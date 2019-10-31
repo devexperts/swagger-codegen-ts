@@ -12,20 +12,19 @@ import {
 	getSerializedObjectType,
 	getSerializedRecursiveType,
 	getSerializedDictionaryType,
+	getSerializedIntersectionType,
 } from '../../common/data/serialized-type';
-import { monoidDependencies, serializedDependency } from '../../common/data/serialized-dependency';
+import { serializedDependency } from '../../common/data/serialized-dependency';
 import { AllOfSchemaObject, SchemaObject } from '../../../../schema/2.0/schema-object/schema-object';
 import { none, some } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { fold, monoidString } from 'fp-ts/lib/Monoid';
-import { intercalate } from 'fp-ts/lib/Foldable';
 import { constFalse } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
 import { fromString, Ref } from '../../../../utils/ref';
 import { Either, right } from 'fp-ts/lib/Either';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
-import { array, either, option, record } from 'fp-ts';
-import { traverseArrayEither } from '../../../../utils/either';
+import { either, option, record } from 'fp-ts';
+import { traverseNEAEither } from '../../../../utils/either';
 import { ReferenceObject } from '../../../../schema/2.0/reference-object';
 
 export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<Error, SerializedType> =>
@@ -46,20 +45,9 @@ const serializeSchemaObjectWithRecursion = (
 
 	if (AllOfSchemaObject.is(schema)) {
 		return pipe(
-			traverseArrayEither(schema.allOf, item => serializeSchemaObject(from, item)),
-			either.map(results => {
-				const types = results.map(item => item.type);
-				const ios = results.map(item => item.io);
-				const dependencies = fold(monoidDependencies)(results.map(item => item.dependencies));
-				const refs = fold(array.getMonoid<Ref>())(results.map(item => item.refs));
-
-				return serializedType(
-					intercalate(monoidString, array.array)(' & ', types),
-					`intersection([${intercalate(monoidString, array.array)(', ', ios)}])`,
-					[serializedDependency('intersection', 'io-ts'), ...dependencies],
-					refs,
-				);
-			}),
+			traverseNEAEither(schema.allOf, item => serializeSchemaObjectWithRecursion(from, item, false)),
+			either.map(getSerializedIntersectionType),
+			either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 		);
 	}
 

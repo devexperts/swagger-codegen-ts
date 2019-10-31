@@ -1,6 +1,7 @@
 import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
+	getSerializedIntersectionType,
 	getSerializedObjectType,
 	getSerializedPropertyType,
 	getSerializedRecursiveType,
@@ -21,8 +22,9 @@ import { constFalse } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { fromString, Ref } from '../../../../utils/ref';
-import { SchemaObject } from '../../../../schema/3.0/schema-object';
+import { AllOfSchemaObjectCodec, SchemaObject } from '../../../../schema/3.0/schema-object';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
+import { traverseNEAEither } from '../../../../utils/either';
 
 type AdditionalProperties = boolean | ReferenceObject | SchemaObject;
 type AllowedAdditionalProperties = true | ReferenceObject | SchemaObject;
@@ -39,6 +41,23 @@ export const serializeSchemaObject = (
 const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boolean, name?: string) => (
 	schemaObject: SchemaObject,
 ): Either<Error, SerializedType> => {
+	if (AllOfSchemaObjectCodec.is(schemaObject)) {
+		return pipe(
+			traverseNEAEither(schemaObject.allOf, item => {
+				if (ReferenceObjectCodec.is(item)) {
+					return pipe(
+						fromString(item.$ref),
+						either.map(getSerializedRefType(from)),
+					);
+				} else {
+					return serializeSchemaObjectWithRecursion(from, false)(item);
+				}
+			}),
+			either.map(getSerializedIntersectionType),
+			either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
+		);
+	}
+
 	switch (schemaObject.type) {
 		case 'string': {
 			return right(SERIALIZED_STRING_TYPE);
