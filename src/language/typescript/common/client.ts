@@ -29,6 +29,29 @@ const client = `
 		readonly request: (request: Request) => Kind2<F, unknown, unknown>;
 	}
 	
+	export interface WebSocketClient2<F extends URIS2> {
+		readonly channel: (channel: string) => WebSocketChannel2<F>;
+	}
+	export interface WebSocketClient1<F extends URIS> {
+		readonly channel: (channel: string) => WebSocketChannel1<F>;
+	}
+	export interface WebSocketClient<F> {
+		readonly channel: (channel: string) => WebSocketChannel<F>;
+	}
+	
+	export interface WebSocketChannel<F> extends MonadThrow<F> {
+		readonly send: (payload: unknown) => void;
+		readonly message: HKT<F, unknown>
+	}
+	export interface WebSocketChannel1<F extends URIS> extends MonadThrow1<F> {
+		readonly send: (payload: unknown) => void;
+		readonly message: Kind<F, unknown>
+	}
+	export interface WebSocketChannel2<F extends URIS2> extends MonadThrow2<F> {
+		readonly send: (payload: unknown) => void;
+		readonly message: Kind2<F, unknown, unknown>
+	}
+	
 	export class ResponseValidationError extends Error {
 		static create(errors: Errors): ResponseValidationError {
 			return new ResponseValidationError(errors);

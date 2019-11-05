@@ -75,4 +75,7 @@ const specLikeCodec = union([
 	type({
 		openapi: union([literal('3.0.0'), literal('3.0.1'), literal('3.0.2')]),
 	}),
+	type({
+		asyncapi: literal('2.0.0'),
+	}),
 ]);

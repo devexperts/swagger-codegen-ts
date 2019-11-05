@@ -33,6 +33,7 @@ export const monoidDependencies = getArrayMonoid<SerializedDependency>();
 const dependencyOption = serializedDependency('Option', 'fp-ts/lib/Option');
 const dependencyOptionFromNullable = serializedDependency('optionFromNullable', 'io-ts-types/lib/optionFromNullable');
 export const OPTION_DEPENDENCIES: SerializedDependency[] = [dependencyOption, dependencyOptionFromNullable];
+export const LITERAL_DEPENDENCY = serializedDependency('literal', 'io-ts');
 
 export const getSerializedKindDependency = (kind: Kind): SerializedDependency => {
 	switch (kind) {
