@@ -78,6 +78,12 @@ export const SERIALIZED_DATE_TYPE = serializedType(
 	[],
 );
 export const SERIALIZED_STRING_TYPE = serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []);
+export const SERIALIZED_NULL_TYPE = serializedType(
+	'null',
+	'literal(null)',
+	[serializedDependency('literal', 'io-ts')],
+	[],
+);
 
 export const getSerializedPropertyType = (name: string, isRequired: boolean) => (
 	serialized: SerializedType,

@@ -2,11 +2,10 @@ import { Either, right } from 'fp-ts/lib/Either';
 import { directory, Directory, File, file, FSEntity } from '../../../../utils/fs';
 import { serializeSchemaObject } from './schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { sequenceEither, sequenceTEither } from '@devexperts/utils/dist/adt/either.utils';
+import { combineEither, sequenceEither, sequenceTEither } from '@devexperts/utils/dist/adt/either.utils';
 import { array, either, option, record } from 'fp-ts';
 import { serializeDependencies } from '../../common/data/serialized-dependency';
-import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
-import { Context, getIOName, getTypeName } from '../../common/utils';
+import { context, getIOName, getTypeName } from '../../common/utils';
 import { addPathParts, Ref } from '../../../../utils/ref';
 import { SchemaObject, SchemaObjectCodec } from '../../../../schema/3.0/schema-object';
 import { ComponentsObject } from '../../../../schema/3.0/components-object';
@@ -16,13 +15,10 @@ import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/re
 import { ResponseObject, ResponseObjectCodec } from '../../../../schema/3.0/response-object';
 import { SERIALIZED_VOID_TYPE } from '../../common/data/serialized-type';
 import { serializeResponseObject } from './response-object';
-import { ask } from 'fp-ts/lib/Reader';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { reportIfFailed } from '../../../../utils/io-ts';
 import { RequestBodyObject, RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
 import { serializeRequestBodyObject } from './request-body-object';
-
-const context = ask<Context>();
 
 const serializeSchema = (from: Ref, schema: SchemaObject): Either<Error, File> => {
 	const typeName = getTypeName(from.name);
