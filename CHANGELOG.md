@@ -1,3 +1,23 @@
+# [2.0.0-alpha.3](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2019-11-06)
+
+
+### Bug Fixes
+
+* fix recursive allOf ([ff6a181](https://github.com/devexperts/swagger-codegen-ts/commit/ff6a181))
+* fix recursive SchemaObject in typescript 2 ([8ab9fc0](https://github.com/devexperts/swagger-codegen-ts/commit/8ab9fc0))
+
+
+### Features
+
+* full $ref support for typescript-3 ([e95c7fd](https://github.com/devexperts/swagger-codegen-ts/commit/e95c7fd))
+
+
+### BREAKING CHANGES
+
+* SchemaObject codec was renamed to SchemaObjectCodec
+
+
+
 # [2.0.0-alpha.2](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2019-10-31)
 
 
