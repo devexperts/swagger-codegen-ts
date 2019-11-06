@@ -90,6 +90,15 @@ components:
   schemas:
     GeneralError:
       $ref: './arbitrary.yml#/schemas/GeneralError'
+    TestAllOf:
+      allOf:
+        - $ref: '#/components/schemas/GeneralError'
+        - type: 'object'
+          properties:
+            foo:
+              type: 'string'
+            self:
+              $ref: '#/components/schemas/TestAllOf'
   requestBodies:
     RefRequestBody:
       description: ref request body

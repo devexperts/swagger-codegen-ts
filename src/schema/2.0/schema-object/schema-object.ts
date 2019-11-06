@@ -5,9 +5,11 @@ import { StringPropertySchemaObject } from './string-property-schema-object';
 import { NumberPropertySchemaObject } from './number-property-schema-object';
 import { IntegerPropertySchemaObject } from './integer-property-schema-object';
 import { BooleanPropertySchemaObject } from './boolean-property-schema-object';
-import { array, literal, recursion, type, union } from 'io-ts';
+import { literal, recursion, type, union } from 'io-ts';
 import { Option } from 'fp-ts/lib/Option';
 import { Dictionary } from '../../../utils/types';
+import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import { nonEmptyArray } from 'io-ts-types/lib/nonEmptyArray';
 
 export interface ArraySchemaObject {
 	readonly type: 'array';
@@ -17,7 +19,7 @@ export interface ArraySchemaObject {
 const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaObject', () =>
 	type({
 		type: literal('array'),
-		items: SchemaObject,
+		items: SchemaObjectCodec,
 	}),
 );
 
@@ -32,20 +34,20 @@ const ObjectSchemaObjectCodec: Codec<ObjectSchemaObject> = recursion('ObjectSche
 	type({
 		required: stringArrayOption,
 		type: literal('object'),
-		properties: optionFromNullable(dictionary(SchemaObject, 'Dictionary<SchemaObject>')),
-		additionalProperties: optionFromNullable(SchemaObject),
+		properties: optionFromNullable(dictionary(SchemaObjectCodec, 'Dictionary<SchemaObject>')),
+		additionalProperties: optionFromNullable(SchemaObjectCodec),
 	}),
 );
 
 export interface AllOfSchemaObject {
-	readonly allOf: SchemaObject[];
+	readonly allOf: NonEmptyArray<ReferenceObject | SchemaObject>;
 	readonly description: Option<string>;
 }
 
 export const AllOfSchemaObject: Codec<AllOfSchemaObject> = recursion('ReferenceOrAllOfSchemaObject', () =>
 	type({
 		description: stringOption,
-		allOf: array(SchemaObject),
+		allOf: nonEmptyArray(union([ReferenceObject, SchemaObjectCodec])),
 	}),
 );
 
@@ -59,7 +61,7 @@ export type SchemaObject =
 	| BooleanPropertySchemaObject
 	| ArraySchemaObject;
 
-export const SchemaObject: Codec<SchemaObject> = recursion('SchemaObject', () =>
+export const SchemaObjectCodec: Codec<SchemaObject> = recursion('SchemaObject', () =>
 	union([
 		ReferenceObject,
 		AllOfSchemaObject,

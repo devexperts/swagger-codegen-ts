@@ -3,6 +3,8 @@ import { ReferenceObject, ReferenceObjectCodec } from './reference-object';
 import { Option } from 'fp-ts/lib/Option';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { Codec } from '../../utils/io-ts';
+import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import { nonEmptyArray } from 'io-ts-types/lib/nonEmptyArray';
 
 export interface BaseSchemaObject {
 	readonly format: Option<string>;
@@ -56,8 +58,19 @@ const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaO
 	}),
 );
 
-export type SchemaObject = PrimitiveSchemaObject | ObjectSchemaObject | ArraySchemaObject;
+export interface AllOfSchemaObject extends BaseSchemaObject {
+	readonly allOf: NonEmptyArray<ReferenceObject | SchemaObject>;
+}
+
+export const AllOfSchemaObjectCodec: Codec<AllOfSchemaObject> = recursion('AllOfSchemaObject', () =>
+	type({
+		...BaseSchemaObjectProps,
+		allOf: nonEmptyArray(union([ReferenceObjectCodec, SchemaObjectCodec])),
+	}),
+);
+
+export type SchemaObject = PrimitiveSchemaObject | ObjectSchemaObject | ArraySchemaObject | AllOfSchemaObject;
 
 export const SchemaObjectCodec: Codec<SchemaObject> = recursion('SchemaObject', () =>
-	union([PrimitiveSchemaObjectCodec, ObjectSchemaObjectCodec, ArraySchemaObjectCodec]),
+	union([PrimitiveSchemaObjectCodec, ObjectSchemaObjectCodec, ArraySchemaObjectCodec, AllOfSchemaObjectCodec]),
 );

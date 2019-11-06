@@ -56,6 +56,7 @@ definitions:
     required:
       - pets
       - self
+      - nested
     properties:
       pets:
         type: array
@@ -63,6 +64,22 @@ definitions:
           "$ref": "./common.yml#/definitions/Pet"
       self:
         $ref: '#/definitions/local'
+      nested:
+        type: object
+        required:
+          - nested2
+        properties:
+          nested2:
+            type: object
+            required:
+              - nested3
+            properties:
+              nested3:
+                $ref: '#/definitions/local'
+      allOfProp:
+        allOf:
+          - $ref: '#/definitions/local'
+          - $ref: './common.yml#/definitions/Pet'
   GeneralError:
     type: object
 parameters:
