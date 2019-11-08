@@ -6,6 +6,7 @@ import {
 	getSerializedPropertyType,
 	getSerializedRecursiveType,
 	getSerializedRefType,
+	getSerializedUnionType,
 	intercalateSerializedTypes,
 	SERIALIZED_BOOLEAN_TYPE,
 	SERIALIZED_NUMERIC_TYPE,
@@ -22,9 +23,10 @@ import { constFalse } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { fromString, Ref } from '../../../../utils/ref';
-import { AllOfSchemaObjectCodec, SchemaObject } from '../../../../schema/3.0/schema-object';
+import { AllOfSchemaObjectCodec, OneOfSchemaObjectCodec, SchemaObject } from '../../../../schema/3.0/schema-object';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { traverseNEAEither } from '../../../../utils/either';
+import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 
 type AdditionalProperties = boolean | ReferenceObject | SchemaObject;
 type AllowedAdditionalProperties = true | ReferenceObject | SchemaObject;
@@ -41,18 +43,17 @@ export const serializeSchemaObject = (
 const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boolean, name?: string) => (
 	schemaObject: SchemaObject,
 ): Either<Error, SerializedType> => {
+	if (OneOfSchemaObjectCodec.is(schemaObject)) {
+		return pipe(
+			serializeChildren(from, schemaObject.oneOf),
+			either.map(getSerializedUnionType),
+			either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
+		);
+	}
+
 	if (AllOfSchemaObjectCodec.is(schemaObject)) {
 		return pipe(
-			traverseNEAEither(schemaObject.allOf, item => {
-				if (ReferenceObjectCodec.is(item)) {
-					return pipe(
-						fromString(item.$ref),
-						either.map(getSerializedRefType(from)),
-					);
-				} else {
-					return serializeSchemaObjectWithRecursion(from, false)(item);
-				}
-			}),
+			serializeChildren(from, schemaObject.allOf),
 			either.map(getSerializedIntersectionType),
 			either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 		);
@@ -166,3 +167,16 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 		}
 	}
 };
+
+const serializeChildren = (
+	from: Ref,
+	children: NonEmptyArray<ReferenceObject | SchemaObject>,
+): Either<Error, NonEmptyArray<SerializedType>> =>
+	traverseNEAEither(children, item =>
+		ReferenceObjectCodec.is(item)
+			? pipe(
+					fromString(item.$ref),
+					either.map(getSerializedRefType(from)),
+			  )
+			: serializeSchemaObjectWithRecursion(from, false)(item),
+	);
