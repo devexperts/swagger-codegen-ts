@@ -69,8 +69,30 @@ export const AllOfSchemaObjectCodec: Codec<AllOfSchemaObject> = recursion('AllOf
 	}),
 );
 
-export type SchemaObject = PrimitiveSchemaObject | ObjectSchemaObject | ArraySchemaObject | AllOfSchemaObject;
+export interface OneOfSchemaObject extends BaseSchemaObject {
+	readonly oneOf: NonEmptyArray<ReferenceObject | SchemaObject>;
+}
+
+export const OneOfSchemaObjectCodec: Codec<OneOfSchemaObject> = recursion('OneOfSchemaObject', () =>
+	type({
+		...BaseSchemaObjectProps,
+		oneOf: nonEmptyArray(union([ReferenceObjectCodec, SchemaObjectCodec])),
+	}),
+);
+
+export type SchemaObject =
+	| PrimitiveSchemaObject
+	| ObjectSchemaObject
+	| ArraySchemaObject
+	| AllOfSchemaObject
+	| OneOfSchemaObject;
 
 export const SchemaObjectCodec: Codec<SchemaObject> = recursion('SchemaObject', () =>
-	union([PrimitiveSchemaObjectCodec, ObjectSchemaObjectCodec, ArraySchemaObjectCodec, AllOfSchemaObjectCodec]),
+	union([
+		PrimitiveSchemaObjectCodec,
+		ObjectSchemaObjectCodec,
+		ArraySchemaObjectCodec,
+		AllOfSchemaObjectCodec,
+		OneOfSchemaObjectCodec,
+	]),
 );
