@@ -4,8 +4,10 @@
     "./src/index.ts",
     "./src/language/typescript/2.0/index.ts",
     "./src/language/typescript/3.0/index.ts",
+    "./src/language/typescript/asyncapi-2.0.0/index.ts",
     "./src/schema/2.0/swagger-object.ts",
-    "./src/schema/3.0/openapi-object.ts"
+    "./src/schema/3.0/openapi-object.ts",
+    "./src/schema/asyncapi-2.0.0/asyncapi-object.ts"
   ],
   "exclude": [
     "**/__tests__"
