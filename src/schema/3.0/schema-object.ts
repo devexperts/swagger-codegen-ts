@@ -30,21 +30,22 @@ export const EnumSchemaObjectCodec: Codec<EnumSchemaObject> = intersection(
 	'EnumSchemaObject',
 );
 
+/**
+ * Primitive type SchemaObject
+ * `null` is not supported as a primitive type
+ * @see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#data-types
+ */
 export interface PrimitiveSchemaObject extends BaseSchemaObject {
-	readonly type: 'boolean' | 'string' | 'number' | 'integer' | 'null';
+	readonly format: Option<string>;
+	readonly type: 'boolean' | 'string' | 'number' | 'integer';
 }
 
 const PrimitiveSchemaObjectCodec: Codec<PrimitiveSchemaObject> = intersection(
 	[
 		BaseSchemaObjectCodec,
 		type({
-			type: union([
-				literal('boolean'),
-				literal('string'),
-				literal('number'),
-				literal('integer'),
-				literal('null'),
-			]),
+			format: optionFromNullable(string),
+			type: union([literal('boolean'), literal('string'), literal('number'), literal('integer')]),
 		}),
 	],
 	'PrimitiveSchemaObject',

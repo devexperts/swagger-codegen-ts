@@ -10,7 +10,6 @@ import {
 	getSerializedUnionType,
 	intercalateSerializedTypes,
 	SERIALIZED_BOOLEAN_TYPE,
-	SERIALIZED_NULL_TYPE,
 	SERIALIZED_NUMERIC_TYPE,
 	SERIALIZED_STRING_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
@@ -71,9 +70,6 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 	}
 
 	switch (schemaObject.type) {
-		case 'null': {
-			return right(SERIALIZED_NULL_TYPE);
-		}
 		case 'string': {
 			return right(SERIALIZED_STRING_TYPE);
 		}

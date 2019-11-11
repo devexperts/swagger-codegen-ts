@@ -80,12 +80,25 @@ export const OneOfSchemaObjectCodec: Codec<OneOfSchemaObject> = recursion('OneOf
 	]),
 );
 
-export interface NullSchemaObject extends BaseSchemaObject {
+export interface BasePrimitiveSchemaObject extends BaseSchemaObject {
+	readonly format: Option<string>;
+}
+export const BasePrimitiveSchemaObjectCodec: Codec<BasePrimitiveSchemaObject> = intersection(
+	[
+		BaseSchemaObjectCodec,
+		type({
+			format: optionFromNullable(string),
+		}),
+	],
+	'BasePrimitiveSchemaObject',
+);
+
+export interface NullSchemaObject extends BasePrimitiveSchemaObject {
 	readonly type: 'null';
 }
 const NullSchemaObjectCodec: Codec<NullSchemaObject> = intersection(
 	[
-		BaseSchemaObjectCodec,
+		BasePrimitiveSchemaObjectCodec,
 		type({
 			type: literal('null'),
 		}),
@@ -93,12 +106,12 @@ const NullSchemaObjectCodec: Codec<NullSchemaObject> = intersection(
 	'NullSchemaObject',
 );
 
-export interface BooleanSchemaObject extends BaseSchemaObject {
+export interface BooleanSchemaObject extends BasePrimitiveSchemaObject {
 	readonly type: 'boolean';
 }
 const BooleanSchemaObjectCodec: Codec<BooleanSchemaObject> = intersection(
 	[
-		BaseSchemaObjectCodec,
+		BasePrimitiveSchemaObjectCodec,
 		type({
 			type: literal('boolean'),
 		}),
@@ -106,7 +119,7 @@ const BooleanSchemaObjectCodec: Codec<BooleanSchemaObject> = intersection(
 	'BooleanSchemaObject',
 );
 
-export interface BaseNumericSchemaObject extends BaseSchemaObject {
+export interface BaseNumericSchemaObject extends BasePrimitiveSchemaObject {
 	readonly multipleOf: Option<Positive>;
 	readonly maximum: Option<number>;
 	readonly exclusiveMaximum: Option<number>;
@@ -115,7 +128,7 @@ export interface BaseNumericSchemaObject extends BaseSchemaObject {
 }
 const BaseNumericSchemaObjectCodec: Codec<BaseNumericSchemaObject> = intersection(
 	[
-		BaseSchemaObjectCodec,
+		BasePrimitiveSchemaObjectCodec,
 		type({
 			multipleOf: optionFromNullable(positive),
 			maximum: optionFromNullable(number),
@@ -153,7 +166,7 @@ const IntegerSchemaObjectCodec: Codec<IntegerSchemaObject> = intersection(
 	'IntegerSchemaObject',
 );
 
-export interface StringSchemaObject extends BaseSchemaObject {
+export interface StringSchemaObject extends BasePrimitiveSchemaObject {
 	readonly type: 'string';
 	readonly maxLength: Option<Natural>;
 	readonly minLength: Option<Natural>;
@@ -161,7 +174,7 @@ export interface StringSchemaObject extends BaseSchemaObject {
 }
 const StringSchemaObjectCodec: Codec<StringSchemaObject> = intersection(
 	[
-		BaseSchemaObjectCodec,
+		BasePrimitiveSchemaObjectCodec,
 		type({
 			type: literal('string'),
 			maxLength: optionFromNullable(natural),
