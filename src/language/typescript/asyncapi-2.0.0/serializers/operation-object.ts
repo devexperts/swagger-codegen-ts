@@ -33,7 +33,7 @@ export const serializePublishOperationObject = (
 		either.map(serialized => {
 			const type = `send: (payload: ${serialized.type}) => void`;
 			const io = `send: payload => {
-				e.webSocketClient.channel(${JSON.stringify(channel)}).send(${serialized.io}.encode(payload));
+				channel.send(${serialized.io}.encode(payload));
 			}`;
 			return serializedType(type, io, serialized.dependencies, serialized.refs);
 		}),
@@ -47,19 +47,15 @@ export const serializeSubscribeOperationObject = (
 	const serialized = serializeMessage(from, operationObject.message);
 	return combineEither(serialized, clientRef, (serialized, clientRef) => {
 		const type = `message: ${getKindValue(kind, serialized.type)}`;
-		const channelName = JSON.stringify(channel);
 		const io = `
-			message: pipe(
-				e.webSocketClient.channel(${channelName}),
-				channel =>
-					channel.chain(channel.message, message =>
-						pipe(
-							${serialized.io}.decode(message),
-							mapLeft(ResponseValidationError.create),
-							fold(error => channel.throwError(error), value => channel.of(value)),
-						),
+			message: 
+				channel.chain(channel.message, message =>
+					pipe(
+						${serialized.io}.decode(message),
+						mapLeft(ResponseValidationError.create),
+						fold(error => channel.throwError(error), value => channel.of(value)),
 					),
-			)
+				)
 		`;
 		const dependencies = [
 			...serialized.dependencies,
