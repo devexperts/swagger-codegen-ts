@@ -1,3 +1,36 @@
+# [2.0.0-alpha.4](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2019-11-11)
+
+
+### Code Refactoring
+
+* rename ReferenceObject codec to ReferenceObjectCodec ([bdda8e2](https://github.com/devexperts/swagger-codegen-ts/commit/bdda8e2))
+* update SchemaObject ([0b4cf16](https://github.com/devexperts/swagger-codegen-ts/commit/0b4cf16))
+* update SchemaObject ([58ea69d](https://github.com/devexperts/swagger-codegen-ts/commit/58ea69d))
+
+
+### Features
+
+* add branded numeric types and codecs ([7739952](https://github.com/devexperts/swagger-codegen-ts/commit/7739952))
+* asyncapi shema ([5fc7b84](https://github.com/devexperts/swagger-codegen-ts/commit/5fc7b84))
+* full enum support ([21a6b8c](https://github.com/devexperts/swagger-codegen-ts/commit/21a6b8c))
+* oneOf support for typescript openapi 3 ([f9e2ab5](https://github.com/devexperts/swagger-codegen-ts/commit/f9e2ab5))
+* support Data Type Format in SchemaObject ([d8bc635](https://github.com/devexperts/swagger-codegen-ts/commit/d8bc635))
+* support ws channel bindings ([dab6d10](https://github.com/devexperts/swagger-codegen-ts/commit/dab6d10)), closes [#68](https://github.com/devexperts/swagger-codegen-ts/issues/68)
+
+
+### BREAKING CHANGES
+
+* IntegerSchemaObject now emits `Integer` type and `integer` codec from utils
+* SchemaObject.format was moved to PrimitiveSchemaObject.format
+* SchemaObject codec and interfaces were renamed
+* EnumSchemaObject type was added to SchemaObject
+* ReferenceObject was renamed to ReferenceObjectCodec
+* some codecs were renamed and moved
+* OneOfSchemaObject type was added to SchemaObject
+* Fragment type was added to FSEntity
+
+
+
 # [2.0.0-alpha.3](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2019-11-06)
 
 
