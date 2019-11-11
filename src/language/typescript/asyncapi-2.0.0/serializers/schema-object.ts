@@ -13,12 +13,13 @@ import {
 	getSerializedPrimitiveType,
 	SERIALIZED_BOOLEAN_TYPE,
 	SERIALIZED_NULL_TYPE,
-	SERIALIZED_NUMERIC_TYPE,
-	SERIALIZED_STRING_TYPE,
+	SERIALIZED_NUMBER_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 	serializedType,
 	SerializedType,
 	getSerializedEnumType,
+	getSerializedStringType,
+	getSerializedIntegerType,
 } from '../../common/data/serialized-type';
 import {
 	AllOfSchemaObjectCodec,
@@ -36,6 +37,7 @@ import { traverseNEAEither } from '../../../../utils/either';
 import { constFalse } from 'fp-ts/lib/function';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { Option } from 'fp-ts/lib/Option';
+import { utilsRef } from '../../common/bundled/utils';
 
 export const serializeSchemaObject = (
 	from: Ref,
@@ -65,18 +67,23 @@ const serializeSchemaObjectWithRecursion = (
 
 	// schema is typed at this point
 	switch (schemaObject.type) {
-		case 'string': {
-			return right(SERIALIZED_STRING_TYPE);
+		case 'null': {
+			return right(SERIALIZED_NULL_TYPE);
 		}
-		case 'number':
+		case 'string': {
+			return right(getSerializedStringType(schemaObject.format));
+		}
+		case 'number': {
+			return right(SERIALIZED_NUMBER_TYPE);
+		}
 		case 'integer': {
-			return right(SERIALIZED_NUMERIC_TYPE);
+			return pipe(
+				utilsRef,
+				either.map(utilsRef => getSerializedIntegerType(from, utilsRef)),
+			);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);
-		}
-		case 'null': {
-			return right(SERIALIZED_NULL_TYPE);
 		}
 		case 'object': {
 			return serializeObjectSchemaObject(from, schemaObject, shouldTrackRecursion, name);

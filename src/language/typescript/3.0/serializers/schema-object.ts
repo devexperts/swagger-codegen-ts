@@ -2,16 +2,17 @@ import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
 	getSerializedEnumType,
+	getSerializedIntegerType,
 	getSerializedIntersectionType,
 	getSerializedObjectType,
 	getSerializedPropertyType,
 	getSerializedRecursiveType,
 	getSerializedRefType,
+	getSerializedStringType,
 	getSerializedUnionType,
 	intercalateSerializedTypes,
 	SERIALIZED_BOOLEAN_TYPE,
-	SERIALIZED_NUMERIC_TYPE,
-	SERIALIZED_STRING_TYPE,
+	SERIALIZED_NUMBER_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 	SerializedType,
 	serializedType,
@@ -29,10 +30,12 @@ import {
 	EnumSchemaObjectCodec,
 	OneOfSchemaObjectCodec,
 	SchemaObject,
+	PrimitiveSchemaObject,
 } from '../../../../schema/3.0/schema-object';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { traverseNEAEither } from '../../../../utils/either';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import { utilsRef } from '../../common/bundled/utils';
 
 type AdditionalProperties = boolean | ReferenceObject | SchemaObject;
 type AllowedAdditionalProperties = true | ReferenceObject | SchemaObject;
@@ -70,15 +73,11 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 	}
 
 	switch (schemaObject.type) {
-		case 'string': {
-			return right(SERIALIZED_STRING_TYPE);
-		}
-		case 'boolean': {
-			return right(SERIALIZED_BOOLEAN_TYPE);
-		}
+		case 'string':
+		case 'boolean':
 		case 'integer':
 		case 'number': {
-			return right(SERIALIZED_NUMERIC_TYPE);
+			return serializePrimitive(from, schemaObject);
 		}
 		case 'array': {
 			const { items } = schemaObject;
@@ -190,3 +189,23 @@ const serializeChildren = (
 			  )
 			: serializeSchemaObjectWithRecursion(from, false)(item),
 	);
+
+const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): Either<Error, SerializedType> => {
+	switch (schemaObject.type) {
+		case 'string': {
+			return right(getSerializedStringType(schemaObject.format));
+		}
+		case 'number': {
+			return right(SERIALIZED_NUMBER_TYPE);
+		}
+		case 'integer': {
+			return pipe(
+				utilsRef,
+				either.map(utilsRef => getSerializedIntegerType(from, utilsRef)),
+			);
+		}
+		case 'boolean': {
+			return right(SERIALIZED_BOOLEAN_TYPE);
+		}
+	}
+};

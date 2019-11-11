@@ -1,12 +1,10 @@
 import {
 	getSerializedRefType,
-	SERIALIZED_NUMERIC_TYPE,
+	SERIALIZED_NUMBER_TYPE,
 	SERIALIZED_BOOLEAN_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 	serializedType,
 	SerializedType,
-	SERIALIZED_DATE_TYPE,
-	SERIALIZED_STRING_TYPE,
 	getSerializedPropertyType,
 	intercalateSerializedTypes,
 	getSerializedObjectType,
@@ -15,10 +13,16 @@ import {
 	getSerializedIntersectionType,
 	getSerializedEnumType,
 	SERIALIZED_NULL_TYPE,
+	getSerializedIntegerType,
+	getSerializedStringType,
 } from '../../common/data/serialized-type';
 import { serializedDependency } from '../../common/data/serialized-dependency';
-import { AllOfSchemaObject, EnumSchemaObjectCodec, SchemaObject } from '../../../../schema/2.0/schema-object';
-import { none, some } from 'fp-ts/lib/Option';
+import {
+	AllOfSchemaObject,
+	EnumSchemaObjectCodec,
+	PrimitiveSchemaObject,
+	SchemaObject,
+} from '../../../../schema/2.0/schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { constFalse } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
@@ -29,6 +33,7 @@ import { either, option, record } from 'fp-ts';
 import { traverseNEAEither } from '../../../../utils/either';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/2.0/reference-object';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import { utilsRef } from '../../common/bundled/utils';
 
 export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<Error, SerializedType> =>
 	serializeSchemaObjectWithRecursion(from, schema, true);
@@ -56,30 +61,12 @@ const serializeSchemaObjectWithRecursion = (
 
 	// schema is typed
 	switch (schema.type) {
-		case 'null': {
-			return right(SERIALIZED_NULL_TYPE);
-		}
-		case 'string': {
-			return pipe(
-				schema.format,
-				option.chain(format => {
-					switch (format) {
-						case 'date-time': {
-							return some(SERIALIZED_DATE_TYPE);
-						}
-					}
-					return none;
-				}),
-				option.getOrElse(() => SERIALIZED_STRING_TYPE),
-				right,
-			);
-		}
-		case 'boolean': {
-			return right(SERIALIZED_BOOLEAN_TYPE);
-		}
+		case 'null':
+		case 'string':
+		case 'number':
 		case 'integer':
-		case 'number': {
-			return right(SERIALIZED_NUMERIC_TYPE);
+		case 'boolean': {
+			return serializePrimitive(from, schema);
 		}
 		case 'array': {
 			return pipe(
@@ -149,3 +136,26 @@ const serializeAllOf = (
 		either.map(getSerializedIntersectionType),
 		either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 	);
+
+const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): Either<Error, SerializedType> => {
+	switch (schemaObject.type) {
+		case 'null': {
+			return right(SERIALIZED_NULL_TYPE);
+		}
+		case 'string': {
+			return right(getSerializedStringType(schemaObject.format));
+		}
+		case 'number': {
+			return right(SERIALIZED_NUMBER_TYPE);
+		}
+		case 'integer': {
+			return pipe(
+				utilsRef,
+				either.map(utilsRef => getSerializedIntegerType(from, utilsRef)),
+			);
+		}
+		case 'boolean': {
+			return right(SERIALIZED_BOOLEAN_TYPE);
+		}
+	}
+};

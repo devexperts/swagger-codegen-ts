@@ -3,7 +3,7 @@ import { ParameterObject } from '../../../../schema/2.0/parameter-object';
 import {
 	getSerializedArrayType,
 	SERIALIZED_BOOLEAN_TYPE,
-	SERIALIZED_NUMERIC_TYPE,
+	SERIALIZED_NUMBER_TYPE,
 	SERIALIZED_STRING_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 } from '../../common/data/serialized-type';
@@ -31,7 +31,7 @@ export const serializeParameterObject = (
 				}
 				case 'number':
 				case 'integer': {
-					return right(toSerializedParameter(SERIALIZED_NUMERIC_TYPE));
+					return right(toSerializedParameter(SERIALIZED_NUMBER_TYPE));
 				}
 				case 'boolean': {
 					return right(toSerializedParameter(SERIALIZED_BOOLEAN_TYPE));
