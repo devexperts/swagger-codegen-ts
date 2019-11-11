@@ -1,6 +1,6 @@
 import { Codec, dictionary, primitiveArrayOption, stringArrayOption, stringOption } from '../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
-import { ReferenceObject } from './reference-object';
+import { ReferenceObject, ReferenceObjectCodec } from './reference-object';
 import { intersection, literal, recursion, string, type, union } from 'io-ts';
 import { Option } from 'fp-ts/lib/Option';
 import { Dictionary } from '../../utils/types';
@@ -84,7 +84,7 @@ export const AllOfSchemaObject: Codec<AllOfSchemaObject> = recursion('ReferenceO
 	intersection([
 		BaseSchemaObjectCodec,
 		type({
-			allOf: nonEmptyArray(union([ReferenceObject, SchemaObjectCodec])),
+			allOf: nonEmptyArray(union([ReferenceObjectCodec, SchemaObjectCodec])),
 		}),
 	]),
 );
@@ -135,7 +135,7 @@ export type SchemaObject =
 
 export const SchemaObjectCodec: Codec<SchemaObject> = recursion('SchemaObject', () =>
 	union([
-		ReferenceObject,
+		ReferenceObjectCodec,
 		AllOfSchemaObject,
 		ArraySchemaObjectCodec,
 		ObjectSchemaObjectCodec,

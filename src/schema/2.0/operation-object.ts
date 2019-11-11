@@ -1,7 +1,7 @@
 import { Option } from 'fp-ts/lib/Option';
 import { ExternalDocumentationObject } from './external-documentation-object';
 import { ParameterObject, ParameterObjectCodec } from './parameter-object';
-import { ReferenceObject } from './reference-object';
+import { ReferenceObject, ReferenceObjectCodec } from './reference-object';
 import { ResponsesObject } from './responses-object';
 import { SecurityRequirementObject } from './security-requirement-object';
 import { booleanOption, stringArrayOption, stringOption } from '../../utils/io-ts';
@@ -32,7 +32,7 @@ export const OperationObject = type(
 		operationId: stringOption,
 		consumes: stringArrayOption,
 		produces: stringArrayOption,
-		parameters: optionFromNullable(array(union([ParameterObjectCodec, ReferenceObject]))),
+		parameters: optionFromNullable(array(union([ReferenceObjectCodec, ParameterObjectCodec]))),
 		responses: ResponsesObject,
 		schemes: stringArrayOption,
 		deprecated: booleanOption,
