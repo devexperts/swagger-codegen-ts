@@ -19,6 +19,7 @@ import {
 	intercalateSerializedParameters,
 	serializedParameter,
 	SerializedParameter,
+	getSerializedPropertyParameter,
 } from '../../common/data/serialized-parameter';
 import {
 	fromSerializedParameter,
@@ -26,7 +27,7 @@ import {
 	SerializedPathParameter,
 } from '../../common/data/serialized-path-parameter';
 import { concatIf, concatIfL } from '../../../../utils/array';
-import { unless, when } from '../../../../utils/string';
+import { when } from '../../../../utils/string';
 import { serializeRequestBodyObject } from './request-body-object';
 import { fromString, getRelativePath, Ref } from '../../../../utils/ref';
 import { OperationObject } from '../../../../schema/3.0/operation-object';
@@ -195,7 +196,7 @@ const getParameters = combineReader(
 							option.getOrElse(constFalse),
 						),
 					),
-					serialized => toOperationParameter('body', serialized),
+					serialized => getSerializedPropertyParameter('body', serialized),
 					some,
 				);
 			} else {
@@ -209,7 +210,7 @@ const getParameters = combineReader(
 							),
 						),
 					),
-					either.map(serialized => toOperationParameter('body', serialized)),
+					either.map(serialized => getSerializedPropertyParameter('body', serialized)),
 				);
 				if (isLeft(serialized)) {
 					return serialized;
@@ -229,7 +230,7 @@ const getParameters = combineReader(
 					intercalated,
 					getSerializedObjectType(),
 					fromSerializedType(intercalated.isRequired),
-					serialized => toOperationParameter('query', serialized),
+					serialized => getSerializedPropertyParameter('query', serialized),
 				);
 			}),
 		);
@@ -343,12 +344,3 @@ export const serializeOperationObject = combineReader(
 		);
 	},
 );
-
-const toOperationParameter = (name: string, serialized: SerializedParameter): SerializedParameter =>
-	serializedParameter(
-		`${name}${unless(serialized.isRequired, '?')}: ${serialized.type}`,
-		`${name}: ${serialized.io}`,
-		serialized.isRequired,
-		serialized.dependencies,
-		serialized.refs,
-	);

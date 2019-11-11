@@ -20,6 +20,26 @@ servers:
 
 channels:
   light/measured:
+    bindings:
+      ws:
+        query:
+          type: object
+          required:
+            - times
+          properties:
+            times:
+              type: integer
+              description: How many times the message should be echoed.
+              minimum: 1
+        headers:
+          type: object
+          required:
+            - test
+          properties:
+            test:
+              type: string
+              description: Test header
+        bindingVersion: 0.1.0
     publish:
       summary: Inform about environmental lighting conditions for a particular streetlight.
       message:

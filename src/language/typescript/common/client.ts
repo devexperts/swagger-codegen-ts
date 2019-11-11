@@ -29,14 +29,21 @@ const client = `
 		readonly request: (request: Request) => Kind2<F, unknown, unknown>;
 	}
 	
+	export interface WebSocketChannelRequest {
+		readonly method: 'GET' | 'POST';
+		readonly channel: string;
+		readonly query?: Record<string, unknown>;
+		readonly headers?: Record<string, unknown>;
+	}
+	
 	export interface WebSocketClient2<F extends URIS2> {
-		readonly channel: (channel: string) => WebSocketChannel2<F>;
+		readonly channel: (request: WebSocketChannelRequest) => WebSocketChannel2<F>;
 	}
 	export interface WebSocketClient1<F extends URIS> {
-		readonly channel: (channel: string) => WebSocketChannel1<F>;
+		readonly channel: (request: WebSocketChannelRequest) => WebSocketChannel1<F>;
 	}
 	export interface WebSocketClient<F> {
-		readonly channel: (channel: string) => WebSocketChannel<F>;
+		readonly channel: (request: WebSocketChannelRequest) => WebSocketChannel<F>;
 	}
 	
 	export interface WebSocketChannel<F> extends MonadThrow<F> {
