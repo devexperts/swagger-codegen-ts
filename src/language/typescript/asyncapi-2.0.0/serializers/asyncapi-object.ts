@@ -9,6 +9,7 @@ import { array, either, option } from 'fp-ts';
 import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { serializeChannelsObject } from './channels-object';
 import { clientFile } from '../../common/bundled/client';
+import { utilsFile } from '../../common/bundled/utils';
 
 export const serializeAsyncAPIObject = combineReader(
 	serializeComponentsObject,
@@ -32,8 +33,13 @@ export const serializeAsyncAPIObject = combineReader(
 			either.chain(from => serializeChannelsObject(from, asyncAPIObject.channels)),
 			either.map(content => directory('channels', [content])),
 		);
-		return combineEither(channels, additional, clientFile, (channels, additional, clientFile) =>
-			directory(name, [channels, clientFile, ...additional]),
+		return combineEither(
+			channels,
+			additional,
+			clientFile,
+			utilsFile,
+			(channels, additional, clientFile, utilsFile) =>
+				directory(name, [channels, clientFile, utilsFile, ...additional]),
 		);
 	},
 );

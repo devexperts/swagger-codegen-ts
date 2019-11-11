@@ -12,6 +12,7 @@ import { clientFile } from '../../common/bundled/client';
 import { serializeParametersDefinitionsObject } from './parameters-definitions-object';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { serializeResponsesDefinitionsObject } from './responses-definitions-object';
+import { utilsFile } from '../../common/bundled/utils';
 
 const definitionsRef = fromString('#/definitions');
 const parametersRef = fromString('#/parameters');
@@ -56,8 +57,8 @@ export const serializeSwaggerObject = combineReader(
 			pathsRef,
 			either.chain(from => serializePaths(from, swaggerObject.paths)),
 		);
-		return combineEither(additional, paths, clientFile, (additional, paths, clientFile) =>
-			directory(name, [clientFile, ...additional, paths]),
+		return combineEither(additional, paths, clientFile, utilsFile, (additional, paths, clientFile, utilsFile) =>
+			directory(name, [clientFile, utilsFile, ...additional, paths]),
 		);
 	},
 );
