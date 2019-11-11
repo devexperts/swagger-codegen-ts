@@ -16,7 +16,8 @@ import { when } from '../../../../utils/string';
 import { head, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { JSONPrimitive } from '../../../../utils/io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { nonEmptyArray } from 'fp-ts';
+import { nonEmptyArray, option } from 'fp-ts';
+import { none, Option, some } from 'fp-ts/lib/Option';
 
 export interface SerializedType {
 	readonly type: string;
@@ -69,12 +70,16 @@ export const SERIALIZED_BOOLEAN_TYPE = serializedType(
 	[serializedDependency('boolean', 'io-ts')],
 	[],
 );
-export const SERIALIZED_NUMERIC_TYPE = serializedType(
-	'number',
-	'number',
-	[serializedDependency('number', 'io-ts')],
-	[],
-);
+export const SERIALIZED_NUMBER_TYPE = serializedType('number', 'number', [serializedDependency('number', 'io-ts')], []);
+export const getSerializedIntegerType = (from: Ref, utilsRef: Ref): SerializedType => {
+	const pathToUtils = getRelativePath(from, utilsRef);
+	return serializedType(
+		'Integer',
+		'integer',
+		[serializedDependency('Integer', pathToUtils), serializedDependency('integer', pathToUtils)],
+		[],
+	);
+};
 export const SERIALIZED_DATE_TYPE = serializedType(
 	'Date',
 	'DateFromISOString',
@@ -82,6 +87,22 @@ export const SERIALIZED_DATE_TYPE = serializedType(
 	[],
 );
 export const SERIALIZED_STRING_TYPE = serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []);
+export const getSerializedStringType = (format: Option<string>): SerializedType => {
+	return pipe(
+		format,
+		option.chain(format => {
+			// https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14
+			switch (format) {
+				case 'date-time':
+				case 'date': {
+					return some(SERIALIZED_DATE_TYPE);
+				}
+			}
+			return none;
+		}),
+		option.getOrElse(() => SERIALIZED_STRING_TYPE),
+	);
+};
 export const SERIALIZED_NULL_TYPE = serializedType(
 	'null',
 	'literal(null)',
