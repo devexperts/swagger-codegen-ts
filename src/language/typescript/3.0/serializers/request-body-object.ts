@@ -5,9 +5,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { either, option, record } from 'fp-ts';
 import { fromString, Ref } from '../../../../utils/ref';
 import { RequestBodyObject } from '../../../../schema/3.0/request-body-object';
-import { ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
+import { ReferenceObjectCodec, ReferenceObject } from '../../../../schema/3.0/reference-object';
 import { SchemaObject } from '../../../../schema/3.0/schema-object';
-import { ReferenceObject } from '../../../../schema/2.0/reference-object';
 
 export const serializeRequestBodyObject = (from: Ref, body: RequestBodyObject): Either<Error, SerializedType> =>
 	pipe(

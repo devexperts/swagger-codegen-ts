@@ -39,7 +39,7 @@ import {
 	PathParameterObject,
 	QueryParameterObject,
 } from '../../../../schema/2.0/parameter-object';
-import { ReferenceObject } from '../../../../schema/2.0/reference-object';
+import { ReferenceObjectCodec } from '../../../../schema/2.0/reference-object';
 import { isRequired, serializeParameterObject } from './parameter-object';
 import {
 	fromSerializedParameter,
@@ -91,7 +91,7 @@ const getParameters = combineReader(
 		);
 
 		for (const parameter of parameters) {
-			if (ReferenceObject.is(parameter)) {
+			if (ReferenceObjectCodec.is(parameter)) {
 				const reference = fromString(parameter.$ref);
 				if (isLeft(reference)) {
 					return reference;

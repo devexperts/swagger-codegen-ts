@@ -25,7 +25,7 @@ import { Either, right } from 'fp-ts/lib/Either';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { either, option, record } from 'fp-ts';
 import { traverseNEAEither } from '../../../../utils/either';
-import { ReferenceObject } from '../../../../schema/2.0/reference-object';
+import { ReferenceObjectCodec } from '../../../../schema/2.0/reference-object';
 
 export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<Error, SerializedType> =>
 	serializeSchemaObjectWithRecursion(from, schema, true);
@@ -36,7 +36,7 @@ const serializeSchemaObjectWithRecursion = (
 	shouldTrackRecursion: boolean,
 ): Either<Error, SerializedType> => {
 	// check non-typed schemas first
-	if (ReferenceObject.is(schema)) {
+	if (ReferenceObjectCodec.is(schema)) {
 		return pipe(
 			fromString(schema.$ref),
 			either.map(getSerializedRefType(from)),
