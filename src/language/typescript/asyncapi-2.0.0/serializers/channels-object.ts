@@ -9,7 +9,7 @@ import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either
 import { intercalateSerializedTypes, SerializedType, serializedType } from '../../common/data/serialized-type';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { Kind } from '../../../../utils/types';
-import { clientRef } from '../../common/client';
+import { clientRef } from '../../common/bundled/client';
 
 const serializeChannelsObjectWithKind = (
 	from: Ref,

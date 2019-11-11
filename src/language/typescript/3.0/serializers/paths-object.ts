@@ -14,7 +14,7 @@ import { addPathParts, getRelativePath, Ref } from '../../../../utils/ref';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { applyTo } from '../../../../utils/function';
 import { PathsObject } from '../../../../schema/3.0/paths-object';
-import { clientRef } from '../../common/client';
+import { clientRef } from '../../common/bundled/client';
 import { getControllerName } from '../../common/utils';
 
 const serializeGrouppedPaths = combineReader(

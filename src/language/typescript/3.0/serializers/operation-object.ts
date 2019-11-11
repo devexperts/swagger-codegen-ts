@@ -35,7 +35,7 @@ import { ParameterObject, ParameterObjectCodec } from '../../../../schema/3.0/pa
 import { RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
 import { isSome, none, Option, some } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';
-import { clientRef } from '../../common/client';
+import { clientRef } from '../../common/bundled/client';
 import { Kind } from '../../../../utils/types';
 import { ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { PathItemObject } from '../../../../schema/3.0/path-item-object';

@@ -19,7 +19,7 @@ import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/asynca
 import { serializeMessageObject } from './message-object';
 import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
-import { clientRef } from '../../common/client';
+import { clientRef } from '../../common/bundled/client';
 import { Kind } from '../../../../utils/types';
 import { getKindValue } from '../../common/utils';
 

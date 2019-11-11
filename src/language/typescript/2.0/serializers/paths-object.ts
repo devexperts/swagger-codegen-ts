@@ -12,7 +12,7 @@ import { PathItemObject } from '../../../../schema/2.0/path-item-object';
 import { camelize, decapitalize } from '@devexperts/utils/dist/string';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
-import { clientRef } from '../../common/client';
+import { clientRef } from '../../common/bundled/client';
 
 export const serializePaths = combineReader(
 	serializePathGroup,

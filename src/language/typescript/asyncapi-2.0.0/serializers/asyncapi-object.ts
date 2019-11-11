@@ -8,7 +8,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { array, either, option } from 'fp-ts';
 import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { serializeChannelsObject } from './channels-object';
-import { clientFile } from '../../common/client';
+import { clientFile } from '../../common/bundled/client';
 
 export const serializeAsyncAPIObject = combineReader(
 	serializeComponentsObject,

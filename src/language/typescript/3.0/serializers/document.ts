@@ -10,7 +10,7 @@ import { array, either, option } from 'fp-ts';
 import { applyTo } from '../../../../utils/function';
 import { OpenapiObject } from '../../../../schema/3.0/openapi-object';
 import { pathsRef } from '../../common/utils';
-import { clientFile } from '../../common/client';
+import { clientFile } from '../../common/bundled/client';
 
 export const serializeDocument = combineReader(
 	serializeComponentsObject,

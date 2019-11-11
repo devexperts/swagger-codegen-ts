@@ -1,5 +1,5 @@
-import { fromString } from '../../../utils/ref';
-import { fromRef } from '../../../utils/fs';
+import { fromString } from '../../../../utils/ref';
+import { fromRef } from '../../../../utils/fs';
 import { either } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 

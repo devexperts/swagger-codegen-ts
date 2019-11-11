@@ -12,7 +12,7 @@ import { Either } from 'fp-ts/lib/Either';
 import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { either, nonEmptyArray, option, record } from 'fp-ts';
 import { getRelativePath, Ref } from '../../../../utils/ref';
-import { clientRef } from '../../common/client';
+import { clientRef } from '../../common/bundled/client';
 import { OperationObject } from '../../../../schema/2.0/operation-object';
 import { tuple } from 'fp-ts/lib/function';
 import { uniqString } from '../../../../utils/array';
