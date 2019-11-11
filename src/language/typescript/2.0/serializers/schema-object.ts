@@ -15,7 +15,7 @@ import {
 	getSerializedIntersectionType,
 } from '../../common/data/serialized-type';
 import { serializedDependency } from '../../common/data/serialized-dependency';
-import { AllOfSchemaObject, SchemaObject } from '../../../../schema/2.0/schema-object/schema-object';
+import { AllOfSchemaObject, SchemaObject } from '../../../../schema/2.0/schema-object';
 import { none, some } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { constFalse } from 'fp-ts/lib/function';

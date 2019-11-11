@@ -1,6 +1,6 @@
 import { boolean, literal, string, type, union } from 'io-ts';
 import { Codec } from '../../utils/io-ts';
-import { SchemaObject, SchemaObjectCodec } from './schema-object/schema-object';
+import { SchemaObject, SchemaObjectCodec } from './schema-object';
 import { Option } from 'fp-ts/lib/Option';
 import { ItemsObject, ItemsObjectCodec } from './items-object';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
