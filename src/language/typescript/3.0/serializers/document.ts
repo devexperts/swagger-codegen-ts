@@ -11,6 +11,7 @@ import { applyTo } from '../../../../utils/function';
 import { OpenapiObject } from '../../../../schema/3.0/openapi-object';
 import { pathsRef } from '../../common/utils';
 import { clientFile } from '../../common/bundled/client';
+import { utilsFile } from '../../common/bundled/utils';
 
 export const serializeDocument = combineReader(
 	serializeComponentsObject,
@@ -42,8 +43,8 @@ export const serializeDocument = combineReader(
 			array.compact([components]),
 			sequenceEither,
 		);
-		return combineEither(paths, additional, clientFile, (paths, additional, clientFile) =>
-			directory(name, [paths, ...additional, clientFile]),
+		return combineEither(paths, additional, clientFile, utilsFile, (paths, additional, clientFile, utilsFile) =>
+			directory(name, [paths, ...additional, clientFile, utilsFile]),
 		);
 	},
 );
