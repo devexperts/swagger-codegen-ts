@@ -1,4 +1,11 @@
-import { Codec, dictionary, primitiveArrayOption, stringArrayOption, stringOption } from '../../utils/io-ts';
+import {
+	Codec,
+	dictionary,
+	JSONPrimitive,
+	JSONPrimitiveCodec,
+	stringArrayOption,
+	stringOption,
+} from '../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 import { ReferenceObject, ReferenceObjectCodec } from './reference-object';
 import { intersection, literal, recursion, string, type, union } from 'io-ts';
@@ -16,27 +23,53 @@ export const BaseSchemaObjectCodec: Codec<BaseSchemaObject> = type({
 	format: optionFromNullable(string),
 });
 
-export interface StringPropertySchemaObject extends BaseSchemaObject {
-	readonly type: 'string';
-	readonly enum: Option<Array<string | number | boolean>>;
+export interface EnumSchemaObject extends BaseSchemaObject {
+	readonly enum: NonEmptyArray<JSONPrimitive>;
 }
 
-export const StringPropertySchemaObjectCodec: Codec<StringPropertySchemaObject> = intersection(
+export const EnumSchemaObjectCodec: Codec<EnumSchemaObject> = intersection(
+	[
+		BaseSchemaObjectCodec,
+		type({
+			enum: nonEmptyArray(JSONPrimitiveCodec),
+		}),
+	],
+	'EnumSchemaObject',
+);
+
+export interface NullSchemaObject extends BaseSchemaObject {
+	readonly type: 'null';
+}
+
+export const NullSchemaObjectCodec: Codec<NullSchemaObject> = intersection(
+	[
+		BaseSchemaObjectCodec,
+		type({
+			type: literal('null'),
+		}),
+	],
+	'NullSchemaObject',
+);
+
+export interface StringSchemaObject extends BaseSchemaObject {
+	readonly type: 'string';
+}
+
+export const StringSchemaObjectCodec: Codec<StringSchemaObject> = intersection(
 	[
 		BaseSchemaObjectCodec,
 		type({
 			type: literal('string'),
-			enum: primitiveArrayOption,
 		}),
 	],
-	'StringPropertySchemaObject',
+	'StringSchemaObject',
 );
 
-export interface NumberPropertySchemaObject extends BaseSchemaObject {
+export interface NumberSchemaObject extends BaseSchemaObject {
 	readonly type: 'number';
 }
 
-export const NumberPropertySchemaObjectCodec: Codec<NumberPropertySchemaObject> = intersection(
+export const NumberSchemaObjectCodec: Codec<NumberSchemaObject> = intersection(
 	[
 		BaseSchemaObjectCodec,
 		type({
@@ -44,14 +77,14 @@ export const NumberPropertySchemaObjectCodec: Codec<NumberPropertySchemaObject> 
 			format: stringOption,
 		}),
 	],
-	'NumberPropertySchemaObject',
+	'NumberSchemaObject',
 );
 
-export interface IntegerPropertySchemaObject extends BaseSchemaObject {
+export interface IntegerSchemaObject extends BaseSchemaObject {
 	readonly type: 'integer';
 }
 
-export const IntegerPropertySchemaObjectCodec: Codec<IntegerPropertySchemaObject> = intersection(
+export const IntegerSchemaObjectCodec: Codec<IntegerSchemaObject> = intersection(
 	[
 		BaseSchemaObjectCodec,
 		type({
@@ -59,21 +92,21 @@ export const IntegerPropertySchemaObjectCodec: Codec<IntegerPropertySchemaObject
 			format: stringOption,
 		}),
 	],
-	'IntegerPropertySchemaObject',
+	'IntegerSchemaObject',
 );
 
-export interface BooleanPropertySchemaObject extends BaseSchemaObject {
+export interface BooleanSchemaObject extends BaseSchemaObject {
 	readonly type: 'boolean';
 }
 
-export const BooleanPropertySchemaObjectCodec: Codec<BooleanPropertySchemaObject> = intersection(
+export const BooleanSchemaObjectCodec: Codec<BooleanSchemaObject> = intersection(
 	[
 		BaseSchemaObjectCodec,
 		type({
 			type: literal('boolean'),
 		}),
 	],
-	'BooleanPropertySchemaObject',
+	'BooleanSchemaObject',
 );
 
 export interface AllOfSchemaObject extends BaseSchemaObject {
@@ -125,23 +158,27 @@ const ObjectSchemaObjectCodec: Codec<ObjectSchemaObject> = recursion('ObjectSche
 
 export type SchemaObject =
 	| ReferenceObject
+	| EnumSchemaObject
+	| NullSchemaObject
 	| AllOfSchemaObject
 	| ObjectSchemaObject
-	| StringPropertySchemaObject
-	| NumberPropertySchemaObject
-	| IntegerPropertySchemaObject
-	| BooleanPropertySchemaObject
+	| StringSchemaObject
+	| NumberSchemaObject
+	| IntegerSchemaObject
+	| BooleanSchemaObject
 	| ArraySchemaObject;
 
 export const SchemaObjectCodec: Codec<SchemaObject> = recursion('SchemaObject', () =>
 	union([
 		ReferenceObjectCodec,
+		EnumSchemaObjectCodec,
+		NullSchemaObjectCodec,
 		AllOfSchemaObject,
 		ArraySchemaObjectCodec,
 		ObjectSchemaObjectCodec,
-		StringPropertySchemaObjectCodec,
-		NumberPropertySchemaObjectCodec,
-		IntegerPropertySchemaObjectCodec,
-		BooleanPropertySchemaObjectCodec,
+		StringSchemaObjectCodec,
+		NumberSchemaObjectCodec,
+		IntegerSchemaObjectCodec,
+		BooleanSchemaObjectCodec,
 	]),
 );

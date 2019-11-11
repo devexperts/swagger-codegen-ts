@@ -1,6 +1,7 @@
 import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
+	getSerializedEnumType,
 	getSerializedIntersectionType,
 	getSerializedObjectType,
 	getSerializedPropertyType,
@@ -9,6 +10,7 @@ import {
 	getSerializedUnionType,
 	intercalateSerializedTypes,
 	SERIALIZED_BOOLEAN_TYPE,
+	SERIALIZED_NULL_TYPE,
 	SERIALIZED_NUMERIC_TYPE,
 	SERIALIZED_STRING_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
@@ -23,7 +25,12 @@ import { constFalse } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { fromString, Ref } from '../../../../utils/ref';
-import { AllOfSchemaObjectCodec, OneOfSchemaObjectCodec, SchemaObject } from '../../../../schema/3.0/schema-object';
+import {
+	AllOfSchemaObjectCodec,
+	EnumSchemaObjectCodec,
+	OneOfSchemaObjectCodec,
+	SchemaObject,
+} from '../../../../schema/3.0/schema-object';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { traverseNEAEither } from '../../../../utils/either';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
@@ -59,7 +66,14 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 		);
 	}
 
+	if (EnumSchemaObjectCodec.is(schemaObject)) {
+		return right(getSerializedEnumType(schemaObject.enum));
+	}
+
 	switch (schemaObject.type) {
+		case 'null': {
+			return right(SERIALIZED_NULL_TYPE);
+		}
 		case 'string': {
 			return right(SERIALIZED_STRING_TYPE);
 		}

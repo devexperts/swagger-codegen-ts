@@ -1,4 +1,5 @@
 import {
+	LITERAL_DEPENDENCY,
 	monoidDependencies,
 	OPTION_DEPENDENCIES,
 	serializedDependency,
@@ -13,6 +14,9 @@ import { getIOName, getTypeName } from '../utils';
 import { concatIfL } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
 import { head, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import { JSONPrimitive } from '../../../../utils/io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { nonEmptyArray } from 'fp-ts';
 
 export interface SerializedType {
 	readonly type: string;
@@ -180,4 +184,16 @@ export const getSerializedIntersectionType = (serialized: NonEmptyArray<Serializ
 			intercalated.refs,
 		);
 	}
+};
+
+export const getSerializedEnumType = (value: NonEmptyArray<JSONPrimitive>): SerializedType =>
+	pipe(
+		value,
+		nonEmptyArray.map(getSerializedPrimitiveType),
+		getSerializedUnionType,
+	);
+
+export const getSerializedPrimitiveType = (value: JSONPrimitive): SerializedType => {
+	const serialized = JSON.stringify(value);
+	return serializedType(serialized, `literal(${serialized})`, [LITERAL_DEPENDENCY], []);
 };

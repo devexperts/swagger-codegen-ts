@@ -13,9 +13,11 @@ import {
 	getSerializedRecursiveType,
 	getSerializedDictionaryType,
 	getSerializedIntersectionType,
+	getSerializedEnumType,
+	SERIALIZED_NULL_TYPE,
 } from '../../common/data/serialized-type';
 import { serializedDependency } from '../../common/data/serialized-dependency';
-import { AllOfSchemaObject, SchemaObject } from '../../../../schema/2.0/schema-object';
+import { AllOfSchemaObject, EnumSchemaObjectCodec, SchemaObject } from '../../../../schema/2.0/schema-object';
 import { none, some } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { constFalse } from 'fp-ts/lib/function';
@@ -25,7 +27,8 @@ import { Either, right } from 'fp-ts/lib/Either';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { either, option, record } from 'fp-ts';
 import { traverseNEAEither } from '../../../../utils/either';
-import { ReferenceObjectCodec } from '../../../../schema/2.0/reference-object';
+import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/2.0/reference-object';
+import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 
 export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<Error, SerializedType> =>
 	serializeSchemaObjectWithRecursion(from, schema, true);
@@ -43,33 +46,30 @@ const serializeSchemaObjectWithRecursion = (
 		);
 	}
 
+	if (EnumSchemaObjectCodec.is(schema)) {
+		return right(getSerializedEnumType(schema.enum));
+	}
+
 	if (AllOfSchemaObject.is(schema)) {
-		return pipe(
-			traverseNEAEither(schema.allOf, item => serializeSchemaObjectWithRecursion(from, item, false)),
-			either.map(getSerializedIntersectionType),
-			either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
-		);
+		return serializeAllOf(from, schema.allOf, shouldTrackRecursion);
 	}
 
 	// schema is typed
 	switch (schema.type) {
+		case 'null': {
+			return right(SERIALIZED_NULL_TYPE);
+		}
 		case 'string': {
 			return pipe(
-				schema.enum,
-				option.map(serializeEnum),
-				option.alt(() =>
-					pipe(
-						schema.format,
-						option.chain(format => {
-							switch (format) {
-								case 'date-time': {
-									return some(SERIALIZED_DATE_TYPE);
-								}
-							}
-							return none;
-						}),
-					),
-				),
+				schema.format,
+				option.chain(format => {
+					switch (format) {
+						case 'date-time': {
+							return some(SERIALIZED_DATE_TYPE);
+						}
+					}
+					return none;
+				}),
 				option.getOrElse(() => SERIALIZED_STRING_TYPE),
 				right,
 			);
@@ -139,16 +139,13 @@ const serializeSchemaObjectWithRecursion = (
 	}
 };
 
-const serializeEnum = (enumValue: Array<string | number | boolean>): SerializedType => {
-	const type = enumValue.map(value => `'${value}'`).join(' | ');
-	const io =
-		enumValue.length === 1
-			? `literal(${type})`
-			: `union([${enumValue.map(value => `literal('${value}')`).join(',')}])`;
-	return serializedType(
-		type,
-		io,
-		[serializedDependency('union', 'io-ts'), serializedDependency('literal', 'io-ts')],
-		[],
+const serializeAllOf = (
+	from: Ref,
+	allOf: NonEmptyArray<ReferenceObject | SchemaObject>,
+	shouldTrackRecursion: boolean,
+): Either<Error, SerializedType> =>
+	pipe(
+		traverseNEAEither(allOf, item => serializeSchemaObjectWithRecursion(from, item, false)),
+		either.map(getSerializedIntersectionType),
+		either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 	);
-};

@@ -10,6 +10,7 @@ import {
 	getSerializedRefType,
 	getSerializedUnionType,
 	intercalateSerializedTypes,
+	getSerializedPrimitiveType,
 	SERIALIZED_BOOLEAN_TYPE,
 	SERIALIZED_NULL_TYPE,
 	SERIALIZED_NUMERIC_TYPE,
@@ -17,6 +18,7 @@ import {
 	SERIALIZED_UNKNOWN_TYPE,
 	serializedType,
 	SerializedType,
+	getSerializedEnumType,
 } from '../../common/data/serialized-type';
 import {
 	AllOfSchemaObjectCodec,
@@ -27,10 +29,8 @@ import {
 	SchemaObject,
 } from '../../../../schema/asyncapi-2.0.0/schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { either, nonEmptyArray, option, record } from 'fp-ts';
+import { either, option, record } from 'fp-ts';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
-import { LITERAL_DEPENDENCY } from '../../common/data/serialized-dependency';
-import { JSONPrimitive } from '../../../../utils/io-ts';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/asyncapi-2.0.0/reference-object';
 import { traverseNEAEither } from '../../../../utils/either';
 import { constFalse } from 'fp-ts/lib/function';
@@ -51,10 +51,10 @@ const serializeSchemaObjectWithRecursion = (
 ): Either<Error, SerializedType> => {
 	// check non-types schemas
 	if (EnumSchemaObjectCodec.is(schemaObject)) {
-		return right(serializeEnum(schemaObject.enum));
+		return right(getSerializedEnumType(schemaObject.enum));
 	}
 	if (ConstSchemaObjectCodec.is(schemaObject)) {
-		return right(serializeConst(schemaObject.const));
+		return right(getSerializedPrimitiveType(schemaObject.const));
 	}
 	if (AllOfSchemaObjectCodec.is(schemaObject)) {
 		return serializeAllOf(from, schemaObject.allOf, shouldTrackRecursion);
@@ -85,18 +85,6 @@ const serializeSchemaObjectWithRecursion = (
 			return serializeArray(from, schemaObject.items, shouldTrackRecursion, name);
 		}
 	}
-};
-
-const serializeEnum = (value: NonEmptyArray<JSONPrimitive>): SerializedType =>
-	pipe(
-		value,
-		nonEmptyArray.map(serializeConst),
-		getSerializedUnionType,
-	);
-
-const serializeConst = (value: JSONPrimitive): SerializedType => {
-	const serialized = JSON.stringify(value);
-	return serializedType(serialized, `literal(${serialized})`, [LITERAL_DEPENDENCY], []);
 };
 
 const serializeChildren = (
