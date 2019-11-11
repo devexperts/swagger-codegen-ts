@@ -1,4 +1,4 @@
-import { SchemaObject } from '../../../../schema/2.0/schema-object/schema-object';
+import { SchemaObject } from '../../../../schema/2.0/schema-object';
 import { directory, Directory, file, File } from '../../../../utils/fs';
 import { serializeSchemaObject } from './schema-object';
 import { serializeDependencies } from '../../common/data/serialized-dependency';

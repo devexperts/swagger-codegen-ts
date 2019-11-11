@@ -10,7 +10,7 @@ import {
 } from '../../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { serializeSchemaObject } from '../schema-object';
-import { SchemaObjectCodec } from '../../../../../schema/2.0/schema-object/schema-object';
+import { SchemaObjectCodec } from '../../../../../schema/2.0/schema-object';
 import { right } from 'fp-ts/lib/Either';
 import { either } from 'fp-ts';
 import { reportIfFailed } from '../../../../../utils/io-ts';
