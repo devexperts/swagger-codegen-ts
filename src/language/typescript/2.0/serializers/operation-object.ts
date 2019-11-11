@@ -29,7 +29,7 @@ import { Either, isLeft, right } from 'fp-ts/lib/Either';
 import { array, either, nonEmptyArray, option } from 'fp-ts';
 import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { fromString, getRelativePath, Ref } from '../../../../utils/ref';
-import { clientRef } from '../../common/client';
+import { clientRef } from '../../common/bundled/client';
 import {
 	BodyParameterObject,
 	FormDataParameterObject,

@@ -8,7 +8,7 @@ import { array, either, option } from 'fp-ts';
 import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { SwaggerObject } from '../../../../schema/2.0/swagger-object';
 import { fromString } from '../../../../utils/ref';
-import { clientFile } from '../../common/client';
+import { clientFile } from '../../common/bundled/client';
 import { serializeParametersDefinitionsObject } from './parameters-definitions-object';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { serializeResponsesDefinitionsObject } from './responses-definitions-object';

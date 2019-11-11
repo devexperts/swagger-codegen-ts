@@ -13,7 +13,7 @@ import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either
 import { serializePublishOperationObject, serializeSubscribeOperationObject } from './operation-object';
 import { foldKind, Kind } from '../../../../utils/types';
 import { serializedDependency } from '../../common/data/serialized-dependency';
-import { clientRef } from '../../common/client';
+import { clientRef } from '../../common/bundled/client';
 import { serializeSchemaObject } from './schema-object';
 import { ObjectSchemaObject } from '../../../../schema/asyncapi-2.0.0/schema-object';
 import { isSome } from 'fp-ts/lib/Option';
