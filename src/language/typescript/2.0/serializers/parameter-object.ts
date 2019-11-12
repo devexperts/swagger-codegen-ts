@@ -2,9 +2,10 @@ import { Ref } from '../../../../utils/ref';
 import { ParameterObject } from '../../../../schema/2.0/parameter-object';
 import {
 	getSerializedArrayType,
+	getSerializedIntegerType,
+	getSerializedStringType,
 	SERIALIZED_BOOLEAN_TYPE,
 	SERIALIZED_NUMBER_TYPE,
-	SERIALIZED_STRING_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 } from '../../common/data/serialized-type';
 import { serializeItemsObject } from './items-object';
@@ -14,6 +15,7 @@ import { fromSerializedType, SerializedParameter } from '../../common/data/seria
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either, option } from 'fp-ts';
 import { constFalse } from 'fp-ts/lib/function';
+import { utilsRef } from '../../common/bundled/utils';
 
 export const serializeParameterObject = (
 	from: Ref,
@@ -27,11 +29,16 @@ export const serializeParameterObject = (
 		case 'formData': {
 			switch (parameterObject.type) {
 				case 'string': {
-					return right(toSerializedParameter(SERIALIZED_STRING_TYPE));
+					return right(toSerializedParameter(getSerializedStringType(parameterObject.format)));
 				}
-				case 'number':
-				case 'integer': {
+				case 'number': {
 					return right(toSerializedParameter(SERIALIZED_NUMBER_TYPE));
+				}
+				case 'integer': {
+					return pipe(
+						utilsRef,
+						either.map(utilsRef => toSerializedParameter(getSerializedIntegerType(from, utilsRef))),
+					);
 				}
 				case 'boolean': {
 					return right(toSerializedParameter(SERIALIZED_BOOLEAN_TYPE));

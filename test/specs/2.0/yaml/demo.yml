@@ -16,6 +16,10 @@ paths:
           in: query
           required: true
           type: number
+        - name: currenttime
+          in: query
+          type: string
+          format: date-time
       operationId: test
       responses:
         200:
