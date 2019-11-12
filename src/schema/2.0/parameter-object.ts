@@ -29,10 +29,12 @@ const BaseArrayParameterObjectProps = {
 
 export interface BaseNonArrayParameterObject {
 	readonly type: 'string' | 'number' | 'integer' | 'boolean';
+	readonly format: Option<string>;
 }
 
 const BaseNonArrayParameterObjectProps = {
 	type: union([literal('string'), literal('number'), literal('integer'), literal('boolean')]),
+	format: optionFromNullable(string),
 };
 
 export interface BodyParameterObject extends BaseParameterObject {
