@@ -5,7 +5,7 @@ import {
 	getSerializedIntegerType,
 	getSerializedIntersectionType,
 	getSerializedObjectType,
-	getSerializedPropertyType,
+	getSerializedOptionPropertyType,
 	getSerializedRecursiveType,
 	getSerializedRefType,
 	getSerializedStringType,
@@ -151,13 +151,13 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 											),
 									),
 									either.map(getSerializedRefType(from)),
-									either.map(getSerializedPropertyType(name, isRequired)),
+									either.map(getSerializedOptionPropertyType(name, isRequired)),
 								);
 							} else {
 								return pipe(
 									property,
 									serializeSchemaObjectWithRecursion(from, false, undefined),
-									either.map(getSerializedPropertyType(name, isRequired)),
+									either.map(getSerializedOptionPropertyType(name, isRequired)),
 								);
 							}
 						}),

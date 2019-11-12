@@ -17,14 +17,19 @@ const BaseParameterObjectProps = {
 	description: optionFromNullable(string),
 };
 
+export type ArrayParameterObjectCollectionFormat = 'csv' | 'ssv' | 'tsv' | 'pipes' | 'multi';
 export interface BaseArrayParameterObject {
 	readonly type: 'array';
 	readonly items: ItemsObject;
+	readonly collectionFormat: Option<ArrayParameterObjectCollectionFormat>;
 }
 
 const BaseArrayParameterObjectProps = {
 	type: literal('array'),
 	items: ItemsObjectCodec,
+	collectionFormat: optionFromNullable(
+		union([literal('csv'), literal('ssv'), literal('tsv'), literal('pipes'), literal('multi')]),
+	),
 };
 
 export interface BaseNonArrayParameterObject {
@@ -86,7 +91,7 @@ const BaseQueryParameterObjectProps = {
 	in: literal('query'),
 };
 export interface ArrayQueryParameterObject extends BaseQueryParameterObject, BaseArrayParameterObject {}
-const ArrayQueryParameterObjectCodec: Codec<ArrayQueryParameterObject> = type({
+export const ArrayQueryParameterObjectCodec: Codec<ArrayQueryParameterObject> = type({
 	...BaseQueryParameterObjectProps,
 	...BaseArrayParameterObjectProps,
 });

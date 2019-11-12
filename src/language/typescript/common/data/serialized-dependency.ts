@@ -2,10 +2,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { groupBy, head } from 'fp-ts/lib/NonEmptyArray';
 import { collect } from 'fp-ts/lib/Record';
 import { uniqString } from '../../../../utils/array';
-import { getMonoid as getArrayMonoid } from 'fp-ts/lib/Array';
+import { getMonoid as getArrayMonoid, uniq } from 'fp-ts/lib/Array';
 import { Kind } from '../../../../utils/types';
-
-export const EMPTY_DEPENDENCIES: SerializedDependency[] = [];
+import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
 
 export interface SerializedDependency {
 	readonly name: string;
@@ -34,6 +33,12 @@ const dependencyOption = serializedDependency('Option', 'fp-ts/lib/Option');
 const dependencyOptionFromNullable = serializedDependency('optionFromNullable', 'io-ts-types/lib/optionFromNullable');
 export const OPTION_DEPENDENCIES: SerializedDependency[] = [dependencyOption, dependencyOptionFromNullable];
 export const LITERAL_DEPENDENCY = serializedDependency('literal', 'io-ts');
+
+export const eqSerializedDependency: Eq<SerializedDependency> = getStructEq({
+	name: eqString,
+	path: eqString,
+});
+export const uniqSerializedDependencies = uniq(eqSerializedDependency);
 
 export const getSerializedKindDependency = (kind: Kind): SerializedDependency => {
 	switch (kind) {

@@ -68,7 +68,7 @@ export interface ArraySchemaObject extends BaseSchemaObject {
 	readonly items: SchemaObject;
 }
 
-const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaObject', () =>
+export const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaObject', () =>
 	intersection([
 		BaseSchemaObjectCodec,
 		type({

@@ -4,7 +4,7 @@ import {
 	getSerializedDictionaryType,
 	getSerializedIntersectionType,
 	getSerializedObjectType,
-	getSerializedPropertyType,
+	getSerializedOptionPropertyType,
 	getSerializedRefType,
 	getSerializedUnionType,
 	intercalateSerializedTypes,
@@ -54,7 +54,7 @@ describe('SerializedType', () => {
 	it('getSerializedPropertyType', () => {
 		assert(
 			property(string(), serializedTypeArbitrary, boolean(), (name, s, isRequired) => {
-				const serialized = getSerializedPropertyType(name, isRequired)(s);
+				const serialized = getSerializedOptionPropertyType(name, isRequired)(s);
 				const expected = isRequired
 					? serializedType(`${name}: ${s.type}`, `${name}: ${s.io}`, s.dependencies, s.refs)
 					: serializedType(

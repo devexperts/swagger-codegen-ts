@@ -1,6 +1,6 @@
-import { SerializedDependency } from './serialized-dependency';
+import { SerializedDependency, uniqSerializedDependencies } from './serialized-dependency';
 import { SerializedParameter } from './serialized-parameter';
-import { Ref } from '../../../../utils/ref';
+import { Ref, uniqRefs } from '../../../../utils/ref';
 
 export interface SerializedPathParameter extends SerializedParameter {
 	readonly name: string;
@@ -18,8 +18,8 @@ export const serializedPathParameter = (
 	type,
 	io,
 	isRequired,
-	dependencies,
-	refs,
+	dependencies: uniqSerializedDependencies(dependencies),
+	refs: uniqRefs(refs),
 });
 
 export const fromSerializedParameter = (name: string) => (

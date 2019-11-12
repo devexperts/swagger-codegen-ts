@@ -3,6 +3,7 @@ import { ChannelItemObject } from '../../../../schema/asyncapi-2.0.0/channel-ite
 import { Either, left, right } from 'fp-ts/lib/Either';
 import {
 	getSerializedPropertyType,
+	getSerializedOptionPropertyType,
 	intercalateSerializedTypes,
 	serializedType,
 	SerializedType,
@@ -22,7 +23,6 @@ import { constFalse } from 'fp-ts/lib/function';
 import { when } from '../../../../utils/string';
 import {
 	fromSerializedType,
-	getSerializedPropertyParameter,
 	intercalateSerializedParameters,
 	serializedParameter,
 } from '../../common/data/serialized-parameter';
@@ -64,8 +64,8 @@ export const serializeChannelItemObject = (
 			return pipe(
 				validateSchemaObject(query),
 				either.chain(query => serializeSchemaObject(from, query)),
+				either.map(serialized => getSerializedPropertyType('query', required, serialized)),
 				either.map(fromSerializedType(required)),
-				either.map(serialized => getSerializedPropertyParameter('query', serialized)),
 			);
 		}),
 	);
@@ -77,8 +77,8 @@ export const serializeChannelItemObject = (
 			return pipe(
 				validateSchemaObject(headers),
 				either.chain(headers => serializeSchemaObject(from, headers)),
+				either.map(serialized => getSerializedPropertyType('headers', required, serialized)),
 				either.map(fromSerializedType(required)),
-				either.map(serialized => getSerializedPropertyParameter('headers', serialized)),
 			);
 		}),
 	);
@@ -119,7 +119,7 @@ export const serializeChannelItemObject = (
 		const refs = [...serialized.refs, ...serializedParameters.refs];
 		return pipe(
 			serializedType(type, io, dependencies, refs),
-			getSerializedPropertyType(`[${JSON.stringify(channel)}]`, true),
+			getSerializedOptionPropertyType(`[${JSON.stringify(channel)}]`, true),
 		);
 	});
 };

@@ -44,8 +44,10 @@ export const serializeParameterObject = (
 					return right(toSerializedParameter(SERIALIZED_BOOLEAN_TYPE));
 				}
 				case 'array': {
-					return right(
-						toSerializedParameter(getSerializedArrayType()(serializeItemsObject(parameterObject.items))),
+					return pipe(
+						serializeItemsObject(from, parameterObject.items),
+						either.map(getSerializedArrayType()),
+						either.map(toSerializedParameter),
 					);
 				}
 				case 'file':

@@ -4,12 +4,13 @@ import {
 	OPTION_DEPENDENCIES,
 	serializedDependency,
 	SerializedDependency,
+	uniqSerializedDependencies,
 } from './serialized-dependency';
 import { fold, getStructMonoid, Monoid, monoidString } from 'fp-ts/lib/Monoid';
 import { intercalate } from 'fp-ts/lib/Foldable';
 import { array, getMonoid, uniq } from 'fp-ts/lib/Array';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
-import { getRelativePath, Ref } from '../../../../utils/ref';
+import { getRelativePath, Ref, uniqRefs } from '../../../../utils/ref';
 import { getIOName, getTypeName } from '../utils';
 import { concatIfL } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
@@ -34,8 +35,8 @@ export const serializedType = (
 ): SerializedType => ({
 	type,
 	io,
-	dependencies,
-	refs,
+	dependencies: uniqSerializedDependencies(dependencies),
+	refs: uniqRefs(refs),
 });
 
 export const monoidSerializedType: Monoid<SerializedType> = getStructMonoid({
@@ -109,23 +110,6 @@ export const SERIALIZED_NULL_TYPE = serializedType(
 	[serializedDependency('literal', 'io-ts')],
 	[],
 );
-
-export const getSerializedPropertyType = (name: string, isRequired: boolean) => (
-	serialized: SerializedType,
-): SerializedType =>
-	isRequired
-		? serializedType(
-				`${name}: ${serialized.type}`,
-				`${name}: ${serialized.io}`,
-				serialized.dependencies,
-				serialized.refs,
-		  )
-		: serializedType(
-				`${name}: Option<${serialized.type}>`,
-				`${name}: optionFromNullable(${serialized.io})`,
-				[...serialized.dependencies, ...OPTION_DEPENDENCIES],
-				serialized.refs,
-		  );
 
 export const getSerializedArrayType = (name?: string) => (serialized: SerializedType): SerializedType =>
 	serializedType(
@@ -218,3 +202,30 @@ export const getSerializedPrimitiveType = (value: JSONPrimitive): SerializedType
 	const serialized = JSON.stringify(value);
 	return serializedType(serialized, `literal(${serialized})`, [LITERAL_DEPENDENCY], []);
 };
+
+export const getSerializedOptionType = (serialized: SerializedType): SerializedType =>
+	serializedType(
+		`Option<${serialized.type}>`,
+		`optionFromNullable(${serialized.io})`,
+		[...serialized.dependencies, ...OPTION_DEPENDENCIES],
+		serialized.refs,
+	);
+
+export const getSerializedOptionalType = (isRequired: boolean, serialized: SerializedType): SerializedType =>
+	isRequired ? serialized : getSerializedOptionType(serialized);
+
+export const getSerializedPropertyType = (
+	name: string,
+	isRequired: boolean,
+	serialized: SerializedType,
+): SerializedType =>
+	serializedType(
+		`${name}${when(!isRequired, '?')}: ${serialized.type}`,
+		`${name}: ${serialized.io}`,
+		serialized.dependencies,
+		serialized.refs,
+	);
+
+export const getSerializedOptionPropertyType = (name: string, isRequired: boolean) => (
+	serialized: SerializedType,
+): SerializedType => getSerializedPropertyType(name, true, getSerializedOptionalType(isRequired, serialized));

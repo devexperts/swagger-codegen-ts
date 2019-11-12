@@ -37,9 +37,11 @@ const BaseItemsObjectProps = {
 	multipleOf: numberOption,
 };
 
+export type ArrayItemsObjectCollectionFormat = 'csv' | 'ssv' | 'tsv' | 'pipes';
 export interface ArrayItemsObject extends BaseItemsObject {
 	readonly type: 'array';
 	readonly items: ItemsObject;
+	readonly collectionFormat: Option<ArrayItemsObjectCollectionFormat>;
 }
 
 const ArrayItemsObjectCodec: Codec<ArrayItemsObject> = recursion('ArrayItemsObject', () =>
@@ -47,6 +49,7 @@ const ArrayItemsObjectCodec: Codec<ArrayItemsObject> = recursion('ArrayItemsObje
 		...BaseItemsObjectProps,
 		type: literal('array'),
 		items: ItemsObjectCodec,
+		collectionFormat: optionFromNullable(union([literal('csv'), literal('ssv'), literal('tsv'), literal('pipes')])),
 	}),
 );
 

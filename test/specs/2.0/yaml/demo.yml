@@ -8,6 +8,7 @@ paths:
       parameters:
         - $ref: '#/parameters/PathParam'
         - $ref: '#/parameters/QueryParam'
+        - $ref: '#/parameters/CSVQueryParam'
         - name: inlinePathParam
           in: path
           required: true
@@ -20,6 +21,22 @@ paths:
           in: query
           type: string
           format: date-time
+        - name: bodyParam
+          in: body
+          schema:
+            $ref: '#/definitions/local'
+        - name: inlineQueryArrayParam
+          in: query
+          required: true
+          type: array
+          items:
+            type: string
+        - name: inlineQueryMultiParam
+          in: query
+          type: array
+          items:
+            type: integer
+          collectionFormat: multi
       operationId: test
       responses:
         200:
@@ -55,6 +72,8 @@ paths:
   /shared-path-item:
     $ref: '../../arbitrary.yml#/SharedPathItem'
 definitions:
+  Id:
+    type: integer
   local:
     type: object
     required:
@@ -96,6 +115,12 @@ parameters:
     name: queryParam
     in: query
     type: number
+  CSVQueryParam:
+    name: csvQueryParam
+    in: query
+    type: array
+    items:
+      type: integer
   HeaderParam:
     name: headerParam
     in: header

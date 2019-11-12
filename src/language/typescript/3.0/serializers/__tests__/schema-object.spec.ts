@@ -3,7 +3,7 @@ import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
 	getSerializedObjectType,
-	getSerializedPropertyType,
+	getSerializedOptionPropertyType,
 	getSerializedRecursiveType,
 	getSerializedRefType,
 } from '../../../common/data/serialized-type';
@@ -90,7 +90,7 @@ describe('SchemaObject', () => {
 							ref,
 							getSerializedRefType(ref),
 							getSerializedArrayType(undefined),
-							getSerializedPropertyType('children', true),
+							getSerializedOptionPropertyType('children', true),
 							getSerializedObjectType(undefined),
 							getSerializedRecursiveType(ref, true),
 						);
@@ -130,9 +130,9 @@ describe('SchemaObject', () => {
 						const expected = pipe(
 							ref,
 							getSerializedRefType(ref),
-							getSerializedPropertyType('self', true),
+							getSerializedOptionPropertyType('self', true),
 							getSerializedObjectType(undefined),
-							getSerializedPropertyType('children', true),
+							getSerializedOptionPropertyType('children', true),
 							getSerializedObjectType(undefined),
 							getSerializedRecursiveType(ref, true),
 						);

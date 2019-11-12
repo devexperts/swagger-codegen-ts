@@ -116,3 +116,6 @@ export const nonEmptySetFromArray = <C extends Mixed>(
 
 export type JSONPrimitive = string | number | boolean | null;
 export const JSONPrimitiveCodec: Codec<JSONPrimitive> = union([string, number, boolean, iotsNull]);
+
+export const split = (separator: string): Type<string[], string, string> =>
+	new Type('Split', (u): u is string[] => string.is(u), u => t.success(u.split(separator)), as => as.join(separator));

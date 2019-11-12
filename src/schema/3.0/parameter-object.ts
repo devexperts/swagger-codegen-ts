@@ -6,12 +6,23 @@ import { Option } from 'fp-ts/lib/Option';
 import { Codec } from '../../utils/io-ts';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
 
+export type ParameterObjectStyle =
+	| 'matrix'
+	| 'label'
+	| 'form'
+	| 'simple'
+	| 'spaceDelimited'
+	| 'pipeDelimited'
+	| 'deepObject';
+
 export interface BaseParameterObject {
 	readonly name: string;
 	readonly description: Option<string>;
 	readonly deprecated: Option<boolean>;
 	readonly schema: Option<ReferenceObject | SchemaObject>;
 	readonly content: Option<Record<string, MediaTypeObject>>;
+	readonly explode: Option<boolean>;
+	readonly style: Option<ParameterObjectStyle>;
 }
 const BaseParameterObjectCodecProps = {
 	name: string,
@@ -19,6 +30,18 @@ const BaseParameterObjectCodecProps = {
 	deprecated: optionFromNullable(boolean),
 	schema: optionFromNullable(union([ReferenceObjectCodec, SchemaObjectCodec])),
 	content: optionFromNullable(record(string, MediaTypeObjectCodec)),
+	explode: optionFromNullable(boolean),
+	style: optionFromNullable(
+		union([
+			literal('matrix'),
+			literal('label'),
+			literal('form'),
+			literal('simple'),
+			literal('spaceDelimited'),
+			literal('pipeDelimited'),
+			literal('deepObject'),
+		]),
+	),
 };
 
 export interface PathParameterObject extends BaseParameterObject {

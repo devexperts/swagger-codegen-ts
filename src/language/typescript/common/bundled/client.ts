@@ -5,6 +5,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 export const clientRef = fromString('#/client/client');
 
+//TODO: make WebSocketChannelRequest.query a string after https://github.com/asyncapi/asyncapi/issues/294
 const client = `
 	import { HKT, Kind, Kind2, URIS, URIS2 } from 'fp-ts/lib/HKT';
 	import { MonadThrow, MonadThrow1, MonadThrow2 } from 'fp-ts/lib/MonadThrow';
@@ -15,7 +16,7 @@ const client = `
 	export interface Request {
 		readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 		readonly url: string;
-		readonly query?: object;
+		readonly query?: string;
 		readonly body?: unknown;
 	}
 	

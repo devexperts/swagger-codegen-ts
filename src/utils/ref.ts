@@ -1,7 +1,8 @@
 import * as path from 'path';
-import { isNonEmpty } from 'fp-ts/lib/Array';
+import { isNonEmpty, uniq } from 'fp-ts/lib/Array';
 import { last, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { Either, left, right } from 'fp-ts/lib/Either';
+import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
 
 export interface Ref<R extends string = string> {
 	readonly $ref: string;
@@ -9,6 +10,13 @@ export interface Ref<R extends string = string> {
 	readonly path: string;
 	readonly target: string;
 }
+export const eqRef: Eq<Ref> = getStructEq({
+	$ref: eqString,
+	name: eqString,
+	path: eqString,
+	target: eqString,
+});
+export const uniqRefs = uniq(eqRef);
 
 export const fromString = <R extends string>($ref: R): Either<Error, Ref<R>> => {
 	let target = '';

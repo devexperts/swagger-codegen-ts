@@ -5,7 +5,7 @@ import {
 	getSerializedDictionaryType,
 	getSerializedIntersectionType,
 	getSerializedObjectType,
-	getSerializedPropertyType,
+	getSerializedOptionPropertyType,
 	getSerializedRecursiveType,
 	getSerializedRefType,
 	getSerializedUnionType,
@@ -188,7 +188,7 @@ const serializeProperties = (
 
 					return pipe(
 						serialized,
-						either.map(getSerializedPropertyType(name, isRequired)),
+						either.map(getSerializedOptionPropertyType(name, isRequired)),
 					);
 				}),
 				sequenceEither,
