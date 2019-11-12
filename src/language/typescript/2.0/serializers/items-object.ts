@@ -1,26 +1,40 @@
 import { ItemsObject } from '../../../../schema/2.0/items-object';
 import {
 	getSerializedArrayType,
+	getSerializedIntegerType,
+	getSerializedStringType,
 	SERIALIZED_BOOLEAN_TYPE,
 	SERIALIZED_NUMBER_TYPE,
-	SERIALIZED_STRING_TYPE,
 	SerializedType,
 } from '../../common/data/serialized-type';
+import { Ref } from '../../../../utils/ref';
+import { utilsRef } from '../../common/bundled/utils';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { either } from 'fp-ts';
+import { Either, right } from 'fp-ts/lib/Either';
 
-export const serializeItemsObject = (itemsObject: ItemsObject): SerializedType => {
+export const serializeItemsObject = (from: Ref, itemsObject: ItemsObject): Either<Error, SerializedType> => {
 	switch (itemsObject.type) {
 		case 'array': {
-			return getSerializedArrayType()(serializeItemsObject(itemsObject.items));
+			return pipe(
+				serializeItemsObject(from, itemsObject.items),
+				either.map(getSerializedArrayType()),
+			);
 		}
 		case 'string': {
-			return SERIALIZED_STRING_TYPE;
+			return right(getSerializedStringType(itemsObject.format));
 		}
-		case 'number':
+		case 'number': {
+			return right(SERIALIZED_NUMBER_TYPE);
+		}
 		case 'integer': {
-			return SERIALIZED_NUMBER_TYPE;
+			return pipe(
+				utilsRef,
+				either.map(utilsRef => getSerializedIntegerType(from, utilsRef)),
+			);
 		}
 		case 'boolean': {
-			return SERIALIZED_BOOLEAN_TYPE;
+			return right(SERIALIZED_BOOLEAN_TYPE);
 		}
 	}
 };

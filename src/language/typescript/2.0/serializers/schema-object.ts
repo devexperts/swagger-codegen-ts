@@ -5,7 +5,7 @@ import {
 	SERIALIZED_UNKNOWN_TYPE,
 	serializedType,
 	SerializedType,
-	getSerializedPropertyType,
+	getSerializedOptionPropertyType,
 	intercalateSerializedTypes,
 	getSerializedObjectType,
 	getSerializedRecursiveType,
@@ -106,7 +106,7 @@ const serializeSchemaObjectWithRecursion = (
 								);
 								return pipe(
 									serializeSchemaObjectWithRecursion(from, value, false),
-									either.map(getSerializedPropertyType(name, isRequired)),
+									either.map(getSerializedOptionPropertyType(name, isRequired)),
 								);
 							}),
 							sequenceEither,

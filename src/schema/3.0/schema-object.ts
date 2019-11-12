@@ -40,7 +40,7 @@ export interface PrimitiveSchemaObject extends BaseSchemaObject {
 	readonly type: 'boolean' | 'string' | 'number' | 'integer';
 }
 
-const PrimitiveSchemaObjectCodec: Codec<PrimitiveSchemaObject> = intersection(
+export const PrimitiveSchemaObjectCodec: Codec<PrimitiveSchemaObject> = intersection(
 	[
 		BaseSchemaObjectCodec,
 		type({
@@ -58,7 +58,7 @@ export interface ObjectSchemaObject extends BaseSchemaObject {
 	readonly required: Option<string[]>;
 }
 
-const ObjectSchemaObjectCodec: Codec<ObjectSchemaObject> = recursion('ObjectSchemaObject', () =>
+export const ObjectSchemaObjectCodec: Codec<ObjectSchemaObject> = recursion('ObjectSchemaObject', () =>
 	intersection([
 		BaseSchemaObjectCodec,
 		type({
@@ -75,7 +75,7 @@ export interface ArraySchemaObject extends BaseSchemaObject {
 	readonly items: ReferenceObject | SchemaObject;
 }
 
-const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaObject', () =>
+export const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaObject', () =>
 	intersection([
 		BaseSchemaObjectCodec,
 		type({

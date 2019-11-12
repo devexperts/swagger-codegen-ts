@@ -6,8 +6,8 @@ import { fromRef } from '../../../../utils/fs';
 export const utilsRef = fromString('#/utils/utils');
 
 const utils = `
-	import { brand, Branded, intersection, number, Type } from 'io-ts';
-	
+	import { brand, Branded, intersection, number, string, success, Type } from 'io-ts';
+
 	export interface IntegerBrand {
 		readonly Integer: unique symbol;
 	}
@@ -32,6 +32,9 @@ const utils = `
 	
 	export type Natural = NonNegative & Integer;
 	export const natural: Type<Natural, number> = intersection([nonNegative, integer], 'Natural');
+	
+	export const split = (separator: string): Type<string[], string, string> =>
+		new Type('Split', (u): u is string[] => string.is(u), u => success(u.split(separator)), as => as.join(separator));
 `;
 
 export const utilsFile = pipe(

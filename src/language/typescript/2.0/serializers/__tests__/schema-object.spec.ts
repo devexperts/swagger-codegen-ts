@@ -3,7 +3,7 @@ import { $refArbitrary } from '../../../../../utils/__tests__/ref.spec';
 import {
 	getSerializedIntersectionType,
 	getSerializedObjectType,
-	getSerializedPropertyType,
+	getSerializedOptionPropertyType,
 	getSerializedRecursiveType,
 	getSerializedRefType,
 	SERIALIZED_STRING_TYPE,
@@ -33,7 +33,7 @@ describe('SchemaObject serializer', () => {
 						const expected = pipe(
 							ref,
 							getSerializedRefType(ref),
-							getSerializedPropertyType('recursive', true),
+							getSerializedOptionPropertyType('recursive', true),
 							getSerializedObjectType(),
 							getSerializedRecursiveType(ref, true),
 						);
@@ -67,9 +67,9 @@ describe('SchemaObject serializer', () => {
 						const expected = pipe(
 							ref,
 							getSerializedRefType(ref),
-							getSerializedPropertyType('recursive', true),
+							getSerializedOptionPropertyType('recursive', true),
 							getSerializedObjectType(),
-							getSerializedPropertyType('children', true),
+							getSerializedOptionPropertyType('children', true),
 							getSerializedObjectType(),
 							getSerializedRecursiveType(ref, true),
 						);
@@ -111,7 +111,7 @@ describe('SchemaObject serializer', () => {
 						const expected = pipe(
 							ref,
 							getSerializedRefType(ref),
-							getSerializedPropertyType('self', true),
+							getSerializedOptionPropertyType('self', true),
 							getSerializedObjectType(),
 							serialized => getSerializedIntersectionType([SERIALIZED_STRING_TYPE, serialized]),
 							getSerializedRecursiveType(ref, true),
@@ -153,9 +153,9 @@ describe('SchemaObject serializer', () => {
 						const expected = pipe(
 							ref,
 							getSerializedRefType(ref),
-							getSerializedPropertyType('self', true),
+							getSerializedOptionPropertyType('self', true),
 							getSerializedObjectType(),
-							getSerializedPropertyType('nested', true),
+							getSerializedOptionPropertyType('nested', true),
 							getSerializedObjectType(),
 							serialized => getSerializedIntersectionType([SERIALIZED_STRING_TYPE, serialized]),
 							getSerializedRecursiveType(ref, true),
