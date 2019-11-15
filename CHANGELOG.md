@@ -1,3 +1,22 @@
+# [2.0.0-alpha.5](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2019-11-15)
+
+
+### Features
+
+* query serialization support in swagger-2 and openapi-3 ([3203a63](https://github.com/devexperts/swagger-codegen-ts/commit/3203a63)), closes [#74](https://github.com/devexperts/swagger-codegen-ts/issues/74)
+* support format in primitive parameters in typescript-swagger-2 ([cf5cb6a](https://github.com/devexperts/swagger-codegen-ts/commit/cf5cb6a))
+
+
+### BREAKING CHANGES
+
+* operations now always treat query/body parameters as Option (no ?:)
+* HTTPClient.request now receives query already serialized to string according to spec
+* ArrayQueryParameterObject.items.type should be a primitive
+* SerializedType/SerialiedFragment/SerializedParameter now filter out repeating dependencies and refs on construction
+* operations now require format types (Integer, Date etc.)
+
+
+
 # [2.0.0-alpha.4](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2019-11-11)
 
 
