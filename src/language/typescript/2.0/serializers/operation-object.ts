@@ -47,10 +47,11 @@ import { Kind } from '../../../../utils/types';
 import {
 	combineFragmentsK,
 	getSerializedOptionCallFragment,
-	intercalateSerializedFragments,
+	intercalateSerializedFragmentsNEA,
 	serializedFragment,
 	SerializedFragment,
 } from '../../common/data/serialized-fragment';
+import { sequenceOptionEither } from '../../../../utils/option';
 
 interface Parameters {
 	readonly pathParameters: PathParameterObject[];
@@ -192,13 +193,13 @@ const getParameters = combineReader(
 					either.map(serialized => getSerializedOptionalType(required, serialized)),
 				);
 			}),
-			option.option.sequence(either.either),
+			sequenceOptionEither,
 		);
 
 		const queryString = pipe(
 			nonEmptyArray.fromArray(queryStringFragments),
 			option.map(queryStringFragments =>
-				intercalateSerializedFragments(serializedFragment(',', [], []), queryStringFragments),
+				intercalateSerializedFragmentsNEA(serializedFragment(',', [], []), queryStringFragments),
 			),
 			option.map(f =>
 				combineFragmentsK(f, c =>

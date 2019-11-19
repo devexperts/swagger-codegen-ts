@@ -29,7 +29,8 @@ export const monoidSerializedFragment: Monoid<SerializedFragment> = getStructMon
 	refs: getMonoid<Ref>(),
 });
 
-export const intercalateSerializedFragments = intercalate(monoidSerializedFragment, nonEmptyArray);
+export const intercalateSerializedFragmentsNEA = intercalate(monoidSerializedFragment, nonEmptyArray);
+export const intercalateSerializedFragments = intercalate(monoidSerializedFragment, array.array);
 export const foldSerializedFragments = fold(monoidSerializedFragment);
 
 export function combineFragments(a: SerializedFragment, p: (a: string) => string): SerializedFragment;
@@ -142,3 +143,5 @@ export const getSerializedOptionCallFragment = (
 			  )
 			: serializedFragment(`some((${fn})(${a}))`, [serializedDependency('some', 'fp-ts/lib/Option')], []),
 	);
+
+export const commaFragment = serializedFragment(', ', [], []);

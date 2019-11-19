@@ -44,7 +44,7 @@ import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
 import { ask } from 'fp-ts/lib/Reader';
 import {
 	combineFragmentsK,
-	intercalateSerializedFragments,
+	intercalateSerializedFragmentsNEA,
 	serializedFragment,
 	SerializedFragment,
 } from '../../common/data/serialized-fragment';
@@ -217,7 +217,7 @@ const getParameters = combineReader(
 		const serializedQueryString = pipe(
 			nonEmptyArray.fromArray(queryStringFragments),
 			option.map(queryStringFragments =>
-				intercalateSerializedFragments(serializedFragment(',', [], []), queryStringFragments),
+				intercalateSerializedFragmentsNEA(serializedFragment(',', [], []), queryStringFragments),
 			),
 			option.map(f =>
 				combineFragmentsK(f, c =>
