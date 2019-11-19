@@ -8,6 +8,8 @@ import { Either, isLeft } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { reportIfFailed } from './utils/io-ts';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
+import { FileFormatCodec } from './schema/sketch-121/file-format';
+import { sketchParser } from './parsers/sketch';
 
 export interface GenerateOptions<A> {
 	readonly out: string;
@@ -36,20 +38,24 @@ export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, vo
 			dereference: {
 				circular: 'ignore',
 			},
+			parse: {
+				sketch: sketchParser,
+			},
 		});
 
 		const specs: Record<string, A> = pipe(
 			Object.entries($refs.values()),
-			array.reduce({}, (acc, [fullPath, spec]) => {
+			array.reduce({}, (acc, [fullPath, schema]) => {
+				const isRoot = fullPath === spec;
 				const relative = path.relative(cwd, fullPath);
-				const specLike = specLikeCodec.decode(spec);
-				if (isLeft(specLike)) {
+				// skip specLike check for root because it should always be decoded with passed decoder and fail
+				if (!isRoot && isLeft(specLikeCodec.decode(schema))) {
 					log('Unable to decode', relative, 'as spec. Treat it as an arbitrary json.');
 					// this is not a spec - treat as arbitrary json
 					return acc;
 				}
 				// use getUnsafe to fail fast if unable to decode a spec
-				const decoded = getUnsafe(reportIfFailed(options.decoder.decode(spec)));
+				const decoded = getUnsafe(reportIfFailed(options.decoder.decode(schema)));
 				log('Decoded', relative);
 				return {
 					...acc,
@@ -78,4 +84,5 @@ const specLikeCodec = union([
 	type({
 		asyncapi: literal('2.0.0'),
 	}),
+	FileFormatCodec,
 ]);

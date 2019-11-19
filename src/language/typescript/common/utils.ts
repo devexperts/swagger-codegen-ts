@@ -64,3 +64,6 @@ export const getKindValue = (kind: Kind, value: string): string => {
 };
 
 export const getControllerName = (name: string): string => `${name}Controller`;
+
+export const getSafePropertyName = (value: string): string =>
+	value.replace(/[^a-zA-Z_0-9]/g, '_').replace(/^(\d)/, '_$1');

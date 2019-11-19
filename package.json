@@ -33,8 +33,12 @@
   },
   "dependencies": {
     "@devexperts/utils": "^1.0.0-alpha.2",
+    "@types/adm-zip": "^0.4.32",
+    "@types/color": "^3.0.0",
     "@types/fs-extra": "^8.0.0",
     "@types/prettier": "^1.13.2",
+    "adm-zip": "^0.4.13",
+    "color": "^3.1.2",
     "fs-extra": "^8.1.0",
     "json-schema-ref-parser": "^7.1.1",
     "prettier": "^1.15.3"

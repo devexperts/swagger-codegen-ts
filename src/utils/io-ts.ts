@@ -5,6 +5,7 @@ import {
 	brand,
 	Branded,
 	Context,
+	failure,
 	intersection,
 	Mixed,
 	null as iotsNull,
@@ -14,6 +15,7 @@ import {
 	RecordC,
 	string,
 	StringC,
+	success,
 	Type,
 	TypeOf,
 	union,
@@ -117,5 +119,34 @@ export const nonEmptySetFromArray = <C extends Mixed>(
 export type JSONPrimitive = string | number | boolean | null;
 export const JSONPrimitiveCodec: Codec<JSONPrimitive> = union([string, number, boolean, iotsNull]);
 
-export const split = (separator: string): Type<string[], string, string> =>
-	new Type('Split', (u): u is string[] => string.is(u), u => t.success(u.split(separator)), as => as.join(separator));
+export interface FractionBrand {
+	readonly Fraction: unique symbol;
+}
+export type Fraction = Branded<number, FractionBrand>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const fraction = brand(number, (n): n is Fraction => true, 'Fraction');
+export const fractionFromPercentage = (a: Percentage): Either<Error, Fraction> =>
+	reportIfFailed(fraction.decode(a / 100));
+
+export interface PercentageBrand {
+	readonly Percentage: unique symbol;
+}
+export type Percentage = Branded<number, PercentageBrand>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const percentage = brand(number, (n): n is Percentage => true, 'Percentage');
+export const percentageFromFraction = (a: Fraction): Either<Error, Percentage> =>
+	reportIfFailed(percentage.decode(a * 100));
+
+type LiteralValue = string | number | boolean;
+
+export const mapper = <A extends LiteralValue, O extends LiteralValue>(
+	decoded: A,
+	encoded: O,
+	name: string = `${decoded} <-> ${encoded}`,
+) =>
+	new Type(
+		name,
+		(u): u is A => u === decoded,
+		(u, c) => (u === encoded ? success(decoded) : failure(u, c)),
+		() => encoded,
+	);

@@ -9,5 +9,8 @@
   },
   "exclude": [
     "dist"
+  ],
+  "include": [
+    "test/index.ts"
   ]
 }
