@@ -36,7 +36,7 @@ export const serializeStyle = (style: Style): Either<Error, string> => {
 			pipe(
 				fills,
 				nonEmptyArray.map(fill => serializeColor(fill.color)),
-				colors => `backgroundColor: ${JSON.stringify(colors.join(', '))}`,
+				colors => `backgroundColor: '${colors.join(', ')}'`,
 			),
 		),
 	);
@@ -48,7 +48,7 @@ export const serializeStyle = (style: Style): Either<Error, string> => {
 				fills,
 				nonEmptyArray.map(fill => serializeGradient(fill.gradient)),
 				nonEmptyArray.nonEmptyArray.sequence(either.either),
-				either.map(gradients => `backgroundImage: ${JSON.stringify(gradients.join(', '))}`),
+				either.map(gradients => `backgroundImage: '${gradients.join(', ')}'`),
 			),
 		),
 		sequenceOptionEither,
@@ -58,19 +58,19 @@ export const serializeStyle = (style: Style): Either<Error, string> => {
 		option.map(array.filterMap(fill => option.fromEither(getBackgroundBlendMode(fill.contextSettings.blendMode)))),
 		option.chain(array.last),
 		option.filter(mode => mode !== 'normal'),
-		option.map(mode => `backgroundBlendMode: ${JSON.stringify(mode)}`),
+		option.map(mode => `backgroundBlendMode: '${mode}'`),
 	);
 	const mixBlendMode = pipe(
 		style.contextSettings,
 		option.chain(settings => option.fromEither(getMixBlendMode(settings.blendMode))),
 		option.filter(mode => mode !== 'normal'),
-		option.map(mode => `mixBlendMode: ${JSON.stringify(mode)}`),
+		option.map(mode => `mixBlendMode: '${mode}'`),
 	);
 	const opacity = pipe(
 		style.contextSettings,
 		option.map(settings => settings.opacity),
 		option.filter(n => n !== 1),
-		option.map(opacity => `opacity: ${JSON.stringify(opacity)}`),
+		option.map(opacity => `opacity: '${opacity}'`),
 	);
 
 	const border = pipe(
@@ -91,7 +91,7 @@ export const serializeStyle = (style: Style): Either<Error, string> => {
 				]),
 			),
 		]),
-		option.map(shadows => `boxShadow: ${JSON.stringify(shadows.join(', '))}`),
+		option.map(shadows => `boxShadow: '${shadows.join(', ')}'`),
 	);
 
 	const textStyle = pipe(
