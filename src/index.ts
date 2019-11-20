@@ -8,7 +8,7 @@ import { Either, isLeft } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { reportIfFailed } from './utils/io-ts';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
-import { sketchParser } from './parsers/sketch';
+import { sketchParser121 } from './parsers/sketch-121';
 
 export interface GenerateOptions<A> {
 	readonly out: string;
@@ -38,7 +38,7 @@ export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, vo
 				circular: 'ignore',
 			},
 			parse: {
-				sketch: sketchParser,
+				sketch: sketchParser121,
 			},
 		});
 

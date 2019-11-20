@@ -5,7 +5,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 
 const log = (...args: unknown[]): void => console.log('[SKETCH-PARSER]:', ...args);
 
-export const sketchParser = {
+export const sketchParser121 = {
 	order: 90,
 	allowEmpty: false,
 	canParse: (file: FileInfo): boolean => file.extension === 'sketch',
