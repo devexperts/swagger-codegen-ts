@@ -8,7 +8,6 @@ import { Either, isLeft } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { reportIfFailed } from './utils/io-ts';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
-import { FileFormatCodec } from './schema/sketch-121/file-format';
 import { sketchParser } from './parsers/sketch';
 
 export interface GenerateOptions<A> {
