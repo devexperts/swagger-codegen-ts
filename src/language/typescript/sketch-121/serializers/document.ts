@@ -11,6 +11,7 @@ import { traverseNEAEither } from '../../../../utils/either';
 import { sequenceOptionEither } from '../../../../utils/option';
 import { serializeForeignTextStyle } from './objects/foreign-text-style';
 import { Option } from 'fp-ts/lib/Option';
+import { file, fragment, FSEntity } from '../../../../utils/fs';
 
 export const serializeDocument = combineReader(
 	serializeSharedStyleContainer,
@@ -22,30 +23,14 @@ export const serializeDocument = combineReader(
 		serializeSharedTextStyleContainer,
 		serializeForeignLayerStyle,
 		serializeForeignTextStyle,
-	) => (document: Document): Either<Error, Option<string>> => {
+	) => (document: Document): Either<Error, Option<FSEntity>> => {
 		const layerStyles = pipe(
 			serializeSharedStyleContainer(document.layerStyles),
-			either.map(
-				option.map(
-					styles => `
-						//#region Layer Styles
-						${styles}
-						//#endregion
-					`,
-				),
-			),
+			either.map(option.map(content => file('layer-styles.ts', content))),
 		);
 		const layerTextStyles = pipe(
 			serializeSharedTextStyleContainer(document.layerTextStyles),
-			either.map(
-				option.map(
-					styles => `
-						//#region Layer Text Styles
-						${styles}
-						//#endregion
-					`,
-				),
-			),
+			either.map(option.map(content => file('layer-text-styles.ts', content))),
 		);
 
 		const foreignLayerStyles = pipe(
@@ -53,13 +38,7 @@ export const serializeDocument = combineReader(
 			option.map(styles =>
 				pipe(
 					traverseNEAEither(styles, serializeForeignLayerStyle),
-					either.map(
-						styles => `
-							//#region Foreign Layer Styles
-							${styles.join('')}
-							//#endregion
-						`,
-					),
+					either.map(styles => file('foreign-layer-styles.ts', styles.join(''))),
 				),
 			),
 			sequenceOptionEither,
@@ -69,13 +48,7 @@ export const serializeDocument = combineReader(
 			option.map(styles =>
 				pipe(
 					traverseNEAEither(styles, serializeForeignTextStyle),
-					either.map(
-						styles => `
-							//#region Foreign Text Styles
-							${styles.join('')}
-							//#endregion
-						`,
-					),
+					either.map(styles => file('foreign-text-styles.ts', styles.join(''))),
 				),
 			),
 			sequenceOptionEither,
@@ -86,14 +59,13 @@ export const serializeDocument = combineReader(
 			layerTextStyles,
 			foreignLayerStyles,
 			foreignTextStyles,
-			(layerStyles, layerTextStyles, foreignLayerStyles, foreignTextStyles) => {
-				return pipe(
+			(layerStyles, layerTextStyles, foreignLayerStyles, foreignTextStyles) =>
+				pipe(
 					nonEmptyArray.fromArray(
 						array.compact([layerStyles, layerTextStyles, foreignLayerStyles, foreignTextStyles]),
 					),
-					option.map(content => content.join('')),
-				);
-			},
+					option.map(fragment),
+				),
 		);
 	},
 );
