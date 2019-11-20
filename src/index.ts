@@ -84,5 +84,9 @@ const specLikeCodec = union([
 	type({
 		asyncapi: literal('2.0.0'),
 	}),
-	FileFormatCodec,
+	type({
+		meta: type({
+			version: literal(121),
+		}),
+	}),
 ]);
