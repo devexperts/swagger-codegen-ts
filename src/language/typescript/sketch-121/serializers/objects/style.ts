@@ -70,7 +70,7 @@ export const serializeStyle = (style: Style): Either<Error, string> => {
 		style.contextSettings,
 		option.map(settings => settings.opacity),
 		option.filter(n => n !== 1),
-		option.map(opacity => `opacity: ${opacity}`),
+		option.map(opacity => `opacity: ${JSON.stringify(opacity)}`),
 	);
 
 	const border = pipe(
