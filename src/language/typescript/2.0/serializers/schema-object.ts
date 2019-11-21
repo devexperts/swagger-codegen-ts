@@ -111,7 +111,7 @@ const serializeSchemaObjectWithRecursion = (
 							}),
 							sequenceEither,
 							either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
-							either.map(getSerializedObjectType()),
+							either.map(getSerializedObjectType(from.name)),
 							either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 						),
 					),

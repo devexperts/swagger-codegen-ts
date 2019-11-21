@@ -34,7 +34,7 @@ describe('SchemaObject serializer', () => {
 							ref,
 							getSerializedRefType(ref),
 							getSerializedOptionPropertyType('recursive', true),
-							getSerializedObjectType(),
+							getSerializedObjectType(ref.name),
 							getSerializedRecursiveType(ref, true),
 						);
 						const serialized = pipe(
@@ -68,9 +68,9 @@ describe('SchemaObject serializer', () => {
 							ref,
 							getSerializedRefType(ref),
 							getSerializedOptionPropertyType('recursive', true),
-							getSerializedObjectType(),
+							getSerializedObjectType(ref.name),
 							getSerializedOptionPropertyType('children', true),
-							getSerializedObjectType(),
+							getSerializedObjectType(ref.name),
 							getSerializedRecursiveType(ref, true),
 						);
 						const serialized = pipe(
@@ -112,7 +112,7 @@ describe('SchemaObject serializer', () => {
 							ref,
 							getSerializedRefType(ref),
 							getSerializedOptionPropertyType('self', true),
-							getSerializedObjectType(),
+							getSerializedObjectType(ref.name),
 							serialized => getSerializedIntersectionType([SERIALIZED_STRING_TYPE, serialized]),
 							getSerializedRecursiveType(ref, true),
 						);
@@ -154,9 +154,9 @@ describe('SchemaObject serializer', () => {
 							ref,
 							getSerializedRefType(ref),
 							getSerializedOptionPropertyType('self', true),
-							getSerializedObjectType(),
+							getSerializedObjectType(ref.name),
 							getSerializedOptionPropertyType('nested', true),
-							getSerializedObjectType(),
+							getSerializedObjectType(ref.name),
 							serialized => getSerializedIntersectionType([SERIALIZED_STRING_TYPE, serialized]),
 							getSerializedRecursiveType(ref, true),
 						);
