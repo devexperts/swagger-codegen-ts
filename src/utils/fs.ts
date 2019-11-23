@@ -45,8 +45,9 @@ export type FSEntity = File | Directory | Fragment;
 export const write = async (destination: string, entity: FSEntity): Promise<void> => {
 	switch (entity.type) {
 		case 'FILE': {
-			const filePath = path.resolve(destination, entity.name);
-			await fs.writeFile(filePath, entity.content);
+			const normalizedEntityName = normalizeFilePath(entity.name);
+			const filePath = path.resolve(destination, normalizedEntityName);
+			await fs.outputFile(filePath, entity.content);
 			break;
 		}
 		case 'DIRECTORY': {
@@ -98,3 +99,6 @@ const flatten = (entities: FSEntity[]): FSEntity[] =>
 		(acc, entity) => (entity.type === 'FRAGMENT' ? acc.concat(...entity.content) : acc.concat(entity)),
 		array.array.zero<FSEntity>(),
 	);
+
+const normalizeFilePath = (filePath: string): string =>
+	filePath.startsWith(path.sep) ? normalizeFilePath(filePath.slice(1)) : filePath;
