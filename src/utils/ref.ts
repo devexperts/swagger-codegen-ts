@@ -86,7 +86,9 @@ export const getRelativePath = (from: Ref, to: Ref): string => {
 	const toSelf = path.relative(path.dirname(from.path), '/');
 	const toRoot = to.target === '' ? toSelf : path.join('..', toSelf);
 	const joined = path.join(toRoot, to.target, to.path);
-	return joined.startsWith('..') ? joined : `./${joined}`;
+	const joinedWithProperSeparator =
+		path.sep === path.posix.sep ? joined : joined.split(path.sep).join(path.posix.sep);
+	return joinedWithProperSeparator.startsWith('..') ? joinedWithProperSeparator : `./${joinedWithProperSeparator}`;
 };
 
 export const getFullPath = (ref: Ref): string => path.join(ref.target, ref.path);
