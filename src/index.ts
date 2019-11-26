@@ -84,6 +84,7 @@ const specLikeCodec = union([
 		asyncapi: literal('2.0.0'),
 	}),
 	type({
+		// sketch-like structure
 		meta: type({
 			version: literal(121),
 		}),
