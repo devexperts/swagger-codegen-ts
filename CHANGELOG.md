@@ -1,3 +1,18 @@
+# [2.0.0-alpha.6](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2019-11-26)
+
+
+### Bug Fixes
+
+* support windows os environment ([3ef7cb0](https://github.com/devexperts/swagger-codegen-ts/commit/3ef7cb0))
+
+
+### Features
+
+* sketch file format ([51fa6c6](https://github.com/devexperts/swagger-codegen-ts/commit/51fa6c6)), closes [#76](https://github.com/devexperts/swagger-codegen-ts/issues/76)
+* type codec names for swagger 2.0 ([652f864](https://github.com/devexperts/swagger-codegen-ts/commit/652f864))
+
+
+
 # [2.0.0-alpha.5](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2019-11-15)
 
 
