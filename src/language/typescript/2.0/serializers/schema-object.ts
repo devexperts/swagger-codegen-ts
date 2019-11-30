@@ -34,6 +34,7 @@ import { traverseNEAEither } from '../../../../utils/either';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/2.0/reference-object';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { utilsRef } from '../../common/bundled/utils';
+import { makeNormalizedName } from '../../common/normalized-name';
 
 export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<Error, SerializedType> =>
 	serializeSchemaObjectWithRecursion(from, schema, true);
@@ -111,7 +112,7 @@ const serializeSchemaObjectWithRecursion = (
 							}),
 							sequenceEither,
 							either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
-							either.map(getSerializedObjectType(from.name)),
+							either.map(getSerializedObjectType(makeNormalizedName(from.name))),
 							either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 						),
 					),

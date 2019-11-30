@@ -38,6 +38,7 @@ import { constFalse } from 'fp-ts/lib/function';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { Option } from 'fp-ts/lib/Option';
 import { utilsRef } from '../../common/bundled/utils';
+import { makeNormalizedName } from '../../common/normalized-name';
 
 export const serializeSchemaObject = (
 	from: Ref,
@@ -193,7 +194,7 @@ const serializeProperties = (
 				}),
 				sequenceEither,
 				either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
-				either.map(getSerializedObjectType(name)),
+				either.map(getSerializedObjectType(name !== undefined ? makeNormalizedName(name) : undefined)),
 				either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 			),
 		),

@@ -36,6 +36,7 @@ import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/re
 import { traverseNEAEither } from '../../../../utils/either';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { utilsRef } from '../../common/bundled/utils';
+import { makeNormalizedName } from '../../common/normalized-name';
 
 type AdditionalProperties = boolean | ReferenceObject | SchemaObject;
 type AllowedAdditionalProperties = true | ReferenceObject | SchemaObject;
@@ -163,7 +164,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 						}),
 						sequenceEither,
 						either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
-						either.map(getSerializedObjectType(name)),
+						either.map(getSerializedObjectType(name !== undefined ? makeNormalizedName(name) : undefined)),
 						either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 					),
 				),

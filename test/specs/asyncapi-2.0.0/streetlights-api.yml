@@ -51,6 +51,7 @@ channels:
           - $ref: '#/components/schemas/Id'
           - $ref: '#/components/schemas/Lumens'
           - $ref: '#/components/schemas/SentAt'
+          - $ref: '#/components/schemas/Error'
 
 components:
   messages:
@@ -66,6 +67,11 @@ components:
           $ref: '#/components/schemas/Id'
         lumens:
           $ref: '#/components/schemas/Lumens'
+        sentAt:
+          $ref: '#/components/schemas/SentAt'
+    Error:
+      type: object
+      properties:
         sentAt:
           $ref: '#/components/schemas/SentAt'
     Id:

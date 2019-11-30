@@ -58,6 +58,24 @@ paths:
             $ref: '#/responses/IllegalInput'
           500:
             $ref: '#/responses/GeneralErrorResponse'
+    delete:
+      tags:
+      - test
+      summary: Check support of invalid names
+      description: ''
+      operationId: checkSupportOfInvalidNames
+      parameters:
+      - in: body
+        name: body
+        description: test description
+        required: false
+        schema:
+          type: object
+      responses:
+        '200':
+          description: success
+          schema:
+            '$ref': './common.yml#/definitions/Error'
     parameters:
       - $ref: '#/parameters/PathParam'
       - $ref: '#/parameters/QueryParam'

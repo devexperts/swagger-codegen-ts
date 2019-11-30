@@ -5,15 +5,18 @@ import { fromString } from '../../../utils/ref';
 import { ReferenceObject } from '../../../schema/3.0/reference-object';
 import { Kind } from '../../../utils/types';
 import { ask } from 'fp-ts/lib/Reader';
+import { NormalizedName } from './normalized-name';
+import { serializeDependencies } from './data/serialized-dependency';
+import { SerializedType } from './data/serialized-type';
 
 export const SUCCESSFUL_CODES = ['200', '201', 'default'];
 export const CONTROLLERS_DIRECTORY = 'controllers';
 export const DEFINITIONS_DIRECTORY = 'definitions';
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
-const INVALID_NAMES = ['Error', 'Promise', 'PromiseLike', 'Array', 'ArrayLike', 'Function', 'Object'];
-export const getTypeName = (name: string): string => (INVALID_NAMES.includes(name) ? `${name}Type` : name);
-export const getIOName = (name: string): string => `${name}IO`;
+export const getIOName = (name: NormalizedName): string => `${name}IO`;
+export const getTypeName = (name: NormalizedName): string => name;
+export const getFileName = (name: NormalizedName): string => `${name}.ts`;
 export const getURL = (pattern: string, pathParameters: SerializedPathParameter[]): string =>
 	pathParameters.reduce(
 		(acc, p) => acc.replace(`{${p.name}}`, `\$\{encodeURIComponent(${p.io}.toString())\}`),
@@ -67,3 +70,15 @@ export const getControllerName = (name: string): string => `${name}Controller`;
 
 export const getSafePropertyName = (value: string): string =>
 	value.replace(/[^a-zA-Z_0-9]/g, '_').replace(/^(\d)/, '_$1') || '_';
+
+export const getTypeFileContent = (name: NormalizedName, serialized: SerializedType): string => {
+	const dependencies = serializeDependencies(serialized.dependencies);
+	const content = `
+		${dependencies}
+			
+		export type ${getTypeName(name)} = ${serialized.type};
+		export const ${getIOName(name)} = ${serialized.io};
+	`;
+
+	return content;
+};

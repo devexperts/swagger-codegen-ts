@@ -19,6 +19,7 @@ import { none, some } from 'fp-ts/lib/Option';
 import { getIOName, getTypeName } from '../../utils';
 import { when } from '../../../../../utils/string';
 import { head } from 'fp-ts/lib/NonEmptyArray';
+import { makeNormalizedName } from '../../normalized-name';
 
 const serializedDependencyArbitrary = tuple(string(), string()).map(([name, path]) => serializedDependency(name, path));
 
@@ -88,8 +89,8 @@ describe('SerializedType', () => {
 				property(refs, refs => {
 					const { from, to } = refs;
 					const serialized = getSerializedRefType(from)(to);
-					const type = getTypeName(to.name);
-					const io = getIOName(to.name);
+					const type = getTypeName(makeNormalizedName(to.name));
+					const io = getIOName(makeNormalizedName(to.name));
 					const p = getRelativePath(from, to);
 
 					const expected = serializedType(
@@ -106,8 +107,8 @@ describe('SerializedType', () => {
 		it('should skip self-reference dependencies', () => {
 			assert(
 				property($refArbitrary, ref => {
-					const type = getTypeName(ref.name);
-					const io = getIOName(ref.name);
+					const type = getTypeName(makeNormalizedName(ref.name));
+					const io = getIOName(makeNormalizedName(ref.name));
 					const expected = serializedType(type, io, [], [ref]);
 					const serialized = getSerializedRefType(ref)(ref);
 					expect(serialized).toEqual(expected);
@@ -118,7 +119,8 @@ describe('SerializedType', () => {
 	it('getSerializedObjectType', () => {
 		assert(
 			property(serializedTypeArbitrary, oneof(string(), constant(undefined)), (s, name) => {
-				expect(getSerializedObjectType(name)(s)).toEqual(
+				const normalizedName = name !== undefined ? makeNormalizedName(name) : undefined;
+				expect(getSerializedObjectType(normalizedName)(s)).toEqual(
 					serializedType(
 						`{ ${s.type} }`,
 						`type({ ${s.io} }${when(name !== undefined, `, '${name}'`)})`,

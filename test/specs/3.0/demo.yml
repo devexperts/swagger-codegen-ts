@@ -3,6 +3,37 @@ info:
   version: 1.0.0
   title: Swagger Petstore
 paths:
+  /test/invalidNames/:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/PathParam'
+        - $ref: '#/components/parameters/QueryParam'
+        - name: inlinePathParam
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: inlineQueryParam
+          in: query
+          required: true
+          schema:
+            type: number
+      requestBody:
+        description: inline request body
+        content:
+          application/json:
+            schema:
+              type: string
+      operationId: checkSupportOfInvalidNames
+      responses:
+        200:
+          $ref: '#/components/responses/Error'
+        404:
+          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        500:
+          $ref: '#/components/responses/Error'
   /test/{pathParam}/${inlinePathParam}:
     get:
       parameters:
@@ -79,6 +110,8 @@ components:
   responses:
     Successful:
       $ref: './arbitrary.yml#/responses/Successful'
+    Error:
+      description: Error
     NotFound:
       description: Entity not found.
     IllegalInput:

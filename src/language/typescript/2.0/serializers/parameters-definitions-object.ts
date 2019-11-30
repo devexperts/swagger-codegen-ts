@@ -5,10 +5,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { either, record } from 'fp-ts';
 import { ParameterObject } from '../../../../schema/2.0/parameter-object';
 import { addPathParts, Ref } from '../../../../utils/ref';
-import { serializeDependencies } from '../../common/data/serialized-dependency';
-import { getIOName, getTypeName } from '../../common/utils';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { serializeParameterObject } from './parameter-object';
+import { makeNormalizedName } from '../../common/normalized-name';
+import { getFileName, getTypeFileContent } from '../../common/utils';
 
 export const serializeParametersDefinitionsObject = (
 	from: Ref,
@@ -31,15 +31,7 @@ const serializeParameter = (from: Ref, parameterObject: ParameterObject): Either
 	pipe(
 		serializeParameterObject(from, parameterObject),
 		either.map(serialized => {
-			const dependencies = serializeDependencies(serialized.dependencies);
-			return file(
-				`${from.name}.ts`,
-				`
-					${dependencies}
-					
-					export type ${getTypeName(from.name)} = ${serialized.type};
-					export const ${getIOName(from.name)} = ${serialized.io};
-				`,
-			);
+			const normalizedName = makeNormalizedName(from.name);
+			return file(getFileName(normalizedName), getTypeFileContent(normalizedName, serialized));
 		}),
 	);

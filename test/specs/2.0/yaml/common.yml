@@ -86,6 +86,11 @@ definitions:
         type: string
       message:
         type: string
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
   Pet:
     type: object
     required:

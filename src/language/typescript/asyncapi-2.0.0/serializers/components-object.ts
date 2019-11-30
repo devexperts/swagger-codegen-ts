@@ -2,9 +2,8 @@ import { addPathParts, fromString, Ref } from '../../../../utils/ref';
 import { SchemaObject, SchemaObjectCodec } from '../../../../schema/asyncapi-2.0.0/schema-object';
 import { Either, right } from 'fp-ts/lib/Either';
 import { FSEntity, file, directory, fragment } from '../../../../utils/fs';
-import { context, getIOName, getTypeName } from '../../common/utils';
+import { context, getTypeName, getFileName, getTypeFileContent } from '../../common/utils';
 import { serializeSchemaObject } from './schema-object';
-import { serializeDependencies } from '../../common/data/serialized-dependency';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { array, either, option, record } from 'fp-ts';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/asyncapi-2.0.0/reference-object';
@@ -14,10 +13,9 @@ import { sequenceEither, sequenceTEither } from '@devexperts/utils/dist/adt/eith
 import { ComponentsObject } from '../../../../schema/asyncapi-2.0.0/components-object';
 import { MessageObject, MessageObjectCodec } from '../../../../schema/asyncapi-2.0.0/message-object';
 import { getSerializedRefType } from '../../common/data/serialized-type';
+import { makeNormalizedName } from '../../common/normalized-name';
 
 const serializeMessage = (from: Ref, messageObject: MessageObject): Either<Error, FSEntity> => {
-	const typeName = getTypeName(from.name);
-	const ioName = getIOName(from.name);
 	const serialized = ReferenceObjectCodec.is(messageObject.payload)
 		? pipe(
 				fromString(messageObject.payload.$ref),
@@ -26,17 +24,10 @@ const serializeMessage = (from: Ref, messageObject: MessageObject): Either<Error
 		: serializeSchemaObject(from, messageObject.payload);
 	return pipe(
 		serialized,
-		either.map(serialized =>
-			file(
-				`${from.name}.ts`,
-				`
-					${serializeDependencies(serialized.dependencies)}
-					
-					export type ${typeName} = ${serialized.type};
-					export const ${ioName} = ${serialized.io};
-				`,
-			),
-		),
+		either.map(serialized => {
+			const normalizedName = makeNormalizedName(from.name);
+			return file(getFileName(normalizedName), getTypeFileContent(normalizedName, serialized));
+		}),
 	);
 };
 
@@ -64,24 +55,12 @@ const serializeMessages = combineReader(
 );
 
 const serializeSchema = (from: Ref, schema: SchemaObject): Either<Error, FSEntity> => {
-	const typeName = getTypeName(from.name);
-	const ioName = getIOName(from.name);
+	const normalizedName = makeNormalizedName(from.name);
+	const typeName = getTypeName(normalizedName);
 	const serialized = serializeSchemaObject(from, schema, typeName);
 	return pipe(
 		serialized,
-		either.map(serialized => {
-			const dependencies = serializeDependencies(serialized.dependencies);
-
-			return file(
-				`${from.name}.ts`,
-				`
-					${dependencies}
-					
-					export type ${typeName} = ${serialized.type};
-					export const ${ioName} = ${serialized.io};
-				`,
-			);
-		}),
+		either.map(serialized => file(getFileName(normalizedName), getTypeFileContent(normalizedName, serialized))),
 	);
 };
 

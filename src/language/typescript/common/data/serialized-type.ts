@@ -19,6 +19,7 @@ import { JSONPrimitive } from '../../../../utils/io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { nonEmptyArray, option } from 'fp-ts';
 import { none, Option, some } from 'fp-ts/lib/Option';
+import { NormalizedName, makeNormalizedName, normalizeRefNameAndPath } from '../normalized-name';
 
 export interface SerializedType {
 	readonly type: string;
@@ -121,10 +122,10 @@ export const getSerializedArrayType = (name?: string) => (serialized: Serialized
 
 export const getSerializedRefType = (from: Ref) => (to: Ref): SerializedType => {
 	const isRecursive = from.$ref === to.$ref;
-	const p = getRelativePath(from, to);
-	const type = getTypeName(to.name);
-	const io = getIOName(to.name);
-	const ref = to.name === type ? to : { ...to, name: type };
+	const type = getTypeName(makeNormalizedName(to.name));
+	const io = getIOName(makeNormalizedName(to.name));
+	const ref = normalizeRefNameAndPath(to);
+	const p = getRelativePath(from, ref);
 	const dependencies = concatIfL(!isRecursive, [], () => [
 		serializedDependency(type, p),
 		serializedDependency(io, p),
@@ -132,7 +133,7 @@ export const getSerializedRefType = (from: Ref) => (to: Ref): SerializedType => 
 	return serializedType(type, io, dependencies, [ref]);
 };
 
-export const getSerializedObjectType = (name?: string) => (serialized: SerializedType): SerializedType =>
+export const getSerializedObjectType = (name?: NormalizedName) => (serialized: SerializedType): SerializedType =>
 	serializedType(
 		`{ ${serialized.type} }`,
 		`type({ ${serialized.io} }${when(name !== undefined, `, '${name}'`)})`,
@@ -151,8 +152,8 @@ export const getSerializedDictionaryType = (name?: string) => (serialized: Seria
 export const getSerializedRecursiveType = (from: Ref, shouldTrackRecursion: boolean) => (
 	serialized: SerializedType,
 ): SerializedType => {
-	const typeName = getTypeName(from.name);
-	const ioName = getIOName(from.name);
+	const typeName = getTypeName(makeNormalizedName(from.name));
+	const ioName = getIOName(makeNormalizedName(from.name));
 	return shouldTrackRecursion && serialized.refs.some(ref => ref.$ref === from.$ref)
 		? serializedType(
 				serialized.type,

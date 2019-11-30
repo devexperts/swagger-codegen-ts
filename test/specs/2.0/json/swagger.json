@@ -890,6 +890,33 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "test"
+        ],
+        "summary": "Check support of invalid names",
+        "description": "",
+        "operationId": "checkSupportOfInvalidNames",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "test description",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "schema": {
+              "$ref": "./common.json#/definitions/Error"
+            }
+          }
+        }
       }
     }
   },

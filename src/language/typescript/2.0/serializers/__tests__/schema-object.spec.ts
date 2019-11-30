@@ -14,6 +14,7 @@ import { SchemaObjectCodec } from '../../../../../schema/2.0/schema-object';
 import { right } from 'fp-ts/lib/Either';
 import { either } from 'fp-ts';
 import { reportIfFailed } from '../../../../../utils/io-ts';
+import { makeNormalizedName } from '../../../common/normalized-name';
 
 describe('SchemaObject serializer', () => {
 	describe('recursive', () => {
@@ -34,7 +35,7 @@ describe('SchemaObject serializer', () => {
 							ref,
 							getSerializedRefType(ref),
 							getSerializedOptionPropertyType('recursive', true),
-							getSerializedObjectType(ref.name),
+							getSerializedObjectType(makeNormalizedName(ref.name)),
 							getSerializedRecursiveType(ref, true),
 						);
 						const serialized = pipe(
@@ -68,9 +69,9 @@ describe('SchemaObject serializer', () => {
 							ref,
 							getSerializedRefType(ref),
 							getSerializedOptionPropertyType('recursive', true),
-							getSerializedObjectType(ref.name),
+							getSerializedObjectType(makeNormalizedName(ref.name)),
 							getSerializedOptionPropertyType('children', true),
-							getSerializedObjectType(ref.name),
+							getSerializedObjectType(makeNormalizedName(ref.name)),
 							getSerializedRecursiveType(ref, true),
 						);
 						const serialized = pipe(
@@ -112,7 +113,7 @@ describe('SchemaObject serializer', () => {
 							ref,
 							getSerializedRefType(ref),
 							getSerializedOptionPropertyType('self', true),
-							getSerializedObjectType(ref.name),
+							getSerializedObjectType(makeNormalizedName(ref.name)),
 							serialized => getSerializedIntersectionType([SERIALIZED_STRING_TYPE, serialized]),
 							getSerializedRecursiveType(ref, true),
 						);
@@ -154,9 +155,9 @@ describe('SchemaObject serializer', () => {
 							ref,
 							getSerializedRefType(ref),
 							getSerializedOptionPropertyType('self', true),
-							getSerializedObjectType(ref.name),
+							getSerializedObjectType(makeNormalizedName(ref.name)),
 							getSerializedOptionPropertyType('nested', true),
-							getSerializedObjectType(ref.name),
+							getSerializedObjectType(makeNormalizedName(ref.name)),
 							serialized => getSerializedIntersectionType([SERIALIZED_STRING_TYPE, serialized]),
 							getSerializedRecursiveType(ref, true),
 						);

@@ -2,10 +2,9 @@ import { Either, right } from 'fp-ts/lib/Either';
 import { directory, Directory, File, file, FSEntity } from '../../../../utils/fs';
 import { serializeSchemaObject } from './schema-object';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { combineEither, sequenceEither, sequenceTEither } from '@devexperts/utils/dist/adt/either.utils';
+import { sequenceEither, sequenceTEither } from '@devexperts/utils/dist/adt/either.utils';
 import { array, either, option, record } from 'fp-ts';
-import { serializeDependencies } from '../../common/data/serialized-dependency';
-import { context, getIOName, getTypeName } from '../../common/utils';
+import { context, getTypeName, getFileName, getTypeFileContent } from '../../common/utils';
 import { addPathParts, Ref } from '../../../../utils/ref';
 import { SchemaObject, SchemaObjectCodec } from '../../../../schema/3.0/schema-object';
 import { ComponentsObject } from '../../../../schema/3.0/components-object';
@@ -19,28 +18,15 @@ import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { reportIfFailed } from '../../../../utils/io-ts';
 import { RequestBodyObject, RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
 import { serializeRequestBodyObject } from './request-body-object';
+import { makeNormalizedName } from '../../common/normalized-name';
 
 const serializeSchema = (from: Ref, schema: SchemaObject): Either<Error, File> => {
-	const typeName = getTypeName(from.name);
-	const ioName = getIOName(from.name);
-	const serialized = pipe(
+	const normalizedName = makeNormalizedName(from.name);
+	const typeName = getTypeName(normalizedName);
+	return pipe(
 		schema,
 		serializeSchemaObject(from, typeName),
-	);
-	const dependencies = pipe(
-		serialized,
-		either.map(serialized => serializeDependencies(serialized.dependencies)),
-	);
-	return combineEither(serialized, dependencies, (serialized, dependencies) =>
-		file(
-			`${from.name}.ts`,
-			`
-			${dependencies}
-			
-			export type ${typeName} = ${serialized.type};
-			export const ${ioName} = ${serialized.io};
-		`,
-		),
+		either.map(serialized => file(getFileName(normalizedName), getTypeFileContent(normalizedName, serialized))),
 	);
 };
 
@@ -76,17 +62,8 @@ const serializeParameter = (from: Ref, parameterObject: ParameterObject): Either
 	pipe(
 		serializeParameterObject(from, parameterObject),
 		either.map(serialized => {
-			const dependencies = serializeDependencies(serialized.dependencies);
-
-			return file(
-				`${from.name}.ts`,
-				`
-					${dependencies}
-					
-					export type ${getTypeName(from.name)} = ${serialized.type};
-					export const ${getIOName(from.name)} = ${serialized.io};
-				`,
-			);
+			const normalizedName = makeNormalizedName(from.name);
+			return file(getFileName(normalizedName), getTypeFileContent(normalizedName, serialized));
 		}),
 	);
 
@@ -123,17 +100,8 @@ const serializeResponse = (from: Ref, responseObject: ResponseObject): Either<Er
 		serializeResponseObject(from, responseObject),
 		option.getOrElse(() => right(SERIALIZED_VOID_TYPE)),
 		either.map(serialized => {
-			const dependencies = serializeDependencies(serialized.dependencies);
-
-			return file(
-				`${from.name}.ts`,
-				`
-					${dependencies}
-					
-					export type ${getTypeName(from.name)} = ${serialized.type};
-					export const ${getIOName(from.name)} = ${serialized.io};
-				`,
-			);
+			const normalizedName = makeNormalizedName(from.name);
+			return file(getFileName(normalizedName), getTypeFileContent(normalizedName, serialized));
 		}),
 	);
 
@@ -168,17 +136,10 @@ const serializeResponses = combineReader(
 const serializeRequestBody = (from: Ref, requestBody: RequestBodyObject): Either<Error, FSEntity> =>
 	pipe(
 		serializeRequestBodyObject(from, requestBody),
-		either.map(serialized =>
-			file(
-				`${from.name}.ts`,
-				`
-					${serializeDependencies(serialized.dependencies)}
-					
-					export type ${getTypeName(from.name)} = ${serialized.type};
-					export const ${getIOName(from.name)} = ${serialized.io};
-				`,
-			),
-		),
+		either.map(serialized => {
+			const normalizedName = makeNormalizedName(from.name);
+			return file(getFileName(normalizedName), getTypeFileContent(normalizedName, serialized));
+		}),
 	);
 
 const serializeRequestBodies = combineReader(
