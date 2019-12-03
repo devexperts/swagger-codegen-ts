@@ -55,11 +55,17 @@ describe('SerializedType', () => {
 		assert(
 			property(string(), serializedTypeArbitrary, boolean(), (name, s, isRequired) => {
 				const serialized = getSerializedOptionPropertyType(name, isRequired)(s);
+				const fixedName = (name: string) => (name.includes('-') ? `['${name}']` : name);
 				const expected = isRequired
-					? serializedType(`${name}: ${s.type}`, `${name}: ${s.io}`, s.dependencies, s.refs)
+					? serializedType(
+							`${fixedName(name)}: ${s.type}`,
+							`${fixedName(name)}: ${s.io}`,
+							s.dependencies,
+							s.refs,
+					  )
 					: serializedType(
-							`${name}: Option<${s.type}>`,
-							`${name}: optionFromNullable(${s.io})`,
+							`${fixedName(name)}: Option<${s.type}>`,
+							`${fixedName(name)}: optionFromNullable(${s.io})`,
 							[
 								...s.dependencies,
 								serializedDependency('Option', 'fp-ts/lib/Option'),
