@@ -13,8 +13,8 @@ import {
 	getSerializedIntersectionType,
 	getSerializedEnumType,
 	SERIALIZED_NULL_TYPE,
-	getSerializedIntegerType,
 	getSerializedStringType,
+	SERIALIZED_INTEGER_TYPE,
 } from '../../common/data/serialized-type';
 import { serializedDependency } from '../../common/data/serialized-dependency';
 import {
@@ -33,7 +33,6 @@ import { either, option, record } from 'fp-ts';
 import { traverseNEAEither } from '../../../../utils/either';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/2.0/reference-object';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
-import { utilsRef } from '../../common/bundled/utils';
 
 export const serializeSchemaObject = (from: Ref, schema: SchemaObject): Either<Error, SerializedType> =>
 	serializeSchemaObjectWithRecursion(from, schema, true);
@@ -149,10 +148,7 @@ const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): Eit
 			return right(SERIALIZED_NUMBER_TYPE);
 		}
 		case 'integer': {
-			return pipe(
-				utilsRef,
-				either.map(utilsRef => getSerializedIntegerType(from, utilsRef)),
-			);
+			return right(SERIALIZED_INTEGER_TYPE);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);
