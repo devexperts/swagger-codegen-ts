@@ -1,3 +1,22 @@
+# [2.0.0-alpha.7](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2019-12-04)
+
+
+### Code Refactoring
+
+* use Integer type from io-ts ([#84](https://github.com/devexperts/swagger-codegen-ts/issues/84)) ([d63fd60](https://github.com/devexperts/swagger-codegen-ts/commit/d63fd60))
+
+
+### Features
+
+* implement support of kebab case in property names ([#83](https://github.com/devexperts/swagger-codegen-ts/issues/83)) ([ff937aa](https://github.com/devexperts/swagger-codegen-ts/commit/ff937aa)), closes [#82](https://github.com/devexperts/swagger-codegen-ts/issues/82)
+
+
+### BREAKING CHANGES
+
+* removed empty utils file
+
+
+
 # [2.0.0-alpha.6](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2019-11-26)
 
 
