@@ -220,8 +220,8 @@ export const getSerializedPropertyType = (
 	serialized: SerializedType,
 ): SerializedType =>
 	serializedType(
-		`${name}${when(!isRequired, '?')}: ${serialized.type}`,
-		`${name}: ${serialized.io}`,
+		`${name.includes('-') ? `['${name}']` : name}${when(!isRequired, '?')}: ${serialized.type}`,
+		`${name.includes('-') ? `['${name}']` : name}: ${serialized.io}`,
 		serialized.dependencies,
 		serialized.refs,
 	);
