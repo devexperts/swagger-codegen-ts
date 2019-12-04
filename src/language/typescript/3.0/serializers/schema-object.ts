@@ -2,7 +2,6 @@ import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
 	getSerializedEnumType,
-	getSerializedIntegerType,
 	getSerializedIntersectionType,
 	getSerializedObjectType,
 	getSerializedOptionPropertyType,
@@ -12,6 +11,7 @@ import {
 	getSerializedUnionType,
 	intercalateSerializedTypes,
 	SERIALIZED_BOOLEAN_TYPE,
+	SERIALIZED_INTEGER_TYPE,
 	SERIALIZED_NUMBER_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 	SerializedType,
@@ -35,7 +35,6 @@ import {
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { traverseNEAEither } from '../../../../utils/either';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
-import { utilsRef } from '../../common/bundled/utils';
 
 type AdditionalProperties = boolean | ReferenceObject | SchemaObject;
 type AllowedAdditionalProperties = true | ReferenceObject | SchemaObject;
@@ -199,10 +198,7 @@ const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): Eit
 			return right(SERIALIZED_NUMBER_TYPE);
 		}
 		case 'integer': {
-			return pipe(
-				utilsRef,
-				either.map(utilsRef => getSerializedIntegerType(from, utilsRef)),
-			);
+			return right(SERIALIZED_INTEGER_TYPE);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);

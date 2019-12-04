@@ -22,7 +22,7 @@ export const getURL = (pattern: string, pathParameters: SerializedPathParameter[
 export const getJSDoc = (lines: string[]): string =>
 	unless(
 		lines.length === 0,
-		`/** 
+		`/**
 			 ${lines.map(line => `* ${line}`).join('\n')}
 		 */`,
 	);
@@ -65,5 +65,7 @@ export const getKindValue = (kind: Kind, value: string): string => {
 
 export const getControllerName = (name: string): string => `${name}Controller`;
 
+export const UNSAFE_PROPERTY_PATTERN = /[^a-zA-Z_0-9]/;
+const REPLACE_PATTERN = new RegExp(UNSAFE_PROPERTY_PATTERN, 'g');
 export const getSafePropertyName = (value: string): string =>
-	value.replace(/[^a-zA-Z_0-9]/g, '_').replace(/^(\d)/, '_$1') || '_';
+	value.replace(REPLACE_PATTERN, '_').replace(/^(\d)/, '_$1') || '_';

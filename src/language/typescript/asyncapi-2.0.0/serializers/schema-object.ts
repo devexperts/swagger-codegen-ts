@@ -19,7 +19,7 @@ import {
 	SerializedType,
 	getSerializedEnumType,
 	getSerializedStringType,
-	getSerializedIntegerType,
+	SERIALIZED_INTEGER_TYPE,
 } from '../../common/data/serialized-type';
 import {
 	AllOfSchemaObjectCodec,
@@ -37,7 +37,6 @@ import { traverseNEAEither } from '../../../../utils/either';
 import { constFalse } from 'fp-ts/lib/function';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { Option } from 'fp-ts/lib/Option';
-import { utilsRef } from '../../common/bundled/utils';
 
 export const serializeSchemaObject = (
 	from: Ref,
@@ -77,10 +76,7 @@ const serializeSchemaObjectWithRecursion = (
 			return right(SERIALIZED_NUMBER_TYPE);
 		}
 		case 'integer': {
-			return pipe(
-				utilsRef,
-				either.map(utilsRef => getSerializedIntegerType(from, utilsRef)),
-			);
+			return right(SERIALIZED_INTEGER_TYPE);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);
