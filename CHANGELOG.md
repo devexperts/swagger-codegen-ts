@@ -1,3 +1,12 @@
+# [2.0.0-alpha.8](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2019-12-05)
+
+
+### Bug Fixes
+
+* fix encodeURIComponent in query serialization ([08a6ed0](https://github.com/devexperts/swagger-codegen-ts/commit/08a6ed0))
+
+
+
 # [2.0.0-alpha.7](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2019-12-04)
 
 
