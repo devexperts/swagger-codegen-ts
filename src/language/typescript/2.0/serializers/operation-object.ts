@@ -204,7 +204,7 @@ const getParameters = combineReader(
 			option.map(f =>
 				combineFragmentsK(f, c =>
 					serializedFragment(
-						`encodeURIComponent(compact([${c}]).join('&'))`,
+						`compact([${c}]).join('&')`,
 						[serializedDependency('compact', 'fp-ts/lib/Array')],
 						[],
 					),
@@ -291,7 +291,7 @@ export const serializeOperationObject = combineReader(
 					${operationName}: (${argsIO}) => {
 						${bodyIO}
 						${queryIO}
-				
+
 						return e.httpClient.chain(
 							e.httpClient.request({
 								url: ${getURL(url, parameters.serializedPathParameters)},
@@ -400,7 +400,7 @@ export const serializeQueryParameterObject = (
 		case 'integer':
 		case 'number':
 		case 'boolean': {
-			const f = serializedFragment(`value => '${parameter.name}=' + value`, [], []);
+			const f = serializedFragment(`value => encodeURIComponent('${parameter.name}=' + value)`, [], []);
 			return right(getSerializedOptionCallFragment(!required, f, encoded));
 		}
 		case 'array': {
@@ -415,12 +415,16 @@ export const serializeQueryParameterObject = (
 				case 'tsv':
 				case 'pipes': {
 					const s = getCollectionSeparator(collectionFormat);
-					const f = serializedFragment(`value => '${parameter.name}=' + value.join('${s}')`, [], []);
+					const f = serializedFragment(
+						`value => encodeURIComponent('${parameter.name}=' + value.join('${s}'))`,
+						[],
+						[],
+					);
 					return right(getSerializedOptionCallFragment(!required, f, encoded));
 				}
 				case 'multi': {
 					const f = serializedFragment(
-						`value => value.map(item => '${parameter.name}=' + item).join('&')`,
+						`value => value.map(item => encodeURIComponent('${parameter.name}=' + item)).join('&')`,
 						[],
 						[],
 					);
