@@ -400,7 +400,11 @@ export const serializeQueryParameterObject = (
 		case 'integer':
 		case 'number':
 		case 'boolean': {
-			const f = serializedFragment(`value => encodeURIComponent('${parameter.name}=' + value)`, [], []);
+			const f = serializedFragment(
+				`value => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(value)`,
+				[],
+				[],
+			);
 			return right(getSerializedOptionCallFragment(!required, f, encoded));
 		}
 		case 'array': {
@@ -416,7 +420,9 @@ export const serializeQueryParameterObject = (
 				case 'pipes': {
 					const s = getCollectionSeparator(collectionFormat);
 					const f = serializedFragment(
-						`value => encodeURIComponent('${parameter.name}=' + value.join('${s}'))`,
+						`value => encodeURIComponent('${
+							parameter.name
+						}') + '=' + encodeURIComponent(value.join('${s}'))`,
 						[],
 						[],
 					);
@@ -424,7 +430,9 @@ export const serializeQueryParameterObject = (
 				}
 				case 'multi': {
 					const f = serializedFragment(
-						`value => value.map(item => encodeURIComponent('${parameter.name}=' + item)).join('&')`,
+						`value => value.map(item => encodeURIComponent('${
+							parameter.name
+						}') + '=' + encodeURIComponent(item)).join('&')`,
 						[],
 						[],
 					);
