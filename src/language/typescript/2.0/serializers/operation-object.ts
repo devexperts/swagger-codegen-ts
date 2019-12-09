@@ -272,18 +272,22 @@ export const serializeOperationObject = combineReader(
 					option.getOrElse(() => ''),
 				);
 
-				const argsType = concatIf(hasParameters, parameters.serializedPathParameters.map(p => p.type), [
-					`parameters: { ${queryType}${bodyType} }`,
-				]).join(',');
+				const argsType = concatIf(
+					hasParameters,
+					parameters.serializedPathParameters.map(p => p.type),
+					[`parameters: { ${queryType}${bodyType} }`],
+				).join(',');
 
 				const type = `
 					${getJSDoc(array.compact([deprecated, operation.summary]))}
 					readonly ${operationName}: (${argsType}) => ${getKindValue(kind, serializedResponses.type)};
 				`;
 
-				const argsIO = concatIf(hasParameters, parameters.pathParameters.map(p => p.name), ['parameters']).join(
-					',',
-				);
+				const argsIO = concatIf(
+					hasParameters,
+					parameters.pathParameters.map(p => p.name),
+					['parameters'],
+				).join(',');
 
 				const io = `
 					${operationName}: (${argsIO}) => {
@@ -418,9 +422,7 @@ export const serializeQueryParameterObject = (
 				case 'pipes': {
 					const s = getCollectionSeparator(collectionFormat);
 					const f = serializedFragment(
-						`value => encodeURIComponent('${
-							parameter.name
-						}') + '=' + encodeURIComponent(value.join('${s}'))`,
+						`value => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(value.join('${s}'))`,
 						[],
 						[],
 					);
@@ -428,9 +430,7 @@ export const serializeQueryParameterObject = (
 				}
 				case 'multi': {
 					const f = serializedFragment(
-						`value => value.map(item => encodeURIComponent('${
-							parameter.name
-						}') + '=' + encodeURIComponent(item)).join('&')`,
+						`value => value.map(item => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(item)).join('&')`,
 						[],
 						[],
 					);

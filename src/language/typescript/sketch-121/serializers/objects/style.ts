@@ -18,16 +18,10 @@ export const serializeStyle = (style: Style): Either<Error, string> => {
 		option.map(array.filter(fill => fill.isEnabled)),
 		option.chain(nonEmptyArray.fromArray),
 	);
-	const borders = pipe(
-		style.borders,
-		option.map(array.filter(border => border.isEnabled)),
-	);
+	const borders = pipe(style.borders, option.map(array.filter(border => border.isEnabled)));
 
 	const innerShadows = style.innerShadows.filter(shadow => shadow.isEnabled);
-	const shadows = pipe(
-		style.shadows,
-		option.map(array.filter(shadow => shadow.isEnabled)),
-	);
+	const shadows = pipe(style.shadows, option.map(array.filter(shadow => shadow.isEnabled)));
 
 	const backgroundColor = pipe(
 		fills,
@@ -82,22 +76,12 @@ export const serializeStyle = (style: Style): Either<Error, string> => {
 	const boxShadow = pipe(
 		nonEmptyArray.fromArray([
 			...innerShadows.map(serializeInnerShadow),
-			...array.flatten(
-				array.compact([
-					pipe(
-						shadows,
-						option.map(array.map(serializeShadow)),
-					),
-				]),
-			),
+			...array.flatten(array.compact([pipe(shadows, option.map(array.map(serializeShadow)))])),
 		]),
 		option.map(shadows => `boxShadow: '${shadows.join(', ')}'`),
 	);
 
-	const textStyle = pipe(
-		style.textStyle,
-		option.map(serializeTextStyle),
-	);
+	const textStyle = pipe(style.textStyle, option.map(serializeTextStyle));
 
 	return combineEither(backgroundImage, backgroundImage =>
 		array

@@ -91,12 +91,7 @@ export const serializePathsObject = combineReader(
 		const files = pipe(
 			groupped,
 			collect((name, groupped) =>
-				pipe(
-					from,
-					addPathParts(name),
-					either.map(serializeGrouppedPaths),
-					either.chain(applyTo(groupped)),
-				),
+				pipe(from, addPathParts(name), either.map(serializeGrouppedPaths), either.chain(applyTo(groupped))),
 			),
 			sequenceEither,
 		);

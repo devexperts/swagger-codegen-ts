@@ -86,14 +86,8 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 						mapLeft(() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`)),
 						either.map(getSerializedRefType(from)),
 				  )
-				: pipe(
-						items,
-						serializeSchemaObjectWithRecursion(from, false, undefined),
-				  );
-			return pipe(
-				serialized,
-				either.map(getSerializedArrayType(name)),
-			);
+				: pipe(items, serializeSchemaObjectWithRecursion(from, false, undefined));
+			return pipe(serialized, either.map(getSerializedArrayType(name)));
 		}
 		case 'object': {
 			const additionalProperties = pipe(
@@ -107,19 +101,14 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 							mapLeft(
 								() =>
 									new Error(
-										`Unablew to serialize SchemaObject additionalProperties ref "${
-											additionalProperties.$ref
-										}"`,
+										`Unablew to serialize SchemaObject additionalProperties ref "${additionalProperties.$ref}"`,
 									),
 							),
 							either.map(getSerializedRefType(from)),
 						);
 					} else {
 						return additionalProperties !== true
-							? pipe(
-									additionalProperties,
-									serializeSchemaObjectWithRecursion(from, false, undefined),
-							  )
+							? pipe(additionalProperties, serializeSchemaObjectWithRecursion(from, false, undefined))
 							: right(SERIALIZED_UNKNOWN_TYPE);
 					}
 				}),
@@ -144,9 +133,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 									mapLeft(
 										() =>
 											new Error(
-												`Unable to serialize SchemaObject property "${name}" ref "${
-													property.$ref
-												}"`,
+												`Unable to serialize SchemaObject property "${name}" ref "${property.$ref}"`,
 											),
 									),
 									either.map(getSerializedRefType(from)),
@@ -182,10 +169,7 @@ const serializeChildren = (
 ): Either<Error, NonEmptyArray<SerializedType>> =>
 	traverseNEAEither(children, item =>
 		ReferenceObjectCodec.is(item)
-			? pipe(
-					fromString(item.$ref),
-					either.map(getSerializedRefType(from)),
-			  )
+			? pipe(fromString(item.$ref), either.map(getSerializedRefType(from)))
 			: serializeSchemaObjectWithRecursion(from, false)(item),
 	);
 

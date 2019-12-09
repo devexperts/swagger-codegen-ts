@@ -18,10 +18,7 @@ const serializeMessage = (from: Ref, messageObject: MessageObject): Either<Error
 	const typeName = getTypeName(from.name);
 	const ioName = getIOName(from.name);
 	const serialized = ReferenceObjectCodec.is(messageObject.payload)
-		? pipe(
-				fromString(messageObject.payload.$ref),
-				either.map(getSerializedRefType(from)),
-		  )
+		? pipe(fromString(messageObject.payload.$ref), either.map(getSerializedRefType(from)))
 		: serializeSchemaObject(from, messageObject.payload);
 	return pipe(
 		serialized,
@@ -48,10 +45,7 @@ const serializeMessages = combineReader(
 				const resolved = ReferenceObjectCodec.is(message)
 					? context.resolveRef(message.$ref, MessageObjectCodec)
 					: right(message);
-				const ref = pipe(
-					from,
-					addPathParts(name),
-				);
+				const ref = pipe(from, addPathParts(name));
 				return pipe(
 					sequenceTEither(resolved, ref),
 					either.chain(([resolved, ref]) => serializeMessage(ref, resolved)),
@@ -93,10 +87,7 @@ const serializeSchemas = combineReader(
 				const resolved = ReferenceObjectCodec.is(schema)
 					? e.resolveRef(schema.$ref, SchemaObjectCodec)
 					: right(schema);
-				const ref = pipe(
-					from,
-					addPathParts(name),
-				);
+				const ref = pipe(from, addPathParts(name));
 				return pipe(
 					sequenceTEither(resolved, ref),
 					either.chain(([resolved, ref]) => serializeSchema(ref, resolved)),
@@ -136,10 +127,6 @@ export const serializeComponentsObject = combineReader(
 				),
 			),
 		);
-		return pipe(
-			array.compact([schemas, messages]),
-			sequenceEither,
-			either.map(fragment),
-		);
+		return pipe(array.compact([schemas, messages]), sequenceEither, either.map(fragment));
 	},
 );

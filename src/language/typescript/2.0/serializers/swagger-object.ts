@@ -47,11 +47,7 @@ export const serializeSwaggerObject = combineReader(
 				),
 			),
 		);
-		const additional = pipe(
-			[definitions, parameters, responses],
-			array.compact,
-			sequenceEither,
-		);
+		const additional = pipe([definitions, parameters, responses], array.compact, sequenceEither);
 		const paths = pipe(
 			pathsRef,
 			either.chain(from => serializePaths(from, swaggerObject.paths)),

@@ -47,26 +47,26 @@ export const X509SecuritySchemeObjectCodec: Codec<X509SecuritySchemeObject> = in
 export interface SymmetricEncryptionSecuritySchemeObject extends BaseSecuritySchemeObject {
 	readonly type: 'symmetricEncryption';
 }
-export const SymmetricEncryptionSecuritySchemeObjectCodec: Codec<
-	SymmetricEncryptionSecuritySchemeObject
-> = intersection([
-	BaseSecuritySchemeObjectCodec,
-	type({
-		type: literal('symmetricEncryption'),
-	}),
-]);
+export const SymmetricEncryptionSecuritySchemeObjectCodec: Codec<SymmetricEncryptionSecuritySchemeObject> = intersection(
+	[
+		BaseSecuritySchemeObjectCodec,
+		type({
+			type: literal('symmetricEncryption'),
+		}),
+	],
+);
 
 export interface AssymmetricEncryptionSecuritySchemeObject extends BaseSecuritySchemeObject {
 	readonly type: 'asymmetricEncryption';
 }
-export const AssymmetricEncryptionSecuritySchemeObjectCodec: Codec<
-	AssymmetricEncryptionSecuritySchemeObject
-> = intersection([
-	BaseSecuritySchemeObjectCodec,
-	type({
-		type: literal('asymmetricEncryption'),
-	}),
-]);
+export const AssymmetricEncryptionSecuritySchemeObjectCodec: Codec<AssymmetricEncryptionSecuritySchemeObject> = intersection(
+	[
+		BaseSecuritySchemeObjectCodec,
+		type({
+			type: literal('asymmetricEncryption'),
+		}),
+	],
+);
 
 export interface HTTPAPIKeySecuritySchemeObject extends BaseSecuritySchemeObject {
 	readonly type: 'httpApiKey';

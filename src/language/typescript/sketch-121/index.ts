@@ -18,10 +18,7 @@ export const serialize = combineReader(
 		pipe(
 			files,
 			record.collect((name, file) =>
-				pipe(
-					serializeFileFormat(file),
-					either.map(option.map(content => directory(name, [content]))),
-				),
+				pipe(serializeFileFormat(file), either.map(option.map(content => directory(name, [content])))),
 			),
 			sequenceEither,
 			either.map(serialized =>

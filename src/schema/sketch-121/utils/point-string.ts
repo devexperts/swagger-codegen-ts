@@ -29,11 +29,17 @@ export const PointStringCodec: Codec<PointString> = new Type<PointString, string
 				}
 				const x: Validation<number> = pipe(
 					array.lookup(1, match),
-					option.fold(() => failure(u, c), x => NumberFromString.validate(x, c)),
+					option.fold(
+						() => failure(u, c),
+						x => NumberFromString.validate(x, c),
+					),
 				);
 				const y: Validation<number> = pipe(
 					array.lookup(2, match),
-					option.fold(() => failure(u, c), y => NumberFromString.validate(y, c)),
+					option.fold(
+						() => failure(u, c),
+						y => NumberFromString.validate(y, c),
+					),
 				);
 				return combineEither(x, y, (x, y) => ({ x, y }));
 			}),

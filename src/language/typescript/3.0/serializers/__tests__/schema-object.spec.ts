@@ -37,10 +37,7 @@ describe('SchemaObject', () => {
 							serializeSchemaObject(from, name),
 							either.map(getSerializedArrayType(name)),
 						);
-						const serialized = pipe(
-							schema,
-							serializeSchemaObject(from, name),
-						);
+						const serialized = pipe(schema, serializeSchemaObject(from, name));
 						expect(serialized).toEqual(expected);
 					}),
 				);
@@ -54,18 +51,10 @@ describe('SchemaObject', () => {
 								$ref: $refArbitrary.$ref,
 							},
 						});
-						const expected = pipe(
-							$refArbitrary,
-							getSerializedRefType(from),
-							getSerializedArrayType(name),
+						const expected = pipe($refArbitrary, getSerializedRefType(from), getSerializedArrayType(name));
+						expect(pipe(schema, reportIfFailed, either.chain(serializeSchemaObject(from, name)))).toEqual(
+							right(expected),
 						);
-						expect(
-							pipe(
-								schema,
-								reportIfFailed,
-								either.chain(serializeSchemaObject(from, name)),
-							),
-						).toEqual(right(expected));
 					}),
 				);
 			});
@@ -94,11 +83,7 @@ describe('SchemaObject', () => {
 							getSerializedObjectType(undefined),
 							getSerializedRecursiveType(ref, true),
 						);
-						const serialized = pipe(
-							schema,
-							reportIfFailed,
-							either.chain(serializeSchemaObject(ref)),
-						);
+						const serialized = pipe(schema, reportIfFailed, either.chain(serializeSchemaObject(ref)));
 
 						expect(serialized).toEqual(right(expected));
 					}),
@@ -122,11 +107,7 @@ describe('SchemaObject', () => {
 								},
 							},
 						});
-						const serialized = pipe(
-							schema,
-							reportIfFailed,
-							either.chain(serializeSchemaObject(ref)),
-						);
+						const serialized = pipe(schema, reportIfFailed, either.chain(serializeSchemaObject(ref)));
 						const expected = pipe(
 							ref,
 							getSerializedRefType(ref),
@@ -149,11 +130,7 @@ describe('SchemaObject', () => {
 								$ref: ref.$ref, // references self
 							},
 						});
-						const serialized = pipe(
-							schema,
-							reportIfFailed,
-							either.chain(serializeSchemaObject(ref)),
-						);
+						const serialized = pipe(schema, reportIfFailed, either.chain(serializeSchemaObject(ref)));
 
 						const expected = pipe(
 							ref,

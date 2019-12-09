@@ -184,11 +184,7 @@ export const getSerializedIntersectionType = (serialized: NonEmptyArray<Serializ
 };
 
 export const getSerializedEnumType = (value: NonEmptyArray<JSONPrimitive>): SerializedType =>
-	pipe(
-		value,
-		nonEmptyArray.map(getSerializedPrimitiveType),
-		getSerializedUnionType,
-	);
+	pipe(value, nonEmptyArray.map(getSerializedPrimitiveType), getSerializedUnionType);
 
 export const getSerializedPrimitiveType = (value: JSONPrimitive): SerializedType => {
 	const serialized = JSON.stringify(value);
