@@ -1,3 +1,25 @@
+# [2.0.0-alpha.10](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2019-12-09)
+
+
+### Bug Fixes
+
+* fix '..' and '.' in spec names ([3cec483](https://github.com/devexperts/swagger-codegen-ts/commit/3cec483))
+
+
+### Code Refactoring
+
+* simplify resolveRef ([763cc68](https://github.com/devexperts/swagger-codegen-ts/commit/763cc68))
+
+
+### BREAKING CHANGES
+
+* language is now a Reader of ResolveRefContext
+* resolveRef now requires decoder as a second argument
+* generate doesn't include `out` path in spec output
+* language doesn't accept `out` path and can return `Fragment` to write to `out` directly
+
+
+
 # [2.0.0-alpha.9](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2019-12-06)
 
 
