@@ -51,10 +51,7 @@ export const serializeParameterObject = (
 			}
 		}
 		case 'body': {
-			return pipe(
-				serializeSchemaObject(from, parameterObject.schema),
-				either.map(toSerializedParameter),
-			);
+			return pipe(serializeSchemaObject(from, parameterObject.schema), either.map(toSerializedParameter));
 		}
 	}
 };
@@ -62,7 +59,4 @@ export const serializeParameterObject = (
 export const isRequired = (parameterObject: ParameterObject): boolean =>
 	parameterObject.in === 'path'
 		? parameterObject.required
-		: pipe(
-				parameterObject.required,
-				option.getOrElse(constFalse),
-		  );
+		: pipe(parameterObject.required, option.getOrElse(constFalse));

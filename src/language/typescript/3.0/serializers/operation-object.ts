@@ -176,21 +176,12 @@ const getParameters = combineReader(
 				if (!isSome(resolved)) {
 					return left(new Error(`Unable to resolve RequestBodyObject with ref ${requestBody.$ref}`));
 				}
-				const serializedReference = pipe(
-					reference.right,
-					getSerializedRefType(from),
-				);
+				const serializedReference = pipe(reference.right, getSerializedRefType(from));
 
-				const required = pipe(
-					resolved.value.required,
-					option.getOrElse(constFalse),
-				);
+				const required = pipe(resolved.value.required, option.getOrElse(constFalse));
 				serializedBodyParameter = some(getSerializedOptionalType(required, serializedReference));
 			} else {
-				const required = pipe(
-					requestBody.required,
-					option.getOrElse(constFalse),
-				);
+				const required = pipe(requestBody.required, option.getOrElse(constFalse));
 				const serialized = pipe(
 					serializeRequestBodyObject(from, requestBody),
 					either.map(serialized => getSerializedOptionalType(required, serialized)),
@@ -206,10 +197,7 @@ const getParameters = combineReader(
 			nonEmptyArray.fromArray(serializedQueryParameters),
 			option.map(parameters => {
 				const intercalated = intercalateSerializedTypes(serializedType(';', ',', [], []), parameters);
-				return pipe(
-					intercalated,
-					getSerializedObjectType(),
-				);
+				return pipe(intercalated, getSerializedObjectType());
 			}),
 		);
 
@@ -290,18 +278,22 @@ export const serializeOperationObject = combineReader(
 					option.getOrElse(() => ''),
 				);
 
-				const argsType = concatIf(hasParameters, parameters.serializedPathParameters.map(p => p.type), [
-					`parameters: { ${queryType}${bodyType} }`,
-				]).join(',');
+				const argsType = concatIf(
+					hasParameters,
+					parameters.serializedPathParameters.map(p => p.type),
+					[`parameters: { ${queryType}${bodyType} }`],
+				).join(',');
 
 				const type = `
 					${getJSDoc(array.compact([deprecated, operation.summary]))}
 					readonly ${operationName}: (${argsType}) => ${getKindValue(kind, serializedResponses.type)};
 				`;
 
-				const argsIO = concatIf(hasParameters, parameters.pathParameters.map(p => p.name), ['parameters']).join(
-					',',
-				);
+				const argsIO = concatIf(
+					hasParameters,
+					parameters.pathParameters.map(p => p.name),
+					['parameters'],
+				).join(',');
 
 				const io = `
 					${operationName}: (${argsIO}) => {

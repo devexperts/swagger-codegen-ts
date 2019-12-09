@@ -15,10 +15,7 @@ import { Either, right } from 'fp-ts/lib/Either';
 export const serializeItemsObject = (from: Ref, itemsObject: ItemsObject): Either<Error, SerializedType> => {
 	switch (itemsObject.type) {
 		case 'array': {
-			return pipe(
-				serializeItemsObject(from, itemsObject.items),
-				either.map(getSerializedArrayType()),
-			);
+			return pipe(serializeItemsObject(from, itemsObject.items), either.map(getSerializedArrayType()));
 		}
 		case 'string': {
 			return right(getSerializedStringType(itemsObject.format));

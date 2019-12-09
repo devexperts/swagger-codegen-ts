@@ -22,27 +22,16 @@ export const serializeDocument = combineReader(
 	): Either<Error, Directory> => {
 		const componentsRef = fromString('#/components');
 
-		const paths = pipe(
-			pathsRef,
-			either.map(serializePathsObject),
-			either.chain(applyTo(document.paths)),
-		);
+		const paths = pipe(pathsRef, either.map(serializePathsObject), either.chain(applyTo(document.paths)));
 
 		const components = pipe(
 			document.components,
 			option.map(components =>
-				pipe(
-					componentsRef,
-					either.map(serializeComponentsObject),
-					either.chain(applyTo(components)),
-				),
+				pipe(componentsRef, either.map(serializeComponentsObject), either.chain(applyTo(components))),
 			),
 		);
 
-		const additional = pipe(
-			array.compact([components]),
-			sequenceEither,
-		);
+		const additional = pipe(array.compact([components]), sequenceEither);
 		return combineEither(
 			paths,
 			additional,

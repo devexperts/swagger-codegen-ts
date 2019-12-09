@@ -73,7 +73,10 @@ export const map = (entity: FSEntity, f: (content: string) => string): FSEntity 
 			return file(entity.name, f(entity.content));
 		}
 		case 'DIRECTORY': {
-			return directory(entity.name, entity.content.map(entity => map(entity, f)));
+			return directory(
+				entity.name,
+				entity.content.map(entity => map(entity, f)),
+			);
 		}
 		case 'FRAGMENT': {
 			return fragment(entity.content.map(entity => map(entity, f)));
@@ -82,12 +85,7 @@ export const map = (entity: FSEntity, f: (content: string) => string): FSEntity 
 };
 
 export const fromRef = (ref: Ref, extname: string, content: string): FSEntity => {
-	const parts = pipe(
-		ref,
-		getFullPath,
-		split('/'),
-		reverse,
-	);
+	const parts = pipe(ref, getFullPath, split('/'), reverse);
 	return tail(parts).reduce(
 		(acc: FSEntity, part: string): FSEntity => directory(part, [acc]),
 		file(`${head(parts)}${extname}`, content),

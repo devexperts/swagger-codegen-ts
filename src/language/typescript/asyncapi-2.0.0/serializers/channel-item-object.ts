@@ -82,10 +82,7 @@ export const serializeChannelItemObject = (
 			);
 		}),
 	);
-	const parameters = pipe(
-		array.compact([query, headers]),
-		sequenceEither,
-	);
+	const parameters = pipe(array.compact([query, headers]), sequenceEither);
 	return combineEither(serialized, clientRef, parameters, (serialized, clientRef, parameters) => {
 		const serializedParameters = intercalateSerializedParameters(
 			serializedParameter(';', ',', false, [], []),

@@ -23,10 +23,7 @@ export const serializeAsyncAPIObject = combineReader(
 				),
 			),
 		);
-		const additional = pipe(
-			array.compact([components]),
-			sequenceEither,
-		);
+		const additional = pipe(array.compact([components]), sequenceEither);
 		const channels = pipe(
 			fromString('#/channels'),
 			either.chain(from => serializeChannelsObject(from, asyncAPIObject.channels)),

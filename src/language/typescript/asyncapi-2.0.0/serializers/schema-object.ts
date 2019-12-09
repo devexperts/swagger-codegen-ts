@@ -96,10 +96,7 @@ const serializeChildren = (
 ): Either<Error, NonEmptyArray<SerializedType>> =>
 	traverseNEAEither(value, item =>
 		ReferenceObjectCodec.is(item)
-			? pipe(
-					fromString(item.$ref),
-					either.map(getSerializedRefType(from)),
-			  )
+			? pipe(fromString(item.$ref), either.map(getSerializedRefType(from)))
 			: serializeSchemaObjectWithRecursion(from, item, false),
 	);
 
@@ -145,10 +142,7 @@ const serializeAdditionalProperties = (
 	name?: string,
 ): Either<Error, SerializedType> => {
 	const serialized = ReferenceObjectCodec.is(properties)
-		? pipe(
-				fromString(properties.$ref),
-				either.map(getSerializedRefType(from)),
-		  )
+		? pipe(fromString(properties.$ref), either.map(getSerializedRefType(from)))
 		: serializeSchemaObjectWithRecursion(from, properties, false);
 	return pipe(
 		serialized,
@@ -176,16 +170,10 @@ const serializeProperties = (
 					);
 
 					const serialized = ReferenceObjectCodec.is(property)
-						? pipe(
-								fromString(property.$ref),
-								either.map(getSerializedRefType(from)),
-						  )
+						? pipe(fromString(property.$ref), either.map(getSerializedRefType(from)))
 						: serializeSchemaObjectWithRecursion(from, property, false);
 
-					return pipe(
-						serialized,
-						either.map(getSerializedOptionPropertyType(name, isRequired)),
-					);
+					return pipe(serialized, either.map(getSerializedOptionPropertyType(name, isRequired)));
 				}),
 				sequenceEither,
 				either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
@@ -202,13 +190,7 @@ const serializeArray = (
 	name?: string,
 ): Either<Error, SerializedType> => {
 	const serialized = ReferenceObjectCodec.is(items)
-		? pipe(
-				fromString(items.$ref),
-				either.map(getSerializedRefType(from)),
-		  )
+		? pipe(fromString(items.$ref), either.map(getSerializedRefType(from)))
 		: serializeSchemaObjectWithRecursion(from, items, false);
-	return pipe(
-		serialized,
-		either.map(getSerializedArrayType(name)),
-	);
+	return pipe(serialized, either.map(getSerializedArrayType(name)));
 };

@@ -30,10 +30,7 @@ const serializeChannelsObjectWithKind = (
 	);
 
 export const serializeChannelsObject = (from: Ref, channelsObject: ChannelsObject): Either<Error, FSEntity> => {
-	const ref = pipe(
-		from,
-		addPathParts('channels'),
-	);
+	const ref = pipe(from, addPathParts('channels'));
 	const serializedHKT = serializeChannelsObjectWithKind(from, channelsObject, 'HKT');
 	const serializedKind = serializeChannelsObjectWithKind(from, channelsObject, '*');
 	const serializedKind2 = serializeChannelsObjectWithKind(from, channelsObject, '* -> *');

@@ -44,10 +44,7 @@ const serializeSchemaObjectWithRecursion = (
 ): Either<Error, SerializedType> => {
 	// check non-typed schemas first
 	if (ReferenceObjectCodec.is(schema)) {
-		return pipe(
-			fromString(schema.$ref),
-			either.map(getSerializedRefType(from)),
-		);
+		return pipe(fromString(schema.$ref), either.map(getSerializedRefType(from)));
 	}
 
 	if (EnumSchemaObjectCodec.is(schema)) {

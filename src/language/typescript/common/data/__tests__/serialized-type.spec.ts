@@ -35,12 +35,7 @@ describe('SerializedType', () => {
 	it('getSerializedArrayType', () => {
 		assert(
 			property(serializedTypeArbitrary, name, (s, name) => {
-				expect(
-					pipe(
-						s,
-						getSerializedArrayType(name),
-					),
-				).toEqual(
+				expect(pipe(s, getSerializedArrayType(name))).toEqual(
 					serializedType(
 						`Array<${s.type}>`,
 						`array(${s.io}${when(name !== undefined, `, '${name}'`)})`,

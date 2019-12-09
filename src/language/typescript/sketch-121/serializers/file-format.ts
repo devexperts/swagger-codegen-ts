@@ -14,10 +14,7 @@ export const serializeFileFormat = combineReader(
 		const document = serializeDocument(fileFormat.document);
 
 		return combineEither(document, document =>
-			pipe(
-				nonEmptyArray.fromArray(array.compact([document])),
-				option.map(fragment),
-			),
+			pipe(nonEmptyArray.fromArray(array.compact([document])), option.map(fragment)),
 		);
 	},
 );

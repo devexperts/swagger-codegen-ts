@@ -84,7 +84,4 @@ const serializeSingleMessage = (from: Ref, message: ReferenceObject | MessageObj
 	ReferenceObjectCodec.is(message) ? serializeMessageReference(from, message) : serializeMessageObject(from, message);
 
 const serializeMessageReference = (from: Ref, reference: ReferenceObject): Either<Error, SerializedType> =>
-	pipe(
-		fromString(reference.$ref),
-		either.map(getSerializedRefType(from)),
-	);
+	pipe(fromString(reference.$ref), either.map(getSerializedRefType(from)));

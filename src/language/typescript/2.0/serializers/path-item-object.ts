@@ -61,12 +61,7 @@ const serializePath = combineReader(
 					map(operation => serializeOperationObject(from, url, 'PATCH', kind, operation, item)),
 				);
 				const operations = [get, put, post, remove, options, head, patch];
-				return pipe(
-					operations,
-					array.compact,
-					sequenceEither,
-					either.map(foldSerializedTypes),
-				);
+				return pipe(operations, array.compact, sequenceEither, either.map(foldSerializedTypes));
 			}
 		};
 		return run;

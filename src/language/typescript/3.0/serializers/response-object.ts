@@ -18,10 +18,7 @@ export const serializeResponseObject = (
 		option.chain(media => media.schema),
 		option.map(schema =>
 			ReferenceObjectCodec.is(schema)
-				? pipe(
-						fromString(schema.$ref),
-						either.map(getSerializedRefType(from)),
-				  )
+				? pipe(fromString(schema.$ref), either.map(getSerializedRefType(from)))
 				: serializeSchemaObject(from)(schema),
 		),
 	);

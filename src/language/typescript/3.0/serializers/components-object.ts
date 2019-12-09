@@ -22,10 +22,7 @@ import { serializeRequestBodyObject } from './request-body-object';
 const serializeSchema = (from: Ref, schema: SchemaObject): Either<Error, File> => {
 	const typeName = getTypeName(from.name);
 	const ioName = getIOName(from.name);
-	const serialized = pipe(
-		schema,
-		serializeSchemaObject(from, typeName),
-	);
+	const serialized = pipe(schema, serializeSchemaObject(from, typeName));
 	const dependencies = pipe(
 		serialized,
 		either.map(serialized => serializeDependencies(serialized.dependencies)),
@@ -52,10 +49,7 @@ const serializeSchemas = combineReader(
 				const resolved = ReferenceObjectCodec.is(schema)
 					? e.resolveRef(schema.$ref, SchemaObjectCodec)
 					: right(schema);
-				const ref = pipe(
-					from,
-					addPathParts('schemas', name),
-				);
+				const ref = pipe(from, addPathParts('schemas', name));
 				return pipe(
 					sequenceTEither(resolved, ref),
 					either.chain(([resolved, ref]) => serializeSchema(ref, resolved)),
@@ -93,10 +87,7 @@ const serializeParameters = combineReader(
 				const resolved = ReferenceObjectCodec.is(parameter)
 					? e.resolveRef(parameter.$ref, ParameterObjectCodec)
 					: right(parameter);
-				const ref = pipe(
-					from,
-					addPathParts('parameters', name),
-				);
+				const ref = pipe(from, addPathParts('parameters', name));
 				return pipe(
 					sequenceTEither(resolved, ref),
 					either.chain(([parameter, from]) => serializeParameter(from, parameter)),
@@ -135,10 +126,7 @@ const serializeResponses = combineReader(
 				const resolved = ReferenceObjectCodec.is(response)
 					? e.resolveRef(response.$ref, ResponseObjectCodec)
 					: right(response);
-				const ref = pipe(
-					from,
-					addPathParts('responses', name),
-				);
+				const ref = pipe(from, addPathParts('responses', name));
 				return pipe(
 					sequenceTEither(resolved, ref),
 					either.chain(([resolved, ref]) => serializeResponse(ref, resolved)),
@@ -174,10 +162,7 @@ const serializeRequestBodies = combineReader(
 				const resolved = ReferenceObjectCodec.is(requestBody)
 					? e.resolveRef(requestBody.$ref, RequestBodyObjectCodec)
 					: right(requestBody);
-				const ref = pipe(
-					from,
-					addPathParts('requestBodies', name),
-				);
+				const ref = pipe(from, addPathParts('requestBodies', name));
 				return pipe(
 					sequenceTEither(resolved, ref),
 					either.chain(([resolved, ref]) => serializeRequestBody(ref, resolved)),

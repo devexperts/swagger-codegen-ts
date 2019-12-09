@@ -25,12 +25,7 @@ import { openapi3utilsRef } from '../bundled/openapi-3-utils';
 const forParameter = (parameter: ParameterObject): string => `for parameter "${parameter.name}" in "${parameter.in}"`;
 
 export const isRequired = (parameter: ParameterObject): boolean =>
-	parameter.in === 'path'
-		? parameter.required
-		: pipe(
-				parameter.required,
-				option.getOrElse(constFalse),
-		  );
+	parameter.in === 'path' ? parameter.required : pipe(parameter.required, option.getOrElse(constFalse));
 
 export const serializeParameterObject = (
 	from: Ref,
@@ -40,15 +35,9 @@ export const serializeParameterObject = (
 		getParameterObjectSchema(parameterObject),
 		either.chain(schema => {
 			if (ReferenceObjectCodec.is(schema)) {
-				return pipe(
-					fromString(schema.$ref),
-					either.map(getSerializedRefType(from)),
-				);
+				return pipe(fromString(schema.$ref), either.map(getSerializedRefType(from)));
 			} else {
-				return pipe(
-					schema,
-					serializeSchemaObject(from),
-				);
+				return pipe(schema, serializeSchemaObject(from));
 			}
 		}),
 		either.map(fromSerializedType(isRequired(parameterObject))),
