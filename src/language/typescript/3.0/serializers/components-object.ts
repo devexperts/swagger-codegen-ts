@@ -16,7 +16,6 @@ import { ResponseObject, ResponseObjectCodec } from '../../../../schema/3.0/resp
 import { SERIALIZED_VOID_TYPE } from '../../common/data/serialized-type';
 import { serializeResponseObject } from './response-object';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { reportIfFailed } from '../../../../utils/io-ts';
 import { RequestBodyObject, RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
 import { serializeRequestBodyObject } from './request-body-object';
 

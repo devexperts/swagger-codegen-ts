@@ -9,7 +9,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { array, either, option, record } from 'fp-ts';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/asyncapi-2.0.0/reference-object';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { reportIfFailed } from '../../../../utils/io-ts';
 import { sequenceEither, sequenceTEither } from '@devexperts/utils/dist/adt/either.utils';
 import { ComponentsObject } from '../../../../schema/asyncapi-2.0.0/components-object';
 import { MessageObject, MessageObjectCodec } from '../../../../schema/asyncapi-2.0.0/message-object';
