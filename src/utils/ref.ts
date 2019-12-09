@@ -3,6 +3,7 @@ import { isNonEmpty, uniq } from 'fp-ts/lib/Array';
 import { last, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { Either, left, right } from 'fp-ts/lib/Either';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
+import { Decoder } from 'io-ts';
 
 export interface Ref<R extends string = string> {
 	readonly $ref: string;
@@ -92,3 +93,11 @@ export const getRelativePath = (from: Ref, to: Ref): string => {
 };
 
 export const getFullPath = (ref: Ref): string => path.join(ref.target, ref.path);
+
+export interface ResolveRef {
+	<A>($ref: string, decoder: Decoder<unknown, A>): Either<Error, A>;
+}
+
+export interface ResolveRefContext {
+	readonly resolveRef: ResolveRef;
+}

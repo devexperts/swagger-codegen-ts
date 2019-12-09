@@ -15,11 +15,11 @@ import { fromSerializedType } from '../../common/data/serialized-parameter';
 import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIf } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
-import { Context, getJSDoc, getKindValue, getURL, HTTPMethod } from '../../common/utils';
+import { getJSDoc, getKindValue, getURL, HTTPMethod } from '../../common/utils';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { array, either, nonEmptyArray, option } from 'fp-ts';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
-import { fromString, getRelativePath, Ref } from '../../../../utils/ref';
+import { ResolveRefContext, fromString, getRelativePath, Ref } from '../../../../utils/ref';
 import { clientRef } from '../../common/bundled/client';
 import {
 	ArrayParameterObjectCollectionFormat,
@@ -71,7 +71,7 @@ const contains = array.elem(
 );
 
 const getParameters = combineReader(
-	ask<Context>(),
+	ask<ResolveRefContext>(),
 	e => (from: Ref, operation: OperationObject, pathItem: PathItemObject): Either<Error, Parameters> => {
 		const processedParameters: ParameterObject[] = [];
 		const pathParameters: PathParameterObject[] = [];
@@ -93,9 +93,7 @@ const getParameters = combineReader(
 		for (const parameter of parameters) {
 			const resolved = ReferenceObjectCodec.is(parameter)
 				? pipe(
-						parameter,
-						e.resolveRef,
-						ParameterObjectCodec.decode,
+						e.resolveRef(parameter.$ref, ParameterObjectCodec),
 						either.mapLeft(() => new Error(`Unable to resolve parameter with $ref "${parameter.$ref}"`)),
 				  )
 				: right(parameter);

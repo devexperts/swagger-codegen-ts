@@ -36,7 +36,7 @@ const serializeSchema = (from: Ref, schema: SchemaObject): Either<Error, File> =
 			`${from.name}.ts`,
 			`
 			${dependencies}
-			
+
 			export type ${typeName} = ${serialized.type};
 			export const ${ioName} = ${serialized.io};
 		`,
@@ -51,12 +51,7 @@ const serializeSchemas = combineReader(
 			schemas,
 			record.collect((name, schema) => {
 				const resolved = ReferenceObjectCodec.is(schema)
-					? pipe(
-							schema,
-							e.resolveRef,
-							SchemaObjectCodec.decode,
-							reportIfFailed,
-					  )
+					? e.resolveRef(schema.$ref, SchemaObjectCodec)
 					: right(schema);
 				const ref = pipe(
 					from,
@@ -82,7 +77,7 @@ const serializeParameter = (from: Ref, parameterObject: ParameterObject): Either
 				`${from.name}.ts`,
 				`
 					${dependencies}
-					
+
 					export type ${getTypeName(from.name)} = ${serialized.type};
 					export const ${getIOName(from.name)} = ${serialized.io};
 				`,
@@ -97,12 +92,7 @@ const serializeParameters = combineReader(
 			parameters,
 			record.collect((name, parameter) => {
 				const resolved = ReferenceObjectCodec.is(parameter)
-					? pipe(
-							parameter,
-							e.resolveRef,
-							ParameterObjectCodec.decode,
-							reportIfFailed,
-					  )
+					? e.resolveRef(parameter.$ref, ParameterObjectCodec)
 					: right(parameter);
 				const ref = pipe(
 					from,
@@ -129,7 +119,7 @@ const serializeResponse = (from: Ref, responseObject: ResponseObject): Either<Er
 				`${from.name}.ts`,
 				`
 					${dependencies}
-					
+
 					export type ${getTypeName(from.name)} = ${serialized.type};
 					export const ${getIOName(from.name)} = ${serialized.io};
 				`,
@@ -144,12 +134,7 @@ const serializeResponses = combineReader(
 			responses,
 			record.collect((name, response) => {
 				const resolved = ReferenceObjectCodec.is(response)
-					? pipe(
-							response,
-							e.resolveRef,
-							ResponseObjectCodec.decode,
-							reportIfFailed,
-					  )
+					? e.resolveRef(response.$ref, ResponseObjectCodec)
 					: right(response);
 				const ref = pipe(
 					from,
@@ -173,7 +158,7 @@ const serializeRequestBody = (from: Ref, requestBody: RequestBodyObject): Either
 				`${from.name}.ts`,
 				`
 					${serializeDependencies(serialized.dependencies)}
-					
+
 					export type ${getTypeName(from.name)} = ${serialized.type};
 					export const ${getIOName(from.name)} = ${serialized.io};
 				`,
@@ -188,12 +173,7 @@ const serializeRequestBodies = combineReader(
 			requestBodies,
 			record.collect((name, requestBody) => {
 				const resolved = ReferenceObjectCodec.is(requestBody)
-					? pipe(
-							requestBody,
-							e.resolveRef,
-							RequestBodyObjectCodec.decode,
-							reportIfFailed,
-					  )
+					? e.resolveRef(requestBody.$ref, RequestBodyObjectCodec)
 					: right(requestBody);
 				const ref = pipe(
 					from,

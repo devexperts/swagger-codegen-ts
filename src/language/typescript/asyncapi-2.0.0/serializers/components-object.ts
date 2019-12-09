@@ -31,7 +31,7 @@ const serializeMessage = (from: Ref, messageObject: MessageObject): Either<Error
 				`${from.name}.ts`,
 				`
 					${serializeDependencies(serialized.dependencies)}
-					
+
 					export type ${typeName} = ${serialized.type};
 					export const ${ioName} = ${serialized.io};
 				`,
@@ -47,7 +47,7 @@ const serializeMessages = combineReader(
 			messages,
 			record.collect((name, message) => {
 				const resolved = ReferenceObjectCodec.is(message)
-					? reportIfFailed(MessageObjectCodec.decode(context.resolveRef(message)))
+					? context.resolveRef(message.$ref, MessageObjectCodec)
 					: right(message);
 				const ref = pipe(
 					from,
@@ -76,7 +76,7 @@ const serializeSchema = (from: Ref, schema: SchemaObject): Either<Error, FSEntit
 				`${from.name}.ts`,
 				`
 					${dependencies}
-					
+
 					export type ${typeName} = ${serialized.type};
 					export const ${ioName} = ${serialized.io};
 				`,
@@ -92,11 +92,7 @@ const serializeSchemas = combineReader(
 			schemas,
 			record.collect((name, schema) => {
 				const resolved = ReferenceObjectCodec.is(schema)
-					? pipe(
-							e.resolveRef(schema),
-							SchemaObjectCodec.decode,
-							reportIfFailed,
-					  )
+					? e.resolveRef(schema.$ref, SchemaObjectCodec)
 					: right(schema);
 				const ref = pipe(
 					from,
