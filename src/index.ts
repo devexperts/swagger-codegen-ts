@@ -16,6 +16,7 @@ export interface Language<A> {
 	(documents: Record<string, A>): Either<unknown, FSEntity>;
 }
 export interface GenerateOptions<A> {
+	readonly cwd?: string;
 	readonly out: string;
 	readonly spec: string;
 	readonly decoder: Decoder<unknown, A>;
@@ -29,7 +30,7 @@ const getUnsafe: <E, A>(e: Either<E, A>) => A = either.fold(e => {
 
 export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, void> =>
 	taskEither.tryCatch(async () => {
-		const cwd = process.cwd();
+		const cwd = options.cwd || process.cwd();
 		const out = path.isAbsolute(options.out) ? options.out : path.resolve(cwd, options.out);
 		const spec = path.isAbsolute(options.spec) ? options.spec : path.resolve(cwd, options.spec);
 		log('Processing', spec);
