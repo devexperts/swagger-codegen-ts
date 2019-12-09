@@ -48,7 +48,6 @@ import {
 	serializedFragment,
 	SerializedFragment,
 } from '../../common/data/serialized-fragment';
-import { reportIfFailed } from '../../../../utils/io-ts';
 import { SchemaObjectCodec } from '../../../../schema/3.0/schema-object';
 
 const getOperationName = (operation: OperationObject, method: HTTPMethod): string =>
