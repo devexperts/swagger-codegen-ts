@@ -1,3 +1,17 @@
+# [2.0.0-alpha.11](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2019-12-09)
+
+
+### Bug Fixes
+
+* revert join to resolve ([c30661a](https://github.com/devexperts/swagger-codegen-ts/commit/c30661a))
+
+
+### Features
+
+* support cwd as `generate` argument ([3d46f56](https://github.com/devexperts/swagger-codegen-ts/commit/3d46f56))
+
+
+
 # [2.0.0-alpha.10](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2019-12-09)
 
 
