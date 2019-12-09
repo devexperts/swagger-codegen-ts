@@ -1,8 +1,7 @@
 import { SerializedPathParameter } from './data/serialized-path-parameter';
 import { unless } from '../../../utils/string';
 import { Options } from 'prettier';
-import { fromString } from '../../../utils/ref';
-import { ReferenceObject } from '../../../schema/3.0/reference-object';
+import { fromString, ResolveRefContext } from '../../../utils/ref';
 import { Kind } from '../../../utils/types';
 import { ask } from 'fp-ts/lib/Reader';
 
@@ -44,11 +43,6 @@ export interface SerializeOptions {
 
 export const pathsRef = fromString('#/paths');
 
-export interface Context {
-	readonly resolveRef: (referenceObject: ReferenceObject) => unknown;
-}
-export const context = ask<Context>();
-
 export const getKindValue = (kind: Kind, value: string): string => {
 	switch (kind) {
 		case 'HKT': {
@@ -69,3 +63,5 @@ export const UNSAFE_PROPERTY_PATTERN = /[^a-zA-Z_0-9]/;
 const REPLACE_PATTERN = new RegExp(UNSAFE_PROPERTY_PATTERN, 'g');
 export const getSafePropertyName = (value: string): string =>
 	value.replace(REPLACE_PATTERN, '_').replace(/^(\d)/, '_$1') || '_';
+
+export const context = ask<ResolveRefContext>();

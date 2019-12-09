@@ -9,7 +9,7 @@ import { serialize as serializeSketch } from '../src/language/typescript/sketch-
 import { OpenapiObjectCodec } from '../src/schema/3.0/openapi-object';
 import * as del from 'del';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { either, option, taskEither } from 'fp-ts';
+import { either, taskEither } from 'fp-ts';
 import { identity } from 'fp-ts/lib/function';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
 import { FileFormatCodec } from '../src/schema/sketch-121/file-format';
@@ -22,47 +22,35 @@ const out = path.resolve(cwd, 'out');
 const test1 = generate({
 	spec: path.resolve(__dirname, 'specs/2.0/json/swagger.json'),
 	out,
-	language: (documents, resolveRef) =>
-		serializeSwagger2({
-			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
-		})(documents),
+	language: serializeSwagger2,
 	decoder: SwaggerObject,
 });
 
 const test2 = generate({
 	spec: path.resolve(__dirname, 'specs/2.0/yaml/demo.yml'),
 	out,
-	language: (documents, resolveRef) =>
-		serializeSwagger2({
-			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
-		})(documents),
+	language: serializeSwagger2,
 	decoder: SwaggerObject,
 });
 
 const test3 = generate({
 	spec: path.resolve(__dirname, 'specs/3.0/demo.yml'),
 	out,
-	language: (documents, resolveRef) =>
-		serializeOpenAPI3({
-			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
-		})(documents),
+	language: serializeOpenAPI3,
 	decoder: OpenapiObjectCodec,
 });
 
 const test4 = generate({
 	spec: path.resolve(__dirname, 'specs/asyncapi-2.0.0/streetlights-api.yml'),
 	out,
-	language: (documents, resolveRef) =>
-		serializeAsyncAPI({
-			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
-		})(documents),
+	language: serializeAsyncAPI,
 	decoder: AsyncAPIObjectCodec,
 });
 
 const test5 = generate({
 	spec: path.resolve(__dirname, 'specs/sketch/demo.sketch'),
 	out,
-	language: documents => serializeSketch({ nameStorage: createNameStorage() })(documents),
+	language: () => serializeSketch({ nameStorage: createNameStorage() }),
 	decoder: FileFormatCodec,
 });
 

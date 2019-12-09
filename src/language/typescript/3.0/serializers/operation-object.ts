@@ -1,4 +1,4 @@
-import { Context, getJSDoc, getKindValue, getURL, HTTPMethod } from '../../common/utils';
+import { getJSDoc, getKindValue, getURL, HTTPMethod } from '../../common/utils';
 import {
 	getSerializedPropertyType,
 	getSerializedObjectType,
@@ -30,7 +30,7 @@ import {
 import { concatIf } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
 import { serializeRequestBodyObject } from './request-body-object';
-import { fromString, getRelativePath, Ref } from '../../../../utils/ref';
+import { ResolveRefContext, fromString, getRelativePath, Ref } from '../../../../utils/ref';
 import { OperationObject } from '../../../../schema/3.0/operation-object';
 import { ParameterObject, ParameterObjectCodec } from '../../../../schema/3.0/parameter-object';
 import { RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
@@ -72,7 +72,7 @@ const eqParameterByNameAndIn: Eq<ParameterObject> = getStructEq({
 const contains = array.elem(eqParameterByNameAndIn);
 
 const getParameters = combineReader(
-	ask<Context>(),
+	ask<ResolveRefContext>(),
 	e => (from: Ref, operation: OperationObject, pathItem: PathItemObject): Either<Error, Parameters> => {
 		const processedParameters: ParameterObject[] = [];
 		const pathParameters: ParameterObject[] = [];
@@ -87,7 +87,7 @@ const getParameters = combineReader(
 
 		for (const parameter of parameters) {
 			const resolved = ReferenceObjectCodec.is(parameter)
-				? reportIfFailed(ParameterObjectCodec.decode(e.resolveRef(parameter)))
+				? e.resolveRef(parameter.$ref, ParameterObjectCodec)
 				: right(parameter);
 
 			if (isLeft(resolved)) {
@@ -134,7 +134,7 @@ const getParameters = combineReader(
 						schema,
 						either.chain(schema =>
 							ReferenceObjectCodec.is(schema)
-								? reportIfFailed(SchemaObjectCodec.decode(e.resolveRef(schema)))
+								? e.resolveRef(schema.$ref, SchemaObjectCodec)
 								: right(schema),
 						),
 					);
@@ -172,7 +172,7 @@ const getParameters = combineReader(
 				if (isLeft(reference)) {
 					return left(new Error(`Invalid RequestBodyObject.$ref "${requestBody.$ref}"`));
 				}
-				const resolved = option.fromEither(RequestBodyObjectCodec.decode(e.resolveRef(requestBody)));
+				const resolved = option.fromEither(e.resolveRef(requestBody.$ref, RequestBodyObjectCodec));
 
 				if (!isSome(resolved)) {
 					return left(new Error(`Unable to resolve RequestBodyObject with ref ${requestBody.$ref}`));
@@ -308,7 +308,7 @@ export const serializeOperationObject = combineReader(
 					${operationName}: (${argsIO}) => {
 						${bodyIO}
 						${queryIO}
-	
+
 						return e.httpClient.chain(
 							e.httpClient.request({
 								url: ${getURL(pattern, parameters.serializedPathParameters)},
