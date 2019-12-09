@@ -46,12 +46,12 @@ export const write = async (destination: string, entity: FSEntity): Promise<void
 	switch (entity.type) {
 		case 'FILE': {
 			const normalizedEntityName = normalizeFilePath(entity.name);
-			const filePath = path.resolve(destination, normalizedEntityName);
+			const filePath = path.join(destination, normalizedEntityName);
 			await fs.outputFile(filePath, entity.content);
 			break;
 		}
 		case 'DIRECTORY': {
-			const directoryPath = path.resolve(destination, entity.name);
+			const directoryPath = path.join(destination, entity.name);
 			await fs.mkdirp(directoryPath);
 			for (const contentEntity of entity.content) {
 				await write(directoryPath, contentEntity);

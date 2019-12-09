@@ -1,5 +1,5 @@
 import { defaultPrettierConfig, SerializeOptions } from '../common/utils';
-import { directory, FSEntity, map as mapFS } from '../../../utils/fs';
+import { directory, fragment, FSEntity, map as mapFS } from '../../../utils/fs';
 import { Either } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { array, either, option, record } from 'fp-ts';
@@ -12,7 +12,6 @@ import { serializeFileFormat } from './serializers/file-format';
 export const serialize = combineReader(
 	serializeFileFormat,
 	serializeFileFormat => (
-		out: string,
 		files: Record<string, FileFormat>,
 		options: SerializeOptions = {},
 	): Either<Error, FSEntity> =>
@@ -26,7 +25,7 @@ export const serialize = combineReader(
 			),
 			sequenceEither,
 			either.map(serialized =>
-				mapFS(directory(out, array.compact(serialized)), content =>
+				mapFS(fragment(array.compact(serialized)), content =>
 					format(content, options.prettierConfig || defaultPrettierConfig),
 				),
 			),

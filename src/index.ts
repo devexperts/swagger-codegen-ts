@@ -15,7 +15,6 @@ export interface GenerateOptions<A> {
 	readonly spec: string;
 	readonly decoder: Decoder<unknown, A>;
 	readonly language: (
-		out: string,
 		documents: Record<string, A>,
 		resolveRef: (ref: string) => Either<unknown, unknown>,
 	) => Either<unknown, FSEntity>;
@@ -65,10 +64,7 @@ export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, vo
 
 		log('Writing to', out);
 
-		await write(
-			out,
-			getUnsafe(options.language(out, specs, ref => either.tryCatch(() => $refs.get(ref), identity))),
-		);
+		await write(out, getUnsafe(options.language(specs, ref => either.tryCatch(() => $refs.get(ref), identity))));
 
 		log('Done');
 	}, identity);

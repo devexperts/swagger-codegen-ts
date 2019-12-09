@@ -22,47 +22,47 @@ const out = path.resolve(cwd, 'out');
 const test1 = generate({
 	spec: path.resolve(__dirname, 'specs/2.0/json/swagger.json'),
 	out,
-	language: (out, documents, resolveRef) =>
+	language: (documents, resolveRef) =>
 		serializeSwagger2({
 			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
-		})(out, documents),
+		})(documents),
 	decoder: SwaggerObject,
 });
 
 const test2 = generate({
 	spec: path.resolve(__dirname, 'specs/2.0/yaml/demo.yml'),
 	out,
-	language: (out, documents, resolveRef) =>
+	language: (documents, resolveRef) =>
 		serializeSwagger2({
 			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
-		})(out, documents),
+		})(documents),
 	decoder: SwaggerObject,
 });
 
 const test3 = generate({
 	spec: path.resolve(__dirname, 'specs/3.0/demo.yml'),
 	out,
-	language: (out, documents, resolveRef) =>
+	language: (documents, resolveRef) =>
 		serializeOpenAPI3({
 			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
-		})(out, documents),
+		})(documents),
 	decoder: OpenapiObjectCodec,
 });
 
 const test4 = generate({
 	spec: path.resolve(__dirname, 'specs/asyncapi-2.0.0/streetlights-api.yml'),
 	out,
-	language: (out, documents, resolveRef) =>
+	language: (documents, resolveRef) =>
 		serializeAsyncAPI({
 			resolveRef: referenceObject => option.toUndefined(option.fromEither(resolveRef(referenceObject.$ref))),
-		})(out, documents),
+		})(documents),
 	decoder: AsyncAPIObjectCodec,
 });
 
 const test5 = generate({
 	spec: path.resolve(__dirname, 'specs/sketch/demo.sketch'),
 	out,
-	language: (out1, documents) => serializeSketch({ nameStorage: createNameStorage() })(out, documents),
+	language: documents => serializeSketch({ nameStorage: createNameStorage() })(documents),
 	decoder: FileFormatCodec,
 });
 
