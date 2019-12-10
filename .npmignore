@@ -14,6 +14,6 @@
 /tslint.json
 /.eslintignore
 /.eslintrc.json
-.travis.yml
+/.travis.yml
 /tsconfig.build.json
 /tsconfig.test.json
