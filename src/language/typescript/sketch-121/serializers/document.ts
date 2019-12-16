@@ -7,7 +7,7 @@ import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { serializeSharedTextStyleContainer } from './objects/shared-text-style-container';
 import { serializeForeignLayerStyle } from './objects/foreign-layer-style';
-import { traverseNEAEither } from '../../../../utils/either';
+import { traverseNEAEither, traverseOptionEither } from '../../../../utils/either';
 import { sequenceOptionEither } from '../../../../utils/option';
 import { serializeForeignTextStyle } from './objects/foreign-text-style';
 import { Option } from 'fp-ts/lib/Option';
@@ -65,15 +65,11 @@ export const serializeDocument = combineReader(
 			either.map(option.map(assets => file('assets.ts', assets))),
 		);
 
-		const layers = pipe(
-			nonEmptyArray.fromArray(document.pages),
-			option.map(pages =>
-				pipe(
-					traverseNEAEither(pages, serializePage),
-					either.map(pagesLayers => file('layers.ts', pagesLayers.join(''))),
-				),
+		const layers = traverseOptionEither(nonEmptyArray.fromArray(document.pages), pages =>
+			pipe(
+				traverseNEAEither(pages, serializePage),
+				either.map(pagesLayers => file('layers.ts', pagesLayers.join(''))),
 			),
-			sequenceOptionEither,
 		);
 
 		return combineEither(
