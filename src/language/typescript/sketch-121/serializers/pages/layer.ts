@@ -7,8 +7,7 @@ import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { context } from '../../utils';
 import { option, either } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { traverseArrayEither } from '../../../../../utils/either';
-import { sequenceOptionEither } from '../../../../../utils/option';
+import { traverseArrayEither, traverseOptionEither } from '../../../../../utils/either';
 import { identity, constant } from 'fp-ts/lib/function';
 
 export const serializeLayer = combineReader(context, context => (layer: Layer, jsdoc?: string[]): Either<
@@ -18,15 +17,11 @@ export const serializeLayer = combineReader(context, context => (layer: Layer, j
 	const safeName = 'layer_' + context.nameStorage.getSafeName(layer.do_objectID, layer.name);
 	const layerStyle = serializeStyle(layer.style);
 
-	const nestedLayersStyles = pipe(
-		layer.layers,
-		option.map(layers =>
-			pipe(
-				traverseArrayEither(layers, serializeLayer(context)),
-				either.map(styles => styles.join('')),
-			),
+	const nestedLayersStyles = traverseOptionEither(layer.layers, layers =>
+		pipe(
+			traverseArrayEither(layers, serializeLayer(context)),
+			either.map(styles => styles.join('')),
 		),
-		sequenceOptionEither,
 	);
 
 	return combineEither(
