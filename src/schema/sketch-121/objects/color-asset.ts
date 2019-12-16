@@ -1,17 +1,17 @@
 import { Color, ColorCodec } from './color';
 import { Codec } from '../../../utils/io-ts';
 import { string, type } from 'io-ts';
-import { UUID } from 'io-ts-types/lib/UUID';
+import { ObjectID, ObjectIDCodec } from './object-id';
 
 export interface ColorAsset {
-	readonly do_objectID: UUID;
+	readonly do_objectID: ObjectID;
 	readonly name: string;
 	readonly color: Color;
 }
 
 export const ColorAssetCodec: Codec<ColorAsset> = type(
 	{
-		do_objectID: UUID,
+		do_objectID: ObjectIDCodec,
 		name: string,
 		color: ColorCodec,
 	},

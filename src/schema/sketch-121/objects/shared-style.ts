@@ -1,10 +1,10 @@
 import { Codec } from '../../../utils/io-ts';
 import { string, type } from 'io-ts';
-import { UUID } from 'io-ts-types/lib/UUID';
 import { Style, StyleCodec } from './style';
+import { ObjectID, ObjectIDCodec } from './object-id';
 
 export interface SharedStyle {
-	readonly do_objectID: UUID;
+	readonly do_objectID: ObjectID;
 	readonly name: string;
 	readonly value: Style;
 }
@@ -12,7 +12,7 @@ export interface SharedStyle {
 export const SharedStyleCodec: Codec<SharedStyle> = type(
 	{
 		name: string,
-		do_objectID: UUID,
+		do_objectID: ObjectIDCodec,
 		value: StyleCodec,
 	},
 	'SharedStyle',

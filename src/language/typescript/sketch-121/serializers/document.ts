@@ -13,6 +13,7 @@ import { serializeForeignTextStyle } from './objects/foreign-text-style';
 import { Option } from 'fp-ts/lib/Option';
 import { file, fragment, FSEntity } from '../../../../utils/fs';
 import { serializeAssetCollection } from './objects/asset-collection';
+import { serializePage } from './pages/page';
 
 export const serializeDocument = combineReader(
 	serializeSharedStyleContainer,
@@ -20,12 +21,14 @@ export const serializeDocument = combineReader(
 	serializeForeignLayerStyle,
 	serializeForeignTextStyle,
 	serializeAssetCollection,
+	serializePage,
 	(
 		serializeSharedStyleContainer,
 		serializeSharedTextStyleContainer,
 		serializeForeignLayerStyle,
 		serializeForeignTextStyle,
 		serializeAssetCollection,
+		serializePage,
 	) => (document: Document): Either<Error, Option<FSEntity>> => {
 		const layerStyles = pipe(
 			serializeSharedStyleContainer(document.layerStyles),
@@ -62,16 +65,35 @@ export const serializeDocument = combineReader(
 			either.map(option.map(assets => file('assets.ts', assets))),
 		);
 
+		const layers = pipe(
+			nonEmptyArray.fromArray(document.pages),
+			option.map(pages =>
+				pipe(
+					traverseNEAEither(pages, serializePage),
+					either.map(pagesLayers => file('layers.ts', pagesLayers.join(''))),
+				),
+			),
+			sequenceOptionEither,
+		);
+
 		return combineEither(
 			layerStyles,
 			layerTextStyles,
 			foreignLayerStyles,
 			foreignTextStyles,
 			assets,
-			(layerStyles, layerTextStyles, foreignLayerStyles, foreignTextStyles, assets) =>
+			layers,
+			(layerStyles, layerTextStyles, foreignLayerStyles, foreignTextStyles, assets, layers) =>
 				pipe(
 					nonEmptyArray.fromArray(
-						array.compact([layerStyles, layerTextStyles, foreignLayerStyles, foreignTextStyles, assets]),
+						array.compact([
+							layerStyles,
+							layerTextStyles,
+							foreignLayerStyles,
+							foreignTextStyles,
+							assets,
+							layers,
+						]),
 					),
 					option.map(fragment),
 				),
