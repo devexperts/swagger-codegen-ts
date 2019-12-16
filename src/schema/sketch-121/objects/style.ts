@@ -1,4 +1,3 @@
-import { UUID } from 'io-ts-types/lib/UUID';
 import { Codec } from '../../../utils/io-ts';
 import { array, type } from 'io-ts';
 import { Option } from 'fp-ts/lib/Option';
@@ -10,9 +9,10 @@ import { BorderOptions, BorderOptionsCodec } from './border-options';
 import { InnerShadow, InnerShadowCodec } from './inner-shadow';
 import { Shadow, ShadowCodec } from './shadow';
 import { TextStyle, TextStyleCodec } from './text-style';
+import { ObjectID, ObjectIDCodec } from './object-id';
 
 export interface Style {
-	readonly do_objectID: UUID;
+	readonly do_objectID: ObjectID;
 	readonly borders: Option<Border[]>;
 	readonly borderOptions: BorderOptions;
 	readonly fills: Option<Fill[]>;
@@ -24,7 +24,7 @@ export interface Style {
 
 export const StyleCodec: Codec<Style> = type(
 	{
-		do_objectID: UUID,
+		do_objectID: ObjectIDCodec,
 		borders: optionFromNullable(array(BorderCodec)),
 		borderOptions: BorderOptionsCodec,
 		fills: optionFromNullable(array(FillCodec)),

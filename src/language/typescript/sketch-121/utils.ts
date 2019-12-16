@@ -15,7 +15,7 @@ export const createNameStorage = () => {
 		const nameWithCounter = safeName + counter;
 		nameToCounter.set(safeName, counter + 1);
 		return !nameToUuid.has(nameWithCounter) ? nameWithCounter : getSafeNameWithCounter(safeName);
-	}
+	};
 
 	const getSafeName = (uuid: string, name: string): string => {
 		const safeName = getSafePropertyName(name);
