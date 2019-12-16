@@ -14,7 +14,8 @@ export const serializeLayer = combineReader(context, context => (layer: Layer, j
 	Error,
 	string
 > => {
-	const safeName = 'layer_' + context.nameStorage.getSafeName(layer.do_objectID, layer.name);
+	const layerNameWithPrefix = `layer_${layer.name}`;
+	const safeName = context.nameStorage.getSafeName(layer.do_objectID, layerNameWithPrefix);
 	const layerStyle = serializeStyle(layer.style);
 
 	const nestedLayersStyles = traverseOptionEither(layer.layers, layers =>
