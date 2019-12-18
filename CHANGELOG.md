@@ -1,3 +1,18 @@
+# [2.0.0-alpha.12](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2019-12-18)
+
+
+### Bug Fixes
+
+* **sketch:** add prefix to original layer name ([fb00606](https://github.com/devexperts/swagger-codegen-ts/commit/fb00606))
+* **sketch:** avoid collision for names with counter ([2b3d610](https://github.com/devexperts/swagger-codegen-ts/commit/2b3d610))
+
+
+### Features
+
+* support extract layers from sketch file ([4901aa1](https://github.com/devexperts/swagger-codegen-ts/commit/4901aa1))
+
+
+
 # [2.0.0-alpha.11](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2019-12-09)
 
 
