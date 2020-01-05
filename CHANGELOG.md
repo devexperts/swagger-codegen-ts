@@ -1,3 +1,106 @@
+# [2.0.0-alpha.12](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2019-12-18)
+
+
+### Bug Fixes
+
+* **sketch:** add prefix to original layer name ([fb00606](https://github.com/devexperts/swagger-codegen-ts/commit/fb00606))
+* **sketch:** avoid collision for names with counter ([2b3d610](https://github.com/devexperts/swagger-codegen-ts/commit/2b3d610))
+
+
+### Features
+
+* support extract layers from sketch file ([4901aa1](https://github.com/devexperts/swagger-codegen-ts/commit/4901aa1))
+
+
+
+# [2.0.0-alpha.11](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2019-12-09)
+
+
+### Bug Fixes
+
+* revert join to resolve ([c30661a](https://github.com/devexperts/swagger-codegen-ts/commit/c30661a))
+
+
+### Features
+
+* support cwd as `generate` argument ([3d46f56](https://github.com/devexperts/swagger-codegen-ts/commit/3d46f56))
+
+
+
+# [2.0.0-alpha.10](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2019-12-09)
+
+
+### Bug Fixes
+
+* fix '..' and '.' in spec names ([3cec483](https://github.com/devexperts/swagger-codegen-ts/commit/3cec483))
+
+
+### Code Refactoring
+
+* simplify resolveRef ([763cc68](https://github.com/devexperts/swagger-codegen-ts/commit/763cc68))
+
+
+### BREAKING CHANGES
+
+* language is now a Reader of ResolveRefContext
+* resolveRef now requires decoder as a second argument
+* generate doesn't include `out` path in spec output
+* language doesn't accept `out` path and can return `Fragment` to write to `out` directly
+
+
+
+# [2.0.0-alpha.9](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2019-12-06)
+
+
+### Bug Fixes
+
+* fix encodeURIComponent in query serialization ([d7229d3](https://github.com/devexperts/swagger-codegen-ts/commit/d7229d3))
+
+
+
+# [2.0.0-alpha.8](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2019-12-05)
+
+
+### Bug Fixes
+
+* fix encodeURIComponent in query serialization ([08a6ed0](https://github.com/devexperts/swagger-codegen-ts/commit/08a6ed0))
+
+
+
+# [2.0.0-alpha.7](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2019-12-04)
+
+
+### Code Refactoring
+
+* use Integer type from io-ts ([#84](https://github.com/devexperts/swagger-codegen-ts/issues/84)) ([d63fd60](https://github.com/devexperts/swagger-codegen-ts/commit/d63fd60))
+
+
+### Features
+
+* implement support of kebab case in property names ([#83](https://github.com/devexperts/swagger-codegen-ts/issues/83)) ([ff937aa](https://github.com/devexperts/swagger-codegen-ts/commit/ff937aa)), closes [#82](https://github.com/devexperts/swagger-codegen-ts/issues/82)
+
+
+### BREAKING CHANGES
+
+* removed empty utils file
+
+
+
+# [2.0.0-alpha.6](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2019-11-26)
+
+
+### Bug Fixes
+
+* support windows os environment ([3ef7cb0](https://github.com/devexperts/swagger-codegen-ts/commit/3ef7cb0))
+
+
+### Features
+
+* sketch file format ([51fa6c6](https://github.com/devexperts/swagger-codegen-ts/commit/51fa6c6)), closes [#76](https://github.com/devexperts/swagger-codegen-ts/issues/76)
+* type codec names for swagger 2.0 ([652f864](https://github.com/devexperts/swagger-codegen-ts/commit/652f864))
+
+
+
 # [2.0.0-alpha.5](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2019-11-15)
 
 

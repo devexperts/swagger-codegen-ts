@@ -15,11 +15,11 @@ import { fromSerializedType } from '../../common/data/serialized-parameter';
 import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIf } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
-import { Context, getJSDoc, getKindValue, getURL, HTTPMethod } from '../../common/utils';
+import { getJSDoc, getKindValue, getURL, HTTPMethod } from '../../common/utils';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { array, either, nonEmptyArray, option } from 'fp-ts';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
-import { fromString, getRelativePath, Ref } from '../../../../utils/ref';
+import { ResolveRefContext, fromString, getRelativePath, Ref } from '../../../../utils/ref';
 import { clientRef } from '../../common/bundled/client';
 import {
 	ArrayParameterObjectCollectionFormat,
@@ -47,10 +47,11 @@ import { Kind } from '../../../../utils/types';
 import {
 	combineFragmentsK,
 	getSerializedOptionCallFragment,
-	intercalateSerializedFragments,
+	intercalateSerializedFragmentsNEA,
 	serializedFragment,
 	SerializedFragment,
 } from '../../common/data/serialized-fragment';
+import { sequenceOptionEither } from '../../../../utils/option';
 
 interface Parameters {
 	readonly pathParameters: PathParameterObject[];
@@ -70,7 +71,7 @@ const contains = array.elem(
 );
 
 const getParameters = combineReader(
-	ask<Context>(),
+	ask<ResolveRefContext>(),
 	e => (from: Ref, operation: OperationObject, pathItem: PathItemObject): Either<Error, Parameters> => {
 		const processedParameters: ParameterObject[] = [];
 		const pathParameters: PathParameterObject[] = [];
@@ -92,9 +93,7 @@ const getParameters = combineReader(
 		for (const parameter of parameters) {
 			const resolved = ReferenceObjectCodec.is(parameter)
 				? pipe(
-						parameter,
-						e.resolveRef,
-						ParameterObjectCodec.decode,
+						e.resolveRef(parameter.$ref, ParameterObjectCodec),
 						either.mapLeft(() => new Error(`Unable to resolve parameter with $ref "${parameter.$ref}"`)),
 				  )
 				: right(parameter);
@@ -192,18 +191,18 @@ const getParameters = combineReader(
 					either.map(serialized => getSerializedOptionalType(required, serialized)),
 				);
 			}),
-			option.option.sequence(either.either),
+			sequenceOptionEither,
 		);
 
 		const queryString = pipe(
 			nonEmptyArray.fromArray(queryStringFragments),
 			option.map(queryStringFragments =>
-				intercalateSerializedFragments(serializedFragment(',', [], []), queryStringFragments),
+				intercalateSerializedFragmentsNEA(serializedFragment(',', [], []), queryStringFragments),
 			),
 			option.map(f =>
 				combineFragmentsK(f, c =>
 					serializedFragment(
-						`encodeURIComponent(compact([${c}]).join('&'))`,
+						`compact([${c}]).join('&')`,
 						[serializedDependency('compact', 'fp-ts/lib/Array')],
 						[],
 					),
@@ -273,24 +272,28 @@ export const serializeOperationObject = combineReader(
 					option.getOrElse(() => ''),
 				);
 
-				const argsType = concatIf(hasParameters, parameters.serializedPathParameters.map(p => p.type), [
-					`parameters: { ${queryType}${bodyType} }`,
-				]).join(',');
+				const argsType = concatIf(
+					hasParameters,
+					parameters.serializedPathParameters.map(p => p.type),
+					[`parameters: { ${queryType}${bodyType} }`],
+				).join(',');
 
 				const type = `
 					${getJSDoc(array.compact([deprecated, operation.summary]))}
 					readonly ${operationName}: (${argsType}) => ${getKindValue(kind, serializedResponses.type)};
 				`;
 
-				const argsIO = concatIf(hasParameters, parameters.pathParameters.map(p => p.name), ['parameters']).join(
-					',',
-				);
+				const argsIO = concatIf(
+					hasParameters,
+					parameters.pathParameters.map(p => p.name),
+					['parameters'],
+				).join(',');
 
 				const io = `
 					${operationName}: (${argsIO}) => {
 						${bodyIO}
 						${queryIO}
-				
+
 						return e.httpClient.chain(
 							e.httpClient.request({
 								url: ${getURL(url, parameters.serializedPathParameters)},
@@ -399,7 +402,11 @@ export const serializeQueryParameterObject = (
 		case 'integer':
 		case 'number':
 		case 'boolean': {
-			const f = serializedFragment(`value => '${parameter.name}=' + value`, [], []);
+			const f = serializedFragment(
+				`value => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(value)`,
+				[],
+				[],
+			);
 			return right(getSerializedOptionCallFragment(!required, f, encoded));
 		}
 		case 'array': {
@@ -414,12 +421,16 @@ export const serializeQueryParameterObject = (
 				case 'tsv':
 				case 'pipes': {
 					const s = getCollectionSeparator(collectionFormat);
-					const f = serializedFragment(`value => '${parameter.name}=' + value.join('${s}')`, [], []);
+					const f = serializedFragment(
+						`value => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(value.join('${s}'))`,
+						[],
+						[],
+					);
 					return right(getSerializedOptionCallFragment(!required, f, encoded));
 				}
 				case 'multi': {
 					const f = serializedFragment(
-						`value => value.map(item => '${parameter.name}=' + item).join('&')`,
+						`value => value.map(item => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(item)).join('&')`,
 						[],
 						[],
 					);

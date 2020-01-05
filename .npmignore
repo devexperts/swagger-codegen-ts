@@ -12,3 +12,8 @@
 /package-lock.json
 /.idea
 /tslint.json
+/.eslintignore
+/.eslintrc.json
+/.travis.yml
+/tsconfig.build.json
+/tsconfig.test.json

@@ -11,7 +11,7 @@ import { intercalate } from 'fp-ts/lib/Foldable';
 import { array, getMonoid, uniq } from 'fp-ts/lib/Array';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
 import { getRelativePath, Ref, uniqRefs } from '../../../../utils/ref';
-import { getIOName, getTypeName } from '../utils';
+import { getIOName, getTypeName, UNSAFE_PROPERTY_PATTERN } from '../utils';
 import { concatIfL } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
 import { head, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
@@ -72,15 +72,7 @@ export const SERIALIZED_BOOLEAN_TYPE = serializedType(
 	[],
 );
 export const SERIALIZED_NUMBER_TYPE = serializedType('number', 'number', [serializedDependency('number', 'io-ts')], []);
-export const getSerializedIntegerType = (from: Ref, utilsRef: Ref): SerializedType => {
-	const pathToUtils = getRelativePath(from, utilsRef);
-	return serializedType(
-		'Integer',
-		'integer',
-		[serializedDependency('Integer', pathToUtils), serializedDependency('integer', pathToUtils)],
-		[],
-	);
-};
+export const SERIALIZED_INTEGER_TYPE = serializedType('Int', 'Int', [serializedDependency('Int', 'io-ts')], []);
 export const SERIALIZED_DATE_TYPE = serializedType(
 	'Date',
 	'DateFromISOString',
@@ -192,11 +184,7 @@ export const getSerializedIntersectionType = (serialized: NonEmptyArray<Serializ
 };
 
 export const getSerializedEnumType = (value: NonEmptyArray<JSONPrimitive>): SerializedType =>
-	pipe(
-		value,
-		nonEmptyArray.map(getSerializedPrimitiveType),
-		getSerializedUnionType,
-	);
+	pipe(value, nonEmptyArray.map(getSerializedPrimitiveType), getSerializedUnionType);
 
 export const getSerializedPrimitiveType = (value: JSONPrimitive): SerializedType => {
 	const serialized = JSON.stringify(value);
@@ -218,13 +206,15 @@ export const getSerializedPropertyType = (
 	name: string,
 	isRequired: boolean,
 	serialized: SerializedType,
-): SerializedType =>
-	serializedType(
-		`${name}${when(!isRequired, '?')}: ${serialized.type}`,
-		`${name}: ${serialized.io}`,
+): SerializedType => {
+	const safeName = UNSAFE_PROPERTY_PATTERN.test(name) ? `['${name}']` : name;
+	return serializedType(
+		`${safeName}${when(!isRequired, '?')}: ${serialized.type}`,
+		`${safeName}: ${serialized.io}`,
 		serialized.dependencies,
 		serialized.refs,
 	);
+};
 
 export const getSerializedOptionPropertyType = (name: string, isRequired: boolean) => (
 	serialized: SerializedType,

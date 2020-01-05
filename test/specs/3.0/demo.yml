@@ -99,6 +99,8 @@ components:
               type: 'string'
             self:
               $ref: '#/components/schemas/TestAllOf'
+            kebab-property:
+              type: string
   requestBodies:
     RefRequestBody:
       description: ref request body

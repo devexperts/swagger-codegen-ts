@@ -16,7 +16,7 @@ import { getRelativePath } from '../../../../../utils/ref';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { arbitrary, nonEmptyArray } from '../../../../../utils/fast-check';
 import { none, some } from 'fp-ts/lib/Option';
-import { getIOName, getTypeName } from '../../utils';
+import { getIOName, getTypeName, UNSAFE_PROPERTY_PATTERN } from '../../utils';
 import { when } from '../../../../../utils/string';
 import { head } from 'fp-ts/lib/NonEmptyArray';
 
@@ -35,12 +35,7 @@ describe('SerializedType', () => {
 	it('getSerializedArrayType', () => {
 		assert(
 			property(serializedTypeArbitrary, name, (s, name) => {
-				expect(
-					pipe(
-						s,
-						getSerializedArrayType(name),
-					),
-				).toEqual(
+				expect(pipe(s, getSerializedArrayType(name))).toEqual(
 					serializedType(
 						`Array<${s.type}>`,
 						`array(${s.io}${when(name !== undefined, `, '${name}'`)})`,
@@ -55,11 +50,12 @@ describe('SerializedType', () => {
 		assert(
 			property(string(), serializedTypeArbitrary, boolean(), (name, s, isRequired) => {
 				const serialized = getSerializedOptionPropertyType(name, isRequired)(s);
+				const safeName = UNSAFE_PROPERTY_PATTERN.test(name) ? `['${name}']` : name;
 				const expected = isRequired
-					? serializedType(`${name}: ${s.type}`, `${name}: ${s.io}`, s.dependencies, s.refs)
+					? serializedType(`${safeName}: ${s.type}`, `${safeName}: ${s.io}`, s.dependencies, s.refs)
 					: serializedType(
-							`${name}: Option<${s.type}>`,
-							`${name}: optionFromNullable(${s.io})`,
+							`${safeName}: Option<${s.type}>`,
+							`${safeName}: optionFromNullable(${s.io})`,
 							[
 								...s.dependencies,
 								serializedDependency('Option', 'fp-ts/lib/Option'),

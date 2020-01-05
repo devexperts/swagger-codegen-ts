@@ -9,8 +9,5 @@ import { serializeSchemaObject } from './schema-object';
 
 export const serializeMessageObject = (from: Ref, messageObject: MessageObject): Either<Error, SerializedType> =>
 	ReferenceObjectCodec.is(messageObject.payload)
-		? pipe(
-				fromString(messageObject.payload.$ref),
-				either.map(getSerializedRefType(from)),
-		  )
+		? pipe(fromString(messageObject.payload.$ref), either.map(getSerializedRefType(from)))
 		: serializeSchemaObject(from, messageObject.payload);

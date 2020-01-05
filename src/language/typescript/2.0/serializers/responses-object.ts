@@ -23,11 +23,7 @@ export const serializeOperationResponses = (from: Ref, responses: ResponsesObjec
 		responses,
 		record.collect((code, response) => {
 			if (ReferenceObjectCodec.is(response)) {
-				return pipe(
-					fromString(response.$ref),
-					either.map(getSerializedRefType(from)),
-					some,
-				);
+				return pipe(fromString(response.$ref), either.map(getSerializedRefType(from)), some);
 			} else {
 				return serializeResponseObject(from, response);
 			}

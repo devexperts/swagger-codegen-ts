@@ -19,7 +19,7 @@ import {
 	SerializedType,
 	getSerializedEnumType,
 	getSerializedStringType,
-	getSerializedIntegerType,
+	SERIALIZED_INTEGER_TYPE,
 } from '../../common/data/serialized-type';
 import {
 	AllOfSchemaObjectCodec,
@@ -37,7 +37,6 @@ import { traverseNEAEither } from '../../../../utils/either';
 import { constFalse } from 'fp-ts/lib/function';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { Option } from 'fp-ts/lib/Option';
-import { utilsRef } from '../../common/bundled/utils';
 
 export const serializeSchemaObject = (
 	from: Ref,
@@ -77,10 +76,7 @@ const serializeSchemaObjectWithRecursion = (
 			return right(SERIALIZED_NUMBER_TYPE);
 		}
 		case 'integer': {
-			return pipe(
-				utilsRef,
-				either.map(utilsRef => getSerializedIntegerType(from, utilsRef)),
-			);
+			return right(SERIALIZED_INTEGER_TYPE);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);
@@ -100,10 +96,7 @@ const serializeChildren = (
 ): Either<Error, NonEmptyArray<SerializedType>> =>
 	traverseNEAEither(value, item =>
 		ReferenceObjectCodec.is(item)
-			? pipe(
-					fromString(item.$ref),
-					either.map(getSerializedRefType(from)),
-			  )
+			? pipe(fromString(item.$ref), either.map(getSerializedRefType(from)))
 			: serializeSchemaObjectWithRecursion(from, item, false),
 	);
 
@@ -149,10 +142,7 @@ const serializeAdditionalProperties = (
 	name?: string,
 ): Either<Error, SerializedType> => {
 	const serialized = ReferenceObjectCodec.is(properties)
-		? pipe(
-				fromString(properties.$ref),
-				either.map(getSerializedRefType(from)),
-		  )
+		? pipe(fromString(properties.$ref), either.map(getSerializedRefType(from)))
 		: serializeSchemaObjectWithRecursion(from, properties, false);
 	return pipe(
 		serialized,
@@ -180,16 +170,10 @@ const serializeProperties = (
 					);
 
 					const serialized = ReferenceObjectCodec.is(property)
-						? pipe(
-								fromString(property.$ref),
-								either.map(getSerializedRefType(from)),
-						  )
+						? pipe(fromString(property.$ref), either.map(getSerializedRefType(from)))
 						: serializeSchemaObjectWithRecursion(from, property, false);
 
-					return pipe(
-						serialized,
-						either.map(getSerializedOptionPropertyType(name, isRequired)),
-					);
+					return pipe(serialized, either.map(getSerializedOptionPropertyType(name, isRequired)));
 				}),
 				sequenceEither,
 				either.map(s => intercalateSerializedTypes(serializedType(';', ',', [], []), s)),
@@ -206,13 +190,7 @@ const serializeArray = (
 	name?: string,
 ): Either<Error, SerializedType> => {
 	const serialized = ReferenceObjectCodec.is(items)
-		? pipe(
-				fromString(items.$ref),
-				either.map(getSerializedRefType(from)),
-		  )
+		? pipe(fromString(items.$ref), either.map(getSerializedRefType(from)))
 		: serializeSchemaObjectWithRecursion(from, items, false);
-	return pipe(
-		serialized,
-		either.map(getSerializedArrayType(name)),
-	);
+	return pipe(serialized, either.map(getSerializedArrayType(name)));
 };

@@ -2,7 +2,6 @@ import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
 	getSerializedEnumType,
-	getSerializedIntegerType,
 	getSerializedIntersectionType,
 	getSerializedObjectType,
 	getSerializedOptionPropertyType,
@@ -12,6 +11,7 @@ import {
 	getSerializedUnionType,
 	intercalateSerializedTypes,
 	SERIALIZED_BOOLEAN_TYPE,
+	SERIALIZED_INTEGER_TYPE,
 	SERIALIZED_NUMBER_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 	SerializedType,
@@ -35,7 +35,6 @@ import {
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { traverseNEAEither } from '../../../../utils/either';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
-import { utilsRef } from '../../common/bundled/utils';
 
 type AdditionalProperties = boolean | ReferenceObject | SchemaObject;
 type AllowedAdditionalProperties = true | ReferenceObject | SchemaObject;
@@ -87,14 +86,8 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 						mapLeft(() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`)),
 						either.map(getSerializedRefType(from)),
 				  )
-				: pipe(
-						items,
-						serializeSchemaObjectWithRecursion(from, false, undefined),
-				  );
-			return pipe(
-				serialized,
-				either.map(getSerializedArrayType(name)),
-			);
+				: pipe(items, serializeSchemaObjectWithRecursion(from, false, undefined));
+			return pipe(serialized, either.map(getSerializedArrayType(name)));
 		}
 		case 'object': {
 			const additionalProperties = pipe(
@@ -108,19 +101,14 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 							mapLeft(
 								() =>
 									new Error(
-										`Unablew to serialize SchemaObject additionalProperties ref "${
-											additionalProperties.$ref
-										}"`,
+										`Unablew to serialize SchemaObject additionalProperties ref "${additionalProperties.$ref}"`,
 									),
 							),
 							either.map(getSerializedRefType(from)),
 						);
 					} else {
 						return additionalProperties !== true
-							? pipe(
-									additionalProperties,
-									serializeSchemaObjectWithRecursion(from, false, undefined),
-							  )
+							? pipe(additionalProperties, serializeSchemaObjectWithRecursion(from, false, undefined))
 							: right(SERIALIZED_UNKNOWN_TYPE);
 					}
 				}),
@@ -145,9 +133,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 									mapLeft(
 										() =>
 											new Error(
-												`Unable to serialize SchemaObject property "${name}" ref "${
-													property.$ref
-												}"`,
+												`Unable to serialize SchemaObject property "${name}" ref "${property.$ref}"`,
 											),
 									),
 									either.map(getSerializedRefType(from)),
@@ -183,10 +169,7 @@ const serializeChildren = (
 ): Either<Error, NonEmptyArray<SerializedType>> =>
 	traverseNEAEither(children, item =>
 		ReferenceObjectCodec.is(item)
-			? pipe(
-					fromString(item.$ref),
-					either.map(getSerializedRefType(from)),
-			  )
+			? pipe(fromString(item.$ref), either.map(getSerializedRefType(from)))
 			: serializeSchemaObjectWithRecursion(from, false)(item),
 	);
 
@@ -199,10 +182,7 @@ const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): Eit
 			return right(SERIALIZED_NUMBER_TYPE);
 		}
 		case 'integer': {
-			return pipe(
-				utilsRef,
-				either.map(utilsRef => getSerializedIntegerType(from, utilsRef)),
-			);
+			return right(SERIALIZED_INTEGER_TYPE);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);
