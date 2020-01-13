@@ -9,11 +9,9 @@ export const clientRef = fromString('#/client/client');
 export const client = `
 	import { HKT, Kind, Kind2, URIS, URIS2 } from 'fp-ts/lib/HKT';
 	import { MonadThrow, MonadThrow1, MonadThrow2 } from 'fp-ts/lib/MonadThrow';
-	import { Errors, UnknownRecord } from 'io-ts';
+	import { Errors } from 'io-ts';
 	import { PathReporter } from 'io-ts/lib/PathReporter';
 	import { left } from 'fp-ts/lib/Either';
-
-	const ResponseValidationErrorSymbol = Symbol('ResponseValidationError');
 
 	export interface Request {
 		readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
