@@ -3,7 +3,7 @@ import { client } from '../client';
 
 describe('client', () => {
 	describe('ResponseValidationError class', () => {
-		it('should should produce uniquely identifiable instance of itself', () => {
+		it('should produce uniquely identifiable instance of itself', () => {
 			const exports = {} as any;
 
 			const clientCodeTranspiled = typescript.transpile(client, {
@@ -15,7 +15,7 @@ describe('client', () => {
 			eval(clientCodeTranspiled);
 
 			expect(exports.ResponseValidationError.create([])).toBeInstanceOf(exports.ResponseValidationError);
-			expect(exports.ResponseValidationError.create([])).not.toBeInstanceOf(Error);
+			expect(exports.ResponseValidationError.create([])).toBeInstanceOf(Error);
 		});
 		it('should produce instance that not crashing when its casted to string', () => {
 			const exports = {} as any;

@@ -67,17 +67,10 @@ export const client = `
 			return new ResponseValidationError(errors);
 		}
 
-		static [Symbol.hasInstance](target: unknown) {
-			return UnknownRecord.is(target) && target.symbol === ResponseValidationErrorSymbol;
-		}
-
-		symbol = ResponseValidationErrorSymbol;
-
 		constructor(readonly errors: Errors) {
 			super(PathReporter.report(left(errors)).join('\\n\\n'));
-			this.name = ResponseValidationErrorSymbol.toString();
-			this.toString = () => PathReporter.report(left(errors)).join('\\n\\n');
-			Object.setPrototypeOf(this, ResponseValidationError);
+			this.name = 'ResponseValidationError';
+			Object.setPrototypeOf(this, ResponseValidationError.prototype);
 		}
 	}
 `;
