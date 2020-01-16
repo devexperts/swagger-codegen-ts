@@ -1,3 +1,12 @@
+# [2.0.0-alpha.13](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2020-01-16)
+
+
+### Bug Fixes
+
+* fix ResponseValidationError class to properly extend Error ([#94](https://github.com/devexperts/swagger-codegen-ts/issues/94)) ([e874154](https://github.com/devexperts/swagger-codegen-ts/commit/e874154)), closes [#93](https://github.com/devexperts/swagger-codegen-ts/issues/93)
+
+
+
 # [2.0.0-alpha.12](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2019-12-18)
 
 
