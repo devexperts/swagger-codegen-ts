@@ -1,3 +1,7 @@
+# [2.0.0-alpha.14](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2020-01-17)
+
+
+
 # [2.0.0-alpha.13](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2020-01-16)
 
 
