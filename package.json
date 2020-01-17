@@ -32,7 +32,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@devexperts/utils": "^1.0.0-alpha.2",
+    "@devexperts/utils": "^1.0.0-alpha.10",
     "@types/adm-zip": "^0.4.32",
     "@types/color": "^3.0.0",
     "@types/fs-extra": "^8.0.0",
@@ -45,7 +45,7 @@
     "prettier": "^1.19.1"
   },
   "devDependencies": {
-    "@devexperts/lint": "^1.0.0-alpha.2",
+    "@devexperts/lint": "^1.0.0-alpha.10",
     "@types/del": "^4.0.0",
     "@types/jest": "^24.0.18",
     "conventional-changelog-cli": "^2.0.21",
