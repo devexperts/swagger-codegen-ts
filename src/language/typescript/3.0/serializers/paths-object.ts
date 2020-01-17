@@ -5,7 +5,7 @@ import { serializePathItemObject, serializePathItemObjectTags } from './path-ite
 import { Dictionary, serializeDictionary } from '../../../../utils/types';
 import { foldSerializedTypes } from '../../common/data/serialized-type';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
-import { decapitalize, camelize } from '@devexperts/utils/dist/string';
+import { decapitalize, camelize } from '@devexperts/utils/dist/string/string';
 import { Either, isLeft, right } from 'fp-ts/lib/Either';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';

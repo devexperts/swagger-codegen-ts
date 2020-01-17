@@ -9,7 +9,7 @@ import { Either, isLeft, right } from 'fp-ts/lib/Either';
 import { addPathParts, getRelativePath, Ref } from '../../../../utils/ref';
 import { Dictionary } from '../../../../utils/types';
 import { PathItemObject } from '../../../../schema/2.0/path-item-object';
-import { camelize, decapitalize } from '@devexperts/utils/dist/string';
+import { camelize, decapitalize } from '@devexperts/utils/dist/string/string';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
 import { clientRef } from '../../common/bundled/client';

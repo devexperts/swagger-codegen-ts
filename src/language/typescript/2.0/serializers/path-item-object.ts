@@ -7,7 +7,7 @@ import { array, flatten } from 'fp-ts/lib/Array';
 import { Dictionary, Kind } from '../../../../utils/types';
 import { file, File } from '../../../../utils/fs';
 import { serializedDependency, serializeDependencies } from '../../common/data/serialized-dependency';
-import { decapitalize } from '@devexperts/utils/dist/string';
+import { decapitalize } from '@devexperts/utils/dist/string/string';
 import { Either } from 'fp-ts/lib/Either';
 import { combineEither, sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { either, nonEmptyArray, option, record } from 'fp-ts';
