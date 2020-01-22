@@ -9,11 +9,13 @@ import { nonEmptyArray } from 'io-ts-types/lib/nonEmptyArray';
 export interface BaseSchemaObject {
 	readonly format: Option<string>;
 	readonly deprecated: Option<boolean>;
+	readonly nullable: Option<boolean>;
 }
 
 const BaseSchemaObjectCodec: Codec<BaseSchemaObject> = type({
 	format: optionFromNullable(string),
 	deprecated: optionFromNullable(boolean),
+	nullable: optionFromNullable(boolean),
 });
 
 export interface EnumSchemaObject extends BaseSchemaObject {

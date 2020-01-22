@@ -26,9 +26,11 @@ describe('SchemaObject', () => {
 						type: constant<'string'>('string'),
 						format: constant(none),
 						deprecated: constant(none),
+						nullable: constant(none),
 					}),
 					format: constant(none),
 					deprecated: constant(none),
+					nullable: constant(none),
 				});
 				assert(
 					property($refArbitrary, schema, string(), (from, schema, name) => {

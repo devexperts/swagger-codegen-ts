@@ -3,6 +3,7 @@ import {
 	getSerializedDictionaryType,
 	getSerializedEnumType,
 	getSerializedIntersectionType,
+	getSerializedNullableType,
 	getSerializedObjectType,
 	getSerializedOptionPropertyType,
 	getSerializedRecursiveType,
@@ -21,7 +22,7 @@ import { Either, mapLeft, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either, option } from 'fp-ts';
 import { serializeDictionary } from '../../../../utils/types';
-import { constFalse } from 'fp-ts/lib/function';
+import { constFalse, identity } from 'fp-ts/lib/function';
 import { includes } from '../../../../utils/array';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { fromString, Ref } from '../../../../utils/ref';
@@ -51,11 +52,13 @@ export const serializeSchemaObject = (
 const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boolean, name?: string) => (
 	schemaObject: SchemaObject,
 ): Either<Error, SerializedType> => {
+	const isNullable = pipe(schemaObject.nullable, option.exists(identity));
 	if (OneOfSchemaObjectCodec.is(schemaObject)) {
 		return pipe(
 			serializeChildren(from, schemaObject.oneOf),
 			either.map(getSerializedUnionType),
 			either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
+			either.map(getSerializedNullableType(isNullable)),
 		);
 	}
 
@@ -64,11 +67,12 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 			serializeChildren(from, schemaObject.allOf),
 			either.map(getSerializedIntersectionType),
 			either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
+			either.map(getSerializedNullableType(isNullable)),
 		);
 	}
 
 	if (EnumSchemaObjectCodec.is(schemaObject)) {
-		return right(getSerializedEnumType(schemaObject.enum));
+		return pipe(getSerializedEnumType(schemaObject.enum), getSerializedNullableType(isNullable), right);
 	}
 
 	switch (schemaObject.type) {
@@ -76,7 +80,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 		case 'boolean':
 		case 'integer':
 		case 'number': {
-			return serializePrimitive(from, schemaObject);
+			return pipe(serializePrimitive(from, schemaObject), getSerializedNullableType(isNullable), right);
 		}
 		case 'array': {
 			const { items } = schemaObject;
@@ -87,7 +91,11 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 						either.map(getSerializedRefType(from)),
 				  )
 				: pipe(items, serializeSchemaObjectWithRecursion(from, false, undefined));
-			return pipe(serialized, either.map(getSerializedArrayType(name)));
+			return pipe(
+				serialized,
+				either.map(getSerializedArrayType(name)),
+				either.map(getSerializedNullableType(isNullable)),
+			);
 		}
 		case 'object': {
 			const additionalProperties = pipe(
@@ -157,6 +165,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 			return pipe(
 				additionalProperties,
 				option.alt(() => properties),
+				option.map(either.map(getSerializedNullableType(isNullable))),
 				option.getOrElse(() => right(SERIALIZED_UNKNOWN_TYPE)),
 			);
 		}
@@ -173,19 +182,19 @@ const serializeChildren = (
 			: serializeSchemaObjectWithRecursion(from, false)(item),
 	);
 
-const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): Either<Error, SerializedType> => {
+const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): SerializedType => {
 	switch (schemaObject.type) {
 		case 'string': {
-			return right(getSerializedStringType(schemaObject.format));
+			return getSerializedStringType(schemaObject.format);
 		}
 		case 'number': {
-			return right(SERIALIZED_NUMBER_TYPE);
+			return SERIALIZED_NUMBER_TYPE;
 		}
 		case 'integer': {
-			return right(SERIALIZED_INTEGER_TYPE);
+			return SERIALIZED_INTEGER_TYPE;
 		}
 		case 'boolean': {
-			return right(SERIALIZED_BOOLEAN_TYPE);
+			return SERIALIZED_BOOLEAN_TYPE;
 		}
 	}
 };
