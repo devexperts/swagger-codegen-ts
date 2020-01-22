@@ -96,12 +96,9 @@ export const getSerializedStringType = (format: Option<string>): SerializedType 
 		option.getOrElse(() => SERIALIZED_STRING_TYPE),
 	);
 };
-export const SERIALIZED_NULL_TYPE = serializedType(
-	'null',
-	'literal(null)',
-	[serializedDependency('literal', 'io-ts')],
-	[],
-);
+export const SERIALIZED_NULL_TYPE = serializedType('null', 'nullType', [serializedDependency('nullType', 'io-ts')], []);
+export const getSerializedNullableType = (isNullable: boolean) => (type: SerializedType): SerializedType =>
+	isNullable ? getSerializedUnionType([type, SERIALIZED_NULL_TYPE]) : type;
 
 export const getSerializedArrayType = (name?: string) => (serialized: SerializedType): SerializedType =>
 	serializedType(
