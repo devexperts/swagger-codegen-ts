@@ -1,4 +1,4 @@
-import { getJSDoc, getKindValue, getURL, HTTPMethod } from '../../common/utils';
+import { getJSDoc, getKindValue, getSafePropertyName, getURL, HTTPMethod } from '../../common/utils';
 import {
 	getSerializedPropertyType,
 	getSerializedObjectType,
@@ -50,10 +50,10 @@ import {
 } from '../../common/data/serialized-fragment';
 import { SchemaObjectCodec } from '../../../../schema/3.0/schema-object';
 
-const getOperationName = (operation: OperationObject, method: HTTPMethod): string =>
+const getOperationName = (pattern: string, operation: OperationObject, method: HTTPMethod): string =>
 	pipe(
 		operation.operationId,
-		option.getOrElse(() => method.toString()),
+		option.getOrElse(() => `${method}_${getSafePropertyName(pattern)}`),
 	);
 
 interface Parameters {
@@ -238,7 +238,7 @@ export const serializeOperationObject = combineReader(
 		pathItem: PathItemObject,
 	): Either<Error, SerializedType> => {
 		const parameters = getParameters(from, operation, pathItem);
-		const operationName = getOperationName(operation, method);
+		const operationName = getOperationName(pattern, operation, method);
 
 		const deprecated = pipe(
 			operation.deprecated,
