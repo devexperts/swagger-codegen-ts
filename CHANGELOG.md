@@ -1,3 +1,22 @@
+# [2.0.0-alpha.15](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2020-01-23)
+
+
+### Bug Fixes
+
+* fix OperationObject name generation without operationId ([2da2822](https://github.com/devexperts/swagger-codegen-ts/commit/2da2822))
+
+
+### Features
+
+* add `nullable` support for OpenAPI3 ([937c21f](https://github.com/devexperts/swagger-codegen-ts/commit/937c21f))
+
+
+### BREAKING CHANGES
+
+* if operation id is missing then url/pattern is included in the name
+
+
+
 # [2.0.0-alpha.14](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2020-01-17)
 
 
