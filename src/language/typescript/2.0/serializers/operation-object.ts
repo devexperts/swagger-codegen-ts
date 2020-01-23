@@ -15,7 +15,7 @@ import { fromSerializedType } from '../../common/data/serialized-parameter';
 import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIf } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
-import { getJSDoc, getKindValue, getURL, HTTPMethod } from '../../common/utils';
+import { getJSDoc, getKindValue, getSafePropertyName, getURL, HTTPMethod } from '../../common/utils';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { array, either, nonEmptyArray, option } from 'fp-ts';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
@@ -232,7 +232,7 @@ export const serializeOperationObject = combineReader(
 		pathItem: PathItemObject,
 	): Either<Error, SerializedType> => {
 		const parameters = getParameters(from, operation, pathItem);
-		const operationName = getOperationName(operation, method);
+		const operationName = getOperationName(url, operation, method);
 
 		const serializedResponses = serializeOperationResponses(from, operation.responses);
 
@@ -361,10 +361,10 @@ export const serializeOperationObject = combineReader(
 	},
 );
 
-const getOperationName = (operation: OperationObject, httpMethod: string) =>
+const getOperationName = (url: string, operation: OperationObject, httpMethod: string) =>
 	pipe(
 		operation.operationId,
-		getOrElse(() => httpMethod),
+		getOrElse(() => `${httpMethod}_${getSafePropertyName(url)}`),
 	);
 
 export const getCollectionSeparator = (format: 'csv' | 'ssv' | 'tsv' | 'pipes'): string => {
