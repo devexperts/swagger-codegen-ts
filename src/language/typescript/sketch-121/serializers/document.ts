@@ -13,7 +13,7 @@ import { serializeForeignTextStyle } from './objects/foreign-text-style';
 import { Option } from 'fp-ts/lib/Option';
 import { file, fragment, FSEntity } from '../../../../utils/fs';
 import { serializeAssetCollection } from './objects/asset-collection';
-import { serializePage } from './pages/page';
+import { serializePage } from './objects/page';
 
 export const serializeDocument = combineReader(
 	serializeSharedStyleContainer,

@@ -1,7 +1,7 @@
 import { Codec } from '../../utils/io-ts';
 import { array, intersection, type } from 'io-ts';
 import { AbstractDocument, AbstractDocumentCodec } from './abstract-document';
-import { Page, PageCodec } from './pages/page';
+import { Page, PageCodec } from './objects/page';
 
 export interface Document extends AbstractDocument {
 	readonly pages: Page[];

@@ -59,6 +59,10 @@ export const getKindValue = (kind: Kind, value: string): string => {
 
 export const getControllerName = (name: string): string => `${name}Controller`;
 
+const COMMENT_PATTERN = /\/\*(.*)\*\//;
+const REPLACE_COMMENT_PATTERN = new RegExp(COMMENT_PATTERN, 'g');
+export const escapeCommpent = (value: string) => value.replace(REPLACE_COMMENT_PATTERN, '\\/*$1*\\/');
+
 export const UNSAFE_PROPERTY_PATTERN = /[^a-zA-Z_0-9]/;
 const REPLACE_PATTERN = new RegExp(UNSAFE_PROPERTY_PATTERN, 'g');
 export const getSafePropertyName = (value: string): string =>

@@ -1,4 +1,4 @@
-import { Page } from '../../../../../schema/sketch-121/pages/page';
+import { Page } from '../../../../../schema/sketch-121/objects/page';
 import { either } from 'fp-ts';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { pipe } from 'fp-ts/lib/pipeable';
