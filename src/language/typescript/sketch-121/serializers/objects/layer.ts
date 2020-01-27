@@ -1,7 +1,7 @@
-import { Layer } from '../../../../../schema/sketch-121/pages/layer';
+import { Layer } from '../../../../../schema/sketch-121/objects/layer';
 import { Either } from 'fp-ts/lib/Either';
-import { getJSDoc } from '../../../common/utils';
-import { serializeStyle } from '../objects/style';
+import { getJSDoc, escapeCommpent } from '../../../common/utils';
+import { serializeStyle } from './style';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { context } from '../../utils';
@@ -29,7 +29,7 @@ export const serializeLayer = combineReader(context, context => (layer: Layer, j
 		layerStyle,
 		nestedLayersStyles,
 		(pageStyle, nestedPagesStyles) => `
-            ${getJSDoc([...(jsdoc || []), layer.name, layer.do_objectID])}
+            ${getJSDoc([...(jsdoc || []), escapeCommpent(layer.name), layer.do_objectID])}
             export const ${safeName}:  { name: string; styles: Partial<CSSStyleDeclaration> } = {
                 name: '${layer.name}',
                 styles: {
