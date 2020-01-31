@@ -1,3 +1,13 @@
+# [2.0.0-alpha.16](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2020-01-31)
+
+
+### Features
+
+* expand sketch schema for support foreign symbols ([ca9d832](https://github.com/devexperts/swagger-codegen-ts/commit/ca9d832))
+* support date-time format ([#100](https://github.com/devexperts/swagger-codegen-ts/issues/100)) ([f48451d](https://github.com/devexperts/swagger-codegen-ts/commit/f48451d))
+
+
+
 # [2.0.0-alpha.15](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2020-01-23)
 
 
