@@ -12,6 +12,7 @@ import { OpenapiObject } from '../../../../schema/3.0/openapi-object';
 import { pathsRef } from '../../common/utils';
 import { clientFile } from '../../common/bundled/client';
 import { openapi3utilsFile } from '../bundled/openapi-3-utils';
+import { utilsFile } from '../../common/bundled/utils';
 
 export const serializeDocument = combineReader(
 	serializeComponentsObject,
@@ -36,9 +37,10 @@ export const serializeDocument = combineReader(
 			paths,
 			additional,
 			clientFile,
+			utilsFile,
 			openapi3utilsFile,
-			(paths, additional, clientFile, openapi3utilsFile) =>
-				directory(name, [paths, ...additional, clientFile, openapi3utilsFile]),
+			(paths, additional, clientFile, utilsFile, openapi3utilsFile) =>
+				directory(name, [paths, ...additional, clientFile, utilsFile, openapi3utilsFile]),
 		);
 	},
 );
