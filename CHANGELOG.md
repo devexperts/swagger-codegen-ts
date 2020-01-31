@@ -1,3 +1,12 @@
+# [2.0.0-alpha.17](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2020-01-31)
+
+
+### Bug Fixes
+
+* add year padding to the codec ([#101](https://github.com/devexperts/swagger-codegen-ts/issues/101)) ([fabe1c8](https://github.com/devexperts/swagger-codegen-ts/commit/fabe1c8))
+
+
+
 # [2.0.0-alpha.16](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2020-01-31)
 
 
