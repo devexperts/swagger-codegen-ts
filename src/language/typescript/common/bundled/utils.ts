@@ -33,7 +33,7 @@ const utils = `
 				return isNaN(d.getTime()) ? failure(u, c) : success(d);
 			}),
 		a =>
-			\`\${a.getFullYear()}-\${(a.getMonth() + 1).toString().padStart(2, '0')}-\${a
+			\`\${a.getFullYear().toString().padStart(4, '0')}-\${(a.getMonth() + 1).toString().padStart(2, '0')}-\${a
 				.getDate()
 				.toString()
 				.padStart(2, '0')}\`,
