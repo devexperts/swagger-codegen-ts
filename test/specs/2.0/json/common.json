@@ -23,6 +23,10 @@
         },
         "shipDate": {
           "type": "string",
+          "format": "date"
+        },
+        "lastUpdate": {
+          "type": "string",
           "format": "date-time"
         },
         "status": {
@@ -34,10 +38,12 @@
             "delivered"
           ]
         },
-        "state" : {
-          "type" : "string",
-          "description" : "order state",
-          "enum" : [ "ACTIVE" ]
+        "state": {
+          "type": "string",
+          "description": "order state",
+          "enum": [
+            "ACTIVE"
+          ]
         },
         "complete": {
           "type": "boolean",

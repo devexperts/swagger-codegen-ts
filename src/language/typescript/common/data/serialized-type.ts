@@ -73,10 +73,16 @@ export const SERIALIZED_BOOLEAN_TYPE = serializedType(
 );
 export const SERIALIZED_NUMBER_TYPE = serializedType('number', 'number', [serializedDependency('number', 'io-ts')], []);
 export const SERIALIZED_INTEGER_TYPE = serializedType('Int', 'Int', [serializedDependency('Int', 'io-ts')], []);
-export const SERIALIZED_DATE_TYPE = serializedType(
+export const SERIALIZED_DATETIME_TYPE = serializedType(
 	'Date',
 	'DateFromISOString',
 	[serializedDependency('DateFromISOString', 'io-ts-types/lib/DateFromISOString')],
+	[],
+);
+export const SERIALIZED_DATE_TYPE = serializedType(
+	'Date',
+	'DateFromISODateStringIO',
+	[serializedDependency('DateFromISODateStringIO', '../utils/utils')],
 	[],
 );
 export const SERIALIZED_STRING_TYPE = serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []);
@@ -86,7 +92,9 @@ export const getSerializedStringType = (format: Option<string>): SerializedType 
 		option.chain(format => {
 			// https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14
 			switch (format) {
-				case 'date-time':
+				case 'date-time': {
+					return some(SERIALIZED_DATETIME_TYPE);
+				}
 				case 'date': {
 					return some(SERIALIZED_DATE_TYPE);
 				}
