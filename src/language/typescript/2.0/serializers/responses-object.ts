@@ -18,9 +18,16 @@ import { fromString, Ref } from '../../../../utils/ref';
 import { ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { some } from 'fp-ts/lib/Option';
 
-export const serializeOperationResponses = (from: Ref, responses: ResponsesObject): Either<Error, SerializedType> =>
+export const serializeOperationResponses = (
+	from: Ref,
+	responses: ResponsesObject,
+	filter: (code: string) => boolean = () => true,
+): Either<Error, SerializedType> =>
 	pipe(
 		responses,
+		record.filterWithIndex(code => {
+			return filter(code);
+		}),
 		record.collect((code, response) => {
 			if (ReferenceObjectCodec.is(response)) {
 				return pipe(fromString(response.$ref), either.map(getSerializedRefType(from)), some);

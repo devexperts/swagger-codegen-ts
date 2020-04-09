@@ -112,8 +112,20 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "./common.json#/definitions/Pet"
+              }
+            }
+          },
+          "400":{
+            "description":"Bad Request",
+            "schema":{
+              "$ref": "./common.json#/definitions/ErrorResponse"
+            }
           },
           "404": {
             "description": "Pet not found"

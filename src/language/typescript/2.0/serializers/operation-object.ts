@@ -234,7 +234,12 @@ export const serializeOperationObject = combineReader(
 		const parameters = getParameters(from, operation, pathItem);
 		const operationName = getOperationName(url, operation, method);
 
-		const serializedResponses = serializeOperationResponses(from, operation.responses);
+		const isSuccessResponse = (code: string) => {
+			const status = parseInt(code, 10);
+			return status >= 200 && status < 300;
+		};
+
+		const serializedResponses = serializeOperationResponses(from, operation.responses, isSuccessResponse);
 
 		const deprecated = pipe(
 			operation.deprecated,
