@@ -6,6 +6,17 @@
   },
   "paths": {},
   "definitions": {
+    "ErrorResponse":{
+      "type":"object",
+      "properties":{
+        "message":{"type":"string"},
+        "status":{
+          "type":"integer",
+          "format":"int32"
+        }
+      },
+      "title":"ErrorResponse"
+    },
     "Order": {
       "type": "object",
       "properties": {

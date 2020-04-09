@@ -17,7 +17,7 @@ import { concatIf } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
 import { getJSDoc, getKindValue, getSafePropertyName, getURL, HTTPMethod } from '../../common/utils';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
-import { array, either, nonEmptyArray, option } from 'fp-ts';
+import { array, either, nonEmptyArray, option, record } from 'fp-ts';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { ResolveRefContext, fromString, getRelativePath, Ref } from '../../../../utils/ref';
 import { clientRef } from '../../common/bundled/client';
@@ -234,7 +234,15 @@ export const serializeOperationObject = combineReader(
 		const parameters = getParameters(from, operation, pathItem);
 		const operationName = getOperationName(url, operation, method);
 
-		const serializedResponses = serializeOperationResponses(from, operation.responses);
+		const isSuccessResponse = (code: string) => {
+			const status = parseInt(code, 10);
+			return status >= 200 && status < 300;
+		};
+
+		const serializedResponses = serializeOperationResponses(
+			from,
+			pipe(operation.responses, record.filterWithIndex(isSuccessResponse)),
+		);
 
 		const deprecated = pipe(
 			operation.deprecated,
