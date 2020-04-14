@@ -49,6 +49,7 @@
         "tags": [
           "pet"
         ],
+        "deprecated": false,
         "summary": "Add a new pet to the store",
         "description": "",
         "operationId": "addPet",
@@ -149,6 +150,7 @@
         "tags": [
           "pet"
         ],
+        "deprecated": true,
         "summary": "Finds Pets by status",
         "description": "Multiple status values can be provided with comma separated strings",
         "operationId": "findPetsByStatus",
