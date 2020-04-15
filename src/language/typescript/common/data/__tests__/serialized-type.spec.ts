@@ -168,7 +168,7 @@ describe('SerializedType', () => {
 					types.length === 1
 						? head(types)
 						: serializedType(
-								`(${intercalated.type})`,
+								`${intercalated.type}`,
 								`intersection([${intercalated.io}])`,
 								[...intercalated.dependencies, serializedDependency('intersection', 'io-ts')],
 								intercalated.refs,
