@@ -125,6 +125,9 @@ export function combineFragmentsK(
 	return serializedFragment(fragment.value, dependencies.concat(fragment.dependencies), refs.concat(fragment.refs));
 }
 
+/**
+ * @param f returns an Option
+ */
 export const getSerializedOptionCallFragment = (
 	nullable: boolean,
 	f: SerializedFragment,
@@ -136,12 +139,19 @@ export const getSerializedOptionCallFragment = (
 					`pipe(
 							${a},
 							option.fromNullable,
-							option.map(${fn}),
+							option.chain(${fn}),
 						)`,
 					[serializedDependency('option', 'fp-ts'), serializedDependency('pipe', 'fp-ts/lib/pipeable')],
 					[],
 			  )
-			: serializedFragment(`some((${fn})(${a}))`, [serializedDependency('some', 'fp-ts/lib/Option')], []),
+			: serializedFragment(
+					`pipe(
+							${a},
+							${fn},
+						)`,
+					[serializedDependency('pipe', 'fp-ts/lib/pipeable')],
+					[],
+			  ),
 	);
 
 export const commaFragment = serializedFragment(', ', [], []);

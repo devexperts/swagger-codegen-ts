@@ -411,8 +411,8 @@ export const serializeQueryParameterObject = (
 		case 'number':
 		case 'boolean': {
 			const f = serializedFragment(
-				`value => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(value)`,
-				[],
+				`value => some(encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(value))`,
+				[serializedDependency('some', 'fp-ts/lib/Option')],
 				[],
 			);
 			return right(getSerializedOptionCallFragment(!required, f, encoded));
@@ -430,16 +430,16 @@ export const serializeQueryParameterObject = (
 				case 'pipes': {
 					const s = getCollectionSeparator(collectionFormat);
 					const f = serializedFragment(
-						`value => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(value.join('${s}'))`,
-						[],
+						`value => some(encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(value.join('${s}')))`,
+						[serializedDependency('some', 'fp-ts/lib/Option')],
 						[],
 					);
 					return right(getSerializedOptionCallFragment(!required, f, encoded));
 				}
 				case 'multi': {
 					const f = serializedFragment(
-						`value => value.map(item => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(item)).join('&')`,
-						[],
+						`value => some(value.map(item => encodeURIComponent('${parameter.name}') + '=' + encodeURIComponent(item)).join('&'))`,
+						[serializedDependency('some', 'fp-ts/lib/Option')],
 						[],
 					);
 					return right(getSerializedOptionCallFragment(!required, f, encoded));
