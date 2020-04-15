@@ -18,6 +18,51 @@ import { reportIfFailed } from '../../../../../utils/io-ts';
 
 describe('SchemaObject', () => {
 	describe('serializeSchemaObject', () => {
+		it('should properly handle nested allOf / oneOf', () => {
+			assert(
+				property($refArbitrary, ref => {
+					const schema = SchemaObjectCodec.decode({
+						allOf: [
+							{
+								type: 'object',
+								properties: {
+									id: { type: 'string' },
+								},
+								required: ['id'],
+							},
+							{
+								oneOf: [
+									{
+										type: 'object',
+										properties: {
+											value: { type: 'string' },
+										},
+										required: ['value'],
+									},
+									{
+										type: 'object',
+										properties: {
+											error: { type: 'string' },
+										},
+										required: ['error'],
+									},
+								],
+							},
+						],
+					});
+					const serialized = pipe(schema, reportIfFailed, either.chain(serializeSchemaObject(ref)));
+					pipe(
+						serialized,
+						either.fold(fail, result => {
+							expect(result.type).toEqual('{ id: string } & ({ value: string } | { error: string })');
+							expect(result.io).toEqual(
+								'intersection([type({ id: string }),union([type({ value: string }),type({ error: string })])])',
+							);
+						}),
+					);
+				}),
+			);
+		});
 		describe('array', () => {
 			it('should serialize using getSerializedArrayType', () => {
 				const schema = record({
