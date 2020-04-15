@@ -166,7 +166,7 @@ export const getSerializedUnionType = (serialized: NonEmptyArray<SerializedType>
 	} else {
 		const intercalated = intercalateSerializedTypes(serializedType(' | ', ',', [], []), serialized);
 		return serializedType(
-			intercalated.type,
+			`(${intercalated.type})`,
 			`union([${intercalated.io}])`,
 			[...intercalated.dependencies, serializedDependency('union', 'io-ts')],
 			intercalated.refs,
@@ -180,7 +180,7 @@ export const getSerializedIntersectionType = (serialized: NonEmptyArray<Serializ
 	} else {
 		const intercalated = intercalateSerializedTypes(serializedType(' & ', ',', [], []), serialized);
 		return serializedType(
-			intercalated.type,
+			`(${intercalated.type})`,
 			`intersection([${intercalated.io}])`,
 			[...intercalated.dependencies, serializedDependency('intersection', 'io-ts')],
 			intercalated.refs,
