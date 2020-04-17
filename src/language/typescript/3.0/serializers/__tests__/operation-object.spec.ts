@@ -58,10 +58,10 @@ describe('OperationObject', () => {
 				`compact([pipe(
 					optionFromNullable(number).encode(parameters.query.offset),
 					option.fromNullable,
-					option.chain(value => option.fromEither(serializePrimitiveParameter('form', 'offset', value))),
+					option.chain(value => fromEither(serializePrimitiveParameter('form', 'offset', value))),
 				),pipe(
 					number.encode(parameters.query.limit),
-					value => option.fromEither(serializePrimitiveParameter('form', 'limit', value)),
+					value => fromEither(serializePrimitiveParameter('form', 'limit', value)),
 				)]).join('&')`
 					.trim()
 					.replace(/\s+/g, ' '),

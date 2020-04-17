@@ -121,9 +121,9 @@ const getFn = (
 	if (PrimitiveSchemaObjectCodec.is(schema)) {
 		return right(
 			serializedFragment(
-				`value => option.fromEither(serializePrimitiveParameter('${style}', '${parameter.name}', value))`,
+				`value => fromEither(serializePrimitiveParameter('${style}', '${parameter.name}', value))`,
 				[
-					serializedDependency('option', 'fp-ts'),
+					serializedDependency('fromEither', 'fp-ts/lib/Option'),
 					serializedDependency('serializePrimitiveParameter', pathToUtils),
 				],
 				[],
@@ -133,8 +133,11 @@ const getFn = (
 	if (ArraySchemaObjectCodec.is(schema)) {
 		return right(
 			serializedFragment(
-				`value => option.fromEither(serializeArrayParameter('${style}', '${parameter.name}', value, ${explode}))`,
-				[serializedDependency('option', 'fp-ts'), serializedDependency('serializeArrayParameter', pathToUtils)],
+				`value => fromEither(serializeArrayParameter('${style}', '${parameter.name}', value, ${explode}))`,
+				[
+					serializedDependency('fromEither', 'fp-ts/lib/Option'),
+					serializedDependency('serializeArrayParameter', pathToUtils),
+				],
 				[],
 			),
 		);
@@ -142,9 +145,9 @@ const getFn = (
 	if (ObjectSchemaObjectCodec.is(schema)) {
 		return right(
 			serializedFragment(
-				`value => option.fromEither(serializeObjectParameter('${style}', '${parameter.name}', value, ${explode}))`,
+				`value => fromEither(serializeObjectParameter('${style}', '${parameter.name}', value, ${explode}))`,
 				[
-					serializedDependency('option', 'fp-ts'),
+					serializedDependency('fromEither', 'fp-ts/lib/Option'),
 					serializedDependency('serializeObjectParameter', pathToUtils),
 				],
 				[],
