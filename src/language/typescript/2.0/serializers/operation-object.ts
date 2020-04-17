@@ -52,6 +52,7 @@ import {
 	SerializedFragment,
 } from '../../common/data/serialized-fragment';
 import { sequenceOptionEither } from '../../../../utils/option';
+import { identity } from 'fp-ts/lib/function';
 
 interface Parameters {
 	readonly pathParameters: PathParameterObject[];
@@ -246,6 +247,7 @@ export const serializeOperationObject = combineReader(
 
 		const deprecated = pipe(
 			operation.deprecated,
+			option.filter(identity),
 			map(() => `@deprecated`),
 		);
 
