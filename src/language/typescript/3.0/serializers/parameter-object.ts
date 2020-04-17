@@ -85,7 +85,7 @@ const getParameterExplode = (parameter: ParameterObject): boolean =>
 		option.getOrElse(() => getParameterObjectStyle(parameter) === 'form'),
 	);
 
-export const serializeParameterToTemplate = (
+export const serializeQueryParameterToTemplate = (
 	from: Ref,
 	parameter: ParameterObject,
 	parameterSchema: SchemaObject,
@@ -121,8 +121,11 @@ const getFn = (
 	if (PrimitiveSchemaObjectCodec.is(schema)) {
 		return right(
 			serializedFragment(
-				`value => serializePrimitiveParameter('${style}', '${parameter.name}', value)`,
-				[serializedDependency('serializePrimitiveParameter', pathToUtils)],
+				`value => fromEither(serializePrimitiveParameter('${style}', '${parameter.name}', value))`,
+				[
+					serializedDependency('fromEither', 'fp-ts/lib/Option'),
+					serializedDependency('serializePrimitiveParameter', pathToUtils),
+				],
 				[],
 			),
 		);
@@ -130,8 +133,11 @@ const getFn = (
 	if (ArraySchemaObjectCodec.is(schema)) {
 		return right(
 			serializedFragment(
-				`value => serializeArrayParameter('${style}', '${parameter.name}', value, ${explode})`,
-				[serializedDependency('serializeArrayParameter', pathToUtils)],
+				`value => fromEither(serializeArrayParameter('${style}', '${parameter.name}', value, ${explode}))`,
+				[
+					serializedDependency('fromEither', 'fp-ts/lib/Option'),
+					serializedDependency('serializeArrayParameter', pathToUtils),
+				],
 				[],
 			),
 		);
@@ -139,8 +145,11 @@ const getFn = (
 	if (ObjectSchemaObjectCodec.is(schema)) {
 		return right(
 			serializedFragment(
-				`value => serializeObjectParameter('${style}', '${parameter.name}', value, ${explode})`,
-				[serializedDependency('serializeObjectParameter', pathToUtils)],
+				`value => fromEither(serializeObjectParameter('${style}', '${parameter.name}', value, ${explode}))`,
+				[
+					serializedDependency('fromEither', 'fp-ts/lib/Option'),
+					serializedDependency('serializeObjectParameter', pathToUtils),
+				],
 				[],
 			),
 		);

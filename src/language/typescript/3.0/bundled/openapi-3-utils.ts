@@ -14,16 +14,16 @@ const content = `
 	export const serializePrimitiveParameter = (style: string, name: string, value: unknown): Either<Error, string> => {
 		switch (style) {
 			case 'matrix': {
-				return right(\`;\${name}=\${value}\`);
+				return right(\`;\${name}=\${encodeURIComponent(String(value))}\`);
 			}
 			case 'label': {
-				return right(\`.\${value}\`);
+				return right(\`.\${encodeURIComponent(String(value))}\`);
 			}
 			case 'form': {
-				return right(\`\${name}=\${value}\`);
+				return right(\`\${name}=\${encodeURIComponent(String(value))}\`);
 			}
 			case 'simple': {
-				return right(\`\${value}\`);
+				return right(\`\${encodeURIComponent(String(value))}\`);
 			}
 		}
 		return left(new Error(\`Unsupported style "\${style}" for parameter "\${name}"\`));

@@ -12,7 +12,7 @@ import {
 	getParameterObjectSchema,
 	isRequired,
 	serializeParameterObject,
-	serializeParameterToTemplate,
+	serializeQueryParameterToTemplate,
 } from './parameter-object';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
@@ -70,7 +70,7 @@ const eqParameterByNameAndIn: Eq<ParameterObject> = getStructEq({
 });
 const contains = array.elem(eqParameterByNameAndIn);
 
-const getParameters = combineReader(
+export const getParameters = combineReader(
 	ask<ResolveRefContext>(),
 	e => (from: Ref, operation: OperationObject, pathItem: PathItemObject): Either<Error, Parameters> => {
 		const processedParameters: ParameterObject[] = [];
@@ -142,7 +142,7 @@ const getParameters = combineReader(
 						return resolvedSchema;
 					}
 
-					const queryStringFragment = serializeParameterToTemplate(
+					const queryStringFragment = serializeQueryParameterToTemplate(
 						from,
 						resolved.right,
 						resolvedSchema.right,
@@ -209,7 +209,7 @@ const getParameters = combineReader(
 			option.map(f =>
 				combineFragmentsK(f, c =>
 					serializedFragment(
-						`encodeURIComponent(compact([${c}]).join('&'))`,
+						`compact([${c}]).join('&')`,
 						[serializedDependency('compact', 'fp-ts/lib/Array')],
 						[],
 					),
