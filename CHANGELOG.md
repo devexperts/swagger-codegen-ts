@@ -1,3 +1,25 @@
+# [2.0.0-alpha.18](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2020-04-17)
+
+
+### Bug Fixes
+
+* incorrect generation "deprecated" jsdoc for method ([#111](https://github.com/devexperts/swagger-codegen-ts/issues/111)) ([51c0029](https://github.com/devexperts/swagger-codegen-ts/commit/51c0029))
+* query string is incorrectly serialized for primitive parameters ([#103](https://github.com/devexperts/swagger-codegen-ts/issues/103)) ([#109](https://github.com/devexperts/swagger-codegen-ts/issues/109)) ([be39d47](https://github.com/devexperts/swagger-codegen-ts/commit/be39d47))
+* void response missing from union ([#104](https://github.com/devexperts/swagger-codegen-ts/issues/104)) ([#110](https://github.com/devexperts/swagger-codegen-ts/issues/110)) ([dfb2b36](https://github.com/devexperts/swagger-codegen-ts/commit/dfb2b36))
+
+
+### Features
+
+* filter operations response ([6164744](https://github.com/devexperts/swagger-codegen-ts/commit/6164744))
+
+
+### BREAKING CHANGES
+
+* void response is added to resulting response type
+* non-successful response types are filtered out of resulting response type
+
+
+
 # [2.0.0-alpha.17](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2020-01-31)
 
 
