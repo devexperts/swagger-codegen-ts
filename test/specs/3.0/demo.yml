@@ -28,6 +28,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/Successful'
+        201:
+          $ref: '#/components/schemas/37sds afd,asd.324sfa as2_+='
         404:
           $ref: '#/components/responses/NotFound'
         400:
@@ -101,6 +103,11 @@ components:
               $ref: '#/components/schemas/TestAllOf'
             kebab-property:
               type: string
+    37sds afd,asd.324sfa as2_+=:
+      type: object
+      properties:
+        self:
+          $ref: '#/components/schemas/37sds afd,asd.324sfa as2_+='
     TestNullable:
       type: array
       nullable: true

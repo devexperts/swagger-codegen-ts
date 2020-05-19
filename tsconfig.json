@@ -11,6 +11,6 @@
     "dist"
   ],
   "include": [
-    "test/index.ts"
+    "test/index.spec.ts"
   ]
 }

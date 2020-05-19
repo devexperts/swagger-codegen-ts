@@ -11,8 +11,16 @@ export const DEFINITIONS_DIRECTORY = 'definitions';
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
 const INVALID_NAMES = ['Error', 'Promise', 'PromiseLike', 'Array', 'ArrayLike', 'Function', 'Object'];
-export const getTypeName = (name: string): string => (INVALID_NAMES.includes(name) ? `${name}Type` : name);
-export const getIOName = (name: string): string => `${name}IO`;
+const TYPE_NAME_NORMALIZE_REGEX = /\W/g;
+const normalize = (name: string): string => name.replace(TYPE_NAME_NORMALIZE_REGEX, '_').replace(/^(\d)/, '_$1');
+export const getTypeName = (name: string): string => {
+	if (name.length === 0) {
+		return 'Type';
+	}
+	const normalized = normalize(name);
+	return INVALID_NAMES.includes(name) ? `${normalized}Type` : normalized;
+};
+export const getIOName = (name: string): string => `${normalize(name)}IO`;
 export const getURL = (pattern: string, pathParameters: SerializedPathParameter[]): string =>
 	pathParameters.reduce(
 		(acc, p) => acc.replace(`{${p.name}}`, `\$\{encodeURIComponent(${p.io}.toString())\}`),

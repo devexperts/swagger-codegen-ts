@@ -92,7 +92,12 @@ describe('SerializedType', () => {
 						type,
 						io,
 						[serializedDependency(type, p), serializedDependency(io, p)],
-						[to],
+						[
+							{
+								...to,
+								name: getTypeName(to.name),
+							},
+						],
 					);
 
 					expect(serialized).toEqual(expected);
@@ -104,7 +109,7 @@ describe('SerializedType', () => {
 				property($refArbitrary, ref => {
 					const type = getTypeName(ref.name);
 					const io = getIOName(ref.name);
-					const expected = serializedType(type, io, [], [ref]);
+					const expected = serializedType(type, io, [], [{ ...ref, name: getTypeName(ref.name) }]);
 					const serialized = getSerializedRefType(ref)(ref);
 					expect(serialized).toEqual(expected);
 				}),

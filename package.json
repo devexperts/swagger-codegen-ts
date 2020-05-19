@@ -6,10 +6,9 @@
   "scripts": {
     "ts-node": "ts-node",
     "test:lint": "eslint './src/**/*.ts' './test/**/*.ts' --fix",
-    "test:run": "ts-node ./test/index.ts",
-    "test:build": "yarn test:run && tsc -p tsconfig.test.json",
-    "test:unit": "jest",
-    "test": "yarn test:lint && yarn prettier && yarn test:unit && yarn test:build",
+    "test:build": "tsc -p tsconfig.test.json",
+    "test:jest": "jest",
+    "test": "yarn test:lint && yarn prettier && yarn test:jest && yarn test:build",
     "prettier": "prettier --list-different \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prettier:fix": "prettier --write \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prepublishOnly": "yarn test && yarn build",
