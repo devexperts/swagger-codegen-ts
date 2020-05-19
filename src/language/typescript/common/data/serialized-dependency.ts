@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { groupBy, head } from 'fp-ts/lib/NonEmptyArray';
 import { collect } from 'fp-ts/lib/Record';
-import { uniqString } from '../../../../utils/array';
+import { join, uniqString } from '../../../../utils/array';
 import { getMonoid as getArrayMonoid, uniq } from 'fp-ts/lib/Array';
 import { Kind } from '../../../../utils/types';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
@@ -18,15 +18,14 @@ export const serializedDependency = (name: string, path: string): SerializedDepe
 
 export const serializeDependencies = (dependencies: SerializedDependency[]): string =>
 	pipe(
-		pipe(
-			dependencies,
-			groupBy(dependency => dependency.path),
-		),
+		dependencies,
+		groupBy(dependency => dependency.path),
 		collect((key, dependencies) => {
-			const names = uniqString(dependencies.map(dependency => dependency.name));
-			return `import { ${names.join(',')} } from '${head(dependencies).path}';`;
+			const names = pipe(uniqString(dependencies.map(dependency => dependency.name)), join(','));
+			return `import { ${names} } from '${head(dependencies).path}';`;
 		}),
-	).join('');
+		join(''),
+	);
 
 export const monoidDependencies = getArrayMonoid<SerializedDependency>();
 const dependencyOption = serializedDependency('Option', 'fp-ts/lib/Option');
