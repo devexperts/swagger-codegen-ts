@@ -56,11 +56,11 @@ describe('OperationObject', () => {
 
 			expect(generated).toEqual(
 				`compact([pipe(
-					optionFromNullable(number).encode(parameters.query.offset),
+					optionFromNullable(number).encode(parameters.query['offset']),
 					option.fromNullable,
 					option.chain(value => fromEither(serializePrimitiveParameter('form', 'offset', value))),
 				),pipe(
-					number.encode(parameters.query.limit),
+					number.encode(parameters.query['limit']),
 					value => fromEither(serializePrimitiveParameter('form', 'limit', value)),
 				)]).join('&')`
 					.trim()

@@ -99,7 +99,7 @@ export const serializeQueryParameterToTemplate = (
 	const required = isRequired(parameter);
 
 	const encoded = serializedFragment(
-		`${serializedSchema.io}.encode(${target}.${parameter.name})`,
+		`${serializedSchema.io}.encode(${target}['${parameter.name}'])`,
 		serializedSchema.dependencies,
 		serializedSchema.refs,
 	);
