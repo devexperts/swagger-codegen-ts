@@ -1,3 +1,17 @@
+# [2.0.0-alpha.20](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2020-05-20)
+
+
+### Features
+
+* support arbitrary names in path/query params ([91a2e66](https://github.com/devexperts/swagger-codegen-ts/commit/91a2e66))
+
+
+### BREAKING CHANGES
+
+* query/path param names are now escaped
+
+
+
 # [2.0.0-alpha.19](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2020-05-20)
 
 
