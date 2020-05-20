@@ -1,6 +1,7 @@
 import { SerializedDependency, uniqSerializedDependencies } from './serialized-dependency';
 import { SerializedParameter } from './serialized-parameter';
 import { Ref, uniqRefs } from '../../../../utils/ref';
+import { getTypeName } from '../utils';
 
 export interface SerializedPathParameter extends SerializedParameter {
 	readonly name: string;
@@ -29,12 +30,14 @@ export const fromSerializedParameter = (name: string) => (
 	name,
 });
 
-export const getSerializedPathParameterType = (serialized: SerializedPathParameter): SerializedPathParameter =>
-	serializedPathParameter(
-		serialized.name,
-		`${serialized.name}: ${serialized.type}`,
-		`${serialized.io}.encode(${serialized.name})`,
+export const getSerializedPathParameterType = (serialized: SerializedPathParameter): SerializedPathParameter => {
+	const name = getTypeName(serialized.name);
+	return serializedPathParameter(
+		name,
+		`${name}: ${serialized.type}`,
+		`${serialized.io}.encode(${name})`,
 		serialized.isRequired,
 		serialized.dependencies,
 		serialized.refs,
 	);
+};

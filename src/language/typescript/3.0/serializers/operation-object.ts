@@ -1,4 +1,4 @@
-import { getJSDoc, getKindValue, getSafePropertyName, getURL, HTTPMethod } from '../../common/utils';
+import { getJSDoc, getKindValue, getSafePropertyName, getTypeName, getURL, HTTPMethod } from '../../common/utils';
 import {
 	getSerializedPropertyType,
 	getSerializedObjectType,
@@ -87,7 +87,7 @@ export const getParameters = combineReader(
 		for (const parameter of parameters) {
 			const resolved = ReferenceObjectCodec.is(parameter)
 				? e.resolveRef(parameter.$ref, ParameterObjectCodec)
-				: right(parameter);
+				: right({ ...parameter, name: getTypeName(parameter.name) });
 
 			if (isLeft(resolved)) {
 				return resolved;

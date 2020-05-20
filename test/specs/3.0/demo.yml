@@ -18,6 +18,16 @@ paths:
           required: true
           schema:
             type: number
+        - name: 37sds afd,asd.324sfa as2_+=
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: 37sds afd,sadfsdfasd.324sfa as2_+=
+          in: path
+          required: true
+          schema:
+            type: number
       requestBody:
         description: inline request body
         content:
