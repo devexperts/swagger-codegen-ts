@@ -1,3 +1,12 @@
+# [2.0.0-alpha.21](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2020-07-08)
+
+
+### Bug Fixes
+
+* change function name in utils file ([1ba6017](https://github.com/devexperts/swagger-codegen-ts/commit/1ba6017))
+
+
+
 # [2.0.0-alpha.20](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2020-05-20)
 
 
@@ -12,21 +21,7 @@
 
 
 
-# [2.0.0-alpha.19](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2020-05-20)
-
-
-### Features
-
-* support arbitrary strings as type names in TS for OA3 ([79cd66e](https://github.com/devexperts/swagger-codegen-ts/commit/79cd66e)), closes [#114](https://github.com/devexperts/swagger-codegen-ts/issues/114)
-
-
-### BREAKING CHANGES
-
-* type names and IO constant names now replace all non-alphanumeric characters with '_'
-
-
-
-# [2.0.0-alpha.18](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2020-04-17)
+# [2.0.0-alpha.19](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.17...v2.0.0-alpha.19) (2020-05-20)
 
 
 ### Bug Fixes
@@ -39,10 +34,12 @@
 ### Features
 
 * filter operations response ([6164744](https://github.com/devexperts/swagger-codegen-ts/commit/6164744))
+* support arbitrary strings as type names in TS for OA3 ([79cd66e](https://github.com/devexperts/swagger-codegen-ts/commit/79cd66e)), closes [#114](https://github.com/devexperts/swagger-codegen-ts/issues/114)
 
 
 ### BREAKING CHANGES
 
+* type names and IO constant names now replace all non-alphanumeric characters with '_'
 * void response is added to resulting response type
 * non-successful response types are filtered out of resulting response type
 
@@ -67,7 +64,7 @@
 
 
 
-# [2.0.0-alpha.15](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2020-01-23)
+# [2.0.0-alpha.15](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.13...v2.0.0-alpha.15) (2020-01-23)
 
 
 ### Bug Fixes
@@ -83,10 +80,6 @@
 ### BREAKING CHANGES
 
 * if operation id is missing then url/pattern is included in the name
-
-
-
-# [2.0.0-alpha.14](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2020-01-17)
 
 
 
