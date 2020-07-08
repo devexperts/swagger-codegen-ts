@@ -29,7 +29,7 @@ const content = `
 		return left(new Error(\`Unsupported style "\${style}" for parameter "\${name}"\`));
 	};
 	
-	export const serializedArrayParameter = (
+	export const serializeArrayParameter = (
 		style: string,
 		name: string,
 		value: unknown[],
