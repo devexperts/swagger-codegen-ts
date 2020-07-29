@@ -9,27 +9,13 @@ const utils = `
 	import { either } from 'fp-ts/lib/Either';
 	import { Type, failure, success, string as tstring } from 'io-ts';
 
-	const getISOTimezoneOffsetString = (offsetMinutes: number): string => {
-		if (offsetMinutes === 0) {
-			return 'Z';
-		}
-
-		const absoluteOffsetMinutes = Math.abs(offsetMinutes);
-		const offsetHours = absoluteOffsetMinutes / 60;
-		const offsetRestMinutes = absoluteOffsetMinutes % 60;
-
-		return \`\${offsetMinutes > 0 ? '-' : '+'}\${offsetHours
-			.toString()
-			.padStart(2, '0')}:\${offsetRestMinutes.toString().padStart(2, '0')}\`;
-	};
-
 	export const DateFromISODateStringIO = new Type<Date, string, unknown>(
 		'DateFromISODateString',
 		(u): u is Date => u instanceof Date,
 		(u, c) =>
-			either.chain(tstring.validate(u, c), s => {
-				const offset = new Date().getTimezoneOffset();
-				const d = new Date(\`\${s}T00:00:00\${getISOTimezoneOffsetString(offset)}\`);
+			either.chain(tstring.validate(u, c), dateString => {
+				const [year, calendarMonth, day] = dateString.split('-');
+				const d = new Date(+year, +calendarMonth - 1, +day);
 				return isNaN(d.getTime()) ? failure(u, c) : success(d);
 			}),
 		a =>
