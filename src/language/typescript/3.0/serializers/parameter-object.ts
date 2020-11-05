@@ -30,6 +30,7 @@ export const isRequired = (parameter: ParameterObject): boolean =>
 export const serializeParameterObject = (
 	from: Ref,
 	parameterObject: ParameterObject,
+	relativePath?: string,
 ): Either<Error, SerializedParameter> =>
 	pipe(
 		getParameterObjectSchema(parameterObject),
@@ -37,7 +38,7 @@ export const serializeParameterObject = (
 			if (ReferenceObjectCodec.is(schema)) {
 				return pipe(fromString(schema.$ref), either.map(getSerializedRefType(from)));
 			} else {
-				return pipe(schema, serializeSchemaObject(from));
+				return pipe(schema, serializeSchemaObject(from, undefined, relativePath));
 			}
 		}),
 		either.map(fromSerializedType(isRequired(parameterObject))),

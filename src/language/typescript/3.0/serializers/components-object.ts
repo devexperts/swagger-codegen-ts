@@ -22,7 +22,7 @@ import { serializeRequestBodyObject } from './request-body-object';
 const serializeSchema = (from: Ref, schema: SchemaObject): Either<Error, File> => {
 	const typeName = getTypeName(from.name);
 	const ioName = getIOName(from.name);
-	const serialized = pipe(schema, serializeSchemaObject(from, typeName));
+	const serialized = pipe(schema, serializeSchemaObject(from, typeName, '../'));
 	const dependencies = pipe(
 		serialized,
 		either.map(serialized => serializeDependencies(serialized.dependencies)),
@@ -62,7 +62,7 @@ const serializeSchemas = combineReader(
 
 const serializeParameter = (from: Ref, parameterObject: ParameterObject): Either<Error, File> =>
 	pipe(
-		serializeParameterObject(from, parameterObject),
+		serializeParameterObject(from, parameterObject, '../'),
 		either.map(serialized => {
 			const dependencies = serializeDependencies(serialized.dependencies);
 

@@ -18,7 +18,7 @@ import { head, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { JSONPrimitive } from '../../../../utils/io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { nonEmptyArray, option } from 'fp-ts';
-import { none, Option, some } from 'fp-ts/lib/Option';
+import { fromNullable, getOrElse, none, Option, some } from 'fp-ts/lib/Option';
 
 export interface SerializedType {
 	readonly type: string;
@@ -79,14 +79,20 @@ export const SERIALIZED_DATETIME_TYPE = serializedType(
 	[serializedDependency('DateFromISOString', 'io-ts-types/lib/DateFromISOString')],
 	[],
 );
-export const SERIALIZED_DATE_TYPE = serializedType(
-	'Date',
-	'DateFromISODateStringIO',
-	[serializedDependency('DateFromISODateStringIO', '../utils/utils')],
-	[],
-);
+export const getSerializedDateType = (relativePath?: string) =>
+	pipe(
+		fromNullable(relativePath),
+		getOrElse(() => ''),
+		relativePath =>
+			serializedType(
+				'Date',
+				'DateFromISODateStringIO',
+				[serializedDependency('DateFromISODateStringIO', `${relativePath}../utils/utils`)],
+				[],
+			),
+	);
 export const SERIALIZED_STRING_TYPE = serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []);
-export const getSerializedStringType = (format: Option<string>): SerializedType => {
+export const getSerializedStringType = (format: Option<string>, relativePath?: string): SerializedType => {
 	return pipe(
 		format,
 		option.chain(format => {
@@ -96,7 +102,7 @@ export const getSerializedStringType = (format: Option<string>): SerializedType 
 					return some(SERIALIZED_DATETIME_TYPE);
 				}
 				case 'date': {
-					return some(SERIALIZED_DATE_TYPE);
+					return some(getSerializedDateType(relativePath));
 				}
 			}
 			return none;
