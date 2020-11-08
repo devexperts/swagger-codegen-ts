@@ -9,13 +9,21 @@ import {
 	SerializedType,
 } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getOrElse, isSome, map, Option } from 'fp-ts/lib/Option';
+import { getOrElse, isSome, map, chain, Option, none, fromEither, some, exists } from 'fp-ts/lib/Option';
 import { serializeOperationResponses } from './responses-object';
 import { fromSerializedType } from '../../common/data/serialized-parameter';
 import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIf } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
-import { getJSDoc, getKindValue, getSafePropertyName, getURL, HTTPMethod } from '../../common/utils';
+import {
+	getJSDoc,
+	getKindValue,
+	getSafePropertyName,
+	getURL,
+	HTTPMethod,
+	JSON_RESPONSE_TYPE,
+	XHRResponseType,
+} from '../../common/utils';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { array, either, nonEmptyArray, option, record } from 'fp-ts';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
@@ -53,6 +61,9 @@ import {
 } from '../../common/data/serialized-fragment';
 import { sequenceOptionEither } from '../../../../utils/option';
 import { identity } from 'fp-ts/lib/function';
+import { lookup } from 'fp-ts/lib/Record';
+import { ResponseObject } from '../../../../schema/2.0/response-object';
+import { PrimitiveSchemaObjectCodec } from '../../../../schema/2.0/schema-object';
 
 interface Parameters {
 	readonly pathParameters: PathParameterObject[];
@@ -223,8 +234,9 @@ const getParameters = combineReader(
 );
 
 export const serializeOperationObject = combineReader(
+	ask<ResolveRefContext>(),
 	getParameters,
-	getParameters => (
+	(e, getParameters) => (
 		from: Ref,
 		url: string,
 		method: HTTPMethod,
@@ -256,6 +268,41 @@ export const serializeOperationObject = combineReader(
 			serializedResponses,
 			clientRef,
 			(parameters, serializedResponses, clientRef) => {
+				const responseType: XHRResponseType = pipe(
+					lookup('200', operation.responses),
+					chain(successResponse =>
+						ReferenceObjectCodec.is(successResponse)
+							? pipe(
+									fromEither(e.resolveRef(successResponse.$ref, ResponseObject)),
+									chain(data => data.schema),
+							  )
+							: successResponse.schema,
+					),
+					chain(schema =>
+						ReferenceObjectCodec.is(schema)
+							? fromEither(e.resolveRef(schema.$ref, PrimitiveSchemaObjectCodec))
+							: PrimitiveSchemaObjectCodec.is(schema)
+							? some(schema)
+							: none,
+					),
+					map(schema => {
+						if (schema.type === 'string') {
+							if (
+								pipe(
+									schema.format,
+									exists(format => format === 'binary'),
+								)
+							) {
+								return 'blob';
+							}
+							return 'text';
+						}
+
+						return 'json';
+					}),
+					getOrElse(() => JSON_RESPONSE_TYPE),
+				);
+
 				const hasQueryParameters = isSome(parameters.serializedQueryParameter);
 				const hasBodyParameters = isSome(parameters.serializedBodyParameter);
 				const hasParameters = hasQueryParameters || hasBodyParameters;
@@ -308,15 +355,20 @@ export const serializeOperationObject = combineReader(
 							e.httpClient.request({
 								url: ${getURL(url, parameters.serializedPathParameters)},
 								method: '${method}',
+								responseType: '${responseType}',
 								${when(hasQueryParameters, 'query,')}
 								${when(hasBodyParameters, 'body,')}
 							}),
 							value =>
-								pipe(
-									${serializedResponses.io}.decode(value),
-									either.mapLeft(ResponseValidationError.create),
-									either.fold(error => e.httpClient.throwError(error), decoded => e.httpClient.of(decoded)),
-								),
+								${when(
+									responseType !== 'blob',
+									`pipe(
+										${serializedResponses.io}.decode(value),
+										either.mapLeft(ResponseValidationError.create),
+										either.fold(error => e.httpClient.throwError(error), decoded => e.httpClient.of(decoded)),
+									),`,
+								)}
+								${when(responseType === 'blob', `e.httpClient.of(value)`)}
 						);
 					},
 				`;

@@ -16,6 +16,7 @@ export const client = `
 	export interface Request {
 		readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 		readonly url: string;
+		readonly responseType?: 'json' | 'blob' | 'text' // TODO make it strict when 3.0 will be supported
 		readonly query?: string;
 		readonly body?: unknown;
 	}

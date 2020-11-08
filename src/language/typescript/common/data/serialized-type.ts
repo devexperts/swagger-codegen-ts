@@ -98,6 +98,8 @@ export const getSerializedStringType = (format: Option<string>): SerializedType 
 				case 'date': {
 					return some(SERIALIZED_DATE_TYPE);
 				}
+				case 'binary':
+					return some(SERIALIZED_UNKNOWN_TYPE);
 			}
 			return none;
 		}),
