@@ -46,12 +46,16 @@ const isAllowedAdditionalProperties = (
 export const serializeSchemaObject = (
 	from: Ref,
 	name?: string,
+	relativePath?: string,
 ): ((schemaObject: SchemaObject) => Either<Error, SerializedType>) =>
-	serializeSchemaObjectWithRecursion(from, true, name);
+	serializeSchemaObjectWithRecursion(from, true, name, relativePath);
 
-const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boolean, name?: string) => (
-	schemaObject: SchemaObject,
-): Either<Error, SerializedType> => {
+const serializeSchemaObjectWithRecursion = (
+	from: Ref,
+	shouldTrackRecursion: boolean,
+	name?: string,
+	relativePath?: string,
+) => (schemaObject: SchemaObject): Either<Error, SerializedType> => {
 	const isNullable = pipe(schemaObject.nullable, option.exists(identity));
 	if (OneOfSchemaObjectCodec.is(schemaObject)) {
 		return pipe(
@@ -80,7 +84,11 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 		case 'boolean':
 		case 'integer':
 		case 'number': {
-			return pipe(serializePrimitive(from, schemaObject), getSerializedNullableType(isNullable), right);
+			return pipe(
+				serializePrimitive(from, schemaObject, relativePath),
+				getSerializedNullableType(isNullable),
+				right,
+			);
 		}
 		case 'array': {
 			const { items } = schemaObject;
@@ -182,10 +190,10 @@ const serializeChildren = (
 			: serializeSchemaObjectWithRecursion(from, false)(item),
 	);
 
-const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): SerializedType => {
+const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject, relativePath?: string): SerializedType => {
 	switch (schemaObject.type) {
 		case 'string': {
-			return getSerializedStringType(schemaObject.format);
+			return getSerializedStringType(schemaObject.format, relativePath);
 		}
 		case 'number': {
 			return SERIALIZED_NUMBER_TYPE;
