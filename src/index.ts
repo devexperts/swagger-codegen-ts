@@ -3,18 +3,19 @@ import { FSEntity, write } from './utils/fs';
 import * as path from 'path';
 import * as $RefParser from 'json-schema-ref-parser';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { array, either, taskEither } from 'fp-ts';
+import { array, either, taskEither, option } from 'fp-ts';
 import { Either, isLeft, toError } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { reportIfFailed } from './utils/io-ts';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
 import { sketchParser121 } from './parsers/sketch-121';
-import { ResolveRef, ResolveRefContext } from './utils/ref';
+import { DeepLookup, ResolveRef, ResolveRefContext } from './utils/ref';
 import { Reader } from 'fp-ts/lib/Reader';
 
 export interface Language<A> {
 	(documents: Record<string, A>): Either<unknown, FSEntity>;
 }
+
 export interface GenerateOptions<A> {
 	readonly cwd?: string;
 	readonly out: string;
@@ -73,7 +74,21 @@ export const generate = <A>(options: GenerateOptions<A>): TaskEither<unknown, vo
 				either.chain(resolved => reportIfFailed(decoder.decode(resolved))),
 			);
 
-		await write(out, getUnsafe(options.language({ resolveRef })(specs)));
+		const deepLookup: DeepLookup = (node: unknown, codec, refCodec) =>
+			codec.is(node)
+				? option.some(node)
+				: refCodec.is(node)
+				? pipe(
+						option.fromEither(resolveRef(node.$ref, codec)),
+						option.alt(() =>
+							pipe(
+								option.fromEither(resolveRef(node.$ref, refCodec)),
+								option.chain(node => deepLookup(node, codec, refCodec)),
+							),
+						),
+				  )
+				: option.none;
+		await write(out, getUnsafe(options.language({ resolveRef, deepLookup })(specs)));
 
 		log('Done');
 	}, identity);

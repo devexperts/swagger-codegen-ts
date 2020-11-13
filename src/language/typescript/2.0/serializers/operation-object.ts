@@ -9,7 +9,7 @@ import {
 	SerializedType,
 } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getOrElse, isSome, map, chain, Option, none, fromEither, some, exists } from 'fp-ts/lib/Option';
+import { getOrElse, isSome, map, chain, Option, exists } from 'fp-ts/lib/Option';
 import { serializeOperationResponses } from './responses-object';
 import { fromSerializedType } from '../../common/data/serialized-parameter';
 import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
@@ -62,8 +62,8 @@ import {
 import { sequenceOptionEither } from '../../../../utils/option';
 import { identity } from 'fp-ts/lib/function';
 import { lookup } from 'fp-ts/lib/Record';
-import { ResponseObject } from '../../../../schema/2.0/response-object';
 import { PrimitiveSchemaObjectCodec } from '../../../../schema/2.0/schema-object';
+import { ResponseObject } from '../../../../schema/2.0/response-object';
 
 interface Parameters {
 	readonly pathParameters: PathParameterObject[];
@@ -270,31 +270,20 @@ export const serializeOperationObject = combineReader(
 			(parameters, serializedResponses, clientRef) => {
 				const responseType: XHRResponseType = pipe(
 					lookup('200', operation.responses),
-					chain(successResponse =>
-						ReferenceObjectCodec.is(successResponse)
-							? pipe(
-									fromEither(e.resolveRef(successResponse.$ref, ResponseObject)),
-									chain(data => data.schema),
-							  )
-							: successResponse.schema,
-					),
-					chain(schema =>
-						ReferenceObjectCodec.is(schema)
-							? fromEither(e.resolveRef(schema.$ref, PrimitiveSchemaObjectCodec))
-							: PrimitiveSchemaObjectCodec.is(schema)
-							? some(schema)
-							: none,
-					),
+					chain(response => e.deepLookup(response, ResponseObject, ReferenceObjectCodec)),
+					chain(response => response.schema),
+					chain(schema => e.deepLookup(schema, PrimitiveSchemaObjectCodec, ReferenceObjectCodec)),
 					map(schema => {
+						const isBinary = pipe(
+							schema.format,
+							exists(format => format === 'binary'),
+						);
+
+						if (schema.type === 'string' && isBinary) {
+							return 'blob';
+						}
+
 						if (schema.type === 'string') {
-							if (
-								pipe(
-									schema.format,
-									exists(format => format === 'binary'),
-								)
-							) {
-								return 'blob';
-							}
 							return 'text';
 						}
 

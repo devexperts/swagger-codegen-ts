@@ -7,11 +7,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { either, option } from 'fp-ts';
 import { OperationObjectCodec } from '../../../../../schema/3.0/operation-object';
 import { sequenceTEither } from '@devexperts/utils/dist/adt/either.utils';
+import { none } from 'fp-ts/lib/Option';
 
 describe('OperationObject', () => {
 	describe('getParameters', () => {
 		const getParameters = createGetParameters({
 			resolveRef: constant(left(new Error('Refs not supported'))),
+			deepLookup: constant(none),
 		});
 
 		it('should correctly handle primitive query parameters', () => {
