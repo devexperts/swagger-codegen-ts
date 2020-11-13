@@ -1,4 +1,13 @@
-import { getJSDoc, getKindValue, getSafePropertyName, getTypeName, getURL, HTTPMethod } from '../../common/utils';
+import {
+	getJSDoc,
+	getKindValue,
+	getSafePropertyName,
+	getTypeName,
+	getURL,
+	HTTPMethod,
+	JSON_RESPONSE_TYPE,
+	XHRResponseType,
+} from '../../common/utils';
 import {
 	getSerializedPropertyType,
 	getSerializedObjectType,
@@ -34,7 +43,7 @@ import { ResolveRefContext, fromString, getRelativePath, Ref } from '../../../..
 import { OperationObject } from '../../../../schema/3.0/operation-object';
 import { ParameterObject, ParameterObjectCodec } from '../../../../schema/3.0/parameter-object';
 import { RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
-import { isSome, none, Option, some } from 'fp-ts/lib/Option';
+import { chain, exists, getOrElse, isSome, none, Option, some, map } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';
 import { clientRef } from '../../common/bundled/client';
 import { Kind } from '../../../../utils/types';
@@ -48,7 +57,9 @@ import {
 	serializedFragment,
 	SerializedFragment,
 } from '../../common/data/serialized-fragment';
-import { SchemaObjectCodec } from '../../../../schema/3.0/schema-object';
+import { PrimitiveSchemaObjectCodec, SchemaObjectCodec } from '../../../../schema/3.0/schema-object';
+import { lookup } from 'fp-ts/lib/Record';
+import { ResponseObjectCodec } from '../../../../schema/3.0/response-object';
 
 const getOperationName = (pattern: string, operation: OperationObject, method: HTTPMethod): string =>
 	pipe(
@@ -228,8 +239,9 @@ export const getParameters = combineReader(
 );
 
 export const serializeOperationObject = combineReader(
+	ask<ResolveRefContext>(),
 	getParameters,
-	getParameters => (
+	(e, getParameters) => (
 		pattern: string,
 		method: HTTPMethod,
 		from: Ref,
@@ -246,6 +258,34 @@ export const serializeOperationObject = combineReader(
 		);
 
 		const serializedResponses = serializeResponsesObject(from)(operation.responses);
+
+		// const responseType = JSON_RESPONSE_TYPE;
+
+		const responseType: XHRResponseType = pipe(
+			lookup('200', operation.responses),
+			chain(response => e.deepLookup(response, ResponseObjectCodec, ReferenceObjectCodec)),
+			chain(response => response.content),
+			chain(content => lookup('application/json', content)),
+			chain(contentBody => contentBody.schema),
+			chain(schema => e.deepLookup(schema, PrimitiveSchemaObjectCodec, ReferenceObjectCodec)),
+			map(schema => {
+				const isBinary = pipe(
+					schema.format,
+					exists(format => format === 'binary'),
+				);
+
+				if (schema.type === 'string' && isBinary) {
+					return 'blob';
+				}
+
+				if (schema.type === 'string') {
+					return 'text';
+				}
+
+				return 'json';
+			}),
+			getOrElse(() => JSON_RESPONSE_TYPE),
+		);
 
 		return combineEither(
 			parameters,
@@ -304,6 +344,7 @@ export const serializeOperationObject = combineReader(
 							e.httpClient.request({
 								url: ${getURL(pattern, parameters.serializedPathParameters)},
 								method: '${method}',
+								responseType: '${responseType}',
 								${when(hasQueryParameters, 'query,')}
 								${when(hasBodyParameter, 'body,')}
 							}),

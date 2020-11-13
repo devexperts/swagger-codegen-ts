@@ -1,0 +1,115 @@
+openapi: '3.0.2'
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+paths:
+  /file/{filedId}/version/{version}:
+    parameters:
+      - in: path
+        required: true
+        name: filedId
+        schema:
+          type: number
+      - in: path
+        required: true
+        name: version
+        schema:
+          type: number
+    get:
+      tags:
+        - files
+      summary: GetSomeFile
+      operationId: getFile
+      responses:
+        200:
+          description: succesfull operation
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+
+
+  /fileWithResponseRef:
+    get:
+      tags:
+        - files
+      summary: GetFileWithResponseRef
+      operationId: getFileWithResponseRef
+      responses:
+        200:
+          $ref: '#/components/responses/SuccessfulFile'
+  /fileWithSchemaRef:
+    get:
+      tags:
+        - files
+      summary: GetFileWithSchemaRef
+      operationId: getFileWithSchemaRef
+      responses:
+        200:
+          description: succesfull operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+  /text/1/version/1:
+    get:
+      tags:
+        - text
+      summary: GetSomeText
+      operationId: getText
+      responses:
+        200:
+          description: succesfull operation
+          content:
+            application/json:
+              schema:
+                type: string
+  /textWithResponseRef:
+    get:
+      tags:
+        - text
+      summary: GetTextWithResponseRef
+      operationId: getTextWithResponseRef
+      responses:
+        200:
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/SuccessfulText'
+  /textWithSchemaRef:
+    get:
+      tags:
+        - text
+      summary: GetTextWithSchemaRef
+      operationId: getTextWithSchemaRef
+      responses:
+        200:
+          description: succesfull operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Text'
+components:
+  schemas:
+    File:
+      type: string
+      format: binary
+    Text:
+      type: string
+  responses:
+    Successful:
+      description: succesful operation
+    SuccessfulFile:
+      description: succesfull operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/File'
+    SuccessfulText:
+      description: succesful text data loading
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Text'
