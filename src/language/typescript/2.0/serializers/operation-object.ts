@@ -349,15 +349,11 @@ export const serializeOperationObject = combineReader(
 								${when(hasBodyParameters, 'body,')}
 							}),
 							value =>
-								${when(
-									responseType !== 'blob',
-									`pipe(
-										${serializedResponses.io}.decode(value),
-										either.mapLeft(ResponseValidationError.create),
-										either.fold(error => e.httpClient.throwError(error), decoded => e.httpClient.of(decoded)),
-									),`,
-								)}
-								${when(responseType === 'blob', `e.httpClient.of(value)`)}
+								pipe(
+									${serializedResponses.io}.decode(value),
+									either.mapLeft(ResponseValidationError.create),
+									either.fold(error => e.httpClient.throwError(error), decoded => e.httpClient.of(decoded)),
+							),
 						);
 					},
 				`;
