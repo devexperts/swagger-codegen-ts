@@ -263,35 +263,35 @@ export const serializeOperationObject = combineReader(
 			map(() => `@deprecated`),
 		);
 
+		const responseType: XHRResponseType = pipe(
+			lookup('200', operation.responses),
+			chain(response => e.deepLookup(response, ResponseObject, ReferenceObjectCodec)),
+			chain(response => response.schema),
+			chain(schema => e.deepLookup(schema, PrimitiveSchemaObjectCodec, ReferenceObjectCodec)),
+			map(schema => {
+				const isBinary = pipe(
+					schema.format,
+					exists(format => format === 'binary'),
+				);
+
+				if (schema.type === 'string' && isBinary) {
+					return 'blob';
+				}
+
+				if (schema.type === 'string') {
+					return 'text';
+				}
+
+				return 'json';
+			}),
+			getOrElse(() => JSON_RESPONSE_TYPE),
+		);
+
 		return combineEither(
 			parameters,
 			serializedResponses,
 			clientRef,
 			(parameters, serializedResponses, clientRef) => {
-				const responseType: XHRResponseType = pipe(
-					lookup('200', operation.responses),
-					chain(response => e.deepLookup(response, ResponseObject, ReferenceObjectCodec)),
-					chain(response => response.schema),
-					chain(schema => e.deepLookup(schema, PrimitiveSchemaObjectCodec, ReferenceObjectCodec)),
-					map(schema => {
-						const isBinary = pipe(
-							schema.format,
-							exists(format => format === 'binary'),
-						);
-
-						if (schema.type === 'string' && isBinary) {
-							return 'blob';
-						}
-
-						if (schema.type === 'string') {
-							return 'text';
-						}
-
-						return 'json';
-					}),
-					getOrElse(() => JSON_RESPONSE_TYPE),
-				);
-
 				const hasQueryParameters = isSome(parameters.serializedQueryParameter);
 				const hasBodyParameters = isSome(parameters.serializedBodyParameter);
 				const hasParameters = hasQueryParameters || hasBodyParameters;

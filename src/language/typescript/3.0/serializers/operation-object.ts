@@ -259,8 +259,6 @@ export const serializeOperationObject = combineReader(
 
 		const serializedResponses = serializeResponsesObject(from)(operation.responses);
 
-		// const responseType = JSON_RESPONSE_TYPE;
-
 		const responseType: XHRResponseType = pipe(
 			lookup('200', operation.responses),
 			chain(response => e.deepLookup(response, ResponseObjectCodec, ReferenceObjectCodec)),
