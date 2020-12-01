@@ -139,7 +139,7 @@ const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): Eit
 			return right(SERIALIZED_NULL_TYPE);
 		}
 		case 'string': {
-			return right(getSerializedStringType(schemaObject.format));
+			return getSerializedStringType(from, schemaObject.format);
 		}
 		case 'number': {
 			return right(SERIALIZED_NUMBER_TYPE);

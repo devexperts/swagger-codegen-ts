@@ -28,7 +28,10 @@ export const serializeParameterObject = (
 		case 'formData': {
 			switch (parameterObject.type) {
 				case 'string': {
-					return right(toSerializedParameter(getSerializedStringType(parameterObject.format)));
+					return pipe(
+						getSerializedStringType(from, parameterObject.format),
+						either.map(toSerializedParameter),
+					);
 				}
 				case 'number': {
 					return right(toSerializedParameter(SERIALIZED_NUMBER_TYPE));
