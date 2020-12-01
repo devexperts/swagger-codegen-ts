@@ -1,3 +1,12 @@
+# [2.0.0-alpha.23](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2020-11-02)
+
+
+### Bug Fixes
+
+* incorrect serialization of array query parameters ([#127](https://github.com/devexperts/swagger-codegen-ts/issues/127)) ([b2e4ed6](https://github.com/devexperts/swagger-codegen-ts/commit/b2e4ed6))
+
+
+
 # [2.0.0-alpha.22](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2020-07-29)
 
 

@@ -8,9 +8,10 @@ const content = `
 	import { pipe } from 'fp-ts/lib/pipeable';
 	import { record } from 'fp-ts';
 	import { Either, left, right } from 'fp-ts/lib/Either';
-	
+	import { flow } from 'fp-ts/lib/function';
+
 	const join = (separator: string) => (parts: string[]): string => parts.join(separator);
-	
+
 	export const serializePrimitiveParameter = (style: string, name: string, value: unknown): Either<Error, string> => {
 		switch (style) {
 			case 'matrix': {
@@ -28,42 +29,44 @@ const content = `
 		}
 		return left(new Error(\`Unsupported style "\${style}" for parameter "\${name}"\`));
 	};
-	
+
 	export const serializeArrayParameter = (
 		style: string,
 		name: string,
 		value: unknown[],
 		explode: boolean,
 	): Either<Error, string> => {
+		const encodedValue = value.map(flow(String, encodeURIComponent));
+
 		switch (style) {
 			case 'matrix': {
 				return right(
-					value.length === 0
+					encodedValue.length === 0
 						? \`;\${name}\`
 						: explode
-						? \`\${value.map(item => \`;\${name}=\${item}\`).join('')}\`
-						: \`;\${name}=\${value.join(',')}\`,
+						? \`\${encodedValue.map(item => \`;\${name}=\${item}\`).join('')}\`
+						: \`;\${name}=\${encodedValue.join(',')}\`,
 				);
 			}
 			case 'label': {
-				return right(value.map(item => \`.\${item}\`).join(''));
+				return right(encodedValue.map(item => \`.\${item}\`).join(''));
 			}
 			case 'form': {
-				return right(explode ? \`\${value.map(item => \`\${name}=\${item}\`).join('&')}\` : \`\${name}=\${value.join(',')}\`);
+				return right(explode ? \`\${encodedValue.map(item => \`\${name}=\${item}\`).join('&')}\` : \`\${name}=\${encodedValue.join(',')}\`);
 			}
 			case 'simple': {
-				return right(value.join(','));
+				return right(encodedValue.join(','));
 			}
 			case 'spaceDelimited': {
-				return right(value.join(' '));
+				return right(encodedValue.join(' '));
 			}
 			case 'pipeDelimited': {
-				return right(value.join('|'));
+				return right(encodedValue.join('|'));
 			}
 		}
 		return left(new Error(\`Unsupported style "\${style}" for parameter "\${name}"\`));
 	};
-	
+
 	export const serializeObjectParameter = (
 		style: string,
 		name: string,
