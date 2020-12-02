@@ -18,7 +18,7 @@ export const serializeItemsObject = (from: Ref, itemsObject: ItemsObject): Eithe
 			return pipe(serializeItemsObject(from, itemsObject.items), either.map(getSerializedArrayType()));
 		}
 		case 'string': {
-			return right(getSerializedStringType(itemsObject.format));
+			return getSerializedStringType(from, itemsObject.format);
 		}
 		case 'number': {
 			return right(SERIALIZED_NUMBER_TYPE);

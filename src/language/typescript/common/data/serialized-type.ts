@@ -19,6 +19,9 @@ import { JSONPrimitive } from '../../../../utils/io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { nonEmptyArray, option } from 'fp-ts';
 import { none, Option, some } from 'fp-ts/lib/Option';
+import { utilsRef } from '../bundled/utils';
+import { Either } from 'fp-ts/lib/Either';
+import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 
 export interface SerializedType {
 	readonly type: string;
@@ -79,30 +82,33 @@ export const SERIALIZED_DATETIME_TYPE = serializedType(
 	[serializedDependency('DateFromISOString', 'io-ts-types/lib/DateFromISOString')],
 	[],
 );
-export const SERIALIZED_DATE_TYPE = serializedType(
-	'Date',
-	'DateFromISODateStringIO',
-	[serializedDependency('DateFromISODateStringIO', '../utils/utils')],
-	[],
-);
 export const SERIALIZED_STRING_TYPE = serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []);
-export const getSerializedStringType = (format: Option<string>): SerializedType => {
-	return pipe(
-		format,
-		option.chain(format => {
-			// https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14
-			switch (format) {
-				case 'date-time': {
-					return some(SERIALIZED_DATETIME_TYPE);
+export const getSerializedStringType = (from: Ref, format: Option<string>): Either<Error, SerializedType> => {
+	return combineEither(utilsRef, utilsRef => {
+		return pipe(
+			format,
+			option.chain(format => {
+				// https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14
+				switch (format) {
+					case 'date-time': {
+						return some(SERIALIZED_DATETIME_TYPE);
+					}
+					case 'date': {
+						return some(
+							serializedType(
+								'Date',
+								'DateFromISODateStringIO',
+								[serializedDependency('DateFromISODateStringIO', getRelativePath(from, utilsRef))],
+								[],
+							),
+						);
+					}
 				}
-				case 'date': {
-					return some(SERIALIZED_DATE_TYPE);
-				}
-			}
-			return none;
-		}),
-		option.getOrElse(() => SERIALIZED_STRING_TYPE),
-	);
+				return none;
+			}),
+			option.getOrElse(() => SERIALIZED_STRING_TYPE),
+		);
+	});
 };
 export const SERIALIZED_NULL_TYPE = serializedType('null', 'nullType', [serializedDependency('nullType', 'io-ts')], []);
 export const getSerializedNullableType = (isNullable: boolean) => (type: SerializedType): SerializedType =>
