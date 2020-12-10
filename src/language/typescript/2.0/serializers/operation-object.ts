@@ -9,21 +9,13 @@ import {
 	SerializedType,
 } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getOrElse, isSome, map, chain, Option, exists } from 'fp-ts/lib/Option';
+import { getOrElse, isSome, map, Option, fold } from 'fp-ts/lib/Option';
 import { serializeOperationResponses } from './responses-object';
 import { fromSerializedType } from '../../common/data/serialized-parameter';
 import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIf } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
-import {
-	getJSDoc,
-	getKindValue,
-	getSafePropertyName,
-	getURL,
-	HTTPMethod,
-	JSON_RESPONSE_TYPE,
-	XHRResponseType,
-} from '../../common/utils';
+import { getJSDoc, getKindValue, getSafePropertyName, getURL, HTTPMethod, XHRResponseType } from '../../common/utils';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { array, either, nonEmptyArray, option, record } from 'fp-ts';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
@@ -61,9 +53,6 @@ import {
 } from '../../common/data/serialized-fragment';
 import { sequenceOptionEither } from '../../../../utils/option';
 import { identity } from 'fp-ts/lib/function';
-import { lookup } from 'fp-ts/lib/Record';
-import { PrimitiveSchemaObjectCodec } from '../../../../schema/2.0/schema-object';
-import { ResponseObject } from '../../../../schema/2.0/response-object';
 
 interface Parameters {
 	readonly pathParameters: PathParameterObject[];
@@ -264,28 +253,23 @@ export const serializeOperationObject = combineReader(
 		);
 
 		const responseType: XHRResponseType = pipe(
-			lookup('200', operation.responses),
-			chain(response => e.deepLookup(response, ResponseObject, ReferenceObjectCodec)),
-			chain(response => response.schema),
-			chain(schema => e.deepLookup(schema, PrimitiveSchemaObjectCodec, ReferenceObjectCodec)),
-			map(schema => {
-				const isBinary = pipe(
-					schema.format,
-					exists(format => format === 'binary'),
-				);
-
-				if (schema.type === 'string' && isBinary) {
-					return 'blob';
-				}
-
-				if (schema.type === 'string') {
-					return 'text';
-				}
-
-				return 'json';
-			}),
-			getOrElse(() => JSON_RESPONSE_TYPE),
+			operation.produces,
+			fold(
+				() => 'json',
+				produces => {
+					console.log(produces);
+					if (produces.includes('application/octet-stream')) {
+						return 'blob';
+					}
+					if (produces.includes('text/plain')) {
+						return 'text';
+					}
+					return 'json';
+				},
+			),
 		);
+
+		console.log(responseType, operation.produces);
 
 		return combineEither(
 			parameters,
