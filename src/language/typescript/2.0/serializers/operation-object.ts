@@ -223,9 +223,8 @@ const getParameters = combineReader(
 );
 
 export const serializeOperationObject = combineReader(
-	ask<ResolveRefContext>(),
 	getParameters,
-	(e, getParameters) => (
+	getParameters => (
 		from: Ref,
 		url: string,
 		method: HTTPMethod,
