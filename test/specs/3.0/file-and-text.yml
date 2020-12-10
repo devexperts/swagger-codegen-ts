@@ -24,7 +24,7 @@ paths:
         200:
           description: succesfull operation
           content:
-            application/json:
+            application/octet-stream:
               schema:
                 type: string
                 format: binary
@@ -49,7 +49,7 @@ paths:
         200:
           description: succesfull operation
           content:
-            application/json:
+            application/octet-stream:
               schema:
                 $ref: '#/components/schemas/File'
   /text/1/version/1:
@@ -62,7 +62,7 @@ paths:
         200:
           description: succesfull operation
           content:
-            application/json:
+            text/plain:
               schema:
                 type: string
   /textWithResponseRef:
@@ -75,7 +75,7 @@ paths:
         200:
           description: ok
           content:
-            application/json:
+            text/plain:
               schema:
                 $ref: '#/components/responses/SuccessfulText'
   /textWithSchemaRef:
@@ -88,7 +88,7 @@ paths:
         200:
           description: succesfull operation
           content:
-            application/json:
+            text/plain:
               schema:
                 $ref: '#/components/schemas/Text'
 components:
@@ -104,12 +104,12 @@ components:
     SuccessfulFile:
       description: succesfull operation
       content:
-        application/json:
+        application/octet-stream:
           schema:
             $ref: '#/components/schemas/File'
     SuccessfulText:
       description: succesful text data loading
       content:
-        application/json:
+        text/plain:
           schema:
             $ref: '#/components/schemas/Text'

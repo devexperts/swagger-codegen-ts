@@ -257,7 +257,6 @@ export const serializeOperationObject = combineReader(
 			fold(
 				() => 'json',
 				produces => {
-					console.log(produces);
 					if (produces.includes('application/octet-stream')) {
 						return 'blob';
 					}

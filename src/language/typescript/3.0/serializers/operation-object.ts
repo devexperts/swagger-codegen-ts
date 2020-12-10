@@ -5,7 +5,6 @@ import {
 	getTypeName,
 	getURL,
 	HTTPMethod,
-	JSON_RESPONSE_TYPE,
 	XHRResponseType,
 } from '../../common/utils';
 import {
@@ -43,7 +42,7 @@ import { ResolveRefContext, fromString, getRelativePath, Ref } from '../../../..
 import { OperationObject } from '../../../../schema/3.0/operation-object';
 import { ParameterObject, ParameterObjectCodec } from '../../../../schema/3.0/parameter-object';
 import { RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
-import { chain, exists, getOrElse, isSome, none, Option, some, map } from 'fp-ts/lib/Option';
+import { chain, isSome, none, Option, some, map, fromEither, fold } from 'fp-ts/lib/Option';
 import { constFalse } from 'fp-ts/lib/function';
 import { clientRef } from '../../common/bundled/client';
 import { Kind } from '../../../../utils/types';
@@ -57,8 +56,8 @@ import {
 	serializedFragment,
 	SerializedFragment,
 } from '../../common/data/serialized-fragment';
-import { PrimitiveSchemaObjectCodec, SchemaObjectCodec } from '../../../../schema/3.0/schema-object';
-import { lookup } from 'fp-ts/lib/Record';
+import { SchemaObjectCodec } from '../../../../schema/3.0/schema-object';
+import { lookup, keys } from 'fp-ts/lib/Record';
 import { ResponseObjectCodec } from '../../../../schema/3.0/response-object';
 
 const getOperationName = (pattern: string, operation: OperationObject, method: HTTPMethod): string =>
@@ -261,28 +260,25 @@ export const serializeOperationObject = combineReader(
 
 		const responseType: XHRResponseType = pipe(
 			lookup('200', operation.responses),
-			chain(response => e.deepLookup(response, ResponseObjectCodec, ReferenceObjectCodec)),
+			chain(response =>
+				ReferenceObjectCodec.is(response)
+					? fromEither(e.resolveRef(response.$ref, ResponseObjectCodec))
+					: some(response),
+			),
 			chain(response => response.content),
-			chain(content => lookup('application/json', content)),
-			chain(contentBody => contentBody.schema),
-			chain(schema => e.deepLookup(schema, PrimitiveSchemaObjectCodec, ReferenceObjectCodec)),
-			map(schema => {
-				const isBinary = pipe(
-					schema.format,
-					exists(format => format === 'binary'),
-				);
-
-				if (schema.type === 'string' && isBinary) {
-					return 'blob';
-				}
-
-				if (schema.type === 'string') {
-					return 'text';
-				}
-
-				return 'json';
-			}),
-			getOrElse(() => JSON_RESPONSE_TYPE),
+			map(keys),
+			fold(
+				() => 'json',
+				types => {
+					if (types.includes('application/octet-stream')) {
+						return 'blob';
+					}
+					if (types.includes('text/plain')) {
+						return 'text';
+					}
+					return 'json';
+				},
+			),
 		);
 
 		return combineEither(
