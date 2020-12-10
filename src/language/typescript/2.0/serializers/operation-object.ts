@@ -268,8 +268,6 @@ export const serializeOperationObject = combineReader(
 			),
 		);
 
-		console.log(responseType, operation.produces);
-
 		return combineEither(
 			parameters,
 			serializedResponses,

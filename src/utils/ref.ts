@@ -3,8 +3,7 @@ import { isNonEmpty, uniq } from 'fp-ts/lib/Array';
 import { last, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { Either, left, right } from 'fp-ts/lib/Either';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
-import { Decoder, Type } from 'io-ts';
-import { Option } from 'fp-ts/lib/Option';
+import { Decoder } from 'io-ts';
 
 export interface Ref<R extends string = string> {
 	readonly $ref: string;
@@ -100,11 +99,6 @@ export interface ResolveRef {
 	<A>($ref: string, decoder: Decoder<unknown, A>): Either<Error, A>;
 }
 
-export interface DeepLookup {
-	<A>(node: unknown, codec: Type<A, unknown>, refCodec: Type<{ $ref: string }, unknown>): Option<A>;
-}
-
 export interface ResolveRefContext {
 	readonly resolveRef: ResolveRef;
-	readonly deepLookup: DeepLookup;
 }
