@@ -5,6 +5,7 @@ import {
 	getTypeName,
 	getURL,
 	HTTPMethod,
+	SUCCESSFUL_CODES,
 	XHRResponseType,
 } from '../../common/utils';
 import {
@@ -257,9 +258,9 @@ export const serializeOperationObject = combineReader(
 		);
 
 		const serializedResponses = serializeResponsesObject(from)(operation.responses);
-
 		const responseType: XHRResponseType = pipe(
-			lookup('200', operation.responses),
+			SUCCESSFUL_CODES,
+			array.findFirstMap(code => lookup(code, operation.responses)),
 			chain(response =>
 				ReferenceObjectCodec.is(response)
 					? fromEither(e.resolveRef(response.$ref, ResponseObjectCodec))
