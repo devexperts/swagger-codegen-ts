@@ -10,7 +10,6 @@ export const CONTROLLERS_DIRECTORY = 'controllers';
 export const DEFINITIONS_DIRECTORY = 'definitions';
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 export type XHRResponseType = 'json' | 'blob' | 'text';
-export const JSON_RESPONSE_TYPE: XHRResponseType = 'json';
 const INVALID_NAMES = ['Error', 'Promise', 'PromiseLike', 'Array', 'ArrayLike', 'Function', 'Object'];
 const TYPE_NAME_NORMALIZE_REGEX = /\W/g;
 const normalize = (name: string): string => name.replace(TYPE_NAME_NORMALIZE_REGEX, '_').replace(/^(\d)/, '_$1');

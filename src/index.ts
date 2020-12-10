@@ -15,7 +15,6 @@ import { Reader } from 'fp-ts/lib/Reader';
 export interface Language<A> {
 	(documents: Record<string, A>): Either<unknown, FSEntity>;
 }
-
 export interface GenerateOptions<A> {
 	readonly cwd?: string;
 	readonly out: string;

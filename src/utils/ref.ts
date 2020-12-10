@@ -11,7 +11,6 @@ export interface Ref<R extends string = string> {
 	readonly path: string;
 	readonly target: string;
 }
-
 export const eqRef: Eq<Ref> = getStructEq({
 	$ref: eqString,
 	name: eqString,
