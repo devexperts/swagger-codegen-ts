@@ -18,6 +18,7 @@ export const client = `
 		readonly url: string;
 		readonly query?: string;
 		readonly body?: unknown;
+		readonly headers?: Record<string, unknown>;
 	}
 
 	export interface HTTPClient<F> extends MonadThrow<F> {
