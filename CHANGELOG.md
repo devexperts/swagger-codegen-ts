@@ -1,3 +1,17 @@
+# [2.0.0-alpha.24](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2020-12-24)
+
+
+### Bug Fixes
+
+* fix path to utils file when using date types ([#131](https://github.com/devexperts/swagger-codegen-ts/issues/131)) ([7448720](https://github.com/devexperts/swagger-codegen-ts/commit/7448720)), closes [#117](https://github.com/devexperts/swagger-codegen-ts/issues/117)
+
+
+### Features
+
+* Support headers ([#133](https://github.com/devexperts/swagger-codegen-ts/issues/133)) ([24b70fa](https://github.com/devexperts/swagger-codegen-ts/commit/24b70fa)), closes [#57](https://github.com/devexperts/swagger-codegen-ts/issues/57)
+
+
+
 # [2.0.0-alpha.23](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2020-11-02)
 
 
@@ -39,21 +53,7 @@
 
 
 
-# [2.0.0-alpha.19](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2020-05-20)
-
-
-### Features
-
-* support arbitrary strings as type names in TS for OA3 ([79cd66e](https://github.com/devexperts/swagger-codegen-ts/commit/79cd66e)), closes [#114](https://github.com/devexperts/swagger-codegen-ts/issues/114)
-
-
-### BREAKING CHANGES
-
-* type names and IO constant names now replace all non-alphanumeric characters with '_'
-
-
-
-# [2.0.0-alpha.18](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2020-04-17)
+# [2.0.0-alpha.19](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.17...v2.0.0-alpha.19) (2020-05-20)
 
 
 ### Bug Fixes
@@ -66,10 +66,12 @@
 ### Features
 
 * filter operations response ([6164744](https://github.com/devexperts/swagger-codegen-ts/commit/6164744))
+* support arbitrary strings as type names in TS for OA3 ([79cd66e](https://github.com/devexperts/swagger-codegen-ts/commit/79cd66e)), closes [#114](https://github.com/devexperts/swagger-codegen-ts/issues/114)
 
 
 ### BREAKING CHANGES
 
+* type names and IO constant names now replace all non-alphanumeric characters with '_'
 * void response is added to resulting response type
 * non-successful response types are filtered out of resulting response type
 
