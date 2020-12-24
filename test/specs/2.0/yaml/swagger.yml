@@ -50,6 +50,11 @@ paths:
         required: true
         schema:
           "$ref": "./common.yml#/definitions/Pet"
+      - in: header
+        name: Custom-Header
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: default
