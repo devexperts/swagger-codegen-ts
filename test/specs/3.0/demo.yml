@@ -28,6 +28,16 @@ paths:
           required: true
           schema:
             type: number
+        - in: header
+          name: Custom-Header
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Custom-Header-Two
+          required: false
+          schema:
+            type: string
       requestBody:
         description: inline request body
         content:

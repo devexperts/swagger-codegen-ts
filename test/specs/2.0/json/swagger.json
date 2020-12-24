@@ -41,8 +41,7 @@
     "https",
     "http"
   ],
-  "parameters": {
-  },
+  "parameters": {},
   "paths": {
     "/pet": {
       "post": {
@@ -70,6 +69,12 @@
             "schema": {
               "$ref": "./common.json#/definitions/Pet"
             }
+          },
+          {
+            "in": "header",
+            "name": "Custom-Header",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -122,9 +127,9 @@
               }
             }
           },
-          "400":{
-            "description":"Bad Request",
-            "schema":{
+          "400": {
+            "description": "Bad Request",
+            "schema": {
               "$ref": "./common.json#/definitions/ErrorResponse"
             }
           },

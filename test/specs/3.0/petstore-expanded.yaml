@@ -39,6 +39,11 @@ paths:
           schema:
             type: integer
             format: int32
+        - in: header
+          name: Custom-Header
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: pet response
