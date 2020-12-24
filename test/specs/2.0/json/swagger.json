@@ -75,6 +75,15 @@
             "name": "Custom-Header",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Custom-Header-Two",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         ],
         "responses": {

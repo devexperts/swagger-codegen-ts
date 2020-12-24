@@ -38,6 +38,13 @@ paths:
           required: false
           schema:
             type: string
+        - in: header
+          name: Custom-Header-Three
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
       requestBody:
         description: inline request body
         content:
