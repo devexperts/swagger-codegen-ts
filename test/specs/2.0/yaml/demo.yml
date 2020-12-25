@@ -37,6 +37,20 @@ paths:
           items:
             type: integer
           collectionFormat: multi
+        - in: header
+          name: Custom-Header
+          required: true
+          type: string
+        - in: header
+          name: Custom-Header-Two
+          required: false
+          type: string
+        - in: header
+          name: Custom-Header-Three
+          required: true
+          type: array
+          items:
+            type: string
       operationId: test
       responses:
         200:

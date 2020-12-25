@@ -25,7 +25,6 @@ import {
 	ArrayParameterObjectCollectionFormat,
 	BodyParameterObject,
 	FormDataParameterObject,
-	HeaderParameterObject,
 	ParameterObject,
 	ParameterObjectCodec,
 	PathParameterObject,
@@ -53,13 +52,18 @@ import {
 } from '../../common/data/serialized-fragment';
 import { sequenceOptionEither } from '../../../../utils/option';
 import { identity } from 'fp-ts/lib/function';
+import {
+	fromSerializedHeaderParameter,
+	getSerializedHeaderParameterType,
+	SerializedHeaderParameter,
+} from '../../common/data/serialized-header-parameters';
 
 interface Parameters {
 	readonly pathParameters: PathParameterObject[];
 	readonly serializedPathParameters: SerializedPathParameter[];
 	readonly serializedQueryParameter: Option<SerializedType>;
 	readonly serializedBodyParameter: Option<SerializedType>;
-	readonly headerParameters: HeaderParameterObject[];
+	readonly serializedHeadersParameter: Option<SerializedType>;
 	readonly formDataParameters: FormDataParameterObject[];
 	readonly queryString: Option<SerializedFragment>;
 }
@@ -79,7 +83,7 @@ const getParameters = combineReader(
 		const serializedPathParameters: SerializedPathParameter[] = [];
 		const serializedQueryParameters: SerializedType[] = [];
 		const bodyParameters: BodyParameterObject[] = [];
-		const headerParameters: HeaderParameterObject[] = [];
+		const serializedHeaderParameters: SerializedHeaderParameter[] = [];
 		const formDataParameters: FormDataParameterObject[] = [];
 		const queryStringFragments: SerializedFragment[] = [];
 
@@ -129,7 +133,13 @@ const getParameters = combineReader(
 					break;
 				}
 				case 'header': {
-					headerParameters.push(resolved.right);
+					const serializedParameter = pipe(
+						serialized.right,
+						fromSerializedHeaderParameter(resolved.right.name),
+						getSerializedHeaderParameterType,
+					);
+
+					serializedHeaderParameters.push(serializedParameter);
 					break;
 				}
 				case 'formData': {
@@ -195,6 +205,16 @@ const getParameters = combineReader(
 			sequenceOptionEither,
 		);
 
+		const serializedHeadersParameter = pipe(
+			nonEmptyArray.fromArray(serializedHeaderParameters),
+			option.map(parameters =>
+				pipe(
+					intercalateSerializedTypes(serializedType(';', ',', [], []), parameters),
+					getSerializedObjectType(),
+				),
+			),
+		);
+
 		const queryString = pipe(
 			nonEmptyArray.fromArray(queryStringFragments),
 			option.map(queryStringFragments =>
@@ -215,7 +235,7 @@ const getParameters = combineReader(
 			serializedPathParameters,
 			serializedQueryParameter,
 			serializedBodyParameter,
-			headerParameters,
+			serializedHeadersParameter,
 			formDataParameters,
 			queryString,
 		}));
@@ -274,7 +294,8 @@ export const serializeOperationObject = combineReader(
 			(parameters, serializedResponses, clientRef) => {
 				const hasQueryParameters = isSome(parameters.serializedQueryParameter);
 				const hasBodyParameters = isSome(parameters.serializedBodyParameter);
-				const hasParameters = hasQueryParameters || hasBodyParameters;
+				const hasHeaderParameters = isSome(parameters.serializedHeadersParameter);
+				const hasParameters = hasQueryParameters || hasBodyParameters || hasHeaderParameters;
 
 				const bodyType = pipe(
 					parameters.serializedBodyParameter,
@@ -298,10 +319,22 @@ export const serializeOperationObject = combineReader(
 					option.getOrElse(() => ''),
 				);
 
+				const headersType = pipe(
+					parameters.serializedHeadersParameter,
+					option.map(headers => `headers: ${headers.type}`),
+					option.getOrElse(() => ''),
+				);
+
+				const headersIO = pipe(
+					parameters.serializedHeadersParameter,
+					option.map(headers => `const headers = ${headers.io}.encode(parameters.headers)`),
+					option.getOrElse(() => ''),
+				);
+
 				const argsType = concatIf(
 					hasParameters,
 					parameters.serializedPathParameters.map(p => p.type),
-					[`parameters: { ${queryType}${bodyType} }`],
+					[`parameters: { ${queryType}${bodyType}${headersType} }`],
 				).join(',');
 
 				const type = `
@@ -319,6 +352,7 @@ export const serializeOperationObject = combineReader(
 					${operationName}: (${argsIO}) => {
 						${bodyIO}
 						${queryIO}
+						${headersIO}
 
 						return e.httpClient.chain(
 							e.httpClient.request({
@@ -327,6 +361,7 @@ export const serializeOperationObject = combineReader(
 								responseType: '${responseType}',
 								${when(hasQueryParameters, 'query,')}
 								${when(hasBodyParameters, 'body,')}
+								${when(hasHeaderParameters, 'headers')}
 							}),
 							value =>
 								pipe(
@@ -357,6 +392,10 @@ export const serializeOperationObject = combineReader(
 							),
 							pipe(
 								parameters.queryString,
+								option.map(p => p.dependencies),
+							),
+							pipe(
+								parameters.serializedHeadersParameter,
 								option.map(p => p.dependencies),
 							),
 						]),
