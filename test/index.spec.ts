@@ -65,6 +65,18 @@ describe('codegen', () => {
 	);
 
 	it(
+		'specs/3.0/file-and-text.yml',
+		unsafe(
+			generate({
+				spec: path.resolve(__dirname, 'specs/3.0/file-and-text.yml'),
+				out,
+				language: serializeOpenAPI3,
+				decoder: OpenapiObjectCodec,
+			}),
+		),
+	);
+
+	it(
 		'specs/asyncapi-2.0.0/streetlights-api.yml',
 		unsafe(
 			generate({

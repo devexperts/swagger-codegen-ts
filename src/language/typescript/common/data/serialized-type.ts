@@ -82,6 +82,12 @@ export const SERIALIZED_DATETIME_TYPE = serializedType(
 	[serializedDependency('DateFromISOString', 'io-ts-types/lib/DateFromISOString')],
 	[],
 );
+export const SERIALIZED_DATE_TYPE = serializedType(
+	'Date',
+	'DateFromISODateStringIO',
+	[serializedDependency('DateFromISODateStringIO', '../utils/utils')],
+	[],
+);
 export const SERIALIZED_STRING_TYPE = serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []);
 export const getSerializedStringType = (from: Ref, format: Option<string>): Either<Error, SerializedType> => {
 	return combineEither(utilsRef, utilsRef => {
@@ -102,6 +108,9 @@ export const getSerializedStringType = (from: Ref, format: Option<string>): Eith
 								[],
 							),
 						);
+					}
+					case 'binary': {
+						return some(SERIALIZED_UNKNOWN_TYPE);
 					}
 				}
 				return none;

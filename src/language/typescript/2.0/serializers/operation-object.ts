@@ -9,13 +9,13 @@ import {
 	SerializedType,
 } from '../../common/data/serialized-type';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getOrElse, isSome, map, Option } from 'fp-ts/lib/Option';
+import { getOrElse, isSome, map, Option, fold } from 'fp-ts/lib/Option';
 import { serializeOperationResponses } from './responses-object';
 import { fromSerializedType } from '../../common/data/serialized-parameter';
 import { getSerializedKindDependency, serializedDependency } from '../../common/data/serialized-dependency';
 import { concatIf } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
-import { getJSDoc, getKindValue, getSafePropertyName, getURL, HTTPMethod } from '../../common/utils';
+import { getJSDoc, getKindValue, getSafePropertyName, getURL, HTTPMethod, XHRResponseType } from '../../common/utils';
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { array, either, nonEmptyArray, option, record } from 'fp-ts';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
@@ -271,6 +271,22 @@ export const serializeOperationObject = combineReader(
 			map(() => `@deprecated`),
 		);
 
+		const responseType: XHRResponseType = pipe(
+			operation.produces,
+			fold(
+				() => 'json',
+				produces => {
+					if (produces.includes('application/octet-stream')) {
+						return 'blob';
+					}
+					if (produces.includes('text/plain')) {
+						return 'text';
+					}
+					return 'json';
+				},
+			),
+		);
+
 		return combineEither(
 			parameters,
 			serializedResponses,
@@ -342,6 +358,7 @@ export const serializeOperationObject = combineReader(
 							e.httpClient.request({
 								url: ${getURL(url, parameters.serializedPathParameters)},
 								method: '${method}',
+								responseType: '${responseType}',
 								${when(hasQueryParameters, 'query,')}
 								${when(hasBodyParameters, 'body,')}
 								${when(hasHeaderParameters, 'headers')}
@@ -351,7 +368,7 @@ export const serializeOperationObject = combineReader(
 									${serializedResponses.io}.decode(value),
 									either.mapLeft(ResponseValidationError.create),
 									either.fold(error => e.httpClient.throwError(error), decoded => e.httpClient.of(decoded)),
-								),
+							),
 						);
 					},
 				`;

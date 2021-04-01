@@ -85,9 +85,107 @@ paths:
         type: number
   /shared-path-item:
     $ref: '../../arbitrary.yml#/SharedPathItem'
+  /file/{filedId}/version/{version}:
+    parameters:
+      - in: path
+        type: number
+        required: true
+        name: filedId
+      - in: path
+        type: number
+        required: true
+        name: version
+    get:
+      tags:
+        - files
+      summary: GetSomeFile
+      operationId: getFile
+      produces:
+        - application/octet-stream
+      responses:
+        200:
+          description: succesfull operation
+          schema:
+            type: string
+            format: binary
+  /fileWithResponseRef:
+    get:
+      tags:
+        - files
+      summary: GetFileWithResponseRef
+      operationId: getFileWithResponseRef
+      produces:
+        - application/octet-stream
+      responses:
+        200:
+          $ref: '#/responses/SuccessfulFile'
+  /fileWithSchemaRef:
+    get:
+      tags:
+        - files
+      summary: GetFileWithSchemaRef
+      operationId: getFileWithSchemaRef
+      produces:
+        - application/octet-stream
+      responses:
+        200:
+          description: succesfull operation
+          schema:
+            $ref: '#/definitions/File'
+  /text/{textId}/version/{version}:
+    parameters:
+      - in: path
+        type: number
+        required: true
+        name: textId
+      - in: path
+        type: number
+        required: true
+        name: version
+    get:
+      tags:
+        - text
+      summary: GetSomeText
+      operationId: getText
+      produces:
+        - text/plain
+      responses:
+        200:
+          description: succesfull operation
+          schema:
+            type: string
+  /textWithResponseRef:
+    get:
+      tags:
+        - text
+      summary: GetTextWithResponseRef
+      operationId: getTextWithResponseRef
+      produces:
+        - text/plain
+      responses:
+        200:
+          $ref: '#/responses/SuccessfulText'
+  /textWithSchemaRef:
+    get:
+      tags:
+        - text
+      summary: GetTextWithSchemaRef
+      operationId: getTextWithSchemaRef
+      produces:
+        - text/plain
+      responses:
+        200:
+          description: succesfull operation
+          schema:
+            $ref: '#/definitions/Text'
 definitions:
   Id:
     type: integer
+  File:
+    type: string
+    format: binary
+  Text:
+    type: string
   local:
     type: object
     required:
@@ -150,3 +248,11 @@ responses:
     description: General Error
     schema:
       $ref: '#/definitions/GeneralError'
+  SuccessfulFile:
+    description: succesful file data loading
+    schema:
+      $ref: '#/definitions/File'
+  SuccessfulText:
+    description: succesful text data loading
+    schema:
+      $ref: '#/definitions/Text'

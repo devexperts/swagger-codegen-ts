@@ -14,7 +14,9 @@ export const serializeResponseObject = (
 ): Option<Either<Error, SerializedType>> =>
 	pipe(
 		responseObject.content,
-		option.mapNullable(content => content['application/json']),
+		option.mapNullable(
+			content => content['application/json'] || content['text/plain'] || content['application/octet-stream'],
+		),
 		option.chain(media => media.schema),
 		option.map(schema =>
 			ReferenceObjectCodec.is(schema)
