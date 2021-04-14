@@ -1,0 +1,19 @@
+{
+  "name": "@devexperts/swagger-codegen-ts-examples",
+  "version": "0.0.1",
+  "description": "TS generator for swagger spec - examples",
+  "author": "devexperts",
+  "license": "MPL-2.0",
+  "private": true,
+  "dependencies": {
+    "fp-ts": "^2.10.5",
+    "io-ts": "^2.2.16",
+    "io-ts-types": "^0.5.16",
+    "typescript": "^4.2.4"
+  },
+  "devDependencies": {
+    "@devexperts/swagger-codegen-ts": "^2.0.0-alpha.24",
+    "fs-extra": "^10.0.0",
+    "ts-node": "^9.1.1"
+  }
+}
