@@ -1,0 +1,30 @@
+asyncapi: 2.0.0
+info:
+  title: Chat Example
+  version: 0.1.0
+channels:
+  user/{userId}/chat:
+    parameters:
+      userId:
+        description: Id of the user.
+        schema:
+          type: string
+    subscribe:
+      message:
+        description: Incoming message
+        payload:
+          type: object
+          properties:
+            text:
+              type: string
+            time:
+              type: string
+              format: date-time
+    publish:
+      message:
+        description: Outgoing message
+        payload:
+          type: object
+          properties:
+            text:
+              type: string
