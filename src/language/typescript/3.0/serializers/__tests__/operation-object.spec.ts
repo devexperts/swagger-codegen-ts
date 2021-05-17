@@ -7,6 +7,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { either, option } from 'fp-ts';
 import { OperationObjectCodec } from '../../../../../schema/3.0/operation-object';
 import { sequenceTEither } from '@devexperts/utils/dist/adt/either.utils';
+import { normalizeCodeSnippet } from '../../../../../../test/utils';
 
 describe('OperationObject', () => {
 	describe('getParameters', () => {
@@ -51,20 +52,23 @@ describe('OperationObject', () => {
 				result,
 				option.fromEither,
 				option.chain(result => result.serializedQueryString),
-				option.fold(constant(''), fragment => fragment.value.replace(/\s+/g, ' ')),
+				option.fold(constant(''), fragment => normalizeCodeSnippet(fragment.value)),
 			);
 
 			expect(generated).toEqual(
-				`compact([pipe(
-					optionFromNullable(number).encode(parameters.query['offset']),
-					option.fromNullable,
-					option.chain(value => fromEither(serializePrimitiveParameter('form', 'offset', value))),
-				),pipe(
-					number.encode(parameters.query['limit']),
-					value => fromEither(serializePrimitiveParameter('form', 'limit', value)),
-				)]).join('&')`
-					.trim()
-					.replace(/\s+/g, ' '),
+				normalizeCodeSnippet(`
+					compact([
+						pipe(
+							optionFromNullable(number).encode(parameters.query['offset']),
+							option.fromNullable,
+							option.chain(value => fromEither(serializePrimitiveParameter('form', 'offset', value))),
+						),
+						pipe(
+							number.encode(parameters.query['limit']),
+							value => fromEither(serializePrimitiveParameter('form', 'limit', value)),
+						)
+					]).join('&')
+				`),
 			);
 		});
 	});

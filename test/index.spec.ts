@@ -89,6 +89,18 @@ describe('codegen', () => {
 	);
 
 	it(
+		'specs/asyncapi-2.0.0/channel-params.yml',
+		unsafe(
+			generate({
+				spec: path.resolve(__dirname, 'specs/asyncapi-2.0.0/channel-params.yml'),
+				out,
+				language: serializeAsyncAPI,
+				decoder: AsyncAPIObjectCodec,
+			}),
+		),
+	);
+
+	it(
 		'specs/sketch/demo.sketch',
 		unsafe(
 			generate({
