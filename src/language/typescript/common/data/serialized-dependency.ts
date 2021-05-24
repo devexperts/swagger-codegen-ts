@@ -5,6 +5,8 @@ import { join, uniqString } from '../../../../utils/array';
 import { getMonoid as getArrayMonoid, uniq } from 'fp-ts/lib/Array';
 import { Kind } from '../../../../utils/types';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
+import { ord } from 'fp-ts';
+import { ordString } from 'fp-ts/lib/Ord';
 
 export interface SerializedDependency {
 	readonly name: string;
@@ -26,6 +28,9 @@ export const serializeDependencies = (dependencies: SerializedDependency[]): str
 		}),
 		join(''),
 	);
+
+export const ordDependencyByPath = ord.contramap((dep: SerializedDependency) => dep.path)(ordString);
+export const ordDependencyByName = ord.contramap((dep: SerializedDependency) => dep.name)(ordString);
 
 export const monoidDependencies = getArrayMonoid<SerializedDependency>();
 const dependencyOption = serializedDependency('Option', 'fp-ts/lib/Option');

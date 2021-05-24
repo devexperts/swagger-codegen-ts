@@ -41,5 +41,5 @@ export const OperationObjectCodec: Codec<OperationObject> = type(
 		traits: optionFromNullable(array(OperationTraitObjectCodec)),
 		message: union([ReferenceObjectCodec, MessageObjectCodec, OperationObjectOneOfMessageCodec]),
 	},
-	'OperationTraitObject',
+	'OperationObject',
 );

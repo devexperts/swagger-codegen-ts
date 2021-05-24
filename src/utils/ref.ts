@@ -4,6 +4,8 @@ import { last, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { Either, left, right } from 'fp-ts/lib/Either';
 import { Eq, eqString, getStructEq } from 'fp-ts/lib/Eq';
 import { Decoder } from 'io-ts';
+import { ord } from 'fp-ts';
+import { ordString } from 'fp-ts/lib/Ord';
 
 export interface Ref<R extends string = string> {
 	readonly $ref: string;
@@ -11,6 +13,9 @@ export interface Ref<R extends string = string> {
 	readonly path: string;
 	readonly target: string;
 }
+
+export const ordRefByPath = ord.contramap((ref: Ref) => ref.path)(ordString);
+
 export const eqRef: Eq<Ref> = getStructEq({
 	$ref: eqString,
 	name: eqString,

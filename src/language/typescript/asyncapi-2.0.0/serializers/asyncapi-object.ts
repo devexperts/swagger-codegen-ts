@@ -13,7 +13,11 @@ import { utilsFile } from '../../common/bundled/utils';
 
 export const serializeAsyncAPIObject = combineReader(
 	serializeComponentsObject,
-	serializeComponentsObject => (name: string, asyncAPIObject: AsyncAPIObject): Either<Error, FSEntity> => {
+	serializeChannelsObject,
+	(serializeComponentsObject, serializeChannelsObject) => (
+		name: string,
+		asyncAPIObject: AsyncAPIObject,
+	): Either<Error, FSEntity> => {
 		const components = pipe(
 			asyncAPIObject.components,
 			option.map(components =>
