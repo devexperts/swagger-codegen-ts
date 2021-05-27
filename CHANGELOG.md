@@ -1,4 +1,4 @@
-# [2.0.0-alpha.24](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2020-12-24)
+# [2.0.0-alpha.25](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2021-05-25)
 
 
 ### Bug Fixes
@@ -8,6 +8,8 @@
 
 ### Features
 
+* **asyncapi:** channel parameters ([33ea85d](https://github.com/devexperts/swagger-codegen-ts/commit/33ea85d))
+* support binary and text responses for 2.0 spec ([da355db](https://github.com/devexperts/swagger-codegen-ts/commit/da355db))
 * Support headers ([#133](https://github.com/devexperts/swagger-codegen-ts/issues/133)) ([24b70fa](https://github.com/devexperts/swagger-codegen-ts/commit/24b70fa)), closes [#57](https://github.com/devexperts/swagger-codegen-ts/issues/57)
 
 
