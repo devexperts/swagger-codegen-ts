@@ -2,11 +2,12 @@ import { serializeSchemaObject } from './schema-object';
 import { getSerializedRefType, SerializedType } from '../../common/data/serialized-type';
 import { Either, mapLeft } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { either, option, record } from 'fp-ts';
+import { either, option } from 'fp-ts';
 import { fromString, Ref } from '../../../../utils/ref';
 import { RequestBodyObject } from '../../../../schema/3.0/request-body-object';
 import { ReferenceObjectCodec, ReferenceObject } from '../../../../schema/3.0/reference-object';
 import { SchemaObject } from '../../../../schema/3.0/schema-object';
+import { getKeyMatchValue } from '../../common/utils';
 
 export const serializeRequestBodyObject = (from: Ref, body: RequestBodyObject): Either<Error, SerializedType> =>
 	pipe(
@@ -25,9 +26,10 @@ export const serializeRequestBodyObject = (from: Ref, body: RequestBodyObject): 
 		),
 	);
 
+const requestMediaRegexp = /^(video|audio|image|application|text|multipart\/form-data)/;
 const getSchema = (requestBodyObject: RequestBodyObject): Either<Error, ReferenceObject | SchemaObject> =>
 	pipe(
-		record.lookup('application/json', requestBodyObject.content),
+		getKeyMatchValue(requestBodyObject.content, requestMediaRegexp),
 		option.chain(media => media.schema),
 		either.fromOption(() => new Error('No schema found for ReqeustBodyObject')),
 	);

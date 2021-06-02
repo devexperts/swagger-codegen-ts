@@ -109,6 +109,7 @@ export const getSerializedStringType = (from: Ref, format: Option<string>): Eith
 							),
 						);
 					}
+					case 'base64':
 					case 'binary': {
 						return some(SERIALIZED_UNKNOWN_TYPE);
 					}

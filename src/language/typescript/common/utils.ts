@@ -4,6 +4,9 @@ import { Options } from 'prettier';
 import { fromString, ResolveRefContext } from '../../../utils/ref';
 import { Kind } from '../../../utils/types';
 import { ask } from 'fp-ts/lib/Reader';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { keys } from 'fp-ts/lib/Record';
+import { array, option } from 'fp-ts';
 
 export const SUCCESSFUL_CODES = ['200', '201', 'default'];
 export const CONTROLLERS_DIRECTORY = 'controllers';
@@ -77,3 +80,11 @@ export const getSafePropertyName = (value: string): string =>
 	value.replace(REPLACE_PATTERN, '_').replace(/^(\d)/, '_$1') || '_';
 
 export const context = ask<ResolveRefContext>();
+
+export const getKeyMatchValue = <T>(record: Record<string, T>, regexp: RegExp): option.Option<T> =>
+	pipe(
+		record,
+		keys,
+		array.findFirst(s => regexp.test(s)),
+		option.map(key => record[key]),
+	);
