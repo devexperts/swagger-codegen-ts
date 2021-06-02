@@ -7,6 +7,9 @@ import { either, option } from 'fp-ts';
 import { ResponseObject } from '../../../../schema/3.0/response-object';
 import { Option } from 'fp-ts/lib/Option';
 import { ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
+import { getKeyMatchValue } from '../../common/utils';
+
+const requestMediaRegexp = /^(video|audio|image|application|text)/;
 
 export const serializeResponseObject = (
 	from: Ref,
@@ -14,9 +17,7 @@ export const serializeResponseObject = (
 ): Option<Either<Error, SerializedType>> =>
 	pipe(
 		responseObject.content,
-		option.mapNullable(
-			content => content['application/json'] || content['text/plain'] || content['application/octet-stream'],
-		),
+		option.chain(content => getKeyMatchValue(content, requestMediaRegexp)),
 		option.chain(media => media.schema),
 		option.map(schema =>
 			ReferenceObjectCodec.is(schema)

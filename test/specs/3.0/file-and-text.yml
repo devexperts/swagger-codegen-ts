@@ -91,6 +91,55 @@ paths:
             text/plain:
               schema:
                 $ref: '#/components/schemas/Text'
+  /image:
+    get:
+      tags:
+        - media
+      summary: get image
+      operationId: loadImage
+      responses:
+        200:
+          description: succesfull operation
+          content:
+            image/png:
+              schema:
+                $ref: '#/components/schemas/File'
+                /image:
+  /audio:
+    get:
+      tags:
+        - media
+      summary: get audio
+      operationId: loadAudio
+      responses:
+        200:
+          description: succesfull operation
+          content:
+            image/png:
+              schema:
+                $ref: '#/components/schemas/File'
+  /upload:
+    post:
+      tags:
+        - media
+      summary: updload image
+      operationId: uploadImage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - images
+      responses:
+        200:
+          description: succesfull operation
 components:
   schemas:
     File:

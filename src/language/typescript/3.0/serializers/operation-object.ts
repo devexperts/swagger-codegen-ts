@@ -266,6 +266,9 @@ export const getParameters = combineReader(
 	},
 );
 
+const blobMediaRegexp = /^(video|audio|image|application)/;
+const textMediaRegexp = /^text/;
+
 export const serializeOperationObject = combineReader(
 	ask<ResolveRefContext>(),
 	getParameters,
@@ -299,10 +302,13 @@ export const serializeOperationObject = combineReader(
 			fold(
 				() => 'json',
 				types => {
-					if (types.includes('application/octet-stream')) {
+					if (types.includes('application/json')) {
+						return 'json';
+					}
+					if (types.some(s => blobMediaRegexp.test(s))) {
 						return 'blob';
 					}
-					if (types.includes('text/plain')) {
+					if (types.some(s => textMediaRegexp.test(s))) {
 						return 'text';
 					}
 					return 'json';
