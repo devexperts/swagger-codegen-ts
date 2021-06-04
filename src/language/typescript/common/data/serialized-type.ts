@@ -109,9 +109,31 @@ export const getSerializedStringType = (from: Ref, format: Option<string>): Eith
 							),
 						);
 					}
-					case 'base64':
+					case 'base64': {
+						return some(
+							serializedType(
+								'Base64',
+								'Base64FromStringIO',
+								[
+									serializedDependency('Base64FromStringIO', getRelativePath(from, utilsRef)),
+									serializedDependency('Base64', getRelativePath(from, utilsRef)),
+								],
+								[],
+							),
+						);
+					}
 					case 'binary': {
-						return some(SERIALIZED_UNKNOWN_TYPE);
+						return some(
+							serializedType(
+								'Binary',
+								'BinaryFromStringIO',
+								[
+									serializedDependency('BinaryFromStringIO', getRelativePath(from, utilsRef)),
+									serializedDependency('Binary', getRelativePath(from, utilsRef)),
+								],
+								[],
+							),
+						);
 					}
 				}
 				return none;
