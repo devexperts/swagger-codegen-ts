@@ -103,8 +103,8 @@ paths:
           content:
             image/png:
               schema:
-                $ref: '#/components/schemas/File'
-                /image:
+                type: string
+                format: base64
   /audio:
     get:
       tags:
@@ -116,6 +116,19 @@ paths:
           description: succesfull operation
           content:
             image/png:
+              schema:
+                $ref: '#/components/schemas/File'
+  /table:
+    get:
+      tags:
+        - media
+      summary: get table
+      operationId: loadTable
+      responses:
+        200:
+          description: succesfull operation
+          content:
+            text/csv:
               schema:
                 $ref: '#/components/schemas/File'
   /upload:
