@@ -81,10 +81,26 @@ export const getSafePropertyName = (value: string): string =>
 
 export const context = ask<ResolveRefContext>();
 
-export const getKeyMatchValue = <T>(record: Record<string, T>, regexp: RegExp): option.Option<T> =>
+export const getKeyMatchValue = <T extends string, A>(record: Record<T, A>, regexp: RegExp) =>
 	pipe(
 		record,
 		keys,
 		array.findFirst(s => regexp.test(s)),
-		option.map(key => record[key]),
+		option.map(key => ({ key, value: record[key] })),
 	);
+
+const blobMediaRegexp = /^(video|audio|image|application)/;
+const textMediaRegexp = /^text/;
+export const DEFAULT_MEDIA_TYPE = 'application/json';
+export const getResponseTypeFromMediaType = (mediaType: string): XHRResponseType => {
+	if (mediaType === 'application/json') {
+		return 'json';
+	}
+	if (blobMediaRegexp.test(mediaType)) {
+		return 'blob';
+	}
+	if (textMediaRegexp.test(mediaType)) {
+		return 'text';
+	}
+	return 'json';
+};

@@ -6,8 +6,19 @@ import { fromRef } from '../../../../utils/fs';
 export const utilsRef = fromString('#/utils/utils');
 
 const utils = `
-	import { either } from 'fp-ts/lib/Either';
-	import { Type, type, TypeOf, failure, success, string as tstring, literal } from 'io-ts';
+	import { either, left, right } from 'fp-ts/lib/Either';
+	import {
+		Type,
+		type,
+		TypeOf,
+		failure,
+		success,
+		string as tstring,
+		literal,
+		Validate,
+		Context,
+		getValidationError,
+	} from 'io-ts';
 
 	export const DateFromISODateStringIO = new Type<Date, string, unknown>(
 		'DateFromISODateString',
@@ -51,6 +62,16 @@ const utils = `
 		(u): u is Binary => BinaryIO.is(u),
 		(u, c) => either.chain(tstring.validate(u, c), string => success({ string, format: 'binary' })),
 		a => a.string,
+	);
+
+	const validateBlob: Validate<unknown, Blob> = (u: unknown, c: Context) =>
+		u instanceof Blob ? right(u) : left([getValidationError(u, c)]);
+
+	export const BlobToBlobIO = new Type<Blob, Blob, unknown>(
+		'Base64FromString',
+		(u): u is Blob => u instanceof Blob,
+		validateBlob,
+		a => a,
 	);
 
 `;
