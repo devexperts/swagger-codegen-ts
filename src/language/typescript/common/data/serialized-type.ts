@@ -18,7 +18,7 @@ import { head, NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { JSONPrimitive } from '../../../../utils/io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { nonEmptyArray, option } from 'fp-ts';
-import { none, Option, some } from 'fp-ts/lib/Option';
+import { none, Option, some, exists } from 'fp-ts/lib/Option';
 import { utilsRef } from '../bundled/utils';
 import { Either } from 'fp-ts/lib/Either';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
@@ -123,12 +123,30 @@ export const SERIALIZED_NULL_TYPE = serializedType('null', 'nullType', [serializ
 export const getSerializedNullableType = (isNullable: boolean) => (type: SerializedType): SerializedType =>
 	isNullable ? getSerializedUnionType([type, SERIALIZED_NULL_TYPE]) : type;
 
-export const getSerializedArrayType = (name?: string) => (serialized: SerializedType): SerializedType =>
-	serializedType(
-		`Array<${serialized.type}>`,
-		`array(${serialized.io}${when(name !== undefined, `, '${name}'`)})`,
-		[...serialized.dependencies, serializedDependency('array', 'io-ts')],
-		serialized.refs,
+export const getSerializedArrayType = (minItems: Option<number>, name?: string) => (
+	serialized: SerializedType,
+): SerializedType =>
+	pipe(
+		minItems,
+		exists(minItems => minItems > 0),
+		isNonEmpty =>
+			isNonEmpty
+				? serializedType(
+						`NonEmptyArray<${serialized.type}>`,
+						`nonEmptyArray(${serialized.io}${when(name !== undefined, `, '${name}'`)})`,
+						[
+							...serialized.dependencies,
+							serializedDependency('nonEmptyArray', 'io-ts-types/lib/nonEmptyArray'),
+							serializedDependency('NonEmptyArray', 'fp-ts/lib/NonEmptyArray'),
+						],
+						serialized.refs,
+				  )
+				: serializedType(
+						`Array<${serialized.type}>`,
+						`array(${serialized.io}${when(name !== undefined, `, '${name}'`)})`,
+						[...serialized.dependencies, serializedDependency('array', 'io-ts')],
+						serialized.refs,
+				  ),
 	);
 
 export const getSerializedRefType = (from: Ref) => (to: Ref): SerializedType => {

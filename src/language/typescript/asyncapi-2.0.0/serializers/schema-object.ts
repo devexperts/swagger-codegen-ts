@@ -36,7 +36,7 @@ import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/asynca
 import { traverseNEAEither } from '../../../../utils/either';
 import { constFalse } from 'fp-ts/lib/function';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
-import { Option } from 'fp-ts/lib/Option';
+import { none, Option } from 'fp-ts/lib/Option';
 
 export const serializeSchemaObject = (
 	from: Ref,
@@ -192,5 +192,5 @@ const serializeArray = (
 	const serialized = ReferenceObjectCodec.is(items)
 		? pipe(fromString(items.$ref), either.map(getSerializedRefType(from)))
 		: serializeSchemaObjectWithRecursion(from, items, false);
-	return pipe(serialized, either.map(getSerializedArrayType(name)));
+	return pipe(serialized, either.map(getSerializedArrayType(none, name)));
 };

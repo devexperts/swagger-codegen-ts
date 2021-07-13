@@ -35,11 +35,29 @@ describe('SerializedType', () => {
 	it('getSerializedArrayType', () => {
 		assert(
 			property(serializedTypeArbitrary, name, (s, name) => {
-				expect(pipe(s, getSerializedArrayType(name))).toEqual(
+				expect(pipe(s, getSerializedArrayType(none, name))).toEqual(
 					serializedType(
 						`Array<${s.type}>`,
 						`array(${s.io}${when(name !== undefined, `, '${name}'`)})`,
 						[...s.dependencies, serializedDependency('array', 'io-ts')],
+						s.refs,
+					),
+				);
+			}),
+		);
+	});
+	it('getSerializedArrayType with minItems not 0', () => {
+		assert(
+			property(serializedTypeArbitrary, name, (s, name) => {
+				expect(pipe(s, getSerializedArrayType(some(1), name))).toEqual(
+					serializedType(
+						`NonEmptyArray<${s.type}>`,
+						`nonEmptyArray(${s.io}${when(name !== undefined, `, '${name}'`)})`,
+						[
+							...s.dependencies,
+							serializedDependency('nonEmptyArray', 'io-ts-types/lib/nonEmptyArray'),
+							serializedDependency('NonEmptyArray', 'fp-ts/lib/NonEmptyArray'),
+						],
 						s.refs,
 					),
 				);
