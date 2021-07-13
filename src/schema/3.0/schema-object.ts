@@ -2,7 +2,7 @@ import { array, boolean, intersection, literal, record, recursion, string, type,
 import { ReferenceObject, ReferenceObjectCodec } from './reference-object';
 import { Option } from 'fp-ts/lib/Option';
 import { optionFromNullable } from 'io-ts-types/lib/optionFromNullable';
-import { Codec, JSONPrimitive, JSONPrimitiveCodec } from '../../utils/io-ts';
+import { Codec, JSONPrimitive, JSONPrimitiveCodec, numberOption } from '../../utils/io-ts';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { nonEmptyArray } from 'io-ts-types/lib/nonEmptyArray';
 
@@ -10,12 +10,16 @@ export interface BaseSchemaObject {
 	readonly format: Option<string>;
 	readonly deprecated: Option<boolean>;
 	readonly nullable: Option<boolean>;
+	readonly maxItems: Option<number>;
+	readonly minItems: Option<number>;
 }
 
 const BaseSchemaObjectCodec: Codec<BaseSchemaObject> = type({
 	format: optionFromNullable(string),
 	deprecated: optionFromNullable(boolean),
 	nullable: optionFromNullable(boolean),
+	maxItems: numberOption,
+	minItems: numberOption,
 });
 
 export interface EnumSchemaObject extends BaseSchemaObject {

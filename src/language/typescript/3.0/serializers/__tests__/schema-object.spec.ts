@@ -72,17 +72,21 @@ describe('SchemaObject', () => {
 						format: constant(none),
 						deprecated: constant(none),
 						nullable: constant(none),
+						minItems: constant(none),
+						maxItems: constant(none),
 					}),
 					format: constant(none),
 					deprecated: constant(none),
 					nullable: constant(none),
+					minItems: constant(none),
+					maxItems: constant(none),
 				});
 				assert(
 					property($refArbitrary, schema, string(), (from, schema, name) => {
 						const expected = pipe(
 							schema.items,
 							serializeSchemaObject(from, name),
-							either.map(getSerializedArrayType(name)),
+							either.map(getSerializedArrayType(none, name)),
 						);
 						const serialized = pipe(schema, serializeSchemaObject(from, name));
 						expect(serialized).toEqual(expected);
@@ -98,7 +102,11 @@ describe('SchemaObject', () => {
 								$ref: $refArbitrary.$ref,
 							},
 						});
-						const expected = pipe($refArbitrary, getSerializedRefType(from), getSerializedArrayType(name));
+						const expected = pipe(
+							$refArbitrary,
+							getSerializedRefType(from),
+							getSerializedArrayType(none, name),
+						);
 						expect(pipe(schema, reportIfFailed, either.chain(serializeSchemaObject(from, name)))).toEqual(
 							right(expected),
 						);
@@ -125,7 +133,7 @@ describe('SchemaObject', () => {
 						const expected = pipe(
 							ref,
 							getSerializedRefType(ref),
-							getSerializedArrayType(undefined),
+							getSerializedArrayType(none, undefined),
 							getSerializedOptionPropertyType('children', true),
 							getSerializedObjectType(undefined),
 							getSerializedRecursiveType(ref, true),

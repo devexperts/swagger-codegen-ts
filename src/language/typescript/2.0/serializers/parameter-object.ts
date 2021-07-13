@@ -15,6 +15,7 @@ import { fromSerializedType, SerializedParameter } from '../../common/data/seria
 import { pipe } from 'fp-ts/lib/pipeable';
 import { either, option } from 'fp-ts';
 import { constFalse } from 'fp-ts/lib/function';
+import { none } from 'fp-ts/lib/Option';
 
 export const serializeParameterObject = (
 	from: Ref,
@@ -45,7 +46,7 @@ export const serializeParameterObject = (
 				case 'array': {
 					return pipe(
 						serializeItemsObject(from, parameterObject.items),
-						either.map(getSerializedArrayType()),
+						either.map(getSerializedArrayType(none)),
 						either.map(toSerializedParameter),
 					);
 				}
