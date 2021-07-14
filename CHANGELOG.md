@@ -1,8 +1,24 @@
-# [2.0.0-alpha.25](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2021-05-25)
+# [2.0.0-alpha.26](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2021-07-14)
+
+
+### Features
+
+* **oas3:** Support nonEmptyArray for arrays with minItems > 0 ([5038b65](https://github.com/devexperts/swagger-codegen-ts/commit/5038b65))
+
+
+### BREAKING CHANGES
+
+* **oas3:** getSerializedArrayType now takes minItems as first argument
+
+
+
+# [2.0.0-alpha.25](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2021-05-27)
 
 
 ### Bug Fixes
 
+* **deps:** fixing some dependabot alerts ([790d5ff](https://github.com/devexperts/swagger-codegen-ts/commit/790d5ff))
+* **deps:** fixing vulnerable minimist version ([9d27320](https://github.com/devexperts/swagger-codegen-ts/commit/9d27320))
 * fix path to utils file when using date types ([#131](https://github.com/devexperts/swagger-codegen-ts/issues/131)) ([7448720](https://github.com/devexperts/swagger-codegen-ts/commit/7448720)), closes [#117](https://github.com/devexperts/swagger-codegen-ts/issues/117)
 
 
