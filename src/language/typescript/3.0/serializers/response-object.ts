@@ -8,17 +8,23 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { serializeSchemaObject } from './schema-object';
 import { Either } from 'fp-ts/lib/Either';
 import { fromString, Ref } from '../../../../utils/ref';
-import { either, option } from 'fp-ts';
+import { either, option, array, nonEmptyArray } from 'fp-ts';
 import { ResponseObject } from '../../../../schema/3.0/response-object';
 import { Option } from 'fp-ts/lib/Option';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
-import { getKeyMatchValue, getResponseTypeFromMediaType, XHRResponseType } from '../../common/utils';
+import { getKeyMatchValue, getKeyMatchValues, getResponseTypeFromMediaType, XHRResponseType } from '../../common/utils';
 import { SchemaObject } from '../../../../schema/3.0/schema-object';
 import { MediaTypeObject } from '../../../../schema/3.0/media-type-object';
+import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 
 const requestMediaRegexp = /^(video|audio|image|application|text)/;
 export const getResponseMedia = (content: Record<string, MediaTypeObject>) =>
 	getKeyMatchValue(content, requestMediaRegexp);
+
+export const getResponseMedia2 = (content: Record<string, MediaTypeObject>) =>
+	getKeyMatchValues(content, requestMediaRegexp);
+
+export type SerializedResponse = { mediaType: string; schema: SerializedType };
 
 export const serializeResponseObject = (
 	from: Ref,
@@ -37,6 +43,44 @@ export const serializeResponseObject = (
 			const resType = getResponseTypeFromMediaType(mediaType);
 			return serializeResponseSchema(resType, schema, from);
 		}),
+	);
+
+export const serializeResponseObjectWithMediaType = (
+	from: Ref,
+	responseObject: ResponseObject,
+): Option<Either<Error, SerializedResponse[]>> =>
+	pipe(
+		responseObject.content,
+		option.chain(content => getResponseMedia2(content)),
+		option.chain(arr =>
+			pipe(
+				arr,
+				array.map(({ key: mediaType, value: { schema } }) =>
+					pipe(
+						schema,
+						option.map(schema => ({ mediaType, schema })),
+					),
+				),
+				array.filterMap(a => a),
+				nonEmptyArray.fromArray,
+			),
+		),
+		option.map(arr =>
+			pipe(
+				arr,
+				array.map(({ mediaType, schema }) => {
+					const resType = getResponseTypeFromMediaType(mediaType);
+					return pipe(
+						serializeResponseSchema(resType, schema, from),
+						either.map(schema => ({
+							mediaType,
+							schema,
+						})),
+					);
+				}),
+				sequenceEither,
+			),
+		),
 	);
 
 const serializeResponseSchema = (

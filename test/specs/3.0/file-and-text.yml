@@ -95,15 +95,48 @@ paths:
     get:
       tags:
         - media
-      summary: get table
+      summary: get table with selected media
       operationId: loadTable
+      parameters:
+        - in: header
+          required: true
+          name: version
+          schema:
+            type: number
       responses:
         200:
           description: succesfull operation
           content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableObject'
             text/csv:
               schema:
-                $ref: '#/components/schemas/File'
+                type: string
+    post:
+      tags:
+        - media
+      summary: post table
+      operationId: loadTable2
+      responses:
+        200:
+          description: succesfull operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableObject'
+            text/csv:
+              schema:
+                type: string
+        201:
+          description: succesfull operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Text'
+            text/csv:
+              schema:
+                type: string
   /inline-image:
     get:
       tags:
@@ -132,6 +165,14 @@ paths:
               schema:
                 type: string
                 format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
     post:
       tags:
         - media
@@ -153,6 +194,26 @@ components:
       format: binary
     Text:
       type: string
+    TableObject:
+      type: object
+      required:
+        - tableName
+        - rows
+      properties:
+        tableName:
+          type: string
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - name
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
   responses:
     Successful:
       description: succesful operation

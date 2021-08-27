@@ -6,7 +6,7 @@ import { Kind } from '../../../utils/types';
 import { ask } from 'fp-ts/lib/Reader';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { keys } from 'fp-ts/lib/Record';
-import { array, option } from 'fp-ts';
+import { array, option, nonEmptyArray } from 'fp-ts';
 
 export const SUCCESSFUL_CODES = ['200', '201', 'default'];
 export const CONTROLLERS_DIRECTORY = 'controllers';
@@ -87,6 +87,15 @@ export const getKeyMatchValue = <T extends string, A>(record: Record<T, A>, rege
 		keys,
 		array.findFirst(s => regexp.test(s)),
 		option.map(key => ({ key, value: record[key] })),
+	);
+
+export const getKeyMatchValues = <T extends string, A>(record: Record<T, A>, regexp: RegExp) =>
+	pipe(
+		record,
+		keys,
+		array.filter(s => regexp.test(s)),
+		nonEmptyArray.fromArray,
+		option.map(nonEmptyArray.map(key => ({ key, value: record[key] }))),
 	);
 
 const blobMediaRegexp = /^(video|audio|image|application)/;

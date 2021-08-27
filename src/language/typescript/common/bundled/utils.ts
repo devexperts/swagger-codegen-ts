@@ -74,6 +74,21 @@ const utils = `
 		a => a,
 	);
 
+	const blobMediaRegexp = /^(video|audio|image|application)/;
+	const textMediaRegexp = /^text/;
+	export const getResponseTypeFromMediaType = (mediaType: string) => {
+		if (mediaType === 'application/json') {
+			return 'json';
+		}
+		if (blobMediaRegexp.test(mediaType)) {
+			return 'blob';
+		}
+		if (textMediaRegexp.test(mediaType)) {
+			return 'text';
+		}
+		return 'json';
+	};
+
 `;
 
 export const utilsFile = pipe(
