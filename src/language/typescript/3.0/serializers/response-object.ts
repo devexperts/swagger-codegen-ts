@@ -14,15 +14,9 @@ import { Option } from 'fp-ts/lib/Option';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { getKeyMatchValue, getKeyMatchValues, getResponseTypeFromMediaType, XHRResponseType } from '../../common/utils';
 import { SchemaObject } from '../../../../schema/3.0/schema-object';
-import { MediaTypeObject } from '../../../../schema/3.0/media-type-object';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 
 const requestMediaRegexp = /^(video|audio|image|application|text)/;
-export const getResponseMedia = (content: Record<string, MediaTypeObject>) =>
-	getKeyMatchValue(content, requestMediaRegexp);
-
-export const getResponseMedia2 = (content: Record<string, MediaTypeObject>) =>
-	getKeyMatchValues(content, requestMediaRegexp);
 
 export type SerializedResponse = { mediaType: string; schema: SerializedType };
 
@@ -32,7 +26,7 @@ export const serializeResponseObject = (
 ): Option<Either<Error, SerializedType>> =>
 	pipe(
 		responseObject.content,
-		option.chain(content => getResponseMedia(content)),
+		option.chain(content => getKeyMatchValue(content, requestMediaRegexp)),
 		option.chain(({ key: mediaType, value: { schema } }) =>
 			pipe(
 				schema,
@@ -51,7 +45,7 @@ export const serializeResponseObjectWithMediaType = (
 ): Option<Either<Error, SerializedResponse[]>> =>
 	pipe(
 		responseObject.content,
-		option.chain(content => getResponseMedia2(content)),
+		option.chain(content => getKeyMatchValues(content, requestMediaRegexp)),
 		option.chain(arr =>
 			pipe(
 				arr,
