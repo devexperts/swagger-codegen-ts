@@ -300,7 +300,6 @@ export const serializeOperationObject = combineReader(
 				const hasBodyParameter = isSome(parameters.serializedBodyParameter);
 				const hasHeaderParameters = isSome(parameters.serializedHeadersParameter);
 				const hasParameters = hasQueryParameters || hasBodyParameter || hasHeaderParameters;
-				const hasResponseMap = either.isRight(serializedResponses);
 
 				const bodyType = pipe(
 					parameters.serializedBodyParameter,
@@ -335,35 +334,52 @@ export const serializeOperationObject = combineReader(
 					option.map(headers => `const headers = ${headers.io}.encode(parameters.headers)`),
 					option.getOrElse(() => ''),
 				);
-				const accepArg = hasResponseMap ? 'accept?: A;' : '';
-
 				const argsType = concatIf(
-					hasParameters || hasResponseMap,
+					hasParameters,
 					parameters.serializedPathParameters.map(p => p.type),
-					[`parameters${hasParameters ? '' : '?'}: { ${queryType}${bodyType}${headersType}${accepArg} }`],
+					[`parameters${hasParameters ? '' : '?'}: { ${queryType}${bodyType}${headersType} }`],
+				).join(',');
+
+				const argsTypeWithAccept = concatIf(
+					true,
+					parameters.serializedPathParameters.map(p => p.type),
+					[`parameters${hasParameters ? '' : '?'}: { ${queryType}${bodyType}${headersType} accept: A; }`],
 				).join(',');
 
 				const type = pipe(
 					serializedResponses,
 					either.fold(
 						sr => `
-					${getJSDoc(array.compact([deprecated, operation.summary]))}
-					readonly ${operationName}: (${argsType}) => ${getKindValue(kind, sr.schema.type)};
-				`,
+							${getJSDoc(array.compact([deprecated, operation.summary]))}
+							readonly ${operationName}: (${argsType}) => ${getKindValue(kind, sr.schema.type)};
+						`,
 						sr => `
-					${getJSDoc(array.compact([deprecated, operation.summary]))}
-					readonly ${operationName}: <A extends keyof MapToResponse${operationName} = '${
-							sr[0].mediaType
-						}'>(${argsType}) => ${getKindValue(kind, `MapToResponse${operationName}[A]`)};
-				`,
+							${getJSDoc(array.compact([deprecated, operation.summary]))}
+							${operationName}(${argsType}): ${getKindValue(kind, `MapToResponse${operationName}['${sr[0].mediaType}']`)};
+							${operationName}<A extends keyof MapToResponse${operationName}>(${argsTypeWithAccept}): ${getKindValue(
+							kind,
+							`MapToResponse${operationName}[A]`,
+						)};`,
 					),
 				);
 
 				const argsIO = concatIf(
-					hasParameters || hasResponseMap,
+					hasParameters,
 					parameters.pathParameters.map(p => p.name),
 					['parameters'],
 				).join(',');
+
+				const methodTypeIO = pipe(
+					serializedResponses,
+					either.fold(
+						() => `(${argsIO})`,
+						() => `
+							<A extends keyof MapToResponse${operationName}>(${argsTypeWithAccept}): ${getKindValue(
+							kind,
+							`MapToResponse${operationName}[A]`,
+						)}`,
+					),
+				);
 
 				const decode = pipe(
 					serializedResponses,
@@ -376,9 +392,7 @@ export const serializeOperationObject = combineReader(
 					serializedResponses,
 					either.fold(
 						sr => `const accept = '${sr.mediaType}';`,
-						sr =>
-							`const rawAccept = (parameters && parameters.accept)!;
-							const accept = (rawAccept || '${sr[0].mediaType}') as typeof rawAccept;`,
+						sr => `const accept = (parameters && parameters.accept || '${sr[0].mediaType}') as A`,
 					),
 				);
 
@@ -409,7 +423,7 @@ export const serializeOperationObject = combineReader(
 				}`;
 
 				const io = `
-					${operationName}: (${argsIO}) => {
+					${operationName}: ${methodTypeIO} => {
 						${bodyIO}
 						${queryIO}
 						${headersIO}
