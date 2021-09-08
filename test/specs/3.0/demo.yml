@@ -135,6 +135,31 @@ components:
       properties:
         self:
           $ref: '#/components/schemas/37sds afd,asd.324sfa as2_+='
+    TestNonEmpty:
+      type: array
+      minItems: 1
+      items:
+        type: object
+        properties:
+          foo:
+            type: string
+          bar:
+            type: number
+    TestArrayWithMinItems0:
+      type: array
+      minItems: 0
+      items:
+        type: object
+        properties:
+          foo:
+            type: string
+          bar:
+            type: number
+    TestNonEmptyRef:
+      type: array
+      minItems: 1
+      items:
+        $ref: "#/components/schemas/TestAllOf"
     TestNullable:
       type: array
       nullable: true

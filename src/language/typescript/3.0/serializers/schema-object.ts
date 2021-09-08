@@ -87,13 +87,14 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 			const serialized = ReferenceObjectCodec.is(items)
 				? pipe(
 						fromString(items.$ref),
-						mapLeft(() => new Error(`Unable to serialize SchemaObjeft array items ref "${items.$ref}"`)),
+						mapLeft(() => new Error(`Unable to serialize SchemaObject array items ref "${items.$ref}"`)),
 						either.map(getSerializedRefType(from)),
 				  )
 				: pipe(items, serializeSchemaObjectWithRecursion(from, false, undefined));
+
 			return pipe(
 				serialized,
-				either.map(getSerializedArrayType(name)),
+				either.map(getSerializedArrayType(schemaObject.minItems, name)),
 				either.map(getSerializedNullableType(isNullable)),
 			);
 		}
@@ -109,7 +110,7 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 							mapLeft(
 								() =>
 									new Error(
-										`Unablew to serialize SchemaObject additionalProperties ref "${additionalProperties.$ref}"`,
+										`Unable to serialize SchemaObject additionalProperties ref "${additionalProperties.$ref}"`,
 									),
 							),
 							either.map(getSerializedRefType(from)),
