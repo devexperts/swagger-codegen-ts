@@ -15,7 +15,7 @@ import { SchemaObject } from '../../../../schema/3.0/schema-object';
 import { getKeyMatchValue, getResponseTypeFromMediaType, XHRResponseType } from '../../common/utils';
 import { MediaTypeObject } from '../../../../schema/3.0/media-type-object';
 
-const requestMediaRegexp = /^(video|audio|image|application|text|multipart\/form-data)/;
+const requestMediaRegexp = /^(video|audio|image|application|text|multipart|\*)\/(\w+|\*)/;
 export const getRequestMedia = (content: Record<string, MediaTypeObject>) =>
 	getKeyMatchValue(content, requestMediaRegexp);
 

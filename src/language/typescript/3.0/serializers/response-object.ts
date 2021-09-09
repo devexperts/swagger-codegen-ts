@@ -16,7 +16,7 @@ import { getKeyMatchValue, getKeyMatchValues, getResponseTypeFromMediaType, XHRR
 import { SchemaObject } from '../../../../schema/3.0/schema-object';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 
-const requestMediaRegexp = /^(video|audio|image|application|text)/;
+const requestMediaRegexp = /^(video|audio|image|application|text|\*)\/(\w+|\*)/;
 
 export type SerializedResponse = { mediaType: string; schema: SerializedType };
 
