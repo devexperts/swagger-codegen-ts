@@ -1,13 +1,4 @@
-import {
-	getJSDoc,
-	getKindValue,
-	getSafePropertyName,
-	getTypeName,
-	getURL,
-	HTTPMethod,
-	SUCCESSFUL_CODES,
-	XHRResponseType,
-} from '../../common/utils';
+import { getJSDoc, getKindValue, getSafePropertyName, getTypeName, getURL, HTTPMethod } from '../../common/utils';
 import {
 	getSerializedPropertyType,
 	getSerializedObjectType,
@@ -38,13 +29,13 @@ import {
 } from '../../common/data/serialized-path-parameter';
 import { concatIf } from '../../../../utils/array';
 import { when } from '../../../../utils/string';
-import { serializeRequestBodyObject } from './request-body-object';
+import { getRequestMedia, serializeRequestBodyObject } from './request-body-object';
 import { ResolveRefContext, fromString, getRelativePath, Ref } from '../../../../utils/ref';
 import { OperationObject } from '../../../../schema/3.0/operation-object';
 import { ParameterObject, ParameterObjectCodec } from '../../../../schema/3.0/parameter-object';
 import { RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
 import { chain, isSome, none, Option, some, map, fromEither, fold } from 'fp-ts/lib/Option';
-import { constFalse } from 'fp-ts/lib/function';
+import { constFalse, flow } from 'fp-ts/lib/function';
 import { clientRef } from '../../common/bundled/client';
 import { Kind } from '../../../../utils/types';
 import { ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
@@ -58,15 +49,13 @@ import {
 	SerializedFragment,
 } from '../../common/data/serialized-fragment';
 import { SchemaObjectCodec } from '../../../../schema/3.0/schema-object';
-import { lookup, keys } from 'fp-ts/lib/Record';
-import { ResponseObjectCodec } from '../../../../schema/3.0/response-object';
 import {
 	fromSerializedHeaderParameter,
 	getSerializedHeaderParameterType,
 	SerializedHeaderParameter,
 } from '../../common/data/serialized-header-parameters';
 
-const getOperationName = (pattern: string, operation: OperationObject, method: HTTPMethod): string =>
+export const getOperationName = (pattern: string, operation: OperationObject, method: HTTPMethod): string =>
 	pipe(
 		operation.operationId,
 		option.getOrElse(() => `${method}_${getSafePropertyName(pattern)}`),
@@ -286,27 +275,19 @@ export const serializeOperationObject = combineReader(
 		);
 
 		const serializedResponses = serializeResponsesObject(from)(operation.responses);
-		const responseType: XHRResponseType = pipe(
-			SUCCESSFUL_CODES,
-			array.findFirstMap(code => lookup(code, operation.responses)),
-			chain(response =>
-				ReferenceObjectCodec.is(response)
-					? fromEither(e.resolveRef(response.$ref, ResponseObjectCodec))
-					: some(response),
+		const serializedContentType = pipe(
+			operation.requestBody,
+			chain(requestBody =>
+				ReferenceObjectCodec.is(requestBody)
+					? fromEither(e.resolveRef(requestBody.$ref, RequestBodyObjectCodec))
+					: some(requestBody),
 			),
-			chain(response => response.content),
-			map(keys),
+			map(request => request.content),
+			chain(getRequestMedia),
+			map(({ key }) => key),
 			fold(
-				() => 'json',
-				types => {
-					if (types.includes('application/octet-stream')) {
-						return 'blob';
-					}
-					if (types.includes('text/plain')) {
-						return 'text';
-					}
-					return 'json';
-				},
+				() => '',
+				contentType => `'Content-type': '${contentType}',`,
 			),
 		);
 
@@ -333,7 +314,7 @@ export const serializeOperationObject = combineReader(
 
 				const queryType = pipe(
 					parameters.serializedQueryParameter,
-					option.map(query => `query: ${query.type},`),
+					option.map(query => `query: ${query.type};`),
 					option.getOrElse(() => ''),
 				);
 				const queryIO = pipe(
@@ -344,7 +325,7 @@ export const serializeOperationObject = combineReader(
 
 				const headersType = pipe(
 					parameters.serializedHeadersParameter,
-					option.map(headers => `headers: ${headers.type}`),
+					option.map(headers => `headers: ${headers.type};`),
 					option.getOrElse(() => ''),
 				);
 
@@ -353,17 +334,34 @@ export const serializeOperationObject = combineReader(
 					option.map(headers => `const headers = ${headers.io}.encode(parameters.headers)`),
 					option.getOrElse(() => ''),
 				);
-
 				const argsType = concatIf(
 					hasParameters,
 					parameters.serializedPathParameters.map(p => p.type),
-					[`parameters: { ${queryType}${bodyType}${headersType} }`],
+					[`parameters${hasParameters ? '' : '?'}: { ${queryType}${bodyType}${headersType} }`],
 				).join(',');
 
-				const type = `
-					${getJSDoc(array.compact([deprecated, operation.summary]))}
-					readonly ${operationName}: (${argsType}) => ${getKindValue(kind, serializedResponses.type)};
-				`;
+				const argsTypeWithAccept = concatIf(
+					true,
+					parameters.serializedPathParameters.map(p => p.type),
+					[`parameters${hasParameters ? '' : '?'}: { ${queryType}${bodyType}${headersType} accept: A; }`],
+				).join(',');
+
+				const type = pipe(
+					serializedResponses,
+					either.fold(
+						sr => `
+							${getJSDoc(array.compact([deprecated, operation.summary]))}
+							readonly ${operationName}: (${argsType}) => ${getKindValue(kind, sr.schema.type)};
+						`,
+						sr => `
+							${getJSDoc(array.compact([deprecated, operation.summary]))}
+							${operationName}(${argsType}): ${getKindValue(kind, `MapToResponse${operationName}['${sr[0].mediaType}']`)};
+							${operationName}<A extends keyof MapToResponse${operationName}>(${argsTypeWithAccept}): ${getKindValue(
+							kind,
+							`MapToResponse${operationName}[A]`,
+						)};`,
+					),
+				);
 
 				const argsIO = concatIf(
 					hasParameters,
@@ -371,24 +369,82 @@ export const serializeOperationObject = combineReader(
 					['parameters'],
 				).join(',');
 
+				const methodTypeIO = pipe(
+					serializedResponses,
+					either.fold(
+						() => `(${argsIO})`,
+						() => `
+							<A extends keyof MapToResponse${operationName}>(${argsTypeWithAccept}): ${getKindValue(
+							kind,
+							`MapToResponse${operationName}[A]`,
+						)}`,
+					),
+				);
+
+				const decode = pipe(
+					serializedResponses,
+					either.fold(
+						sr => `${sr.schema.io}.decode(value)`,
+						() => `decode(accept, value)`,
+					),
+				);
+				const acceptIO = pipe(
+					serializedResponses,
+					either.fold(
+						sr => `const accept = '${sr.mediaType}';`,
+						sr => `const accept = (parameters && parameters.accept || '${sr[0].mediaType}') as A`,
+					),
+				);
+
+				const mapToIO = pipe(
+					serializedResponses,
+					either.fold(
+						() => '',
+						sr => {
+							const rows = sr.map(s => `'${s.mediaType}': ${s.schema.io}`);
+							return `const mapToIO = { ${rows.join()} };`;
+						},
+					),
+				);
+
+				const decodeIO = pipe(
+					serializedResponses,
+					either.fold(
+						() => '',
+						() =>
+							`const decode = <A extends keyof MapToResponse${operationName}>(a: A, b: unknown) =>
+						(mapToIO[a].decode(b) as unknown) as Either<Errors, MapToResponse${operationName}[A]>;`,
+					),
+				);
+
+				const requestHeaders = `{
+					Accept: accept,
+					${serializedContentType}
+				}`;
+
 				const io = `
-					${operationName}: (${argsIO}) => {
+					${operationName}: ${methodTypeIO} => {
 						${bodyIO}
 						${queryIO}
 						${headersIO}
+						${acceptIO}
+						${mapToIO}
+						${decodeIO}
+						const responseType = getResponseTypeFromMediaType(accept);
+						const requestHeaders = ${requestHeaders}
 
 						return e.httpClient.chain(
 							e.httpClient.request({
 								url: ${getURL(pattern, parameters.serializedPathParameters)},
 								method: '${method}',
-								responseType: '${responseType}',
+								responseType,
 								${when(hasQueryParameters, 'query,')}
 								${when(hasBodyParameter, 'body,')}
-								${when(hasHeaderParameters, 'headers')}
+								headers: {${hasHeaderParameters ? '...headers,' : ''} ...requestHeaders}
 							}),
 							value =>
 								pipe(
-									${serializedResponses.io}.decode(value),
+									${decode},
 									either.mapLeft(ResponseValidationError.create),
 									either.fold(error => e.httpClient.throwError(error), decoded => e.httpClient.of(decoded)),
 								),
@@ -397,11 +453,26 @@ export const serializeOperationObject = combineReader(
 				`;
 
 				const dependencies = [
+					serializedDependency('getResponseTypeFromMediaType', '../utils/utils'),
 					serializedDependency('ResponseValidationError', getRelativePath(from, clientRef)),
 					serializedDependency('pipe', 'fp-ts/lib/pipeable'),
 					serializedDependency('either', 'fp-ts'),
 					getSerializedKindDependency(kind),
-					...serializedResponses.dependencies,
+					...pipe(
+						serializedResponses,
+						either.fold(
+							s => s.schema.dependencies,
+							flow(
+								array.map(s => s.schema.dependencies),
+								array.flatten,
+								arr => [
+									...arr,
+									serializedDependency('Errors', 'io-ts'),
+									serializedDependency('Either', 'fp-ts/lib/Either'),
+								],
+							),
+						),
+					),
 					...array.flatten([
 						...parameters.serializedPathParameters.map(p => p.dependencies),
 						...array.compact([

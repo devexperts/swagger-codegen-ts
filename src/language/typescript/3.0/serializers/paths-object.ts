@@ -16,6 +16,7 @@ import { applyTo } from '../../../../utils/function';
 import { PathsObject } from '../../../../schema/3.0/paths-object';
 import { clientRef } from '../../common/bundled/client';
 import { getControllerName } from '../../common/utils';
+import { serializeResponseMaps } from './response-maps';
 
 const serializeGrouppedPaths = combineReader(
 	serializePathItemObject,
@@ -35,13 +36,19 @@ const serializeGrouppedPaths = combineReader(
 			sequenceEither,
 			either.map(foldSerializedTypes),
 		);
+		const serializedResponseMaps = pipe(
+			serializeDictionary(groupped, (pattern, item) => serializeResponseMaps(pattern, item, from)),
+			sequenceEither,
+			either.map(foldSerializedTypes),
+		);
 
 		return combineEither(
 			serializedHKT,
 			serializedKind,
 			serializedKind2,
 			clientRef,
-			(serializedHKT, serializedKind, serializedKind2, clientRef) => {
+			serializedResponseMaps,
+			(serializedHKT, serializedKind, serializedKind2, clientRef, serializedMaps) => {
 				const dependencies = serializeDependencies([
 					...serializedHKT.dependencies,
 					...serializedKind.dependencies,
@@ -56,6 +63,8 @@ const serializeGrouppedPaths = combineReader(
 					`${from.name}.ts`,
 					`
 						${dependencies}
+
+						${serializedMaps.type}
 						
 						export interface ${from.name}<F> {
 							${serializedHKT.type}
