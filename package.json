@@ -52,7 +52,7 @@
     "eslint": "^6.7.2",
     "fast-check": "^1.17.0",
     "fp-ts": "^2.1.0",
-    "io-ts": "^2.0.1",
+    "io-ts": "^2.0.5",
     "io-ts-types": "^0.5.1",
     "jest": "^24.9.0",
     "nodemon": "^1.18.3",
@@ -62,7 +62,7 @@
   },
   "peerDependencies": {
     "fp-ts": "^2.1.0",
-    "io-ts": "^2.0.1",
+    "io-ts": "^2.0.5",
     "io-ts-types": "^0.5.1"
   },
   "jest": {
