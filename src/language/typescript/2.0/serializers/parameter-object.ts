@@ -2,9 +2,9 @@ import { Ref } from '../../../../utils/ref';
 import { ParameterObject } from '../../../../schema/2.0/parameter-object';
 import {
 	getSerializedArrayType,
+	getSerializedIntegerType,
 	getSerializedStringType,
 	SERIALIZED_BOOLEAN_TYPE,
-	SERIALIZED_INTEGER_TYPE,
 	SERIALIZED_NUMBER_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 } from '../../common/data/serialized-type';
@@ -38,7 +38,10 @@ export const serializeParameterObject = (
 					return right(toSerializedParameter(SERIALIZED_NUMBER_TYPE));
 				}
 				case 'integer': {
-					return right(toSerializedParameter(SERIALIZED_INTEGER_TYPE));
+					return pipe(
+						getSerializedIntegerType(from, parameterObject.format),
+						either.map(toSerializedParameter),
+					);
 				}
 				case 'boolean': {
 					return right(toSerializedParameter(SERIALIZED_BOOLEAN_TYPE));

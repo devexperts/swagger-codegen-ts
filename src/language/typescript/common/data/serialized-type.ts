@@ -99,6 +99,35 @@ export const SERIALIZED_DATE_TYPE = serializedType(
 	[],
 );
 export const SERIALIZED_STRING_TYPE = serializedType('string', 'string', [serializedDependency('string', 'io-ts')], []);
+
+export const getSerializedIntegerType = (from: Ref, format: Option<string>): Either<Error, SerializedType> => {
+	return combineEither(utilsRef, utilsRef => {
+		return pipe(
+			format,
+			option.chain(format => {
+				// https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14
+				switch (format) {
+					case 'int64': {
+						return some(
+							serializedType(
+								'Bigint',
+								'Bigint',
+								[serializedDependency('Bigint', getRelativePath(from, utilsRef))],
+								[],
+							),
+						);
+					}
+					case 'int32': {
+						return some(SERIALIZED_INTEGER_TYPE);
+					}
+				}
+				return none;
+			}),
+			option.getOrElse(() => SERIALIZED_INTEGER_TYPE),
+		);
+	});
+};
+
 export const getSerializedStringType = (from: Ref, format: Option<string>): Either<Error, SerializedType> => {
 	return combineEither(utilsRef, utilsRef => {
 		return pipe(

@@ -1,9 +1,9 @@
 import { ItemsObject } from '../../../../schema/2.0/items-object';
 import {
 	getSerializedArrayType,
+	getSerializedIntegerType,
 	getSerializedStringType,
 	SERIALIZED_BOOLEAN_TYPE,
-	SERIALIZED_INTEGER_TYPE,
 	SERIALIZED_NUMBER_TYPE,
 	SerializedType,
 } from '../../common/data/serialized-type';
@@ -25,7 +25,7 @@ export const serializeItemsObject = (from: Ref, itemsObject: ItemsObject): Eithe
 			return right(SERIALIZED_NUMBER_TYPE);
 		}
 		case 'integer': {
-			return right(SERIALIZED_INTEGER_TYPE);
+			return getSerializedIntegerType(from, itemsObject.format);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);

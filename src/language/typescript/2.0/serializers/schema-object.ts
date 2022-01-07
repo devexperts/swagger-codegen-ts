@@ -14,7 +14,7 @@ import {
 	getSerializedEnumType,
 	SERIALIZED_NULL_TYPE,
 	getSerializedStringType,
-	SERIALIZED_INTEGER_TYPE,
+	getSerializedIntegerType,
 } from '../../common/data/serialized-type';
 import { serializedDependency } from '../../common/data/serialized-dependency';
 import {
@@ -145,7 +145,7 @@ const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): Eit
 			return right(SERIALIZED_NUMBER_TYPE);
 		}
 		case 'integer': {
-			return right(SERIALIZED_INTEGER_TYPE);
+			return getSerializedIntegerType(from, schemaObject.format);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);

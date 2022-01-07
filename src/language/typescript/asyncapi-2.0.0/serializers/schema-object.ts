@@ -19,7 +19,7 @@ import {
 	SerializedType,
 	getSerializedEnumType,
 	getSerializedStringType,
-	SERIALIZED_INTEGER_TYPE,
+	getSerializedIntegerType,
 } from '../../common/data/serialized-type';
 import {
 	AllOfSchemaObjectCodec,
@@ -76,7 +76,7 @@ const serializeSchemaObjectWithRecursion = (
 			return right(SERIALIZED_NUMBER_TYPE);
 		}
 		case 'integer': {
-			return right(SERIALIZED_INTEGER_TYPE);
+			return getSerializedIntegerType(from, schemaObject.format);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);

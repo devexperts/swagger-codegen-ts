@@ -2,6 +2,7 @@ import {
 	getSerializedArrayType,
 	getSerializedDictionaryType,
 	getSerializedEnumType,
+	getSerializedIntegerType,
 	getSerializedIntersectionType,
 	getSerializedNullableType,
 	getSerializedObjectType,
@@ -12,7 +13,6 @@ import {
 	getSerializedUnionType,
 	intercalateSerializedTypes,
 	SERIALIZED_BOOLEAN_TYPE,
-	SERIALIZED_INTEGER_TYPE,
 	SERIALIZED_NUMBER_TYPE,
 	SERIALIZED_UNKNOWN_TYPE,
 	SerializedType,
@@ -192,7 +192,7 @@ const serializePrimitive = (from: Ref, schemaObject: PrimitiveSchemaObject): Eit
 			return right(SERIALIZED_NUMBER_TYPE);
 		}
 		case 'integer': {
-			return right(SERIALIZED_INTEGER_TYPE);
+			return getSerializedIntegerType(from, schemaObject.format);
 		}
 		case 'boolean': {
 			return right(SERIALIZED_BOOLEAN_TYPE);
