@@ -23,6 +23,7 @@ import {
 } from '../../common/data/serialized-type';
 import {
 	AllOfSchemaObjectCodec,
+	ArraySchemaObject,
 	ConstSchemaObjectCodec,
 	EnumSchemaObjectCodec,
 	ObjectSchemaObject,
@@ -36,7 +37,7 @@ import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/asynca
 import { traverseNEAEither } from '../../../../utils/either';
 import { constFalse } from 'fp-ts/lib/function';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
-import { none, Option } from 'fp-ts/lib/Option';
+import { Option } from 'fp-ts/lib/Option';
 
 export const serializeSchemaObject = (
 	from: Ref,
@@ -85,7 +86,7 @@ const serializeSchemaObjectWithRecursion = (
 			return serializeObjectSchemaObject(from, schemaObject, shouldTrackRecursion, name);
 		}
 		case 'array': {
-			return serializeArray(from, schemaObject.items, shouldTrackRecursion, name);
+			return serializeArray(from, schemaObject, shouldTrackRecursion, name);
 		}
 	}
 };
@@ -185,12 +186,12 @@ const serializeProperties = (
 
 const serializeArray = (
 	from: Ref,
-	items: ReferenceObject | SchemaObject,
+	schemaObject: ArraySchemaObject,
 	shouldTrackRecursion: boolean,
 	name?: string,
 ): Either<Error, SerializedType> => {
-	const serialized = ReferenceObjectCodec.is(items)
-		? pipe(fromString(items.$ref), either.map(getSerializedRefType(from)))
-		: serializeSchemaObjectWithRecursion(from, items, false);
-	return pipe(serialized, either.map(getSerializedArrayType(none, name)));
+	const serialized = ReferenceObjectCodec.is(schemaObject.items)
+		? pipe(fromString(schemaObject.items.$ref), either.map(getSerializedRefType(from)))
+		: serializeSchemaObjectWithRecursion(from, schemaObject.items, false);
+	return pipe(serialized, either.map(getSerializedArrayType(schemaObject.minItems, name)));
 };
