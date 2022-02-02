@@ -188,6 +188,8 @@ const StringSchemaObjectCodec: Codec<StringSchemaObject> = intersection(
 export interface ArraySchemaObject extends BaseSchemaObject {
 	readonly type: 'array';
 	readonly items: ReferenceObject | SchemaObject;
+	readonly maxItems: Option<Natural>;
+	readonly minItems: Option<Natural>;
 }
 const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaObject', () =>
 	intersection([
@@ -195,6 +197,8 @@ const ArraySchemaObjectCodec: Codec<ArraySchemaObject> = recursion('ArraySchemaO
 		type({
 			type: literal('array'),
 			items: union([ReferenceObjectCodec, SchemaObjectCodec]),
+			maxItems: optionFromNullable(natural),
+			minItems: optionFromNullable(natural),
 		}),
 	]),
 );
