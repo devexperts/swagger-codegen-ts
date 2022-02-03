@@ -20,6 +20,12 @@ channels:
             time:
               type: string
               format: date-time
+        examples:
+          - payload: |
+              ```
+              {"time": "2021-10-01T12:25:36Z", "text": "First message"}
+              ```
+          - {"time": "2021-10-01T12:25:43Z", "text": "Second message"}
     publish:
       message:
         description: Outgoing message

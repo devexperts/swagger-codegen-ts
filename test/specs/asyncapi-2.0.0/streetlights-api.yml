@@ -68,6 +68,16 @@ components:
           $ref: '#/components/schemas/Lumens'
         sentAt:
           $ref: '#/components/schemas/SentAt'
+      examples:
+        - >
+          ```
+          {
+            "id": 123,
+            "lumens": 470,
+            "sentAt": "2021-10-04T08:42:25Z"
+          }
+          ```
+        - { "id": 123, "lumens": 470, "sentAt": "2021-10-04T08:42:25Z" }
     Id:
       type: integer
       minimum: 0

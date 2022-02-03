@@ -22,7 +22,7 @@ export interface MessageObject {
 	readonly description: Option<string>;
 	readonly tags: Option<TagsObject>;
 	readonly externalDocs: Option<ExternalDocumentationObject>;
-	readonly examples: Option<Record<string, unknown>>;
+	readonly examples: Option<Record<string, unknown>[]>;
 	readonly traits: Option<MessageTraitObject[]>;
 }
 
@@ -39,7 +39,7 @@ export const MessageObjectCodec: Codec<MessageObject> = type(
 		description: optionFromNullable(string),
 		tags: optionFromNullable(TagsObjectCodec),
 		externalDocs: optionFromNullable(ExternalDocumentationObjectCodec),
-		examples: optionFromNullable(record(string, unknown)),
+		examples: optionFromNullable(array(record(string, unknown))),
 		traits: optionFromNullable(array(MessageTraitObjectCodec)),
 	},
 	'MessageObject',
