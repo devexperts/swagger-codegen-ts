@@ -1,3 +1,24 @@
+# [2.0.0-alpha.28](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2022-02-04)
+
+
+### Bug Fixes
+
+* AsyncAPI: update the `examples` codec according to the spec ([47a1ad3](https://github.com/devexperts/swagger-codegen-ts/commit/47a1ad37b713d2a33a96dd78eb3be83840cc2826))
+* fixing the CI ([ab776f3](https://github.com/devexperts/swagger-codegen-ts/commit/ab776f3ed5adae11fa7dd5a9d1c66b7eb7acb4b8))
+* upgrade to non-vulnerable dot-prop and trim-newlines ([9c966d2](https://github.com/devexperts/swagger-codegen-ts/commit/9c966d28b9f2d7eaaa6f97e4ebc0278dc87a68c4))
+* upgrade vulnerable ansi-regex ([5150fb8](https://github.com/devexperts/swagger-codegen-ts/commit/5150fb8eaf7944907a4d13522af0151d57e5efe4))
+* upgrading vulnerable glob-parent ([dadde68](https://github.com/devexperts/swagger-codegen-ts/commit/dadde68c890cf879e16ec89a97e7ea2529fcf907))
+
+### Features
+
+* AsyncAPI: add non empty array support ([ac33682](https://github.com/devexperts/swagger-codegen-ts/pull/162/commits/ac33682bf9c41d1e0853cf5cdac74f4779ce8376))
+
+### BREAKING CHANGES
+
+* upgrading to node 10
+
+
+
 # [2.0.0-alpha.27](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2021-09-14)
 
 ### Bug Fixes
@@ -7,6 +28,8 @@
 ### Features
 
 * **oas3:** [IO-363] Arbitrary file downloads for OpenAPI 3.0 ([#144](https://github.com/devexperts/swagger-codegen-ts/pull/144))
+
+
 
 # [2.0.0-alpha.26](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2021-07-14)
 
