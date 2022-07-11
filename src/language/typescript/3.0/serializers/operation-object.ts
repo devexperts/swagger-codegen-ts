@@ -78,7 +78,13 @@ const contains = array.elem(eqParameterByNameAndIn);
 
 export const getParameters = combineReader(
 	ask<ResolveRefContext>(),
-	e => (from: Ref, operation: OperationObject, pathItem: PathItemObject): Either<Error, Parameters> => {
+	serializeParameterObject,
+	serializeRequestBodyObject,
+	(e, serializeParameterObject, serializeRequestBodyObject) => (
+		from: Ref,
+		operation: OperationObject,
+		pathItem: PathItemObject,
+	): Either<Error, Parameters> => {
 		const processedParameters: ParameterObject[] = [];
 		const pathParameters: ParameterObject[] = [];
 		const serializedPathParameters: SerializedPathParameter[] = [];
@@ -258,7 +264,8 @@ export const getParameters = combineReader(
 export const serializeOperationObject = combineReader(
 	ask<ResolveRefContext>(),
 	getParameters,
-	(e, getParameters) => (
+	serializeResponsesObject,
+	(e, getParameters, serializeResponsesObject) => (
 		pattern: string,
 		method: HTTPMethod,
 		from: Ref,

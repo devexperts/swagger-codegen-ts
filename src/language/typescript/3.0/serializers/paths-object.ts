@@ -9,7 +9,7 @@ import { decapitalize, camelize } from '@devexperts/utils/dist/string/string';
 import { Either, isLeft, right } from 'fp-ts/lib/Either';
 import { sequenceEither } from '@devexperts/utils/dist/adt/either.utils';
 import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
-import { array, either, option, record } from 'fp-ts';
+import { array, either, option, reader, record } from 'fp-ts';
 import { addPathParts, getRelativePath, Ref } from '../../../../utils/ref';
 import { combineEither } from '@devexperts/utils/dist/adt/either.utils';
 import { applyTo } from '../../../../utils/function';
@@ -17,10 +17,13 @@ import { PathsObject } from '../../../../schema/3.0/paths-object';
 import { clientRef } from '../../common/bundled/client';
 import { getControllerName } from '../../common/utils';
 import { serializeResponseMaps } from './response-maps';
+import { asks, Reader } from 'fp-ts/lib/Reader';
+import { FunctionN } from 'fp-ts/lib/function';
 
 const serializeGrouppedPaths = combineReader(
 	serializePathItemObject,
-	serializePathItemObject => (from: Ref) => (groupped: PathsObject): Either<Error, File> => {
+	serializeResponseMaps,
+	(serializePathItemObject, serializeResponseMaps) => (from: Ref) => (groupped: PathsObject): Either<Error, File> => {
 		const serializedHKT = pipe(
 			serializeDictionary(groupped, (pattern, item) => serializePathItemObject(pattern, item, from, 'HKT')),
 			sequenceEither,
@@ -65,19 +68,19 @@ const serializeGrouppedPaths = combineReader(
 						${dependencies}
 
 						${serializedMaps.type}
-						
+
 						export interface ${from.name}<F> {
 							${serializedHKT.type}
 						}
-						
+
 						export interface ${from.name}1<F extends URIS> {
-							${serializedKind.type}					
+							${serializedKind.type}
 						}
-						
+
 						export interface ${from.name}2<F extends URIS2> {
-							${serializedKind2.type}					
+							${serializedKind2.type}
 						}
-						
+
 						export function ${decapitalize(from.name)}<F extends URIS2>(e: { httpClient: HTTPClient2<F> }): ${from.name}2<F>
 						export function ${decapitalize(from.name)}<F extends URIS>(e: { httpClient: HTTPClient1<F> }): ${from.name}1<F>
 						export function ${decapitalize(from.name)}<F>(e: { httpClient: HTTPClient<F> }): ${from.name}<F>;
@@ -156,16 +159,16 @@ const serializePathsIndex = (from: Ref, pathNames: string[]): Either<Error, File
 		serializedDependency('HTTPClient2', pathToClient),
 	]);
 	const content = `
-		export interface Controllers<F> { 
-			${pathNames.map(name => `${decapitalize(name)}: ${name}<F>;`).join('\n')} 
+		export interface Controllers<F> {
+			${pathNames.map(name => `${decapitalize(name)}: ${name}<F>;`).join('\n')}
 		}
 		export interface Controllers1<F extends URIS> {
-			${pathNames.map(name => `${decapitalize(name)}: ${name}1<F>;`).join('\n')} 			
+			${pathNames.map(name => `${decapitalize(name)}: ${name}1<F>;`).join('\n')}
 		}
 		export interface Controllers2<F extends URIS2> {
-			${pathNames.map(name => `${decapitalize(name)}: ${name}2<F>;`).join('\n')} 			
-		} 
-		
+			${pathNames.map(name => `${decapitalize(name)}: ${name}2<F>;`).join('\n')}
+		}
+
 		export function controllers<F extends URIS2>(e: { httpClient: HTTPClient2<F> }): Controllers2<F>
 		export function controllers<F extends URIS>(e: { httpClient: HTTPClient1<F> }): Controllers1<F>
 		export function controllers<F>(e: { httpClient: HTTPClient<F> }): Controllers<F>;
@@ -180,7 +183,7 @@ const serializePathsIndex = (from: Ref, pathNames: string[]): Either<Error, File
 			`${from.name}.ts`,
 			`
 				${dependencies}
-				
+
 				${content}
 			`,
 		),
