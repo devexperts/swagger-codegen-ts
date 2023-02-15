@@ -1,5 +1,5 @@
 import { Ref, uniqRefs } from '../../../../utils/ref';
-import { getTypeName } from '../utils';
+import { UNSAFE_PROPERTY_PATTERN } from '../utils';
 import { serializedDependency, SerializedDependency, uniqSerializedDependencies } from './serialized-dependency';
 import { SerializedParameter } from './serialized-parameter';
 
@@ -31,7 +31,7 @@ export const fromSerializedHeaderParameter = (name: string) => (
 });
 
 export const getSerializedHeaderParameterType = (serialized: SerializedHeaderParameter): SerializedHeaderParameter => {
-	const name = getTypeName(serialized.name);
+	const name = UNSAFE_PROPERTY_PATTERN.test(serialized.name) ? `['${serialized.name}']` : serialized.name;
 	return serializedHeaderParameter(
 		name,
 		`${name}: ${serialized.isRequired ? serialized.type : `option.Option<${serialized.type}>`}`,
