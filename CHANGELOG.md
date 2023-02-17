@@ -1,3 +1,13 @@
+# [2.0.0-alpha.29](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2023-02-17)
+
+
+### Bug Fixes
+
+* header parameters name generation ([aa4e788](https://github.com/devexperts/swagger-codegen-ts/commit/aa4e7888f50a875c326ce8b4e3fd59b31e9ab956))
+* upgrading vulnerable dependencies ([a7ece38](https://github.com/devexperts/swagger-codegen-ts/commit/a7ece3804a21e278d44ce293ad52e5e3f8d50331))
+
+
+
 # [2.0.0-alpha.28](https://github.com/devexperts/swagger-codegen-ts/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2022-02-04)
 
 
