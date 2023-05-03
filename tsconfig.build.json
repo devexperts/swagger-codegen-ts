@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "include": [
     "./src/index.ts",
+    "./src/cli/index.ts",
     "./src/language/typescript/2.0/index.ts",
     "./src/language/typescript/3.0/index.ts",
     "./src/language/typescript/asyncapi-2.0.0/index.ts",

@@ -8,7 +8,7 @@
     "test:lint": "eslint \"./src/**/*.ts\" \"./test/**/*.ts\" --fix",
     "test:build": "tsc -p tsconfig.test.json",
     "test:jest": "jest",
-    "test": "yarn test:lint && yarn prettier && yarn test:jest && yarn test:build",
+    "test": "yarn test:lint && yarn test:jest && yarn test:build",
     "prettier": "prettier --list-different \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prettier:fix": "prettier --write \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prepublishOnly": "yarn test && yarn build",
@@ -16,6 +16,9 @@
     "build": "tsc -p tsconfig.build.json",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "version": "yarn changelog && git add CHANGELOG.md"
+  },
+  "bin": {
+    "swagger-codegen-ts": "dist/cli/index.js"
   },
   "author": "devexperts",
   "license": "MPL-2.0",
@@ -41,12 +44,14 @@
     "eslint-plugin-prettier": "^3.1.1",
     "fs-extra": "^8.1.0",
     "json-schema-ref-parser": "^7.1.1",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "yargs": "^17.7.1"
   },
   "devDependencies": {
     "@devexperts/lint": "^1.0.0-alpha.10",
     "@types/del": "^4.0.0",
     "@types/jest": "^24.0.18",
+    "@types/yargs": "^17.0.24",
     "conventional-changelog-cli": "^2.1.1",
     "del": "^5.1.0",
     "eslint": "^6.7.2",
