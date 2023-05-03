@@ -11,10 +11,10 @@
     "test": "yarn test:lint && yarn test:jest && yarn test:build",
     "prettier": "prettier --list-different \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "prettier:fix": "prettier --write \"./src/**/*.ts\" \"./test/**/*.ts\"",
-    "prepublishOnly": "yarn test && yarn build",
     "start": "nodemon --exec \"yarn test:run\"",
     "build": "tsc -p tsconfig.build.json",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "preversion": "yarn test && yarn build",
     "version": "yarn changelog && git add CHANGELOG.md"
   },
   "bin": {
