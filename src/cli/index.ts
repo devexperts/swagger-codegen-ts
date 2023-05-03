@@ -1,5 +1,5 @@
 const yargs = require('yargs'); // eslint-disable-line
-import { hideBin } from 'yargs/helpers';
+const { hideBin } = require('yargs/helpers'); // eslint-disable-line
 import { array, either, taskEither } from 'fp-ts';
 import { serialize as serializeOpenAPI3 } from '../language/typescript/3.0';
 import { generate, Language } from '../index';

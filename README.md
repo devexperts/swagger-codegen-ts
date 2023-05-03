@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/devexperts/swagger-codegen-ts.svg?branch=master)](https://travis-ci.org/devexperts/swagger-codegen-ts)
-
 # Typesafe OpenAPI generator for TypeScript
+
+![](https://img.shields.io/npm/v/@devexperts/swagger-codegen-ts)
 
 ## Features
 * Generates client code from **OpenAPI 3.0, 2.0** (aka Swagger) and **AsyncAPI** specs
