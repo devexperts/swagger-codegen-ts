@@ -34,29 +34,38 @@ const createdPet: Promise<Pet> = petController.addPet({
 
 More usage scenarios are supported - check the [usage page](./docs/usage/generated-code.md) for more detail.
 
-## Installation
+## CLI Usage
 
 1. Make sure the peer dependencies are installed, then install the codegen itself:
-   ```
+   ```shell
    yarn add typescript fp-ts io-ts io-ts-types
    yarn add -D @devexperts/swagger-codegen-ts
    ```
 
-2. Create a console script that would invoke the `generate` function, passing the options such as path to the schema file and the output directory.
-See the [Generators](docs/usage/api.md) page for the API reference, and [examples/generate](examples/generate) for sample scripts.
+2. Use the CLI to generate the client code. Example:
+   ```shell
+   yarn swagger-codegen-ts -o src/generated petstore-api.yaml
+   ```
 
-3. In most cases, you might want to include the code generation step into the build and local launch scripts. Example:
+3. In most cases, you might want to add this command into your `package.json` and include it into the build and local launch scripts. Example:
    ```diff
    /* package.json */
 
      "scripts": {
-   +   "generate:api": "ts-node scripts/generate-api.ts",
+   +   "generate:api": "swagger-codegen-ts -o src/generated petstore-api.yaml",
    -   "start": "react-scripts start",
    +   "start": "yarn generate:api && react-scripts start",
    -   "build": "react-scripts build"
    +   "build": "yarn generate:api && react-scripts build"
      }
    ```
+
+## API
+
+You can also create a custom script using the API. The main entry point of the API is the `generate` function,
+which accepts options such as path to the schema file and the output directory.
+
+See the [Generators](docs/usage/api.md) page for the API reference, and [examples/generate](examples/generate) for sample scripts.
 
 ## Contributing
 

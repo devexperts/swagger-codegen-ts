@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const yargs = require('yargs'); // eslint-disable-line
 const { hideBin } = require('yargs/helpers'); // eslint-disable-line
 import { array, either, taskEither } from 'fp-ts';
@@ -20,31 +21,37 @@ const options = yargs(hideBin(process.argv))
 	.usage('swagger-codegen-ts -o <output_path> [flags] <path/to/spec.yaml>...')
 	.option('baseDir', {
 		alias: 'b',
-		describe: 'base directory for <specs> and <outDir> paths',
+		describe: 'base directory for <specs> paths',
 		defaultDescription: 'current working dir',
 	})
 	.option('outDir', {
 		alias: 'o',
-		describe: 'path to the output files, relative to the <baseDir>',
+		describe: 'path to the output files, relative to the current working dir'
 	})
 	.positional('', {
 		array: true,
 		type: 'string',
 		describe: 'list of OpenAPI or YAML specifications, paths relative to the <baseDir>',
-	}).argv;
+	})
+	.demandCommand(1, 'Please provide one or more spec files.')
+	.argv;
+
+const cwd = process.cwd();
+const specsDir = path.resolve(cwd, options.baseDir || '.');
+const outDir = path.resolve(cwd, options.outDir || '.');
 
 const tasks = pipe(
 	options._,
-	array.map((spec: string) => (options.baseDir ? path.resolve(options.baseDir, spec) : spec)),
+	array.map((spec: string) => path.resolve(specsDir, spec)),
 	array.map(spec =>
 		pipe(
 			detectCodec(spec),
 			taskEither.chain(codec =>
 				generate({
 					...(codec as any),
-					cwd: options.baseDir || process.cwd(),
-					spec,
-					out: options.outDir,
+					cwd: path.dirname(spec),
+					spec: path.basename(spec),
+					out: outDir,
 				}),
 			),
 		),
