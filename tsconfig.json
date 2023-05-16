@@ -8,7 +8,7 @@
     "noEmitOnError": true
   },
   "exclude": [
-    "dist"
+    "dist", "node_modules"
   ],
   "include": [
     "test/index.spec.ts"
