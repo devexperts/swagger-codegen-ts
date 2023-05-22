@@ -18,6 +18,7 @@ import { ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { some } from 'fp-ts/lib/Option';
 import { eqString } from 'fp-ts/lib/Eq';
 import { serializedDependency } from '../../common/data/serialized-dependency';
+import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 
 const concatNonUniqResonses = (responses: SerializedResponse[]): SerializedResponse[] =>
 	pipe(
@@ -45,43 +46,46 @@ const concatNonUniqResonses = (responses: SerializedResponse[]): SerializedRespo
 		}),
 	);
 
-export const serializeResponsesObject = (from: Ref) => (
-	responsesObject: ResponsesObject,
-): Either<Error, Either<SerializedResponse, SerializedResponse[]>> => {
-	const serializedResponses = pipe(
-		SUCCESSFUL_CODES,
-		array.map(code =>
-			pipe(
-				record.lookup(code, responsesObject),
-				option.chain(r =>
-					ReferenceObjectCodec.is(r)
-						? pipe(
-								fromString(r.$ref),
-								either.mapLeft(
-									() => new Error(`Invalid ${r.$ref} for ResponsesObject'c code "${code}"`),
-								),
-								either.map(getSerializedRefType(from)),
-								either.map(type => [{ mediaType: DEFAULT_MEDIA_TYPE, schema: type }]),
-								some,
-						  )
-						: serializeResponseObjectWithMediaType(from, r),
+export const serializeResponsesObject = combineReader(
+	serializeResponseObjectWithMediaType,
+	serializeResponseObjectWithMediaType => (from: Ref) => (
+		responsesObject: ResponsesObject,
+	): Either<Error, Either<SerializedResponse, SerializedResponse[]>> => {
+		const serializedResponses = pipe(
+			SUCCESSFUL_CODES,
+			array.map(code =>
+				pipe(
+					record.lookup(code, responsesObject),
+					option.chain(r =>
+						ReferenceObjectCodec.is(r)
+							? pipe(
+									fromString(r.$ref),
+									either.mapLeft(
+										() => new Error(`Invalid ${r.$ref} for ResponsesObject'c code "${code}"`),
+									),
+									either.map(getSerializedRefType(from)),
+									either.map(type => [{ mediaType: DEFAULT_MEDIA_TYPE, schema: type }]),
+									some,
+							  )
+							: serializeResponseObjectWithMediaType(from, r),
+					),
 				),
 			),
-		),
-		array.compact,
-		sequenceEither,
-		either.map(flow(array.flatten, concatNonUniqResonses)),
-	);
-	return pipe(
-		serializedResponses,
-		either.map(serializedResponses => {
-			if (serializedResponses.length === 0) {
-				return either.left({ mediaType: DEFAULT_MEDIA_TYPE, schema: SERIALIZED_VOID_TYPE });
-			} else if (serializedResponses.length === 1) {
-				return either.left(serializedResponses[0]);
-			} else {
-				return either.right(serializedResponses);
-			}
-		}),
-	);
-};
+			array.compact,
+			sequenceEither,
+			either.map(flow(array.flatten, concatNonUniqResonses)),
+		);
+		return pipe(
+			serializedResponses,
+			either.map(serializedResponses => {
+				if (serializedResponses.length === 0) {
+					return either.left({ mediaType: DEFAULT_MEDIA_TYPE, schema: SERIALIZED_VOID_TYPE });
+				} else if (serializedResponses.length === 1) {
+					return either.left(serializedResponses[0]);
+				} else {
+					return either.right(serializedResponses);
+				}
+			}),
+		);
+	},
+);

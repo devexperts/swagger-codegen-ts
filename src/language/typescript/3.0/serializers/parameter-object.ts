@@ -21,27 +21,28 @@ import {
 } from '../../common/data/serialized-fragment';
 import { serializedDependency } from '../../common/data/serialized-dependency';
 import { openapi3utilsRef } from '../bundled/openapi-3-utils';
+import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 
 const forParameter = (parameter: ParameterObject): string => `for parameter "${parameter.name}" in "${parameter.in}"`;
 
 export const isRequired = (parameter: ParameterObject): boolean =>
 	parameter.in === 'path' ? parameter.required : pipe(parameter.required, option.getOrElse(constFalse));
 
-export const serializeParameterObject = (
-	from: Ref,
-	parameterObject: ParameterObject,
-): Either<Error, SerializedParameter> =>
-	pipe(
-		getParameterObjectSchema(parameterObject),
-		either.chain(schema => {
-			if (ReferenceObjectCodec.is(schema)) {
-				return pipe(fromString(schema.$ref), either.map(getSerializedRefType(from)));
-			} else {
-				return pipe(schema, serializeSchemaObject(from));
-			}
-		}),
-		either.map(fromSerializedType(isRequired(parameterObject))),
-	);
+export const serializeParameterObject = combineReader(
+	serializeSchemaObject,
+	serializeSchemaObject => (from: Ref, parameterObject: ParameterObject): Either<Error, SerializedParameter> =>
+		pipe(
+			getParameterObjectSchema(parameterObject),
+			either.chain(schema => {
+				if (ReferenceObjectCodec.is(schema)) {
+					return pipe(fromString(schema.$ref), either.map(getSerializedRefType(from)));
+				} else {
+					return pipe(schema, serializeSchemaObject(from));
+				}
+			}),
+			either.map(fromSerializedType(isRequired(parameterObject))),
+		),
+);
 
 export const getParameterObjectSchema = (
 	parameterObject: ParameterObject,

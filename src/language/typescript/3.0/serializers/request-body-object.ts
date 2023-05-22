@@ -14,46 +14,54 @@ import { ReferenceObjectCodec, ReferenceObject } from '../../../../schema/3.0/re
 import { SchemaObject } from '../../../../schema/3.0/schema-object';
 import { getKeyMatchValue, getResponseTypeFromMediaType, XHRResponseType } from '../../common/utils';
 import { MediaTypeObject } from '../../../../schema/3.0/media-type-object';
+import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 
 const requestMediaRegexp = /^(video|audio|image|application|text|multipart|\*)\/(\w+|\*)/;
 export const getRequestMedia = (content: Record<string, MediaTypeObject>) =>
 	getKeyMatchValue(content, requestMediaRegexp);
 
-export const serializeRequestBodyObject = (from: Ref, body: RequestBodyObject): Either<Error, SerializedType> =>
-	pipe(
-		getRequestMedia(body.content),
-		option.chain(({ key: mediaType, value: { schema } }) =>
-			pipe(
-				schema,
-				option.map(schema => ({ mediaType, schema })),
+export const serializeRequestBodyObject = combineReader(serializeSchemaObject, serializeSchemaObject => {
+	const serializeRequestBodyObject = (from: Ref, body: RequestBodyObject): Either<Error, SerializedType> =>
+		pipe(
+			getRequestMedia(body.content),
+			option.chain(({ key: mediaType, value: { schema } }) =>
+				pipe(
+					schema,
+					option.map(schema => ({ mediaType, schema })),
+				),
 			),
-		),
-		either.fromOption(() => new Error('No schema found for ReqeustBodyObject')),
-		either.chain(({ mediaType, schema }) => {
-			const resType = getResponseTypeFromMediaType(mediaType);
-			return serializeRequestSchema(resType, schema, from);
-		}),
-	);
+			either.fromOption(() => new Error('No schema found for RequestBodyObject')),
+			either.chain(({ mediaType, schema }) => {
+				const resType = getResponseTypeFromMediaType(mediaType);
+				return serializeRequestSchema(resType, schema, from);
+			}),
+		);
 
-const serializeRequestSchema = (
-	responseType: XHRResponseType,
-	schema: ReferenceObject | SchemaObject,
-	from: Ref,
-): Either<Error, SerializedType> => {
-	switch (responseType) {
-		case 'json':
-			return ReferenceObjectCodec.is(schema)
-				? pipe(
-						fromString(schema.$ref),
-						mapLeft(
-							() => new Error(`Invalid MediaObject.content.$ref "${schema.$ref}" for RequestBodyObject`),
-						),
-						either.map(getSerializedRefType(from)),
-				  )
-				: serializeSchemaObject(from)(schema);
-		case 'text':
-			return either.right(SERIALIZED_STRING_TYPE);
-		case 'blob':
-			return getSerializedBlobType(from);
-	}
-};
+	const serializeRequestSchema = (
+		responseType: XHRResponseType,
+		schema: ReferenceObject | SchemaObject,
+		from: Ref,
+	): Either<Error, SerializedType> => {
+		switch (responseType) {
+			case 'json':
+				return ReferenceObjectCodec.is(schema)
+					? pipe(
+							fromString(schema.$ref),
+							mapLeft(
+								() =>
+									new Error(
+										`Invalid MediaObject.content.$ref "${schema.$ref}" for RequestBodyObject`,
+									),
+							),
+							either.map(getSerializedRefType(from)),
+					  )
+					: serializeSchemaObject(from)(schema);
+			case 'text':
+				return either.right(SERIALIZED_STRING_TYPE);
+			case 'blob':
+				return getSerializedBlobType(from);
+		}
+	};
+
+	return serializeRequestBodyObject;
+});
