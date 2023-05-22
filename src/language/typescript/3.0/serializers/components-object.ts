@@ -19,30 +19,37 @@ import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 import { RequestBodyObject, RequestBodyObjectCodec } from '../../../../schema/3.0/request-body-object';
 import { serializeRequestBodyObject } from './request-body-object';
 
-const serializeSchema = (from: Ref, schema: SchemaObject): Either<Error, File> => {
-	const typeName = getTypeName(from.name);
-	const ioName = getIOName(from.name);
-	const serialized = pipe(schema, serializeSchemaObject(from, typeName));
-	const dependencies = pipe(
-		serialized,
-		either.map(serialized => serializeDependencies(serialized.dependencies)),
-	);
-	return combineEither(serialized, dependencies, (serialized, dependencies) =>
-		file(
-			`${from.name}.ts`,
-			`
+const serializeSchema = combineReader(
+	serializeSchemaObject,
+	serializeSchemaObject => (from: Ref, schema: SchemaObject): Either<Error, File> => {
+		const typeName = getTypeName(from.name);
+		const ioName = getIOName(from.name);
+		const serialized = pipe(schema, serializeSchemaObject(from, typeName));
+		const dependencies = pipe(
+			serialized,
+			either.map(serialized => serializeDependencies(serialized.dependencies)),
+		);
+		return combineEither(serialized, dependencies, (serialized, dependencies) =>
+			file(
+				`${from.name}.ts`,
+				`
 			${dependencies}
 
 			export type ${typeName} = ${serialized.type};
 			export const ${ioName} = ${serialized.io};
 		`,
-		),
-	);
-};
+			),
+		);
+	},
+);
 
 const serializeSchemas = combineReader(
 	context,
-	e => (from: Ref, schemas: Record<string, ReferenceObject | SchemaObject>): Either<Error, FSEntity> =>
+	serializeSchema,
+	(e, serializeSchema) => (
+		from: Ref,
+		schemas: Record<string, ReferenceObject | SchemaObject>,
+	): Either<Error, FSEntity> =>
 		pipe(
 			schemas,
 			record.collect((name, schema) => {
@@ -60,27 +67,34 @@ const serializeSchemas = combineReader(
 		),
 );
 
-const serializeParameter = (from: Ref, parameterObject: ParameterObject): Either<Error, File> =>
-	pipe(
-		serializeParameterObject(from, parameterObject),
-		either.map(serialized => {
-			const dependencies = serializeDependencies(serialized.dependencies);
+const serializeParameter = combineReader(
+	serializeParameterObject,
+	serializeParameterObject => (from: Ref, parameterObject: ParameterObject): Either<Error, File> =>
+		pipe(
+			serializeParameterObject(from, parameterObject),
+			either.map(serialized => {
+				const dependencies = serializeDependencies(serialized.dependencies);
 
-			return file(
-				`${from.name}.ts`,
-				`
+				return file(
+					`${from.name}.ts`,
+					`
 					${dependencies}
 
 					export type ${getTypeName(from.name)} = ${serialized.type};
 					export const ${getIOName(from.name)} = ${serialized.io};
 				`,
-			);
-		}),
-	);
+				);
+			}),
+		),
+);
 
 const serializeParameters = combineReader(
 	context,
-	e => (from: Ref, parameters: Record<string, ReferenceObject | ParameterObject>): Either<Error, FSEntity> =>
+	serializeParameter,
+	(e, serializeParameter) => (
+		from: Ref,
+		parameters: Record<string, ReferenceObject | ParameterObject>,
+	): Either<Error, FSEntity> =>
 		pipe(
 			parameters,
 			record.collect((name, parameter) => {
@@ -98,28 +112,35 @@ const serializeParameters = combineReader(
 		),
 );
 
-const serializeResponse = (from: Ref, responseObject: ResponseObject): Either<Error, File> =>
-	pipe(
-		serializeResponseObject(from, responseObject),
-		option.getOrElse(() => right(SERIALIZED_VOID_TYPE)),
-		either.map(serialized => {
-			const dependencies = serializeDependencies(serialized.dependencies);
+const serializeResponse = combineReader(
+	serializeResponseObject,
+	serializeResponseObject => (from: Ref, responseObject: ResponseObject): Either<Error, File> =>
+		pipe(
+			serializeResponseObject(from, responseObject),
+			option.getOrElse(() => right(SERIALIZED_VOID_TYPE)),
+			either.map(serialized => {
+				const dependencies = serializeDependencies(serialized.dependencies);
 
-			return file(
-				`${from.name}.ts`,
-				`
+				return file(
+					`${from.name}.ts`,
+					`
 					${dependencies}
 
 					export type ${getTypeName(from.name)} = ${serialized.type};
 					export const ${getIOName(from.name)} = ${serialized.io};
 				`,
-			);
-		}),
-	);
+				);
+			}),
+		),
+);
 
 const serializeResponses = combineReader(
 	context,
-	e => (from: Ref, responses: Record<string, ReferenceObject | ResponseObject>): Either<Error, FSEntity> =>
+	serializeResponse,
+	(e, serializeResponse) => (
+		from: Ref,
+		responses: Record<string, ReferenceObject | ResponseObject>,
+	): Either<Error, FSEntity> =>
 		pipe(
 			responses,
 			record.collect((name, response) => {
@@ -137,25 +158,32 @@ const serializeResponses = combineReader(
 		),
 );
 
-const serializeRequestBody = (from: Ref, requestBody: RequestBodyObject): Either<Error, FSEntity> =>
-	pipe(
-		serializeRequestBodyObject(from, requestBody),
-		either.map(serialized =>
-			file(
-				`${from.name}.ts`,
-				`
+const serializeRequestBody = combineReader(
+	serializeRequestBodyObject,
+	serializeRequestBodyObject => (from: Ref, requestBody: RequestBodyObject): Either<Error, FSEntity> =>
+		pipe(
+			serializeRequestBodyObject(from, requestBody),
+			either.map(serialized =>
+				file(
+					`${from.name}.ts`,
+					`
 					${serializeDependencies(serialized.dependencies)}
 
 					export type ${getTypeName(from.name)} = ${serialized.type};
 					export const ${getIOName(from.name)} = ${serialized.io};
 				`,
+				),
 			),
 		),
-	);
+);
 
 const serializeRequestBodies = combineReader(
 	context,
-	e => (from: Ref, requestBodies: Record<string, ReferenceObject | RequestBodyObject>): Either<Error, FSEntity> => {
+	serializeRequestBody,
+	(e, serializeRequestBody) => (
+		from: Ref,
+		requestBodies: Record<string, ReferenceObject | RequestBodyObject>,
+	): Either<Error, FSEntity> => {
 		return pipe(
 			requestBodies,
 			record.collect((name, requestBody) => {

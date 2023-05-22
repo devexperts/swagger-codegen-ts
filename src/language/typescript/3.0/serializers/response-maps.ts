@@ -11,57 +11,60 @@ import { foldSerializedTypes, serializedType, SerializedType } from '../../commo
 import { Ref } from '../../../../utils/ref';
 import { PathItemObject } from '../../../../schema/3.0/path-item-object';
 import { OperationObject } from '../../../../schema/3.0/operation-object';
+import { combineReader } from '@devexperts/utils/dist/adt/reader.utils';
 
-const serializeResponseMap = (
-	pattern: string,
-	method: HTTPMethod,
-	from: Ref,
-	operation: OperationObject,
-): Either<Error, SerializedType> => {
-	const operationName = getOperationName(pattern, operation, method);
-	const serializedResponses = serializeResponsesObject(from)(operation.responses);
-	return pipe(
-		serializedResponses,
-		either.map(
-			flow(
-				either.fold(
-					() => serializedType('', '', [], []),
-					sr => {
-						const rows = sr.map(s => `'${s.mediaType}': ${s.schema.type};`);
-						const type = `type MapToResponse${operationName} = {${rows.join('')}};`;
-						return serializedType(type, '', [], []); // dependecies in serializeOperationObject serializedResponses
-					},
+const serializeResponseMap = combineReader(
+	serializeResponsesObject,
+	serializeResponsesObject => (
+		pattern: string,
+		method: HTTPMethod,
+		from: Ref,
+		operation: OperationObject,
+	): Either<Error, SerializedType> => {
+		const operationName = getOperationName(pattern, operation, method);
+		const serializedResponses = serializeResponsesObject(from)(operation.responses);
+		return pipe(
+			serializedResponses,
+			either.map(
+				flow(
+					either.fold(
+						() => serializedType('', '', [], []),
+						sr => {
+							const rows = sr.map(s => `'${s.mediaType}': ${s.schema.type};`);
+							const type = `type MapToResponse${operationName} = {${rows.join('')}};`;
+							return serializedType(type, '', [], []); // dependecies in serializeOperationObject serializedResponses
+						},
+					),
 				),
 			),
-		),
-	);
-};
+		);
+	},
+);
 
-export const serializeResponseMaps = (
-	pattern: string,
-	item: PathItemObject,
-	from: Ref,
-): Either<Error, SerializedType> => {
-	const methods: [HTTPMethod, Option<OperationObject>][] = [
-		['GET', item.get],
-		['POST', item.post],
-		['PUT', item.put],
-		['DELETE', item.delete],
-		['PATCH', item.patch],
-		['HEAD', item.head],
-		['OPTIONS', item.options],
-	];
+export const serializeResponseMaps = combineReader(
+	serializeResponseMap,
+	serializeResponseMap => (pattern: string, item: PathItemObject, from: Ref): Either<Error, SerializedType> => {
+		const methods: [HTTPMethod, Option<OperationObject>][] = [
+			['GET', item.get],
+			['POST', item.post],
+			['PUT', item.put],
+			['DELETE', item.delete],
+			['PATCH', item.patch],
+			['HEAD', item.head],
+			['OPTIONS', item.options],
+		];
 
-	return pipe(
-		methods,
-		array.map(([method, opObject]) =>
-			pipe(
-				opObject,
-				option.map(operation => serializeResponseMap(pattern, method, from, operation)),
+		return pipe(
+			methods,
+			array.map(([method, opObject]) =>
+				pipe(
+					opObject,
+					option.map(operation => serializeResponseMap(pattern, method, from, operation)),
+				),
 			),
-		),
-		array.compact,
-		sequenceEither,
-		either.map(foldSerializedTypes),
-	);
-};
+			array.compact,
+			sequenceEither,
+			either.map(foldSerializedTypes),
+		);
+	},
+);

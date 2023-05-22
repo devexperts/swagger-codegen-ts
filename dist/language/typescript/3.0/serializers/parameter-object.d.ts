@@ -1,0 +1,12 @@
+import { SerializedParameter } from '../../common/data/serialized-parameter';
+import { Either } from 'fp-ts/lib/Either';
+import { SerializedType } from '../../common/data/serialized-type';
+import { Ref } from '../../../../utils/ref';
+import { ParameterObject } from '../../../../schema/3.0/parameter-object';
+import { ReferenceObject } from '../../../../schema/3.0/reference-object';
+import { SchemaObject } from '../../../../schema/3.0/schema-object';
+import { SerializedFragment } from '../../common/data/serialized-fragment';
+export declare const isRequired: (parameter: ParameterObject) => boolean;
+export declare const serializeParameterObject: import("fp-ts/lib/Reader").Reader<import("./schema-object").SerializeSchemaObjectWithRecursionContext, (from: Ref<string>, parameterObject: ParameterObject) => Either<Error, SerializedParameter>>;
+export declare const getParameterObjectSchema: (parameterObject: ParameterObject) => Either<Error, ReferenceObject | import("../../../../schema/3.0/schema-object").EnumSchemaObject | import("../../../../schema/3.0/schema-object").PrimitiveSchemaObject | import("../../../../schema/3.0/schema-object").ObjectSchemaObject | import("../../../../schema/3.0/schema-object").ArraySchemaObject | import("../../../../schema/3.0/schema-object").AllOfSchemaObject | import("../../../../schema/3.0/schema-object").OneOfSchemaObject>;
+export declare const serializeQueryParameterToTemplate: (from: Ref<string>, parameter: ParameterObject, parameterSchema: SchemaObject, serializedSchema: SerializedType, target: string) => Either<Error, SerializedFragment>;

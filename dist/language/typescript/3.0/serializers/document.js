@@ -1,0 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs_1 = require("../../../../utils/fs");
+const paths_object_1 = require("./paths-object");
+const pipeable_1 = require("fp-ts/lib/pipeable");
+const reader_utils_1 = require("@devexperts/utils/dist/adt/reader.utils");
+const components_object_1 = require("./components-object");
+const either_utils_1 = require("@devexperts/utils/dist/adt/either.utils");
+const ref_1 = require("../../../../utils/ref");
+const fp_ts_1 = require("fp-ts");
+const function_1 = require("../../../../utils/function");
+const utils_1 = require("../../common/utils");
+const client_1 = require("../../common/bundled/client");
+const openapi_3_utils_1 = require("../bundled/openapi-3-utils");
+const utils_2 = require("../../common/bundled/utils");
+exports.serializeDocument = reader_utils_1.combineReader(components_object_1.serializeComponentsObject, paths_object_1.serializePathsObject, (serializeComponentsObject, serializePathsObject) => (name, document) => {
+    const componentsRef = ref_1.fromString('#/components');
+    const paths = pipeable_1.pipe(utils_1.pathsRef, fp_ts_1.either.map(serializePathsObject), fp_ts_1.either.chain(function_1.applyTo(document.paths)));
+    const components = pipeable_1.pipe(document.components, fp_ts_1.option.map(components => pipeable_1.pipe(componentsRef, fp_ts_1.either.map(serializeComponentsObject), fp_ts_1.either.chain(function_1.applyTo(components)))));
+    const additional = pipeable_1.pipe(fp_ts_1.array.compact([components]), either_utils_1.sequenceEither);
+    return either_utils_1.combineEither(paths, additional, client_1.clientFile, utils_2.utilsFile, openapi_3_utils_1.openapi3utilsFile, (paths, additional, clientFile, utilsFile, openapi3utilsFile) => fs_1.directory(name, [paths, ...additional, clientFile, utilsFile, openapi3utilsFile]));
+});

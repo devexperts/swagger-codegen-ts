@@ -1,0 +1,12 @@
+import { OperationObject } from '../../../../schema/2.0/operation-object';
+import { SerializedType } from '../../common/data/serialized-type';
+import { HTTPMethod } from '../../common/utils';
+import { Either } from 'fp-ts/lib/Either';
+import { ResolveRefContext, Ref } from '../../../../utils/ref';
+import { QueryParameterObject } from '../../../../schema/2.0/parameter-object';
+import { PathItemObject } from '../../../../schema/2.0/path-item-object';
+import { Kind } from '../../../../utils/types';
+import { SerializedFragment } from '../../common/data/serialized-fragment';
+export declare const serializeOperationObject: import("fp-ts/lib/Reader").Reader<ResolveRefContext, (from: Ref<string>, url: string, method: HTTPMethod, kind: Kind, operation: OperationObject, pathItem: PathItemObject) => Either<Error, SerializedType>>;
+export declare const getCollectionSeparator: (format: "csv" | "ssv" | "tsv" | "pipes") => string;
+export declare const serializeQueryParameterObject: (from: Ref<string>, parameter: QueryParameterObject, serialized: SerializedType, target: string) => Either<Error, SerializedFragment>;
