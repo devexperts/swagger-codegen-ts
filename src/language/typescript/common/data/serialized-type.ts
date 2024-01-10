@@ -241,6 +241,24 @@ export const getSerializedUnionType = (serialized: NonEmptyArray<SerializedType>
 	}
 };
 
+export const getSerializedOneOfType = (from: Ref, serialized: NonEmptyArray<SerializedType>) =>
+	combineEither(
+		utilsRef,
+		(utilsRef): SerializedType => {
+			if (serialized.length === 1) {
+				return head(serialized);
+			} else {
+				const intercalated = intercalateSerializedTypes(serializedType(' | ', ',', [], []), serialized);
+				return serializedType(
+					`(${intercalated.type})`,
+					`oneOf([${intercalated.io}])`,
+					[...intercalated.dependencies, serializedDependency('oneOf', getRelativePath(from, utilsRef))],
+					intercalated.refs,
+				);
+			}
+		},
+	);
+
 export const getSerializedIntersectionType = (serialized: NonEmptyArray<SerializedType>): SerializedType => {
 	if (serialized.length === 1) {
 		return head(serialized);

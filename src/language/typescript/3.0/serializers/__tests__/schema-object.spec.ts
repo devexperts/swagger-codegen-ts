@@ -48,15 +48,33 @@ describe('SchemaObject', () => {
 									},
 								],
 							},
+							{
+								anyOf: [
+									{
+										type: 'object',
+										properties: {
+											walk: { type: 'string' },
+										},
+										required: ['walk'],
+									},
+									{
+										type: 'object',
+										properties: {
+											swim: { type: 'string' },
+										},
+										required: ['swim'],
+									},
+								],
+							}
 						],
 					});
 					const serialized = pipe(schema, reportIfFailed, either.chain(serializeSchemaObject(ref)));
 					pipe(
 						serialized,
 						either.fold(fail, result => {
-							expect(result.type).toEqual('{ id: string } & ({ value: string } | { error: string })');
+							expect(result.type).toEqual('{ id: string } & ({ value: string } | { error: string }) & ({ walk: string } | { swim: string })');
 							expect(result.io).toEqual(
-								'intersection([type({ id: string }),union([type({ value: string }),type({ error: string })])])',
+								'intersection([type({ id: string }),oneOf([type({ value: string }),type({ error: string })]),union([type({ walk: string }),type({ swim: string })])])',
 							);
 						}),
 					);

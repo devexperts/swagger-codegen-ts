@@ -104,6 +104,19 @@ export const AllOfSchemaObjectCodec: Codec<AllOfSchemaObject> = recursion('AllOf
 	]),
 );
 
+export interface AnyOfSchemaObject extends BaseSchemaObject {
+	readonly anyOf: NonEmptyArray<ReferenceObject | SchemaObject>;
+}
+
+export const AnyOfSchemaObjectCodec: Codec<AnyOfSchemaObject> = recursion('AnyOfSchemaObject', () =>
+	intersection([
+		BaseSchemaObjectCodec,
+		type({
+			anyOf: nonEmptyArray(union([ReferenceObjectCodec, SchemaObjectCodec])),
+		}),
+	]),
+);
+
 export interface OneOfSchemaObject extends BaseSchemaObject {
 	readonly oneOf: NonEmptyArray<ReferenceObject | SchemaObject>;
 }
@@ -123,6 +136,7 @@ export type SchemaObject =
 	| ObjectSchemaObject
 	| ArraySchemaObject
 	| AllOfSchemaObject
+	| AnyOfSchemaObject
 	| OneOfSchemaObject;
 
 export const SchemaObjectCodec: Codec<SchemaObject> = recursion('SchemaObject', () =>
@@ -132,6 +146,7 @@ export const SchemaObjectCodec: Codec<SchemaObject> = recursion('SchemaObject', 
 		ObjectSchemaObjectCodec,
 		ArraySchemaObjectCodec,
 		AllOfSchemaObjectCodec,
+		AnyOfSchemaObjectCodec,
 		OneOfSchemaObjectCodec,
 	]),
 );
