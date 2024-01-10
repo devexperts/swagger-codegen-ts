@@ -5,6 +5,7 @@ import {
 	getSerializedIntersectionType,
 	getSerializedNullableType,
 	getSerializedObjectType,
+	getSerializedOneOfType,
 	getSerializedOptionPropertyType,
 	getSerializedRecursiveType,
 	getSerializedRefType,
@@ -32,6 +33,7 @@ import {
 	OneOfSchemaObjectCodec,
 	SchemaObject,
 	PrimitiveSchemaObject,
+	AnyOfSchemaObjectCodec,
 } from '../../../../schema/3.0/schema-object';
 import { ReferenceObject, ReferenceObjectCodec } from '../../../../schema/3.0/reference-object';
 import { traverseNEAEither } from '../../../../utils/either';
@@ -53,10 +55,19 @@ const serializeSchemaObjectWithRecursion = (from: Ref, shouldTrackRecursion: boo
 	schemaObject: SchemaObject,
 ): Either<Error, SerializedType> => {
 	const isNullable = pipe(schemaObject.nullable, option.exists(identity));
+	if (AnyOfSchemaObjectCodec.is(schemaObject)) {
+		return pipe(
+			serializeChildren(from, schemaObject.anyOf),
+			either.map(getSerializedUnionType),
+			either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
+			either.map(getSerializedNullableType(isNullable)),
+		);
+	}
+
 	if (OneOfSchemaObjectCodec.is(schemaObject)) {
 		return pipe(
 			serializeChildren(from, schemaObject.oneOf),
-			either.map(getSerializedUnionType),
+			either.chain(children => getSerializedOneOfType(from, children)),
 			either.map(getSerializedRecursiveType(from, shouldTrackRecursion)),
 			either.map(getSerializedNullableType(isNullable)),
 		);

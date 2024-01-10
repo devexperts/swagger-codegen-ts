@@ -130,6 +130,42 @@ components:
               $ref: '#/components/schemas/TestAllOf'
             kebab-property:
               type: string
+    TestAnyOf:
+      anyOf:
+        - type: object
+          properties:
+            bark:
+              type: string
+        - type: object
+          properties:
+            meow:
+              type: string
+    TestOneOf:
+      oneOf:
+        - type: object
+          properties:
+            bark:
+              type: string
+        - type: object
+          properties:
+            meow:
+              type: string
+    TestOneOfDiscriminated:
+      oneOf:
+        - type: object
+          properties:
+            kind:
+              enum: [ dog ]
+            bark:
+              type: string
+          required: [ kind ]
+        - type: object
+          properties:
+            kind:
+              enum: [ cat ]
+            meow:
+              type: string
+          required: [ kind ]
     37sds afd,asd.324sfa as2_+=:
       type: object
       properties:
